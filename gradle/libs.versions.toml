@@ -1,5 +1,6 @@
 [versions]
-androidDriver = "2.0.2"
+androidDriver = "2.0.0"
+sqlDelight = "2.0.0"
 firebaseBom = "33.2.0"
 firebaseCommonKtx = "20.3.3"
 kotlin = "2.0.10"
@@ -7,7 +8,9 @@ compose = "1.6.10"
 koinCore = "3.5.6"
 koinAndroid = "3.5.6"
 gradle = "8.2.2"
-sqlDelight = " 2.0.2"
+statelyCommon = "2.0.5"
+statelyIsoCollections = "2.0.5"
+statelyIsolate = "2.0.5"
 voyager = "1.0.0"
 multiplatformSettings = "1.1.1"
 koin-compose = "1.1.5"
@@ -56,6 +59,9 @@ gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlyti
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
 sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "androidDriver" }
+stately-common = { module = "co.touchlab:stately-common", version.ref = "statelyCommon" }
+stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "statelyIsoCollections" }
+stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "statelyIsolate" }
 toast4j = { module = "de.mobanisto:toast4j", version.ref = "toast4j" }
 
 # Voyager

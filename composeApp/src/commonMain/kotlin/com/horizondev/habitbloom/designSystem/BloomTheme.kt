@@ -1,12 +1,15 @@
-package com.horizondev.habitbloom.core.designSystem
+package com.horizondev.habitbloom.designSystem
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import com.horizondev.habitbloom.designSystem.BloomColorScheme
 import com.horizondev.habitbloom.designSystem.BloomTypography
+import com.horizondev.habitbloom.designSystem.LocalBloomColorScheme
 import com.horizondev.habitbloom.designSystem.LocalBloomTypography
 import com.horizondev.habitbloom.designSystem.bloomTypography
+import com.horizondev.habitbloom.designSystem.lightColorScheme
 
 @Composable
 fun BloomTheme(

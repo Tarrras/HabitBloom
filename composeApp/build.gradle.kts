@@ -31,6 +31,16 @@ kotlin {
             isStatic = true
         }
     }
+
+    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
+        binaries.withType<org.jetbrains.kotlin.gradle.plugin.mpp.Framework> {
+            @OptIn(ExperimentalKotlinGradlePluginApi::class)
+            transitiveExport = true
+            compilations.all {
+                kotlinOptions.freeCompilerArgs += arrayOf("-linker-options", "-lsqlite3")
+            }
+        }
+    }
     
     sourceSets {
 
@@ -40,6 +50,7 @@ kotlin {
             implementation(libs.accompanist.systemUIController)
             implementation(libs.core)
             implementation(libs.compose.activity)
+            implementation(compose.preview)
 
             implementation(libs.firebase.bom)
             implementation(libs.firebase.common.ktx)
@@ -52,16 +63,22 @@ kotlin {
 
             @OptIn(org.jetbrains.compose.ExperimentalComposeLibrary::class)
             implementation(compose.components.resources)
+
+            implementation(libs.stately.isolate)
+            implementation(libs.stately.iso.collections)
         }
 
         commonMain.dependencies {
             api(libs.koin.core)
             api(libs.koin.compose)
 
+            implementation(compose.runtime)
+            implementation(compose.foundation)
+            implementation(compose.material)
             implementation(compose.material3)
-            implementation(compose.materialIconsExtended)
-
+            implementation(compose.ui)
             implementation(compose.components.resources)
+            implementation(compose.components.uiToolingPreview)
 
             implementation(libs.voyager.navigator)
             implementation(libs.voyager.bottomSheetNavigator)
@@ -88,6 +105,8 @@ kotlin {
             implementation(libs.stdlib)
 
             api(libs.gitlive.firebase.kotlin.crashlytics)
+
+            implementation(libs.stately.common)
         }
     }
 }

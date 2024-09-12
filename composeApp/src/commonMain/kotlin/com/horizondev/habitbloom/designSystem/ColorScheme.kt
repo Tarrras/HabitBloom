@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.core.designSystem
+package com.horizondev.habitbloom.designSystem
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
