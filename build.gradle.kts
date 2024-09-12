@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.spotless)
     id("dev.iurysouza.modulegraph") version "0.8.1"
     alias(libs.plugins.compose.compiler) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.crashlytics) apply false
 }
 
 allprojects {

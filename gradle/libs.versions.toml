@@ -24,8 +24,10 @@ toast4j = "0.2.0"
 compose-activity = "1.9.0"
 spotless = "6.25.0"
 accompanist-systemUIController = "0.34.0"
+
 google-services-plugin = "4.4.2"
 crashlitycs-plugin = "3.0.1"
+firebase-gitlive-sdk = "2.1.0"
 
 [libraries]
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "androidDriver" }
@@ -48,6 +50,8 @@ multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-setti
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }
+firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
+gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
 
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
@@ -78,5 +82,5 @@ jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlinX-serialization-plugin = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 sqlDelight-plugin = { id = "app.cash.sqldelight", version.ref = "sqlDelight" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
-googleServices = { id = "com.google.gms.google-services", version.ref = "google-services-plugin" }
-crashlitycs = { id = "com.google.firebase.crashlytics", version.ref = "crashlitycs-plugin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services-plugin" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "crashlitycs-plugin" }

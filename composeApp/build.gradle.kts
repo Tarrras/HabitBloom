@@ -9,6 +9,8 @@ plugins {
     id("app.cash.sqldelight") version "2.0.2"
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.crashlytics)
 }
 
 kotlin {
@@ -38,6 +40,10 @@ kotlin {
             implementation(libs.accompanist.systemUIController)
             implementation(libs.core)
             implementation(libs.compose.activity)
+
+            implementation(libs.firebase.bom)
+            implementation(libs.firebase.common.ktx)
+            implementation(libs.firebase.android.crashlytics.ktx)
         }
 
         iosMain.dependencies {
@@ -80,6 +86,8 @@ kotlin {
             implementation(libs.koalaplot.core)
 
             implementation(libs.stdlib)
+
+            api(libs.gitlive.firebase.kotlin.crashlytics)
         }
     }
 }
@@ -94,7 +102,7 @@ android {
 
     defaultConfig {
         applicationId = "com.horizondev.habitbloom"
-        minSdk = 21
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

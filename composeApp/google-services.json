@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "30824716032",
+    "project_id": "habitbloom-7e6d4",
+    "storage_bucket": "habitbloom-7e6d4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30824716032:android:1920bc2e05f72202e405e5",
+        "android_client_info": {
+          "package_name": "com.horizondev.habitbloom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHpknaoECnM9g-QgzzNQg0X6qjkgIHF-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:30824716032:android:35dfe4880e18adece405e5",
+        "android_client_info": {
+          "package_name": "com.horizondev.habitbloom.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDHpknaoECnM9g-QgzzNQg0X6qjkgIHF-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
