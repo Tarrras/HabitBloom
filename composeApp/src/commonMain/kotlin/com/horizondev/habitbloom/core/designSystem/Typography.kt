@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.designSystem
+package com.horizondev.habitbloom.core.designSystem
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.staticCompositionLocalOf

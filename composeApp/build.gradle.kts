@@ -20,7 +20,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -41,7 +41,7 @@ kotlin {
             }
         }
     }
-    
+
     sourceSets {
 
         androidMain.dependencies {
@@ -51,6 +51,8 @@ kotlin {
             implementation(libs.core)
             implementation(libs.compose.activity)
             implementation(compose.preview)
+
+            implementation(libs.koin.android)
 
             implementation(libs.firebase.bom)
             implementation(libs.firebase.common.ktx)
@@ -105,6 +107,8 @@ kotlin {
             implementation(libs.stdlib)
 
             api(libs.gitlive.firebase.kotlin.crashlytics)
+            implementation(libs.gitlive.firebase.firestore)
+            implementation(libs.gitlive.firebase.common)
 
             implementation(libs.stately.common)
         }
