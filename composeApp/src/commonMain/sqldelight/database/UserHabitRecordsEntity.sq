@@ -1,0 +1,35 @@
+CREATE TABLE UserHabitRecordsEntity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,  -- Auto-incrementing ID
+    userHabitId INTEGER NOT NULL,                   -- Foreign key to UserHabits.id
+    date TEXT NOT NULL,                             -- The date the habit is scheduled (ISO 8601 format)
+    isCompleted INTEGER NOT NULL,                   -- 0 for not completed, 1 for completed
+    FOREIGN KEY (userHabitId) REFERENCES UserHabitsEntity(id),
+    UNIQUE(userHabitId, date)                       -- Ensure one record per date per habit
+);
+
+-- Insert or replace a habit record
+insertOrReplaceUserHabitRecord:
+INSERT OR REPLACE INTO UserHabitRecordsEntity (userHabitId, date, isCompleted)
+VALUES (?, ?, ?);
+
+-- Select habit records by date
+selectUserHabitRecordsEntityByDate:
+SELECT * FROM UserHabitRecordsEntity
+WHERE date = ?;
+
+-- Select habit records for a specific user habit
+selectUserHabitRecordsEntityByUserHabitId:
+SELECT * FROM UserHabitRecordsEntity
+WHERE userHabitId = ?;
+
+-- Update habit record completion status
+updateUserHabitRecordCompletion:
+UPDATE UserHabitRecordsEntity
+SET isCompleted = ?
+WHERE userHabitId = ? AND date = ?;
+
+-- Delete habit records for a specific user habit
+deleteUserHabitRecordsEntityByUserHabitId:
+DELETE FROM UserHabitRecordsEntity
+WHERE userHabitId = ?;
+

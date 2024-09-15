@@ -9,7 +9,8 @@ class KoinInit {
         return startKoin {
             modules(
                 listOf(
-                    dataModule(),
+                    remoteDataModule(),
+                    localDataModule(),
                     domainModule()
                 ),
             )

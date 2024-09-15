@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.habits.data
+package com.horizondev.habitbloom.habits.data.remote
 
 import com.horizondev.habitbloom.core.data.HABITS_COLLECTION_ROUTE
 import dev.gitlive.firebase.firestore.FirebaseFirestore

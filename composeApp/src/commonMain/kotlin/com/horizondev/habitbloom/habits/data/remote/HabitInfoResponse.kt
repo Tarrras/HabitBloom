@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.habits.data
+package com.horizondev.habitbloom.habits.data.remote
 
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay

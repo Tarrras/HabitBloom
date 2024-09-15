@@ -17,7 +17,7 @@ kotlin {
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
 
@@ -37,7 +37,11 @@ kotlin {
             @OptIn(ExperimentalKotlinGradlePluginApi::class)
             transitiveExport = true
             compilations.all {
-                kotlinOptions.freeCompilerArgs += arrayOf("-linker-options", "-lsqlite3")
+                kotlinOptions.freeCompilerArgs += arrayOf(
+                    "-linker-options",
+                    "-lsqlite3",
+                    "-Xbinary=bundleId=com.horizondev.habitbloom.HabitBloom"
+                )
             }
         }
     }
@@ -142,14 +146,22 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
     }
     dependencies {
         debugImplementation(compose.uiTooling)
+    }
+}
+
+sqldelight {
+    databases {
+        create("HabitBloomDatabase") {
+            packageName.set("com.horizondev.habitbloom.database")
+        }
     }
 }
 
