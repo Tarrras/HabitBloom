@@ -11,6 +11,7 @@ data class BloomColorScheme(
     val surface: Color,
     val success: Color,
     val error: Color,
+    val disabled: Color,
     val textColor: BloomTextColorScheme
 )
 
@@ -30,6 +31,7 @@ val lightColorScheme = BloomColorScheme(
     surface = Color(0xFFFFFFFF),
     success = Color(0xFF7BC86C),
     error = Color(0xFFE57373),
+    disabled = Color(0xFFBDC3C7),
     textColor = BloomTextColorScheme(
         primary = Color(0xFF333333),
         secondary = Color(0xFF333333),
@@ -48,6 +50,7 @@ val LocalBloomColorScheme = staticCompositionLocalOf {
         surface = Color.Unspecified,
         success = Color.Unspecified,
         error = Color.Unspecified,
+        disabled = Color.Unspecified,
         textColor = BloomTextColorScheme(
             primary = Color.Unspecified,
             secondary = Color.Unspecified,
