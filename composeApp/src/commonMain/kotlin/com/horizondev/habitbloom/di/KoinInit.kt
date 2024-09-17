@@ -11,7 +11,8 @@ class KoinInit {
                 listOf(
                     remoteDataModule(),
                     localDataModule(),
-                    domainModule()
+                    domainModule(),
+                    screenModelModule()
                 ),
             )
             appDeclaration()

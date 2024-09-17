@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Habit Bloom</string>
+    <string name="morning">Morning</string>
+    <string name="afternoon">Afternoon</string>
+    <string name="evening">Evening</string>
+    <string name="daily_summary">Daily Summary</string>
+    <string name="some_tasks_completed">%1$s of %1$s habits completed</string>
+    <string name="100_percentage_task_done">Congrats! You've completed all your tasks for today</string>
+    <string name="90_percentage_task_done">Keep it up! You're almost done with your daily task</string>
+    <string name="75_percentage_task_done">Wow!, Your daily tasks are almost done</string>
+    <string name="50_percentage_task_done">You're halfway through your daily tasks</string>
+    <string name="25_percentage_task_done">You're almost halfway through your daily tasks</string>
+    <string name="10_percentage_task_done">You've completed a few tasks for today</string>
+    <string name="0_percentage_task_done">You've not completed any tasks for today</string>
+    <string name="some_percentage_task_done">You've completed %1$s tasks for today</string>
+</resources>

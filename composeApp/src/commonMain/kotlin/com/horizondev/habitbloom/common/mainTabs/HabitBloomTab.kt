@@ -2,9 +2,14 @@ package com.horizondev.habitbloom.common.mainTabs
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.horizondev.habitbloom.habits.presentation.home.HomeScreen
+import com.horizondev.habitbloom.habits.presentation.home.HomeScreenModel
+import com.horizondev.habitbloom.profile.presentation.ProfileScreen
+import com.horizondev.habitbloom.profile.presentation.ProfileScreenModel
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_home_outlined
 import habitbloom.composeapp.generated.resources.ic_profile_outlined
@@ -30,7 +35,8 @@ sealed class HabitBloomTab {
 
         @Composable
         override fun Content() {
-            HomeScreen()
+            val screenModel = getScreenModel<HomeScreenModel>()
+            HomeScreen(screeModel = screenModel)
         }
     }
 
@@ -52,7 +58,8 @@ sealed class HabitBloomTab {
 
         @Composable
         override fun Content() {
-            HomeScreen()
+            val screenModel = getScreenModel<ProfileScreenModel>()
+            ProfileScreen(screeModel = screenModel)
         }
     }
 }
