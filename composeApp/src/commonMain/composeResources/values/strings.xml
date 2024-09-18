@@ -4,7 +4,7 @@
     <string name="afternoon">Afternoon</string>
     <string name="evening">Evening</string>
     <string name="daily_summary">Daily Summary</string>
-    <string name="some_tasks_completed">%1$s of %1$s habits completed</string>
+    <string name="some_tasks_completed">%1$s of %2$s habits completed</string>
     <string name="100_percentage_task_done">Congrats! You've completed all your tasks for today</string>
     <string name="90_percentage_task_done">Keep it up! You're almost done with your daily task</string>
     <string name="75_percentage_task_done">Wow!, Your daily tasks are almost done</string>

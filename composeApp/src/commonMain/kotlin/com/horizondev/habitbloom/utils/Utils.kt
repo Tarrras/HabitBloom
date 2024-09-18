@@ -9,6 +9,7 @@ import habitbloom.composeapp.generated.resources._25_percentage_task_done
 import habitbloom.composeapp.generated.resources._50_percentage_task_done
 import habitbloom.composeapp.generated.resources._75_percentage_task_done
 import habitbloom.composeapp.generated.resources._90_percentage_task_done
+import habitbloom.composeapp.generated.resources.some_percentage_task_done
 import habitbloom.composeapp.generated.resources.some_tasks_completed
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -25,48 +26,56 @@ fun getCurrentDate(): LocalDate {
 }
 
 @Composable
-fun taskCompleteMessage(tasks: List<UserHabitRecordFullInfo>): String {
-    val completedTasks = tasks.filter { it.isCompleted }.size
+fun habitsCompleteMessage(habitsCount: Int, completedHabits: Int): String {
+    val taskCompletionPercentage = taskCompletionPercentage(habitsCount, completedHabits)
     return when {
-        completedTasks == tasks.size && completedTasks != 0 -> {
+        completedHabits == habitsCount && completedHabits != 0 -> {
             stringResource(Res.string._100_percentage_task_done)
         }
 
-        completedTasks == 0 -> {
+        completedHabits == 0 -> {
             stringResource(Res.string._0_percentage_task_done)
         }
 
-        taskCompletionPercentage(tasks) >= 90 -> {
+        taskCompletionPercentage >= 90 -> {
             stringResource(Res.string._90_percentage_task_done)
         }
 
-        taskCompletionPercentage(tasks) >= 75 -> {
+        taskCompletionPercentage >= 75 -> {
             stringResource(Res.string._75_percentage_task_done)
         }
 
-        taskCompletionPercentage(tasks) >= 50 -> {
+        taskCompletionPercentage >= 50 -> {
             stringResource(Res.string._50_percentage_task_done)
         }
 
-        taskCompletionPercentage(tasks) >= 25 -> {
+        taskCompletionPercentage >= 25 -> {
             stringResource(Res.string._25_percentage_task_done)
         }
 
-        taskCompletionPercentage(tasks) >= 10 -> {
+        taskCompletionPercentage >= 10 -> {
             stringResource(Res.string._90_percentage_task_done)
         }
 
         else -> {
-            stringResource(Res.string.some_tasks_completed, completedTasks.toString())
+            stringResource(Res.string.some_percentage_task_done, completedHabits.toString())
         }
     }
 }
 
-fun taskCompletionPercentage(tasks: List<UserHabitRecordFullInfo>): Int {
-    val completedTasks = tasks.filter { it.isCompleted }.size
-    return if (completedTasks == 0) {
+fun taskCompletionPercentage(habits: List<UserHabitRecordFullInfo>): Int {
+    val completedHabits = habits.filter { it.isCompleted }.size
+    return if (completedHabits == 0) {
         0
     } else {
-        (completedTasks.toFloat() / tasks.size.toFloat() * 100).toInt()
+        (completedHabits.toFloat() / habits.size.toFloat() * 100).toInt()
+    }
+}
+
+fun taskCompletionPercentage(habitsCount: Int, completedHabits: Int): Float {
+    return if (completedHabits == 0) {
+        0f
+    } else {
+        (completedHabits.toFloat() / habitsCount.toFloat()).coerceAtMost(1f)
     }
 }
