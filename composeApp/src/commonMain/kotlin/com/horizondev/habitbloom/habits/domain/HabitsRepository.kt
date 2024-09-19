@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -58,7 +59,7 @@ class HabitsRepository(
                     timeOfDay = habitDetailedInfo.timeOfDay
                 )
             }.filterNotNull()
-        }
+        }.distinctUntilChanged()
     }
 
 

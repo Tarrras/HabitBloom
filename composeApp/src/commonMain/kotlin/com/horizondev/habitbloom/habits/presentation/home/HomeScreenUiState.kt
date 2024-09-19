@@ -9,3 +9,7 @@ data class HomeScreenUiState(
     val userHabits: List<UserHabitRecordFullInfo> = emptyList(),
     val selectedTimeOfDay: TimeOfDay = TimeOfDay.Morning,
 )
+
+sealed interface HomeScreenUiEvent {
+    data class SelectTimeOfDay(val timeOfDay: TimeOfDay): HomeScreenUiEvent
+}

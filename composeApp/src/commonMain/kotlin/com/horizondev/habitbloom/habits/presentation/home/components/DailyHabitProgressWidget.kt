@@ -39,8 +39,8 @@ fun DailyHabitProgressWidget(
         )
         Spacer(modifier = Modifier.height(16.dp))
         HabitProgressIndicator(
-            dailyHabits = 10,
-            completedHabits = 5
+            dailyHabits = habitsCount,
+            completedHabits = completedHabitsCount
         )
     }
 }
