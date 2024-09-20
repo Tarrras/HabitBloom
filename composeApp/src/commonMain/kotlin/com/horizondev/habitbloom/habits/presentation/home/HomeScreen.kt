@@ -1,11 +1,14 @@
 package com.horizondev.habitbloom.habits.presentation.home
 
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.presentation.home.components.DailyHabitProgressWidget
+import com.horizondev.habitbloom.habits.presentation.home.components.EmptyHabitsForTimeOfDayPlaceholder
 import com.horizondev.habitbloom.habits.presentation.home.components.TimeOfDaySwitcher
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.app_name
@@ -36,13 +40,19 @@ private fun HomeScreenContent(
     uiState: HomeScreenUiState,
     handleUiEvent: (HomeScreenUiEvent) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         toolbar(modifier = Modifier.fillMaxWidth())
         dailySummary(uiState = uiState)
         timeOfDaySwitcher(
             uiState = uiState,
             onTimeOfDayChanged = {
                 handleUiEvent(HomeScreenUiEvent.SelectTimeOfDay(it))
+            }
+        )
+        habitsList(
+            uiState = uiState,
+            onHabitStatusChanged = { id, isCompleted ->
+                handleUiEvent(HomeScreenUiEvent.ChangeHabitCompletionStatus(id, isCompleted))
             }
         )
     }
@@ -86,5 +96,25 @@ private fun LazyListScope.timeOfDaySwitcher(
             selectedTimeOfDay = uiState.selectedTimeOfDay,
             onTimeChanged = onTimeOfDayChanged
         )
+    }
+}
+
+private fun LazyListScope.habitsList(
+    uiState: HomeScreenUiState,
+    onHabitStatusChanged: (Long, Boolean) -> Unit
+) {
+    if (uiState.userHabits.isEmpty()) {
+        item(key = "no_habits_placeholder") {
+            EmptyHabitsForTimeOfDayPlaceholder(
+                selectTimeOfDay = uiState.selectedTimeOfDay,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            )
+        }
+    } else {
+        items(uiState.userHabits, key = { it.id }) {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
     }
 }

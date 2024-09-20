@@ -1,23 +1,16 @@
 package com.horizondev.habitbloom.habits.presentation.home
 
-import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.horizondev.habitbloom.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getTimeOfDay
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 class HomeScreenModel(
@@ -58,6 +51,8 @@ class HomeScreenModel(
             is HomeScreenUiEvent.SelectTimeOfDay -> {
                 mutableState.update { it.copy(selectedTimeOfDay = uiEvent.timeOfDay) }
             }
+
+            is HomeScreenUiEvent.ChangeHabitCompletionStatus -> {}
         }
     }
 }

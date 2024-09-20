@@ -13,4 +13,10 @@
     <string name="10_percentage_task_done">You've completed a few tasks for today</string>
     <string name="0_percentage_task_done">You've not completed any tasks for today</string>
     <string name="some_percentage_task_done">You've completed %1$s tasks for today</string>
+    <string name="add_morning_habit">Start your day right! Add a morning habit to kickstart your routine.</string>
+    <string name="add_afternoon_habit">Boost your productivity with an afternoon habit.</string>
+    <string name="add_evening_habit">Wind down your day with a relaxing evening habit.</string>
+    <string name="no_morning_habits">No morning Habits Yet</string>
+    <string name="no_afternoon_habits">No afternoon Habits Yet</string>
+    <string name="no_evening_habits">No evening Habits Yet</string>
 </resources>
