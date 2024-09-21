@@ -27,12 +27,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.CurrentScreen
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.horizondev.habitbloom.common.mainTabs.HabitBloomTab
 import com.horizondev.habitbloom.common.mainTabs.TabFilledIcon
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHost
 
 class MainScreen : Screen {
 
@@ -41,13 +44,11 @@ class MainScreen : Screen {
         TabNavigator(
             tab = HabitBloomTab.HomeTab
         ) {
+            val navigator = LocalNavigator.currentOrThrow.parent
 
             Scaffold(
                 content = { innerPadding ->
-                    Box(
-                        modifier = Modifier
-                            .padding(innerPadding),
-                    ) {
+                    Box(modifier = Modifier.padding(innerPadding)) {
                         CurrentScreen()
                     }
                 },
@@ -57,7 +58,7 @@ class MainScreen : Screen {
                         modifier = Modifier.size(48.dp).offset(y = 42.dp),
                         containerColor = BloomTheme.colors.primary,
                         onClick = {
-                            //todo add navigation
+                            navigator?.push(AddHabitFlowHost())
                         },
                         elevation = FloatingActionButtonDefaults.elevation(
                             defaultElevation = 0.dp,

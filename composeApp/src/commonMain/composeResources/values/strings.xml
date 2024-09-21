@@ -19,4 +19,41 @@
     <string name="no_morning_habits">No morning Habits Yet</string>
     <string name="no_afternoon_habits">No afternoon Habits Yet</string>
     <string name="no_evening_habits">No evening Habits Yet</string>
+
+    <string name="add_new_habit">Add New Habit</string>
+    <string name="choose_category">Choose category</string>
+    <string name="choose_habit">Choose habit</string>
+    <string name="choose_days">Choose days</string>
+    <string name="choose_duration">Choose duration</string>
+    <string name="summary">Summary</string>
+
+    <string name="choose_habit_category">Choose habit category</string>
+    <string name="choose_habit_to_acquire">Choose habit to acquire</string>
+    <string name="choose_habit_days_and_duration">Choose days and duration</string>
+    <string name="search_habit">Search habit</string>
+    <string name="select_days_for_habit">Select days for habit</string>
+
+    <string name="morning_habit_title">Morning habit</string>
+    <string name="morning_habit_description">Start your day with energizing habits that set a positive tone. Perfect for workouts, meditation, or a healthy breakfast.</string>
+
+    <string name="midday_focus_title">Midday focus</string>
+    <string name="midday_focus_description">Boost your productivity with focused activities to keep your momentum. Great for work sessions, quick workouts, or mindful breaks.</string>
+
+    <string name="evening_reflection_title">Evening reflection</string>
+    <string name="evening_reflection_description">Unwind with calming activities that offer a chance to reflect on your day. Ideal for journaling, reading, or a relaxing bath.</string>
+
+    <string name="next">Next</string>
+    <string name="cancel">Cancel</string>
+    <string name="back">Back</string>
+    <string name="complete">Complete</string>
+
+    <string name="quick_action">Quick actions</string>
+    <string name="every_day">Every day</string>
+    <string name="only_weekends">Only weekends</string>
+    <string name="one_week">One week</string>
+    <string name="one_month">One month</string>
+    <string name="three_months">Three months</string>
+
+    <string name="do_you_want_add_this_habit">Do you want to add this habit?</string>
+
 </resources>
