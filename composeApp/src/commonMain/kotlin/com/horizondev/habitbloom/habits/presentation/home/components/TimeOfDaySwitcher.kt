@@ -37,7 +37,8 @@ fun TimeOfDaySwitcher(
                     color = BloomTheme.colors.primary
                 )
             }
-        }
+        },
+        containerColor = BloomTheme.colors.background
     ) {
         TimeOfDay.entries.forEach {
             val isSelected = it == selectedTimeOfDay

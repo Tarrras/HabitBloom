@@ -47,6 +47,7 @@ class MainScreen : Screen {
             val navigator = LocalNavigator.currentOrThrow.parent
 
             Scaffold(
+                containerColor = BloomTheme.colors.background,
                 content = { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
                         CurrentScreen()

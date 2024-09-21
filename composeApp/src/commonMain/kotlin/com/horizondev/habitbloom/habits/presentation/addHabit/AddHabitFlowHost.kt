@@ -32,6 +32,7 @@ import cafe.adriel.voyager.navigator.OnBackPressed
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayChoiceScreen
+import com.horizondev.habitbloom.platform.StatusBarColors
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
 import org.jetbrains.compose.resources.stringResource
@@ -49,6 +50,11 @@ fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
     Navigator(screen = AddHabitTimeOfDayChoiceScreen()) { navigator ->
         val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
         val currentPageIndex by hostModel.flowPageState.collectAsState()
+
+        StatusBarColors(
+            statusBarColor = BloomTheme.colors.background,
+            navBarColor = BloomTheme.colors.background
+        )
 
         Scaffold(
             modifier = modifier,

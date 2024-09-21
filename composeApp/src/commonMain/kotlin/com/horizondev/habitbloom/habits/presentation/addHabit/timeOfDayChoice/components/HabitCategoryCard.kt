@@ -32,9 +32,7 @@ fun HabitCategoryCard(
     onClick: () -> Unit
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
         shape = RoundedCornerShape(12.dp), // Rounded corners for a soft appearance
         colors = CardDefaults.cardColors(
