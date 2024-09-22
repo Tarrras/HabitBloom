@@ -1,5 +1,6 @@
 [versions]
 androidDriver = "2.0.0"
+kamelImage = "0.9.5"
 sqlDelight = "2.0.0"
 firebaseBom = "33.2.0"
 firebaseCommonKtx = "20.3.3"
@@ -27,6 +28,7 @@ toast4j = "0.2.0"
 compose-activity = "1.9.0"
 spotless = "6.25.0"
 accompanist-systemUIController = "0.34.0"
+ktor = "2.3.12"
 
 google-services-plugin = "4.4.2"
 crashlitycs-plugin = "3.0.1"
@@ -37,6 +39,7 @@ android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = 
 core = { module = "androidx.core:core", version.ref = "core" }
 coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "androidDriver" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
+kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamelImage" }
 koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koalaplotCore" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinCore" }
 koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin-compose"}
@@ -65,6 +68,10 @@ stately-common = { module = "co.touchlab:stately-common", version.ref = "stately
 stately-iso-collections = { module = "co.touchlab:stately-iso-collections", version.ref = "statelyIsoCollections" }
 stately-isolate = { module = "co.touchlab:stately-isolate", version.ref = "statelyIsolate" }
 toast4j = { module = "de.mobanisto:toast4j", version.ref = "toast4j" }
+
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
 
 # Voyager
 voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }

@@ -4,6 +4,7 @@ import com.horizondev.habitbloom.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.habits.data.remote.toDomainModel
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
+import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -23,10 +24,9 @@ class HabitsRepository(
 
     suspend fun initData(): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            getAllHabits().map {
-                remoteHabits.update { it }
-                true
-            }
+            getAllHabits().onSuccess {
+                remoteHabits.value = it
+            }.map { true }
         }
     }
 
@@ -34,6 +34,14 @@ class HabitsRepository(
         return withContext(Dispatchers.IO) {
             remoteDataSource.getHabits()
                 .mapCatching { data -> data.map { habit -> habit.toDomainModel() } }
+        }
+    }
+
+    fun getHabits(searchInput: String, timeOfDay: TimeOfDay): List<HabitInfo> {
+        return remoteHabits.value.filter {
+            it.timeOfDay == timeOfDay
+        }.filter {
+            it.name.lowercase().contains(searchInput.lowercase())
         }
     }
 

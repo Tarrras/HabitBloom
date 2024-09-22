@@ -2,8 +2,6 @@ package com.horizondev.habitbloom.habits.presentation.home.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults

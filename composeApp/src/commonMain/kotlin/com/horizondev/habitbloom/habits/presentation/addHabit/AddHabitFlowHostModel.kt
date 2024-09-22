@@ -21,6 +21,8 @@ class AddHabitFlowHostModel : ScreenModel {
     private val _flowHabitInfoState = MutableStateFlow(NewUserHabitInfo())
     val flowHabitInfoState = _flowHabitInfoState.asStateFlow()
 
+    fun getNewHabitInfo() = _flowHabitInfoState.value
+
     fun updateTimeOfDaySelection(timeOfDay: TimeOfDay) {
         _flowHabitInfoState.update { it.copy(timeOfDay = timeOfDay) }
     }

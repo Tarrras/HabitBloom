@@ -61,6 +61,8 @@ kotlin {
             implementation(libs.firebase.bom)
             implementation(libs.firebase.common.ktx)
             implementation(libs.firebase.android.crashlytics.ktx)
+
+            implementation(libs.ktor.client.okhttp)
         }
 
         iosMain.dependencies {
@@ -72,6 +74,8 @@ kotlin {
 
             implementation(libs.stately.isolate)
             implementation(libs.stately.iso.collections)
+
+            implementation(libs.ktor.client.darwin)
         }
 
         commonMain.dependencies {
@@ -115,6 +119,9 @@ kotlin {
             implementation(libs.gitlive.firebase.common)
 
             implementation(libs.stately.common)
+
+            implementation(libs.kamel.image)
+            implementation(libs.ktor.client.core)
         }
     }
 }

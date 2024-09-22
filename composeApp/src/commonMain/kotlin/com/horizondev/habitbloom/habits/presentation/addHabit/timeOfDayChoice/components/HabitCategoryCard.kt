@@ -1,18 +1,14 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,6 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 
 @Composable
@@ -31,14 +28,8 @@ fun HabitCategoryCard(
     imageRes: Painter,
     onClick: () -> Unit
 ) {
-    Card(
+    BloomCard(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(12.dp), // Rounded corners for a soft appearance
-        colors = CardDefaults.cardColors(
-            containerColor = BloomTheme.colors.surface,
-            contentColor = Color.Unspecified
-        ),
         onClick = onClick
     ) {
         Column(

@@ -3,7 +3,6 @@ package com.horizondev.habitbloom.habits.presentation.addHabit
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,9 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,13 +22,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getNavigatorScreenModel
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
-import cafe.adriel.voyager.navigator.OnBackPressed
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayChoiceScreen
@@ -62,6 +62,9 @@ fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
                 AddHabitFlowHostTopBar(
                     currentPageIndex = currentPageIndex,
                     onBackPressed = {
+                        navigator.pop()
+                    },
+                    onClearPressed = {
                         navigator.popUntilRoot()
                     }
                 )
@@ -80,7 +83,8 @@ fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
 fun AddHabitFlowHostTopBar(
     modifier: Modifier = Modifier,
     currentPageIndex: Int,
-    onBackPressed: () -> Unit
+    onBackPressed: () -> Unit,
+    onClearPressed: () -> Unit,
 ) {
     Column(modifier = modifier.statusBarsPadding().fillMaxWidth()) {
         Box(
@@ -89,9 +93,13 @@ fun AddHabitFlowHostTopBar(
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 tint = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.size(24.dp).align(Alignment.TopStart).clickable {
-                    onBackPressed()
-                },
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(24.dp)
+                    .align(Alignment.TopStart)
+                    .clickable {
+                        onBackPressed()
+                    },
                 contentDescription = "back"
             )
             Text(
@@ -100,6 +108,18 @@ fun AddHabitFlowHostTopBar(
                 color = BloomTheme.colors.textColor.primary,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.align(Alignment.Center)
+            )
+            Icon(
+                imageVector = Icons.Filled.Close,
+                tint = BloomTheme.colors.textColor.primary,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(24.dp)
+                    .align(Alignment.TopEnd)
+                    .clickable {
+                        onClearPressed()
+                    },
+                contentDescription = "close"
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
