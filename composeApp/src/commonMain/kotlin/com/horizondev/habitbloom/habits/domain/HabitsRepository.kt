@@ -8,6 +8,7 @@ import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged

@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.utils
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import habitbloom.composeapp.generated.resources.Res
@@ -16,12 +17,28 @@ import habitbloom.composeapp.generated.resources.evening
 import habitbloom.composeapp.generated.resources.morning
 import habitbloom.composeapp.generated.resources.some_percentage_task_done
 import habitbloom.composeapp.generated.resources.some_tasks_completed
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.stringResource
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.EmptyCoroutineContext
+
+@Composable
+fun <T> Flow<T>.collectAsEffect(
+    context: CoroutineContext = EmptyCoroutineContext,
+    block: (T) -> Unit
+) {
+    LaunchedEffect(key1 = Unit) {
+        onEach(block).flowOn(context).launchIn(this)
+    }
+}
 
 fun getCurrentDate(): LocalDate {
     // Obtain the current system time zone

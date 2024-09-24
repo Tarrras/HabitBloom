@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit
 
 import cafe.adriel.voyager.core.model.ScreenModel
+import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.domain.models.NewUserHabitInfo
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,5 +26,9 @@ class AddHabitFlowHostModel : ScreenModel {
 
     fun updateTimeOfDaySelection(timeOfDay: TimeOfDay) {
         _flowHabitInfoState.update { it.copy(timeOfDay = timeOfDay) }
+    }
+
+    fun updateSelectedHabit(habitInfo: HabitInfo) {
+        _flowHabitInfoState.update { it.copy(habitInfo = habitInfo) }
     }
 }

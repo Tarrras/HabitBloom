@@ -2,7 +2,10 @@ package com.horizondev.habitbloom.core.designComponents.inputText
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -64,12 +67,15 @@ fun BloomSearchTextField(
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
         prefix = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                tint = BloomTheme.colors.textColor.secondary,
-                contentDescription = "search",
-                modifier = Modifier.size(24.dp)
-            )
+            Row {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    tint = BloomTheme.colors.textColor.secondary,
+                    contentDescription = "search",
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+            }
         },
         suffix = value.takeIf { it.isNotEmpty() }?.let {
             {

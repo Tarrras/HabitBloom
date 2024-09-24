@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.core.designComponents.inputText
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -15,6 +16,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import com.horizondev.habitbloom.core.designComponents.inputText.base.BloomBaseOutlinedTextField
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 
 @Composable
@@ -48,14 +50,13 @@ fun BloomTextField(
         unfocusedContainerColor = BloomTheme.colors.surface,
     )
 ) {
-    OutlinedTextField(
+    BloomBaseOutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier,
         enabled = enabled,
         readOnly = readOnly,
         textStyle = textStyle,
-        label = null,
         placeholder = placeholderText?.let {
             {
                 Text(
@@ -78,6 +79,7 @@ fun BloomTextField(
         maxLines = maxLines,
         minLines = minLines,
         keyboardActions = keyboardActions,
-        keyboardOptions = keyboardOptions
+        keyboardOptions = keyboardOptions,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
     )
 }
