@@ -14,14 +14,22 @@ import habitbloom.composeapp.generated.resources._75_percentage_task_done
 import habitbloom.composeapp.generated.resources._90_percentage_task_done
 import habitbloom.composeapp.generated.resources.afternoon
 import habitbloom.composeapp.generated.resources.evening
+import habitbloom.composeapp.generated.resources.friday_short
+import habitbloom.composeapp.generated.resources.monday_short
 import habitbloom.composeapp.generated.resources.morning
+import habitbloom.composeapp.generated.resources.saturday_short
 import habitbloom.composeapp.generated.resources.some_percentage_task_done
 import habitbloom.composeapp.generated.resources.some_tasks_completed
+import habitbloom.composeapp.generated.resources.sunday_short
+import habitbloom.composeapp.generated.resources.thursday_short
+import habitbloom.composeapp.generated.resources.tuesday_short
+import habitbloom.composeapp.generated.resources.wednesday_short
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -123,5 +131,19 @@ fun TimeOfDay.getTitle(): String {
         TimeOfDay.Morning -> stringResource(Res.string.morning)
         TimeOfDay.Afternoon -> stringResource(Res.string.afternoon)
         TimeOfDay.Evening -> stringResource(Res.string.evening)
+    }
+}
+
+@Composable
+fun DayOfWeek.getShortTitle(): String {
+    return when(this) {
+        DayOfWeek.MONDAY -> stringResource(Res.string.monday_short)
+        DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday_short)
+        DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday_short)
+        DayOfWeek.THURSDAY -> stringResource(Res.string.thursday_short)
+        DayOfWeek.FRIDAY -> stringResource(Res.string.friday_short)
+        DayOfWeek.SATURDAY -> stringResource(Res.string.saturday_short)
+        DayOfWeek.SUNDAY -> stringResource(Res.string.sunday_short)
+        else -> stringResource(Res.string.sunday_short)
     }
 }

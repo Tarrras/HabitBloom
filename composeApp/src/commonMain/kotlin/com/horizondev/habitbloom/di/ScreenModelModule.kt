@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.di
 
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
+import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreenModel
 import com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreenModel
 import com.horizondev.habitbloom.habits.presentation.home.HomeScreenModel
 import com.horizondev.habitbloom.profile.presentation.ProfileScreenModel
@@ -12,4 +13,5 @@ fun screenModelModule() = module {
     factoryOf(::ProfileScreenModel)
     factoryOf(::AddHabitFlowHostModel)
     factoryOf(::AddHabitChoiceScreenModel)
+    factoryOf(::AddHabitDurationChoiceScreenModel)
 }

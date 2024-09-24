@@ -30,6 +30,7 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreen
+import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.components.HabitListItem
 import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
@@ -55,10 +56,10 @@ class AddHabitChoiceScreen : Screen {
         }
 
         screenModel.uiIntent.collectAsEffect { uiIntent ->
-            when(uiIntent){
+            when (uiIntent) {
                 is AddHabitChoiceUiIntent.NavigateNext -> {
                     hostModel.updateSelectedHabit(uiIntent.info)
-
+                    navigator.push(AddHabitDurationChoiceScreen())
                 }
             }
         }
@@ -96,7 +97,9 @@ fun AddHabitChoiceScreenContent(
             LazyColumn {
                 habits(
                     habits = uiState.habits,
-                    onHabitClicked = {}
+                    onHabitClicked = {
+                        handleUiEvent(AddHabitChoiceUiEvent.SubmitHabit(it))
+                    }
                 )
             }
         }

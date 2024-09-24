@@ -56,4 +56,12 @@
 
     <string name="do_you_want_add_this_habit">Do you want to add this habit?</string>
 
+    <string name="monday_short">Mo</string>
+    <string name="tuesday_short">Tu</string>
+    <string name="wednesday_short">We</string>
+    <string name="thursday_short">Th</string>
+    <string name="friday_short">Fr</string>
+    <string name="saturday_short">Sa</string>
+    <string name="sunday_short">Su</string>
+
 </resources>
