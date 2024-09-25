@@ -19,7 +19,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreen
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
 import com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.components.HabitCategoryCard
 import habitbloom.composeapp.generated.resources.Res
@@ -44,7 +44,7 @@ class AddHabitTimeOfDayChoiceScreen : Screen {
         val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
 
         LaunchedEffect(Unit) {
-            hostModel.updatedFlowPage(AddHabitFlowScreen.CHOOSE_CATEGORY)
+            hostModel.updatedFlowPage(AddHabitFlowScreenStep.CHOOSE_CATEGORY)
         }
 
         AddHabitTimeOfDayChoiceScreenContent(

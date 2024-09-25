@@ -1,5 +1,11 @@
 package com.horizondev.habitbloom.core.designComponents.stepper
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -20,6 +26,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -27,7 +37,8 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import kotlinx.coroutines.delay
 
-private val circeSize = 32.dp
+private val circeSize = 36.dp
+private val borderWidth = 1.dp
 
 @Composable
 fun BloomStepper(
@@ -78,18 +89,31 @@ private fun BloomStepperStep(
     index: Int,
     status: StepperItemStatus
 ) {
+
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        when (status) {
-            StepperItemStatus.Completed -> {
+        val isCompleted = status == StepperItemStatus.Completed
+
+        Box(modifier = Modifier.size(circeSize)) {
+            androidx.compose.animation.AnimatedVisibility(
+                isCompleted,
+                enter = scaleIn() + fadeIn(
+                    // Fade in with the initial alpha of 0.3f.
+                    initialAlpha = 0.3f
+                ),
+                exit = scaleOut() + fadeOut()
+            ) {
                 StepperCompletedPageBox()
             }
 
-            else -> StepperPageNumberBox(index = index, status = status)
+            if (!isCompleted) {
+                StepperPageNumberBox(index = index, status = status)
+            }
         }
+
         StepperPageTitle(status = status, title = title)
     }
 }
@@ -106,9 +130,9 @@ private fun StepperPageNumberBox(
     }
     Box(
         modifier = modifier
-            .size(circeSize)
+            .size(circeSize - borderWidth)
             .border(
-                width = 1.dp,
+                width = borderWidth,
                 color = color,
                 shape = CircleShape
             )
@@ -139,7 +163,7 @@ private fun StepperCompletedPageBox(
         Icon(
             imageVector = Icons.Filled.Done,
             contentDescription = null,
-            modifier = Modifier.align(Alignment.Center).size(12.dp),
+            modifier = Modifier.align(Alignment.Center).size(circeSize / 2),
             tint = BloomTheme.colors.textColor.white
         )
     }

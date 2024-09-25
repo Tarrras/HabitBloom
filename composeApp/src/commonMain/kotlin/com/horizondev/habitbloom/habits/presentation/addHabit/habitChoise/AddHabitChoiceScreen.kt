@@ -2,7 +2,6 @@ package com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -29,7 +28,7 @@ import com.horizondev.habitbloom.core.designComponents.inputText.BloomSearchText
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreen
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
 import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.components.HabitListItem
 import com.horizondev.habitbloom.utils.collectAsEffect
@@ -52,7 +51,7 @@ class AddHabitChoiceScreen : Screen {
         val uiState by screenModel.state.collectAsState()
 
         LaunchedEffect(Unit) {
-            hostModel.updatedFlowPage(AddHabitFlowScreen.CHOOSE_HABIT)
+            hostModel.updatedFlowPage(AddHabitFlowScreenStep.CHOOSE_HABIT)
         }
 
         screenModel.uiIntent.collectAsEffect { uiIntent ->

@@ -21,7 +21,7 @@ fun BloomPrimaryOutlinedButton(
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        border = BorderStroke(width = 1.dp, color = BloomTheme.colors.primary)
+        border = BorderStroke(width = 2.dp, color = BloomTheme.colors.primary)
     ) {
         Text(
             text = text,

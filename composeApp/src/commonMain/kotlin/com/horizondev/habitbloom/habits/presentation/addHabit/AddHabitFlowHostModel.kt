@@ -10,12 +10,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.datetime.DayOfWeek
 
 class AddHabitFlowHostModel : ScreenModel {
-    private val flowPages = AddHabitFlowScreen.entries
+    private val flowPages = AddHabitFlowScreenStep.entries
 
     private val _flowPageState = MutableStateFlow(0)
     val flowPageState = _flowPageState.asStateFlow()
 
-    fun updatedFlowPage(page: AddHabitFlowScreen) {
+    fun updatedFlowPage(page: AddHabitFlowScreenStep) {
         val index = flowPages.indexOf(page)
         _flowPageState.update { index }
     }

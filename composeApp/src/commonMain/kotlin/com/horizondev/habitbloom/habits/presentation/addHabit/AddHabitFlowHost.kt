@@ -125,7 +125,7 @@ fun AddHabitFlowHostTopBar(
         Spacer(modifier = Modifier.height(24.dp))
         BloomStepper(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-            items = AddHabitFlowScreen.entries.map { it.getTitle() },
+            items = AddHabitFlowScreenStep.entries.map { it.getTitle() },
             currentItemIndex = currentPageIndex
         )
     }

@@ -1,19 +1,12 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -32,39 +25,31 @@ import cafe.adriel.voyager.koin.getNavigatorScreenModel
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
-import com.horizondev.habitbloom.core.designComponents.inputText.BloomSearchTextField
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
-import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreen
-import com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreenModel
-import com.horizondev.habitbloom.habits.presentation.components.HabitListItem
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
 import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
-import habitbloom.composeapp.generated.resources.choose_habit_to_acquire
 import habitbloom.composeapp.generated.resources.every_day
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_month
 import habitbloom.composeapp.generated.resources.one_week
 import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.quick_action
-import habitbloom.composeapp.generated.resources.search_habit
 import habitbloom.composeapp.generated.resources.select_days_for_habit
 import habitbloom.composeapp.generated.resources.selected_duration
 import habitbloom.composeapp.generated.resources.three_months
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.core.parameter.parametersOf
 import kotlin.math.roundToInt
 
 class AddHabitDurationChoiceScreen : Screen {
@@ -90,7 +75,7 @@ class AddHabitDurationChoiceScreen : Screen {
         }
 
         LaunchedEffect(Unit) {
-            hostModel.updatedFlowPage(AddHabitFlowScreen.CHOOSE_DURATION)
+            hostModel.updatedFlowPage(AddHabitFlowScreenStep.CHOOSE_DURATION)
         }
 
         AddHabitDurationChoiceScreenContent(
