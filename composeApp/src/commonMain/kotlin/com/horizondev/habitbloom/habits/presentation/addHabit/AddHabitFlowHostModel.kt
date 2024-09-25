@@ -7,6 +7,7 @@ import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.datetime.DayOfWeek
 
 class AddHabitFlowHostModel : ScreenModel {
     private val flowPages = AddHabitFlowScreen.entries
@@ -30,5 +31,12 @@ class AddHabitFlowHostModel : ScreenModel {
 
     fun updateSelectedHabit(habitInfo: HabitInfo) {
         _flowHabitInfoState.update { it.copy(habitInfo = habitInfo) }
+    }
+
+    fun updateDaysAndDuration(
+        days: List<DayOfWeek>,
+        duration: Int
+    ) {
+        _flowHabitInfoState.update { it.copy(days = days, duration = duration) }
     }
 }

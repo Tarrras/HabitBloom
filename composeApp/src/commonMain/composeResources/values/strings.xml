@@ -33,6 +33,11 @@
     <string name="search_habit">Search habit</string>
     <string name="select_days_for_habit">Select days for habit</string>
 
+    <plurals name="selected_duration">
+        <item quantity="one">Duration: %1$d day</item>
+        <item quantity="other">Duration: %1$d days</item>
+    </plurals>
+
     <string name="morning_habit_title">Morning habit</string>
     <string name="morning_habit_description">Start your day with energizing habits that set a positive tone. Perfect for workouts, meditation, or a healthy breakfast.</string>
 

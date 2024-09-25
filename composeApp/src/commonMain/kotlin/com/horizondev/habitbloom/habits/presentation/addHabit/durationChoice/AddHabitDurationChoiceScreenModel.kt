@@ -2,15 +2,20 @@ package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.StateScreenModel
+import cafe.adriel.voyager.core.model.screenModelScope
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 
 class AddHabitDurationChoiceScreenModel(
 
 ) : StateScreenModel<AddHabitDurationChoiceUiState>(AddHabitDurationChoiceUiState()) {
 
-    fun handleUiEvent(uiEvent: AddHabitDurationChoiceUiEvent) {
+    val uiIntent = MutableSharedFlow<AddHabitDurationChoiceUiIntent>()
+
+    fun handleUiEvent(uiEvent: AddHabitDurationChoiceUiEvent) = screenModelScope.launch {
         when (uiEvent) {
             is AddHabitDurationChoiceUiEvent.SelectGroupOfDays -> {
                 val newList = when (uiEvent.group) {
@@ -39,6 +44,18 @@ class AddHabitDurationChoiceScreenModel(
                     } else add(dayToChange)
                 }
                 mutableState.update { it.copy(activeDays = newList) }
+            }
+
+            is AddHabitDurationChoiceUiEvent.DurationChanged -> {
+                mutableState.update { it.copy(duration = uiEvent.duration) }
+            }
+
+            AddHabitDurationChoiceUiEvent.Cancel -> {
+                uiIntent.emit(AddHabitDurationChoiceUiIntent.NavigateBack)
+            }
+
+            AddHabitDurationChoiceUiEvent.OnNext -> {
+                uiIntent.emit(AddHabitDurationChoiceUiIntent.NavigateBack)
             }
         }
     }
