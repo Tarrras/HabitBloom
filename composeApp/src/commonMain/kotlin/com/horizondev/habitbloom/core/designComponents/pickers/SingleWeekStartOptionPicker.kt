@@ -5,9 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -18,33 +16,38 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.getShortTitle
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.next
+import habitbloom.composeapp.generated.resources.next_week
+import habitbloom.composeapp.generated.resources.this_week
 import kotlinx.datetime.DayOfWeek
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun DayPicker(
+fun SingleWeekStartOptionPicker(
     modifier: Modifier = Modifier,
-    activeDays: List<DayOfWeek>,
-    dayStateChanged: (DayOfWeek, Boolean) -> Unit,
+    selectedOption: HabitWeekStartOption,
+    options: List<HabitWeekStartOption>,
+    onOptionSelected: (HabitWeekStartOption) -> Unit,
     shapeSize: Dp = 36.dp,
     backgroundColor: Color = BloomTheme.colors.background,
-    listOfDays: List<DayOfWeek> = DayOfWeek.entries
 ) {
     PickerRow(
         modifier = modifier,
+        shapeSize = shapeSize,
         backgroundColor = backgroundColor,
-        shapeSize = shapeSize
+        height = 32.dp
     ) {
-        listOfDays.forEachIndexed { index, dayOfWeek ->
-            val isActiveDay = dayOfWeek in activeDays
+        options.forEachIndexed { index, option ->
+            val isActiveOption = selectedOption == option
             val shape = when (index) {
                 0 -> RoundedCornerShape(topStart = shapeSize, bottomStart = shapeSize)
-                listOfDays.lastIndex -> RoundedCornerShape(
+                options.lastIndex -> RoundedCornerShape(
                     topEnd = shapeSize,
                     bottomEnd = shapeSize
                 )
@@ -55,23 +58,36 @@ fun DayPicker(
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        color = if (isActiveDay) BloomTheme.colors.primary else Color.Transparent,
+                        color = if (isActiveOption) BloomTheme.colors.primary else Color.Transparent,
                         shape = shape
                     )
                     .fillMaxHeight()
                     .clip(shape)
                     .clickable {
-                        dayStateChanged(dayOfWeek, !isActiveDay)
+                        onOptionSelected(option)
                     }
             ) {
                 Text(
                     textAlign = TextAlign.Center,
-                    text = dayOfWeek.getShortTitle(),
-                    color = if (isActiveDay) BloomTheme.colors.textColor.white
+                    text = option.getTitle(),
+                    color = if (isActiveOption) BloomTheme.colors.textColor.white
                     else BloomTheme.colors.textColor.primary,
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
         }
+    }
+}
+
+enum class HabitWeekStartOption {
+    THIS_WEEK,
+    NEXT_WEEK
+}
+
+@Composable
+fun HabitWeekStartOption.getTitle(): String {
+    return when(this) {
+        HabitWeekStartOption.THIS_WEEK -> stringResource(Res.string.this_week)
+        HabitWeekStartOption.NEXT_WEEK -> stringResource(Res.string.next_week)
     }
 }

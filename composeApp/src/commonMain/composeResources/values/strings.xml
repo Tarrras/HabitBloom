@@ -32,11 +32,17 @@
     <string name="choose_habit_days_and_duration">Choose days and duration</string>
     <string name="search_habit">Search habit</string>
     <string name="select_days_for_habit">Select days for habit</string>
+    <string name="select_repeats">Select repeats</string>
+    <string name="start_date">Start date: %1$d</string>
 
-    <plurals name="selected_duration">
-        <item quantity="one">Duration: %1$d day</item>
-        <item quantity="other">Duration: %1$d days</item>
+    <plurals name="selected_repeats">
+        <item quantity="one">Duration: %1$d repeat</item>
+        <item quantity="other">Duration: %1$d repeats</item>
     </plurals>
+
+    <string name="when_do_you_want_to_start">When do you want to start?</string>
+    <string name="this_week">This Week</string>
+    <string name="next_week">Next Week</string>
 
     <string name="morning_habit_title">Morning habit</string>
     <string name="morning_habit_description">Start your day with energizing habits that set a positive tone. Perfect for workouts, meditation, or a healthy breakfast.</string>
@@ -54,10 +60,14 @@
 
     <string name="quick_action">Quick actions</string>
     <string name="every_day">Every day</string>
-    <string name="only_weekends">Only weekends</string>
+    <string name="only_weekends">Weekends only</string>
     <string name="one_week">One week</string>
     <string name="one_month">One month</string>
     <string name="three_months">Three months</string>
+
+    <string name="one_repeat">1 repeat (1 week)</string>
+    <string name="four_repeats">4 repeats (≈1 month)</string>
+    <string name="twelve_repeats">12 repeats (≈3 months)</string>
 
     <string name="do_you_want_add_this_habit">Do you want to add this habit?</string>
 

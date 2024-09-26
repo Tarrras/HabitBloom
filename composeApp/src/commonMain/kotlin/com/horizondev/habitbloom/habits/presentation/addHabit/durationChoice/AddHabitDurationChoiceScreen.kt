@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +19,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getNavigatorScreenModel
@@ -30,6 +35,8 @@ import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutli
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
+import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
+import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
@@ -39,14 +46,17 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
 import habitbloom.composeapp.generated.resources.every_day
+import habitbloom.composeapp.generated.resources.four_repeats
 import habitbloom.composeapp.generated.resources.next
-import habitbloom.composeapp.generated.resources.one_month
-import habitbloom.composeapp.generated.resources.one_week
+import habitbloom.composeapp.generated.resources.one_repeat
 import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.quick_action
 import habitbloom.composeapp.generated.resources.select_days_for_habit
-import habitbloom.composeapp.generated.resources.selected_duration
-import habitbloom.composeapp.generated.resources.three_months
+import habitbloom.composeapp.generated.resources.select_repeats
+import habitbloom.composeapp.generated.resources.selected_repeats
+import habitbloom.composeapp.generated.resources.start_date
+import habitbloom.composeapp.generated.resources.twelve_repeats
+import habitbloom.composeapp.generated.resources.when_do_you_want_to_start
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -107,12 +117,17 @@ fun AddHabitDurationChoiceScreenContent(
         Spacer(modifier = Modifier.height(16.dp))
         SelectDaysForHabitCard(
             modifier = Modifier.fillMaxWidth(),
+            startDate = uiState.startDate,
             activeDays = uiState.activeDays,
+            weekStartOption = uiState.weekStartOption,
             dayStateChanged = { day, isActive ->
                 handleUiEvent(AddHabitDurationChoiceUiEvent.UpdateDayState(day, isActive))
             },
             selectGroupOfDays = {
                 handleUiEvent(AddHabitDurationChoiceUiEvent.SelectGroupOfDays(it))
+            },
+            onOptionSelected = {
+                handleUiEvent(AddHabitDurationChoiceUiEvent.SelectWeekStartOption(it))
             }
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -147,9 +162,12 @@ fun AddHabitDurationChoiceScreenContent(
 @Composable
 private fun SelectDaysForHabitCard(
     modifier: Modifier = Modifier,
+    startDate: String?,
     activeDays: List<DayOfWeek>,
+    weekStartOption: HabitWeekStartOption,
     dayStateChanged: (DayOfWeek, Boolean) -> Unit,
-    selectGroupOfDays: (GroupOfDays) -> Unit
+    selectGroupOfDays: (GroupOfDays) -> Unit,
+    onOptionSelected: (HabitWeekStartOption) -> Unit
 ) {
     Surface(
         color = BloomTheme.colors.surface,
@@ -166,12 +184,38 @@ private fun SelectDaysForHabitCard(
                 color = BloomTheme.colors.textColor.primary,
             )
             Spacer(modifier = Modifier.height(12.dp))
+
+            AnimatedVisibility(
+                startDate != null,
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                Text(
+                    text = stringResource(Res.string.start_date, startDate.orEmpty()),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary,
+                    textDecoration = TextDecoration.Underline
+                )
+            }
+
             DayPicker(
                 modifier = Modifier.fillMaxWidth(),
                 activeDays = activeDays,
                 dayStateChanged = dayStateChanged
             )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = stringResource(Res.string.when_do_you_want_to_start),
+                color = BloomTheme.colors.textColor.secondary,
+                style = BloomTheme.typography.subheading
+            )
             Spacer(modifier = Modifier.height(12.dp))
+            SingleWeekStartOptionPicker(
+                modifier = Modifier,
+                onOptionSelected = onOptionSelected,
+                selectedOption = weekStartOption,
+                options = HabitWeekStartOption.entries
+            )
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = stringResource(Res.string.quick_action),
                 color = BloomTheme.colors.textColor.secondary,
@@ -211,7 +255,7 @@ private fun SelectDurationForHabitCard(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = stringResource(Res.string.select_days_for_habit),
+                text = stringResource(Res.string.select_repeats),
                 style = BloomTheme.typography.heading,
                 color = BloomTheme.colors.textColor.primary,
             )
@@ -229,23 +273,23 @@ private fun SelectDurationForHabitCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
             BloomSmallActionButton(
-                text = stringResource(Res.string.one_week),
+                text = stringResource(Res.string.one_repeat),
                 onClick = {
-                    onDurationChanged(7)
+                    onDurationChanged(1)
                 }
             )
             Spacer(modifier = Modifier.height(12.dp))
             BloomSmallActionButton(
-                text = stringResource(Res.string.one_month),
+                text = stringResource(Res.string.four_repeats),
                 onClick = {
-                    onDurationChanged(30)
+                    onDurationChanged(4)
                 }
             )
             Spacer(modifier = Modifier.height(12.dp))
             BloomSmallActionButton(
-                text = stringResource(Res.string.three_months),
+                text = stringResource(Res.string.twelve_repeats),
                 onClick = {
-                    onDurationChanged(90)
+                    onDurationChanged(12)
                 }
             )
         }
@@ -262,21 +306,20 @@ fun DurationSlider(
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = pluralStringResource(
-                    resource = Res.plurals.selected_duration,
+                    resource = Res.plurals.selected_repeats,
                     quantity = duration,
                     duration
                 ),
-                style = BloomTheme.typography.subheading.copy(
-                    fontWeight = FontWeight.SemiBold
-                ),
-                color = BloomTheme.colors.textColor.primary
+                style = BloomTheme.typography.body,
+                color = BloomTheme.colors.textColor.primary,
+                textDecoration = TextDecoration.Underline
             )
         }
         BloomSlider(
             value = duration.toFloat(),
             onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
-            valueRange = 1f..90f, // Set the range from 1 to 90
-            steps = 89, // 89 steps because we start from 1 (90-1=89 steps)
+            valueRange = 1f..12f, // Set the range from 1 to 12
+            steps = 11, // 11 steps because we start from 1
             modifier = modifier
         )
     }

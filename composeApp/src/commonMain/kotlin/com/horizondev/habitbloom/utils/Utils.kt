@@ -48,27 +48,6 @@ fun <T> Flow<T>.collectAsEffect(
     }
 }
 
-fun getCurrentDate(): LocalDate {
-    // Obtain the current system time zone
-    val timeZone = TimeZone.currentSystemDefault()
-
-    // Get the current date in the system's default time zone
-    return Clock.System.todayIn(timeZone)
-}
-
-fun getTimeOfDay(): TimeOfDay {
-    val currentMoment = Clock.System.now()
-    val timeZone = TimeZone.currentSystemDefault()
-    val currentDateTime = currentMoment.toLocalDateTime(timeZone)
-    val currentHour = currentDateTime.hour
-
-    return when (currentHour) {
-        in 5..11 -> TimeOfDay.Morning
-        in 12..16 -> TimeOfDay.Afternoon
-        in 17..20 -> TimeOfDay.Evening
-        else -> TimeOfDay.Evening
-    }
-}
 
 @Composable
 fun habitsCompleteMessage(habitsCount: Int, completedHabits: Int): String {
