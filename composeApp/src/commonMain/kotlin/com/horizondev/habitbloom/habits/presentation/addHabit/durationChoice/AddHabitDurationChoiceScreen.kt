@@ -81,6 +81,10 @@ class AddHabitDurationChoiceScreen : Screen {
                         duration = uiIntent.selectedDuration
                     )
                 }
+
+                is AddHabitDurationChoiceUiIntent.ShowSnackBar -> {
+                    hostModel.showSnackBar(uiIntent.visuals)
+                }
             }
         }
 
@@ -185,9 +189,15 @@ private fun SelectDaysForHabitCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
 
+            DayPicker(
+                modifier = Modifier.fillMaxWidth(),
+                activeDays = activeDays,
+                dayStateChanged = dayStateChanged
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
             AnimatedVisibility(
                 startDate != null,
-                modifier = Modifier.padding(bottom = 12.dp)
             ) {
                 Text(
                     text = stringResource(Res.string.start_date, startDate.orEmpty()),
@@ -196,13 +206,8 @@ private fun SelectDaysForHabitCard(
                     textDecoration = TextDecoration.Underline
                 )
             }
+            Spacer(modifier = Modifier.height(12.dp))
 
-            DayPicker(
-                modifier = Modifier.fillMaxWidth(),
-                activeDays = activeDays,
-                dayStateChanged = dayStateChanged
-            )
-            Spacer(modifier = Modifier.height(24.dp))
             Text(
                 text = stringResource(Res.string.when_do_you_want_to_start),
                 color = BloomTheme.colors.textColor.secondary,
@@ -303,24 +308,23 @@ fun DurationSlider(
     onDurationChanged: (Int) -> Unit
 ) {
     Column {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(
-                text = pluralStringResource(
-                    resource = Res.plurals.selected_repeats,
-                    quantity = duration,
-                    duration
-                ),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary,
-                textDecoration = TextDecoration.Underline
-            )
-        }
         BloomSlider(
             value = duration.toFloat(),
             onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
             valueRange = 1f..12f, // Set the range from 1 to 12
             steps = 11, // 11 steps because we start from 1
             modifier = modifier
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = pluralStringResource(
+                resource = Res.plurals.selected_repeats,
+                quantity = duration,
+                duration
+            ),
+            style = BloomTheme.typography.body,
+            color = BloomTheme.colors.textColor.primary,
+            textDecoration = TextDecoration.Underline,
         )
     }
 }

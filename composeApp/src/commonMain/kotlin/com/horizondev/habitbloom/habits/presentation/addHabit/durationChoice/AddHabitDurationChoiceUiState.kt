@@ -1,6 +1,8 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
+import androidx.compose.material3.SnackbarVisuals
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
 import kotlinx.datetime.DayOfWeek
 
@@ -15,6 +17,8 @@ data class AddHabitDurationChoiceUiState(
 
 sealed interface AddHabitDurationChoiceUiIntent {
     data object NavigateBack : AddHabitDurationChoiceUiIntent
+
+    data class ShowSnackBar(val visuals: BloomSnackbarVisuals): AddHabitDurationChoiceUiIntent
     data class NavigateToSummary(
         val selectedDays: List<DayOfWeek>,
         val selectedDuration: Int

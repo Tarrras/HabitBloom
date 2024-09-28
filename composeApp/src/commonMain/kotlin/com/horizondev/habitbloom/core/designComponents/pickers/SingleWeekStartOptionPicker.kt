@@ -41,7 +41,7 @@ fun SingleWeekStartOptionPicker(
         modifier = modifier,
         shapeSize = shapeSize,
         backgroundColor = backgroundColor,
-        height = 32.dp
+        height = 36.dp
     ) {
         options.forEachIndexed { index, option ->
             val isActiveOption = selectedOption == option

@@ -15,11 +15,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,12 +35,15 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getNavigatorScreenModel
 import cafe.adriel.voyager.navigator.CurrentScreen
 import cafe.adriel.voyager.navigator.Navigator
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayChoiceScreen
 import com.horizondev.habitbloom.platform.StatusBarColors
+import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
 class AddHabitFlowHost : Screen {
@@ -48,8 +57,17 @@ class AddHabitFlowHost : Screen {
 @Composable
 fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
     Navigator(screen = AddHabitTimeOfDayChoiceScreen()) { navigator ->
+        val scope = rememberCoroutineScope()
+        val snackBarState = remember { SnackbarHostState() }
+
         val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
         val currentPageIndex by hostModel.flowPageState.collectAsState()
+
+        hostModel.snackBarFlow.collectAsEffect { visuals ->
+            scope.launch {
+                snackBarState.showSnackbar(visuals)
+            }
+        }
 
         StatusBarColors(
             statusBarColor = BloomTheme.colors.background,
@@ -74,7 +92,13 @@ fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
                     CurrentScreen()
                 }
             },
-            containerColor = BloomTheme.colors.background
+            containerColor = BloomTheme.colors.background,
+            snackbarHost = {
+                BloomSnackbarHost(
+                    modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                    snackBarState = snackBarState
+                )
+            }
         )
     }
 }

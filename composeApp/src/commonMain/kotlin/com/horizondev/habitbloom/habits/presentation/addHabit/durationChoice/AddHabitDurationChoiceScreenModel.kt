@@ -1,13 +1,18 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
+import androidx.compose.material3.SnackbarDuration
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
 import com.horizondev.habitbloom.utils.formatToMmDdYy
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getFirstDateAfterTodayOrNextWeek
 import com.horizondev.habitbloom.utils.getFirstDateFromDaysList
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.add_new_habit
+import habitbloom.composeapp.generated.resources.the_habit_cannot_start_on_past_days
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
@@ -19,6 +24,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
+import org.jetbrains.compose.resources.getString
 
 class AddHabitDurationChoiceScreenModel(
 
@@ -78,7 +84,19 @@ class AddHabitDurationChoiceScreenModel(
 
             AddHabitDurationChoiceUiEvent.OnNext -> {
                 val uiState = mutableState.value
-                uiIntent.emit(
+
+                if (uiState.startDate == null) {
+                    uiIntent.emit(
+                        AddHabitDurationChoiceUiIntent.ShowSnackBar(
+                            visuals = BloomSnackbarVisuals(
+                                message = getString(Res.string.the_habit_cannot_start_on_past_days),
+                                actionLabel = null,
+                                duration = SnackbarDuration.Short,
+                                withDismissAction = true
+                            )
+                        )
+                    )
+                } else uiIntent.emit(
                     AddHabitDurationChoiceUiIntent.NavigateToSummary(
                         selectedDays = uiState.activeDays,
                         selectedDuration = uiState.duration

@@ -79,4 +79,6 @@
     <string name="saturday_short">Sa</string>
     <string name="sunday_short">Su</string>
 
+    <string name="the_habit_cannot_start_on_past_days">The habit cannot start on past days. Choose another day or switch to 'Next Week.'</string>
+
 </resources>
