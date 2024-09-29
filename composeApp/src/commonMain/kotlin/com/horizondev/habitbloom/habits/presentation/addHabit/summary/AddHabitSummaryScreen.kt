@@ -50,6 +50,7 @@ import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostMo
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
 import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceUiEvent
 import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceUiIntent
+import com.horizondev.habitbloom.habits.presentation.addHabit.success.AddHabitSuccessScreen
 import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.back
@@ -91,7 +92,10 @@ class AddHabitSummaryScreen : Screen {
         screenModel.uiIntent.collectAsEffect { uiIntent ->
             when (uiIntent) {
                 AddHabitSummaryUiIntent.NavigateBack -> navigator.pop()
-                AddHabitSummaryUiIntent.NavigateToSuccess -> TODO()
+                AddHabitSummaryUiIntent.NavigateToSuccess -> {
+                    navigator.parent?.replace(AddHabitSuccessScreen())
+                }
+
                 is AddHabitSummaryUiIntent.ShowSnackBar -> {
                     hostModel.showSnackBar(uiIntent.visuals)
                 }

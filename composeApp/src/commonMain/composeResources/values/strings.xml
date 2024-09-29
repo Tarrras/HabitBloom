@@ -57,6 +57,7 @@
     <string name="cancel">Cancel</string>
     <string name="back">Back</string>
     <string name="complete">Complete</string>
+    <string name="finish">Finish</string>
 
     <string name="quick_action">Quick actions</string>
     <string name="every_day">Every day</string>
@@ -81,4 +82,6 @@
 
     <string name="the_habit_cannot_start_on_past_days">The habit cannot start on past days. Choose another day or switch to 'Next Week.'</string>
 
+    <string name="habit_added_success">Great job! Your new habit is added!</string>
+    <string name="habit_added_description">Stay consistent, and your goals are within reach!</string>
 </resources>

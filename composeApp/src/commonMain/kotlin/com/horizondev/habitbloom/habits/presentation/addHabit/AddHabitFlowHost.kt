@@ -79,9 +79,11 @@ fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
             topBar = {
                 AddHabitFlowHostTopBar(
                     currentPageIndex = currentPageIndex,
-                    onBackPressed = {
-                        navigator.pop()
-                    },
+                    onBackPressed = if (currentPageIndex != 0) {
+                        {
+                            navigator.pop()
+                        }
+                    } else null,
                     onClearPressed = {
                         navigator.popUntilRoot()
                     }
@@ -107,25 +109,27 @@ fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
 fun AddHabitFlowHostTopBar(
     modifier: Modifier = Modifier,
     currentPageIndex: Int,
-    onBackPressed: () -> Unit,
+    onBackPressed: (() -> Unit)? = null,
     onClearPressed: () -> Unit,
 ) {
     Column(modifier = modifier.statusBarsPadding().fillMaxWidth()) {
         Box(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                tint = BloomTheme.colors.textColor.primary,
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .size(24.dp)
-                    .align(Alignment.TopStart)
-                    .clickable {
-                        onBackPressed()
-                    },
-                contentDescription = "back"
-            )
+            onBackPressed?.let {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    tint = BloomTheme.colors.textColor.primary,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .size(24.dp)
+                        .align(Alignment.TopStart)
+                        .clickable {
+                            onBackPressed()
+                        },
+                    contentDescription = "back"
+                )
+            }
             Text(
                 text = stringResource(Res.string.add_new_habit),
                 style = BloomTheme.typography.heading,
