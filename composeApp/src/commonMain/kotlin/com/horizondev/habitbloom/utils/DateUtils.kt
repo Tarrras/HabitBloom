@@ -42,6 +42,11 @@ fun getTimeOfDay(): TimeOfDay {
     }
 }
 
+fun LocalDate.startOfWeek(): LocalDate {
+    val daysSinceMonday = this.dayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
+    return this.minusDays(daysSinceMonday.toLong())
+}
+
 fun getFirstDateFromDaysList(daysList: List<DayOfWeek>): LocalDate? {
     if (daysList.isEmpty()) return null
 
@@ -90,6 +95,10 @@ fun getFirstDateAfterTodayOrNextWeek(
 
 fun LocalDate.formatToMmDdYy(): String {
     return this.format(customFormat)
+}
+
+fun String.mmDdYyToDate(): LocalDate {
+    return LocalDate.parse(this, customFormat)
 }
 
 fun LocalDate.minusDays(days: Long): LocalDate {

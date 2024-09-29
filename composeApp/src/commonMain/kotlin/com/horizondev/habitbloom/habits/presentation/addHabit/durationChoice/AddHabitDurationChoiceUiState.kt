@@ -5,6 +5,7 @@ import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOpt
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 
 data class AddHabitDurationChoiceUiState(
     val activeDays: List<DayOfWeek> = emptyList(),
@@ -21,7 +22,9 @@ sealed interface AddHabitDurationChoiceUiIntent {
     data class ShowSnackBar(val visuals: BloomSnackbarVisuals): AddHabitDurationChoiceUiIntent
     data class NavigateToSummary(
         val selectedDays: List<DayOfWeek>,
-        val selectedDuration: Int
+        val selectedDuration: Int,
+        val habitWeekStartOption: HabitWeekStartOption,
+        val startDate: LocalDate
     ) : AddHabitDurationChoiceUiIntent
 }
 

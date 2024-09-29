@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.habits.presentation.addHabit
 import androidx.compose.material3.SnackbarVisuals
 import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
+import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.domain.models.NewUserHabitInfo
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 
 class AddHabitFlowHostModel : ScreenModel {
     private val flowPages = AddHabitFlowScreenStep.entries
@@ -48,8 +50,17 @@ class AddHabitFlowHostModel : ScreenModel {
 
     fun updateDaysAndDuration(
         days: List<DayOfWeek>,
-        duration: Int
+        duration: Int,
+        weekStartOption: HabitWeekStartOption,
+        startDate: LocalDate
     ) {
-        _flowHabitInfoState.update { it.copy(days = days, duration = duration) }
+        _flowHabitInfoState.update {
+            it.copy(
+                days = days,
+                duration = duration,
+                startDate = startDate,
+                weekStartOption = weekStartOption
+            )
+        }
     }
 }

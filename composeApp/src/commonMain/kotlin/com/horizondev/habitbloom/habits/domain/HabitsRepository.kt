@@ -5,6 +5,7 @@ import com.horizondev.habitbloom.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.habits.data.remote.toDomainModel
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 class HabitsRepository(
@@ -71,6 +73,24 @@ class HabitsRepository(
         }.distinctUntilChanged()
     }
 
+    suspend fun addHabit(
+        habitInfo: HabitInfo,
+        startDate: LocalDate,
+        repeats: Int,
+        days: List<DayOfWeek>
+    ): Result<Boolean> {
+        val userHabit = UserHabit(
+            id = 0L,
+            habitId = habitInfo.id,
+            startDate = startDate,
+            repeats = repeats,
+            daysOfWeek = days,
+            timeOfDay = habitInfo.timeOfDay
+        )
+        return runCatching {
+            localDataSource.insertUserHabit(userHabit)
+        }.map { true }
+    }
 
     suspend fun updateHabitCompletion(userHabitId: Long, date: LocalDate, isCompleted: Boolean) {
         localDataSource.updateHabitCompletion(

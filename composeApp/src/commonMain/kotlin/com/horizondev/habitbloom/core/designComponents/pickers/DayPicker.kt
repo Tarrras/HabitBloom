@@ -33,7 +33,8 @@ fun DayPicker(
     dayStateChanged: (DayOfWeek, Boolean) -> Unit,
     shapeSize: Dp = 36.dp,
     backgroundColor: Color = BloomTheme.colors.background,
-    listOfDays: List<DayOfWeek> = DayOfWeek.entries
+    listOfDays: List<DayOfWeek> = DayOfWeek.entries,
+    enabled: Boolean = true
 ) {
     PickerRow(
         modifier = modifier,
@@ -60,7 +61,7 @@ fun DayPicker(
                     )
                     .fillMaxHeight()
                     .clip(shape)
-                    .clickable {
+                    .clickable(enabled = enabled) {
                         dayStateChanged(dayOfWeek, !isActiveDay)
                     }
             ) {

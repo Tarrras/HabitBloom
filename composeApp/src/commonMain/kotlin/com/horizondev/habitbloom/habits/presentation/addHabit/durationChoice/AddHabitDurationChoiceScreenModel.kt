@@ -10,6 +10,7 @@ import com.horizondev.habitbloom.utils.formatToMmDdYy
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getFirstDateAfterTodayOrNextWeek
 import com.horizondev.habitbloom.utils.getFirstDateFromDaysList
+import com.horizondev.habitbloom.utils.mmDdYyToDate
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
 import habitbloom.composeapp.generated.resources.the_habit_cannot_start_on_past_days
@@ -21,8 +22,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDate
 import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.compose.resources.getString
 
@@ -99,7 +102,9 @@ class AddHabitDurationChoiceScreenModel(
                 } else uiIntent.emit(
                     AddHabitDurationChoiceUiIntent.NavigateToSummary(
                         selectedDays = uiState.activeDays,
-                        selectedDuration = uiState.duration
+                        selectedDuration = uiState.duration,
+                        startDate = uiState.startDate.mmDdYyToDate(),
+                        habitWeekStartOption = uiState.weekStartOption
                     )
                 )
             }

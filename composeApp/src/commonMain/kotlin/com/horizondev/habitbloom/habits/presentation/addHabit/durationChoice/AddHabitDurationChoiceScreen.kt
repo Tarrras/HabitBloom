@@ -41,6 +41,7 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
+import com.horizondev.habitbloom.habits.presentation.addHabit.summary.AddHabitSummaryScreen
 import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
@@ -78,8 +79,11 @@ class AddHabitDurationChoiceScreen : Screen {
                 is AddHabitDurationChoiceUiIntent.NavigateToSummary -> {
                     hostModel.updateDaysAndDuration(
                         days = uiIntent.selectedDays,
-                        duration = uiIntent.selectedDuration
+                        duration = uiIntent.selectedDuration,
+                        startDate = uiIntent.startDate,
+                        weekStartOption = uiIntent.habitWeekStartOption
                     )
+                    navigator.push(AddHabitSummaryScreen())
                 }
 
                 is AddHabitDurationChoiceUiIntent.ShowSnackBar -> {

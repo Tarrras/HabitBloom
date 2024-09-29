@@ -4,14 +4,14 @@ CREATE TABLE UserHabitsEntity (
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,  -- Auto-incrementing ID
     habitId TEXT NOT NULL,                          -- Reference to predefined habit ID
     startDate TEXT NOT NULL,                        -- Start date of the habit (ISO 8601 format)
-    duration INTEGER NOT NULL,                      -- Duration in days (1 to 90)
+    repeats INTEGER NOT NULL,                       -- Repeats (1 to 12)
     daysOfWeek TEXT NOT NULL,                       -- Comma-separated list of days (e.g., "MONDAY,WEDNESDAY")
     timeOfDay INTEGER NOT NULL                      -- Time of day (e.g. Morning, Afternoon) origin
 );
 
 -- Insert a new user habit
 insertUserHabit:
-INSERT INTO UserHabitsEntity (habitId, startDate, duration, daysOfWeek, timeOfDay)
+INSERT INTO UserHabitsEntity (habitId, startDate, repeats, daysOfWeek, timeOfDay)
 VALUES (?, ?, ?, ?, ?);
 
 -- Select all user habits
