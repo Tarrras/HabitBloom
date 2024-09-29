@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
@@ -37,7 +38,8 @@ fun HabitListItem(
             KamelImage(
                 resource = asyncPainterResource(data = habitInfo.iconUrl),
                 modifier = Modifier.size(48.dp).clip(CircleShape),
-                contentDescription = habitInfo.name
+                contentDescription = habitInfo.name,
+                contentScale = ContentScale.FillBounds
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {

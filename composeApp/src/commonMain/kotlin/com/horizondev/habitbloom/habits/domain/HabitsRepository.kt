@@ -12,6 +12,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -27,8 +28,8 @@ class HabitsRepository(
 
     suspend fun initData(): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            getAllHabits().onSuccess {
-                remoteHabits.value = it
+            getAllHabits().onSuccess { habits ->
+                remoteHabits.update { habits }
             }.map { true }
         }
     }
@@ -49,14 +50,16 @@ class HabitsRepository(
     }
 
     fun getUserHabitsByDayFlow(day: LocalDate): Flow<List<UserHabitRecordFullInfo>> {
-        val detailedHabits = remoteHabits.value
-        return localDataSource.getUserHabitsByDateFlow(day).map { habitRecords ->
-            habitRecords.map { habitRecord ->
-                val originHabitId = localDataSource.getHabitOriginId(habitRecord.id)
+        return combine(
+            remoteHabits,
+            localDataSource.getUserHabitsByDateFlow(day)
+        ) { detailedHabits, habitRecords ->
+            habitRecords.mapNotNull { habitRecord ->
+                val originHabitId = localDataSource.getHabitOriginId(habitRecord.userHabitId)
 
                 val habitDetailedInfo = detailedHabits.find {
                     it.id == originHabitId
-                } ?: return@map null
+                } ?: return@mapNotNull null
 
                 UserHabitRecordFullInfo(
                     id = habitRecord.id,
@@ -69,7 +72,7 @@ class HabitsRepository(
                     shortInfo = habitDetailedInfo.shortInfo,
                     timeOfDay = habitDetailedInfo.timeOfDay
                 )
-            }.filterNotNull()
+            }
         }.distinctUntilChanged()
     }
 

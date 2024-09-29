@@ -6,6 +6,7 @@ import com.horizondev.habitbloom.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getTimeOfDay
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -21,11 +22,9 @@ class HomeScreenModel(
     )
 ) {
 
-    private val initDataFlow = flowOf(Unit).onStart {
-        repository.initData()
-    }.launchIn(screenModelScope)
-
-    private val selectedTimeOfDayFlow = state.map { it.selectedTimeOfDay }
+    private val selectedTimeOfDayFlow = state.map {
+        it.selectedTimeOfDay
+    }.distinctUntilChanged()
 
     private val habitsFlow = combine(
         selectedTimeOfDayFlow,
@@ -36,6 +35,8 @@ class HomeScreenModel(
             second = userHabits.count { it.isCompleted },
             third = userHabits.filter { it.timeOfDay == selectedTimeOfDay }
         )
+    }.onStart {
+        repository.initData()
     }.onEach { (userHabitsCount, completedHabitsCount, dailyHabits) ->
         mutableState.update {
             it.copy(
