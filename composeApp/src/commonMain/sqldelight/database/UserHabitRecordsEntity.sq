@@ -26,7 +26,7 @@ WHERE userHabitId = ?;
 updateUserHabitRecordCompletion:
 UPDATE UserHabitRecordsEntity
 SET isCompleted = ?
-WHERE userHabitId = ? AND date = ?;
+WHERE id = ? AND date = ?;
 
 -- Delete habit records for a specific user habit
 deleteUserHabitRecordsEntityByUserHabitId:

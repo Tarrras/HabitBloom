@@ -9,12 +9,10 @@ import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DayOfWeek
@@ -95,9 +93,9 @@ class HabitsRepository(
         }.map { true }
     }
 
-    suspend fun updateHabitCompletion(userHabitId: Long, date: LocalDate, isCompleted: Boolean) {
+    suspend fun updateHabitCompletion(habitRecordId: Long, date: LocalDate, isCompleted: Boolean) {
         localDataSource.updateHabitCompletion(
-            userHabitId = userHabitId,
+            habitRecordId = habitRecordId,
             date = date,
             isCompleted = isCompleted
         )

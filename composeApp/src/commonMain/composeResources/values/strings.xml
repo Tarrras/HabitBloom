@@ -84,4 +84,8 @@
 
     <string name="habit_added_success">Great job! Your new habit is added!</string>
     <string name="habit_added_description">Stay consistent, and your goals are within reach!</string>
+
+    <string name="competed_morning_habits">You’ve completed all your morning habits!</string>
+    <string name="competed_afternoon_habits">Well done! All afternoon habits are completed!</string>
+    <string name="competed_evening_habits">You’ve finished all evening habits! Time to relax!</string>
 </resources>

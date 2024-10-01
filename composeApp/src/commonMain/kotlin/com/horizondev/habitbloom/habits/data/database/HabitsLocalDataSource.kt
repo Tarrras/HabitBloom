@@ -1,11 +1,8 @@
 package com.horizondev.habitbloom.habits.data.database
 
 import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToList
 import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
-import com.horizondev.habitbloom.utils.getCurrentDate
-import com.horizondev.habitbloom.utils.minusDays
 import com.horizondev.habitbloom.utils.plusDays
 import com.horizondev.habitbloom.utils.startOfWeek
 import database.UserHabitRecordsEntityQueries
@@ -15,7 +12,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -26,12 +22,14 @@ class HabitsLocalDataSource(
     private val userHabitRecordsQueries: UserHabitRecordsEntityQueries
 ) {
 
-    suspend fun updateHabitCompletion(userHabitId: Long, date: LocalDate, isCompleted: Boolean) {
-        userHabitRecordsQueries.updateUserHabitRecordCompletion(
-            isCompleted = if (isCompleted) 1L else 2L,
-            date = date.toString(),
-            userHabitId = userHabitId
-        )
+    suspend fun updateHabitCompletion(habitRecordId: Long, date: LocalDate, isCompleted: Boolean) {
+        withContext(Dispatchers.IO) {
+            userHabitRecordsQueries.updateUserHabitRecordCompletion(
+                isCompleted = if (isCompleted) 1L else 2L,
+                date = date.toString(),
+                id = habitRecordId
+            )
+        }
     }
 
     suspend fun getHabitOriginId(userHabitId: Long): String {

@@ -1,5 +1,10 @@
 package com.horizondev.habitbloom.habits.presentation.home
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,9 +22,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.habits.presentation.home.components.AllHabitsCompletedMessage
 import com.horizondev.habitbloom.habits.presentation.home.components.DailyHabitProgressWidget
 import com.horizondev.habitbloom.habits.presentation.home.components.EmptyHabitsForTimeOfDayPlaceholder
 import com.horizondev.habitbloom.habits.presentation.home.components.TimeOfDaySwitcher
+import com.horizondev.habitbloom.habits.presentation.home.components.UserHabitItem
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.app_name
 import org.jetbrains.compose.resources.stringResource
@@ -98,6 +105,7 @@ private fun LazyListScope.timeOfDaySwitcher(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.habitsList(
     uiState: HomeScreenUiState,
     onHabitStatusChanged: (Long, Boolean) -> Unit
@@ -112,7 +120,31 @@ private fun LazyListScope.habitsList(
             )
         }
     } else {
+        item(key = "list_padding") {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+        item {
+            AnimatedVisibility(
+                visible = uiState.userCompletedAllHabitsForTimeOfDay,
+                modifier = Modifier.padding(bottom = 24.dp),
+                enter = slideInVertically() + fadeIn(),
+                exit = fadeOut()
+            ) {
+                AllHabitsCompletedMessage(
+                    timeOfDay = uiState.selectedTimeOfDay,
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                )
+            }
+        }
         items(uiState.userHabits, key = { it.id }) {
+            UserHabitItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateItemPlacement()
+                    .padding(horizontal = 16.dp),
+                habitInfo = it,
+                onCompletionStatusChanged = onHabitStatusChanged
+            )
             Spacer(modifier = Modifier.height(24.dp))
         }
     }

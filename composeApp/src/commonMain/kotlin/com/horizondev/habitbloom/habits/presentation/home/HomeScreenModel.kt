@@ -7,12 +7,12 @@ import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getTimeOfDay
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class HomeScreenModel(
     private val repository: HabitsRepository
@@ -42,7 +42,9 @@ class HomeScreenModel(
             it.copy(
                 userHabits = dailyHabits,
                 completedHabitsCount = completedHabitsCount,
-                habitsCount = userHabitsCount
+                habitsCount = userHabitsCount,
+                userCompletedAllHabitsForTimeOfDay = dailyHabits.isNotEmpty()
+                        && dailyHabits.all { habit -> habit.isCompleted }
             )
         }
     }.launchIn(screenModelScope)
@@ -53,7 +55,15 @@ class HomeScreenModel(
                 mutableState.update { it.copy(selectedTimeOfDay = uiEvent.timeOfDay) }
             }
 
-            is HomeScreenUiEvent.ChangeHabitCompletionStatus -> {}
+            is HomeScreenUiEvent.ChangeHabitCompletionStatus -> {
+                screenModelScope.launch {
+                    repository.updateHabitCompletion(
+                        isCompleted = uiEvent.isCompleted,
+                        habitRecordId = uiEvent.id,
+                        date = getCurrentDate()
+                    )
+                }
+            }
         }
     }
 }
