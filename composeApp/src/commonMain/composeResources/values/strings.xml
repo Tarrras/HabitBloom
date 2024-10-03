@@ -88,4 +88,9 @@
     <string name="competed_morning_habits">You’ve completed all your morning habits!</string>
     <string name="competed_afternoon_habits">Well done! All afternoon habits are completed!</string>
     <string name="competed_evening_habits">You’ve finished all evening habits! Time to relax!</string>
+
+    <plurals name="streak_days">
+        <item quantity="one">Completion streak: %1$d day!</item>
+        <item quantity="other">Completion streak: %1$d days!</item>
+    </plurals>
 </resources>

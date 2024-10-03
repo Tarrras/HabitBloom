@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.habits.presentation.components
 
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +17,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.horizondev.habitbloom.core.designComponents.BloomCircularProgressIndicator
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
+import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import io.kamel.image.KamelImage
@@ -35,11 +39,9 @@ fun HabitListItem(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            KamelImage(
-                resource = asyncPainterResource(data = habitInfo.iconUrl),
-                modifier = Modifier.size(48.dp).clip(CircleShape),
-                contentDescription = habitInfo.name,
-                contentScale = ContentScale.FillBounds
+            BloomNetworkImage(
+                iconUrl = habitInfo.iconUrl,
+                contentDescription = habitInfo.name
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {

@@ -26,6 +26,7 @@ class HabitsRepository(
 
     suspend fun initData(): Result<Boolean> {
         return withContext(Dispatchers.IO) {
+            //remoteDataSource.pushHabitsToFirestore()
             getAllHabits().onSuccess { habits ->
                 remoteHabits.update { habits }
             }.map { true }
@@ -53,7 +54,8 @@ class HabitsRepository(
             localDataSource.getUserHabitsByDateFlow(day)
         ) { detailedHabits, habitRecords ->
             habitRecords.mapNotNull { habitRecord ->
-                val originHabitId = localDataSource.getHabitOriginId(habitRecord.userHabitId)
+                val userHabitId = habitRecord.userHabitId
+                val originHabitId = localDataSource.getHabitOriginId(userHabitId)
 
                 val habitDetailedInfo = detailedHabits.find {
                     it.id == originHabitId
@@ -68,7 +70,8 @@ class HabitsRepository(
                     iconUrl = habitDetailedInfo.iconUrl,
                     name = habitDetailedInfo.name,
                     shortInfo = habitDetailedInfo.shortInfo,
-                    timeOfDay = habitDetailedInfo.timeOfDay
+                    timeOfDay = habitDetailedInfo.timeOfDay,
+                    daysStreak = localDataSource.getHabitDayStreak(userHabitId, day)
                 )
             }
         }.distinctUntilChanged()

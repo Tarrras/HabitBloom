@@ -13,5 +13,6 @@ data class UserHabitRecordFullInfo(
     val iconUrl: String,
     val name: String,
     val shortInfo: String,
-    val timeOfDay: TimeOfDay
+    val timeOfDay: TimeOfDay,
+    val daysStreak: Int
 )

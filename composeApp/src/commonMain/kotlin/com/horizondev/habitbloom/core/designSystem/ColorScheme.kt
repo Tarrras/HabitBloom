@@ -25,7 +25,7 @@ data class BloomTextColorScheme(
 
 val lightColorScheme = BloomColorScheme(
     primary = Color(0xFF4EC4B5),
-    secondary = Color(0xFFF28C82),
+    secondary = Color(0xFFF8bfb9),
     tertiary = Color(0xFFF4E4B2),
     background = Color(0xFFF5F5F5),
     surface = Color(0xFFFFFFFF),

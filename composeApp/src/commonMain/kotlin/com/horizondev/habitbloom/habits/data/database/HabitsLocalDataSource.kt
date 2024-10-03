@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.habits.data.database
 import app.cash.sqldelight.coroutines.asFlow
 import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
+import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.plusDays
 import com.horizondev.habitbloom.utils.startOfWeek
 import database.UserHabitRecordsEntityQueries
@@ -34,6 +35,36 @@ class HabitsLocalDataSource(
 
     suspend fun getHabitOriginId(userHabitId: Long): String {
         return userHabitsQueries.selectUserHabitById(userHabitId).executeAsOne().habitId
+    }
+
+    suspend fun getHabitDayStreak(
+        userHabitId: Long,
+        byDate: LocalDate,
+        includingToday: Boolean = true
+    ): Int {
+        val habitRecords = withContext(Dispatchers.IO) {
+            userHabitRecordsQueries
+                .selectUserHabitRecordsEntityByUserHabitId(userHabitId)
+                .executeAsList()
+        }
+        val mappedHabits = habitRecords
+            .asSequence()
+            .map { it.toDomainModel() }
+
+        val isCompletedToday = mappedHabits.find {
+            it.date == getCurrentDate()
+        }?.isCompleted ?: false
+
+        val completedBefore = mappedHabits
+            .filter { it.date < byDate }
+            .sortedByDescending { it.date }
+            .takeWhile { it.isCompleted }
+            .count()
+
+        return completedBefore + when {
+            includingToday -> if (isCompletedToday) 1 else 0
+            else -> 0
+        }
     }
 
     suspend fun insertUserHabit(userHabit: UserHabit) {
@@ -116,12 +147,7 @@ class HabitsLocalDataSource(
             .mapToList()
             .map { rows ->
                 rows.map { row ->
-                    UserHabitRecord(
-                        id = row.id,
-                        userHabitId = row.userHabitId,
-                        date = LocalDate.parse(row.date),
-                        isCompleted = row.isCompleted == 1L
-                    )
+                    row.toDomainModel()
                 }
             }
     }

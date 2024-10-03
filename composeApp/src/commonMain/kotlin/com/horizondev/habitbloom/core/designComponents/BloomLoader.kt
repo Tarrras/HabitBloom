@@ -16,3 +16,13 @@ fun BloomLoader(modifier: Modifier = Modifier, isLoading: Boolean) {
         )
     }
 }
+
+@Composable
+fun BloomCircularProgressIndicator(modifier: Modifier = Modifier, progress: () -> Float) {
+    CircularProgressIndicator(
+        progress = progress,
+        modifier = modifier,
+        color = BloomTheme.colors.primary,
+        strokeWidth = 2.dp
+    )
+}
