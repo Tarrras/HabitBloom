@@ -23,6 +23,6 @@ fun BloomCircularProgressIndicator(modifier: Modifier = Modifier, progress: () -
         progress = progress,
         modifier = modifier,
         color = BloomTheme.colors.primary,
-        strokeWidth = 2.dp
+        strokeWidth = 4.dp
     )
 }

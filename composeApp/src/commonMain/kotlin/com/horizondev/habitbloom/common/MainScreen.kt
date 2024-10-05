@@ -80,6 +80,8 @@ class MainScreen : Screen {
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             TabNavigationItem(HabitBloomTab.HomeTab)
+                            TabNavigationItem(HabitBloomTab.StatisticTab)
+                            TabNavigationItem(HabitBloomTab.CalendarTab)
                             TabNavigationItem(HabitBloomTab.ProfileTab)
                         }
                     }

@@ -3,9 +3,9 @@ package com.horizondev.habitbloom.habits.data.database
 import app.cash.sqldelight.coroutines.asFlow
 import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
+import com.horizondev.habitbloom.utils.calculateStartOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.plusDays
-import com.horizondev.habitbloom.utils.startOfWeek
 import database.UserHabitRecordsEntityQueries
 import database.UserHabitsEntityQueries
 import kotlinx.coroutines.Dispatchers
@@ -108,7 +108,7 @@ class HabitsLocalDataSource(
     ): List<LocalDate> {
         val habitDates = mutableListOf<LocalDate>()
 
-        val startOfFirstWeek = startDate.startOfWeek()
+        val startOfFirstWeek = startDate.calculateStartOfWeek()
 
         for (weekOffset in 0 until repeats) {
             val startOfWeek = startOfFirstWeek.plus(
@@ -138,6 +138,18 @@ class HabitsLocalDataSource(
                     isCompleted = row.isCompleted == 1L
                 )
             }
+    }
+
+    suspend fun getAllUserHabitRecords(untilDate: LocalDate): List<UserHabitRecord> {
+        return withContext(Dispatchers.IO) {
+            userHabitRecordsQueries
+                .selectAllUserHabitRecords()
+                .executeAsList()
+                .map { row ->
+                    row.toDomainModel()
+                }
+                .filter { it.date <= untilDate }
+        }
     }
 
     fun getUserHabitsByDateFlow(date: LocalDate): Flow<List<UserHabitRecord>> {

@@ -17,6 +17,10 @@ selectUserHabitRecordsEntityByDate:
 SELECT * FROM UserHabitRecordsEntity
 WHERE date = ?;
 
+-- Select all habit records
+selectAllUserHabitRecords:
+SELECT * FROM UserHabitRecordsEntity;
+
 -- Select habit records for a specific user habit
 selectUserHabitRecordsEntityByUserHabitId:
 SELECT * FROM UserHabitRecordsEntity

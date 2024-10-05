@@ -42,7 +42,7 @@ fun getTimeOfDay(): TimeOfDay {
     }
 }
 
-fun LocalDate.startOfWeek(): LocalDate {
+fun LocalDate.calculateStartOfWeek(): LocalDate {
     val daysSinceMonday = this.dayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
     return this.minusDays(daysSinceMonday.toLong())
 }

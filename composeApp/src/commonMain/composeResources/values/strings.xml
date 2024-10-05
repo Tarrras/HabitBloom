@@ -80,6 +80,10 @@
     <string name="saturday_short">Sa</string>
     <string name="sunday_short">Su</string>
 
+    <string name="week">Week</string>
+    <string name="month">Month</string>
+    <string name="year">Year</string>
+
     <string name="the_habit_cannot_start_on_past_days">The habit cannot start on past days. Choose another day or switch to 'Next Week.'</string>
 
     <string name="habit_added_success">Great job! Your new habit is added!</string>
@@ -93,4 +97,10 @@
         <item quantity="one">Completion streak: %1$d day!</item>
         <item quantity="other">Completion streak: %1$d days!</item>
     </plurals>
+
+    <string name="no_completed_habits_title">You haven’t completed any habits yet!</string>
+    <string name="habit_statistic">Habit Statistic</string>
+    <string name="completed_habit_statistic">Completed Habit Statistic</string>
+    <string name="completed_n_times">Completed: %1$d</string>
+
 </resources>

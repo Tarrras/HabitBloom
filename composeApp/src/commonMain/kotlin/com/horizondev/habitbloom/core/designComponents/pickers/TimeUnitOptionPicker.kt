@@ -10,16 +10,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.next_week
-import habitbloom.composeapp.generated.resources.this_week
+import habitbloom.composeapp.generated.resources.month
+import habitbloom.composeapp.generated.resources.week
+import habitbloom.composeapp.generated.resources.year
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun SingleWeekStartOptionPicker(
+fun TimeUnitOptionPicker(
     modifier: Modifier = Modifier,
-    selectedOption: HabitWeekStartOption,
-    options: List<HabitWeekStartOption>,
-    onOptionSelected: (HabitWeekStartOption) -> Unit,
+    selectedOption: TimeUnit,
+    options: List<TimeUnit> = TimeUnit.entries,
+    onOptionSelected: (TimeUnit) -> Unit,
     shapeSize: Dp = 36.dp,
     backgroundColor: Color = BloomTheme.colors.background,
 ) {
@@ -41,15 +42,17 @@ fun SingleWeekStartOptionPicker(
     }
 }
 
-enum class HabitWeekStartOption {
-    THIS_WEEK,
-    NEXT_WEEK
+enum class TimeUnit {
+    WEEK,
+    MONTH,
+    YEAR
 }
 
 @Composable
-fun HabitWeekStartOption.getTitle(): String {
+fun TimeUnit.getTitle(): String {
     return when (this) {
-        HabitWeekStartOption.THIS_WEEK -> stringResource(Res.string.this_week)
-        HabitWeekStartOption.NEXT_WEEK -> stringResource(Res.string.next_week)
+        TimeUnit.WEEK -> stringResource(resource = Res.string.week)
+        TimeUnit.MONTH -> stringResource(resource = Res.string.month)
+        TimeUnit.YEAR -> stringResource(resource = Res.string.year)
     }
 }

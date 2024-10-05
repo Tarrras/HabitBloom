@@ -6,13 +6,16 @@ import com.horizondev.habitbloom.habits.data.remote.toDomainModel
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.domain.models.UserHabit
+import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.utils.getCurrentDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DayOfWeek
@@ -53,28 +56,12 @@ class HabitsRepository(
             remoteHabits,
             localDataSource.getUserHabitsByDateFlow(day)
         ) { detailedHabits, habitRecords ->
-            habitRecords.mapNotNull { habitRecord ->
-                val userHabitId = habitRecord.userHabitId
-                val originHabitId = localDataSource.getHabitOriginId(userHabitId)
-
-                val habitDetailedInfo = detailedHabits.find {
-                    it.id == originHabitId
-                } ?: return@mapNotNull null
-
-                UserHabitRecordFullInfo(
-                    id = habitRecord.id,
-                    userHabitId = habitRecord.userHabitId,
-                    date = habitRecord.date,
-                    isCompleted = habitRecord.isCompleted,
-                    description = habitDetailedInfo.description,
-                    iconUrl = habitDetailedInfo.iconUrl,
-                    name = habitDetailedInfo.name,
-                    shortInfo = habitDetailedInfo.shortInfo,
-                    timeOfDay = habitDetailedInfo.timeOfDay,
-                    daysStreak = localDataSource.getHabitDayStreak(userHabitId, day)
-                )
-            }
-        }.distinctUntilChanged()
+            mergeLocalHabitRecordsWithRemote(
+                habitRecords = habitRecords,
+                detailedHabits = detailedHabits,
+                untilDate = day
+            )
+        }.flowOn(Dispatchers.IO).distinctUntilChanged()
     }
 
     suspend fun addHabit(
@@ -102,5 +89,49 @@ class HabitsRepository(
             date = date,
             isCompleted = isCompleted
         )
+    }
+
+    suspend fun getListOfAllUserHabitRecords(): Result<List<UserHabitRecordFullInfo>> {
+        return runCatching {
+            val detailedHabits = getAllHabits().getOrThrow()
+            val allHabitRecords = localDataSource.getAllUserHabitRecords(getCurrentDate())
+
+            mergeLocalHabitRecordsWithRemote(
+                detailedHabits = detailedHabits,
+                habitRecords = allHabitRecords,
+                untilDate = getCurrentDate()
+            )
+        }
+    }
+
+    private suspend fun mergeLocalHabitRecordsWithRemote(
+        detailedHabits: List<HabitInfo>,
+        habitRecords: List<UserHabitRecord>,
+        untilDate: LocalDate
+    ): List<UserHabitRecordFullInfo> {
+        return habitRecords.mapNotNull { habitRecord ->
+            val userHabitId = habitRecord.userHabitId
+            val originHabitId = localDataSource.getHabitOriginId(userHabitId)
+
+            val habitDetailedInfo = detailedHabits.find {
+                it.id == originHabitId
+            } ?: return@mapNotNull null
+
+            UserHabitRecordFullInfo(
+                id = habitRecord.id,
+                userHabitId = habitRecord.userHabitId,
+                date = habitRecord.date,
+                isCompleted = habitRecord.isCompleted,
+                description = habitDetailedInfo.description,
+                iconUrl = habitDetailedInfo.iconUrl,
+                name = habitDetailedInfo.name,
+                shortInfo = habitDetailedInfo.shortInfo,
+                timeOfDay = habitDetailedInfo.timeOfDay,
+                daysStreak = localDataSource.getHabitDayStreak(
+                    userHabitId = userHabitId,
+                    byDate = untilDate
+                )
+            )
+        }
     }
 }
