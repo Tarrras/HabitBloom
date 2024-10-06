@@ -140,16 +140,16 @@ class HabitsLocalDataSource(
             }
     }
 
-    suspend fun getAllUserHabitRecords(untilDate: LocalDate): List<UserHabitRecord> {
-        return withContext(Dispatchers.IO) {
-            userHabitRecordsQueries
-                .selectAllUserHabitRecords()
-                .executeAsList()
-                .map { row ->
+    fun getAllUserHabitRecords(untilDate: LocalDate): Flow<List<UserHabitRecord>> {
+        return userHabitRecordsQueries
+            .selectAllUserHabitRecords()
+            .asFlow()
+            .mapToList()
+            .map { rows ->
+                rows.map { row ->
                     row.toDomainModel()
-                }
-                .filter { it.date <= untilDate }
-        }
+                }.filter { it.date <= untilDate }
+            }
     }
 
     fun getUserHabitsByDateFlow(date: LocalDate): Flow<List<UserHabitRecord>> {

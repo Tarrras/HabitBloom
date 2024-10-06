@@ -19,7 +19,7 @@ fun BloomSurface(
     shape: Shape = RoundedCornerShape(16.dp),
     contentColor: Color = contentColorFor(color),
     tonalElevation: Dp = 0.dp,
-    shadowElevation: Dp = 0.dp,
+    shadowElevation: Dp = 6.dp,
     border: BorderStroke? = null,
     content: @Composable () -> Unit
 ) {

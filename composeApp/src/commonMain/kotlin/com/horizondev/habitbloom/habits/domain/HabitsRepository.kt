@@ -9,12 +9,14 @@ import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.utils.getCurrentDate
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
@@ -25,6 +27,7 @@ class HabitsRepository(
     private val remoteDataSource: HabitsRemoteDataSource,
     private val localDataSource: HabitsLocalDataSource
 ) {
+    private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
 
     suspend fun initData(): Result<Boolean> {
@@ -38,6 +41,7 @@ class HabitsRepository(
 
     private suspend fun getAllHabits(): Result<List<HabitInfo>> {
         return withContext(Dispatchers.IO) {
+            Napier.d("Fetching network habits...", tag = TAG)
             remoteDataSource.getHabits()
                 .mapCatching { data -> data.map { habit -> habit.toDomainModel() } }
         }
@@ -91,14 +95,15 @@ class HabitsRepository(
         )
     }
 
-    suspend fun getListOfAllUserHabitRecords(): Result<List<UserHabitRecordFullInfo>> {
-        return runCatching {
-            val detailedHabits = getAllHabits().getOrThrow()
-            val allHabitRecords = localDataSource.getAllUserHabitRecords(getCurrentDate())
-
+    fun getListOfAllUserHabitRecordsFlow(): Flow<List<UserHabitRecordFullInfo>> {
+        return combine(
+            flow { emit(getAllHabits()) },
+            localDataSource.getAllUserHabitRecords(getCurrentDate())
+        ) { allHabitsResult, localHabitRecords ->
+            val allHabits = allHabitsResult.getOrThrow()
             mergeLocalHabitRecordsWithRemote(
-                detailedHabits = detailedHabits,
-                habitRecords = allHabitRecords,
+                detailedHabits = allHabits,
+                habitRecords = localHabitRecords,
                 untilDate = getCurrentDate()
             )
         }
