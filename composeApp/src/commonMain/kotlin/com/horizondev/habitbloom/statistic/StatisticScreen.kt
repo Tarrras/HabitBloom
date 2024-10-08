@@ -46,6 +46,7 @@ import habitbloom.composeapp.generated.resources.no_completed_habits_in_this_uni
 import io.github.koalaplot.core.line.LinePlot
 import io.github.koalaplot.core.pie.DefaultSlice
 import io.github.koalaplot.core.pie.PieChart
+import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
@@ -168,6 +169,7 @@ fun GeneralCompletedHabitsChartCard(
                         DefaultSlice(color = color)
                     },
                     maxPieDiameter = 250.dp,
+                    minPieDiameter = 250.dp,
                     labelConnector = {}
                 )
             } else {
@@ -241,27 +243,34 @@ fun WeeklyCompletedHabitsChartCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
 
-            XYGraph(
-                modifier = Modifier.fillMaxWidth().height(300.dp),
-                xAxisModel = CategoryAxisModel(
-                    categories = DayOfWeek.entries.map { it.getShortTitle() }
-                ),
-                yAxisModel = rememberIntLinearAxisModel(
-                    range = 0..yAxisMaxValue,
-                    allowZooming = false,
-                    allowPanning = false
-                ),
-                panZoomEnabled = false
-            ) {
-                LinePlot(
-                    data = pieChartValues.map { (key, value) ->
-                        Point(key.getShortTitle(), value)
-                    },
-                    lineStyle = LineStyle(
-                        SolidColor(BloomTheme.colors.primary),
-                        strokeWidth = 2.dp
-                    )
+            KoalaPlotTheme(
+                axis = KoalaPlotTheme.axis.copy(
+                    color = Color.Black,
+                    minorGridlineStyle = null
                 )
+            ) {
+                XYGraph(
+                    modifier = Modifier.fillMaxWidth().height(300.dp),
+                    xAxisModel = CategoryAxisModel(
+                        categories = DayOfWeek.entries.map { it.getShortTitle() }
+                    ),
+                    yAxisModel = rememberIntLinearAxisModel(
+                        range = 0..yAxisMaxValue,
+                        allowZooming = false,
+                        allowPanning = false
+                    ),
+                    panZoomEnabled = false
+                ) {
+                    LinePlot(
+                        data = pieChartValues.map { (key, value) ->
+                            Point(key.getShortTitle(), value)
+                        },
+                        lineStyle = LineStyle(
+                            SolidColor(BloomTheme.colors.primary),
+                            strokeWidth = 2.dp
+                        )
+                    )
+                }
             }
         }
     }

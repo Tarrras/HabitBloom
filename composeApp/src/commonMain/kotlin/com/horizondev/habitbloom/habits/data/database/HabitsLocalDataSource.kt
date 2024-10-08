@@ -17,6 +17,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
+import kotlin.math.max
 
 class HabitsLocalDataSource(
     private val userHabitsQueries: UserHabitsEntityQueries,
@@ -68,38 +69,72 @@ class HabitsLocalDataSource(
     }
 
     suspend fun insertUserHabit(userHabit: UserHabit) {
-        userHabitsQueries.insertUserHabit(
-            habitId = userHabit.habitId,
-            startDate = userHabit.startDate.toString(),
-            repeats = userHabit.repeats.toLong(),
-            daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
-            timeOfDay = userHabit.timeOfDay.ordinal.toLong()
-        )
+        val existingHabit = userHabitsQueries.selectUserHabitByRemoteId(
+            userHabit.habitId
+        ).executeAsOneOrNull()
 
-        // Get the auto-generated ID of the inserted UserHabit
-        val userHabitId = userHabitsQueries.lastInsertRowId().executeAsOne()
+        val localHabitId = if (existingHabit != null) {
+            val existingStartDate = LocalDate.parse(existingHabit.startDate)
+            val mergedStartDay = when {
+                existingStartDate < userHabit.startDate -> existingStartDate
+                else -> userHabit.startDate
+            }
+            val repeats = max(existingHabit.repeats, userHabit.repeats.toLong())
+            val existingDays = existingHabit.daysOfWeek.split(",").map {
+                DayOfWeek.valueOf(it)
+            }
+            val mergedDays = (existingDays + userHabit.daysOfWeek)
+                .toSet()
+                .sortedBy { it.ordinal }
+                .joinToString(",") { it.name }
+
+            userHabitsQueries.updateUserHabitById(
+                startDate = mergedStartDay.toString(),
+                repeats = repeats,
+                daysOfWeek = mergedDays,
+                id = existingHabit.id
+            )
+            existingHabit.id
+        } else {
+            userHabitsQueries.insertUserHabit(
+                habitId = userHabit.habitId,
+                startDate = userHabit.startDate.toString(),
+                repeats = userHabit.repeats.toLong(),
+                daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
+                timeOfDay = userHabit.timeOfDay.ordinal.toLong()
+            )
+            userHabitsQueries.lastInsertRowId().executeAsOne()
+        }
 
         // Generate habit records
-        generateHabitRecords(userHabitId, userHabit)
+        generateHabitRecords(localHabitId, userHabit)
     }
 
-    private suspend fun generateHabitRecords(userHabitId: Long, userHabit: UserHabit) {
-        val habitDates = generateHabitDates(
-            startDate = userHabit.startDate,
-            habitDays = userHabit.daysOfWeek.sortedBy { it.ordinal },
-            repeats = userHabit.repeats
-        )
-
+    private suspend fun generateHabitRecords(userHabitId: Long, userHabit: UserHabit) =
         withContext(Dispatchers.IO) {
+            val existingHabitRecords =
+                userHabitRecordsQueries.selectUserHabitRecordsEntityByUserHabitId(
+                    userHabitId = userHabitId
+                ).executeAsList()
+
+            val habitDates = generateHabitDates(
+                startDate = userHabit.startDate,
+                habitDays = userHabit.daysOfWeek.sortedBy { it.ordinal },
+                repeats = userHabit.repeats
+            )
+
             habitDates.forEach { date ->
-                userHabitRecordsQueries.insertOrReplaceUserHabitRecord(
-                    userHabitId = userHabitId,
-                    date = date.toString(),
-                    isCompleted = 0  // Not completed by default
-                )
+                val isRecordExistAlready = existingHabitRecords.any { it.date == date.toString() }
+
+                if (isRecordExistAlready.not()) {
+                    userHabitRecordsQueries.insertOrReplaceUserHabitRecord(
+                        userHabitId = userHabitId,
+                        date = date.toString(),
+                        isCompleted = 0  // Not completed by default
+                    )
+                }
             }
         }
-    }
 
     private fun generateHabitDates(
         startDate: LocalDate,

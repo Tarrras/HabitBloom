@@ -23,6 +23,19 @@ selectUserHabitById:
 SELECT * FROM UserHabitsEntity
 WHERE id = ?;
 
+-- Select a user habit by remote ID
+selectUserHabitByRemoteId:
+SELECT * FROM UserHabitsEntity
+WHERE habitId = ?;
+
+-- Update a user habit by ID
+updateUserHabitById:
+UPDATE UserHabitsEntity SET
+    startDate = :startDate,
+    repeats = :repeats,
+    daysOfWeek = :daysOfWeek
+WHERE id = :id;
+
 -- Delete a user habit by ID
 deleteUserHabitById:
 DELETE FROM UserHabitsEntity
