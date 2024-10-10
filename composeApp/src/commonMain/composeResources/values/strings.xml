@@ -105,4 +105,5 @@
     <string name="completed_weekly_habits_statistic">Completed Weekly Habit Statistic</string>
     <string name="completed_n_times">Completed: %1$d</string>
 
+    <string name="habit_details">Habit details</string>
 </resources>

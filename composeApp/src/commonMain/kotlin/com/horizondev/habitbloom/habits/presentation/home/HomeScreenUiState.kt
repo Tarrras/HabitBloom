@@ -13,8 +13,13 @@ data class HomeScreenUiState(
 
 sealed interface HomeScreenUiEvent {
     data class SelectTimeOfDay(val timeOfDay: TimeOfDay) : HomeScreenUiEvent
+    data class OpenHabitDetails(val userHabitId: Long) : HomeScreenUiEvent
     data class ChangeHabitCompletionStatus(
         val id: Long,
         val isCompleted: Boolean
     ) : HomeScreenUiEvent
+}
+
+sealed interface HomeScreenUiIntent {
+    data class OpenHabitDetails(val userHabitId: Long) : HomeScreenUiIntent
 }

@@ -6,6 +6,7 @@ import com.horizondev.habitbloom.habits.data.remote.toDomainModel
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.domain.models.UserHabit
+import com.horizondev.habitbloom.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.utils.getCurrentDate
@@ -107,6 +108,40 @@ class HabitsRepository(
                 untilDate = getCurrentDate()
             )
         }
+    }
+
+    fun getUserHabitWithAllRecordsFlow(
+        userHabitId: Long
+    ): Flow<UserHabitFullInfo?> {
+        return combine(
+            flow { emit(getAllHabits()) },
+            localDataSource.getAllUserHabitRecordsForHabitId(userHabitId)
+        ) { allHabitsResult, localHabitRecords ->
+            val allHabits = allHabitsResult.getOrNull() ?: emptyList()
+            val userHabitInfo = localDataSource.getUserHabitInfo(userHabitId)
+            val originId = localDataSource.getHabitOriginId(userHabitId)
+
+            val habitDetailedInfo = allHabits.find {
+                it.id == originId
+            } ?: return@combine null
+
+            UserHabitFullInfo(
+                userHabitId = userHabitId,
+                description = habitDetailedInfo.description,
+                iconUrl = habitDetailedInfo.iconUrl,
+                name = habitDetailedInfo.name,
+                shortInfo = habitDetailedInfo.shortInfo,
+                timeOfDay = habitDetailedInfo.timeOfDay,
+                daysStreak = localDataSource.getHabitDayStreak(
+                    userHabitId = userHabitId,
+                    byDate = getCurrentDate()
+                ),
+                records = localHabitRecords,
+                startDate = userHabitInfo.startDate,
+                days = userHabitInfo.daysOfWeek,
+                repeats = userHabitInfo.repeats
+            )
+        }.flowOn(Dispatchers.IO)
     }
 
     private suspend fun mergeLocalHabitRecordsWithRemote(

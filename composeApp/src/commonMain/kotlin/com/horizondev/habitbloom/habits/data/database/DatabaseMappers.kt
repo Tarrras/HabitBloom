@@ -1,7 +1,11 @@
 package com.horizondev.habitbloom.habits.data.database
 
+import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import database.UserHabitRecordsEntity
+import database.UserHabitsEntity
+import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 
 fun UserHabitRecordsEntity.toDomainModel() = UserHabitRecord(
@@ -9,4 +13,13 @@ fun UserHabitRecordsEntity.toDomainModel() = UserHabitRecord(
     userHabitId = userHabitId,
     date = LocalDate.parse(date),
     isCompleted = isCompleted == 1L
+)
+
+fun UserHabitsEntity.toDomainModel() = UserHabit(
+    id = id,
+    habitId = habitId,
+    startDate = LocalDate.parse(startDate),
+    repeats = repeats.toInt(),
+    daysOfWeek = daysOfWeek.split(",").map { DayOfWeek.valueOf(it) },
+    timeOfDay = TimeOfDay.entries[timeOfDay.toInt()],
 )

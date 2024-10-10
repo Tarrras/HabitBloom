@@ -20,13 +20,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.habits.presentation.habitDetails.HabitDetailsScreen
 import com.horizondev.habitbloom.habits.presentation.home.components.AllHabitsCompletedMessage
 import com.horizondev.habitbloom.habits.presentation.home.components.DailyHabitProgressWidget
 import com.horizondev.habitbloom.habits.presentation.home.components.EmptyHabitsForTimeOfDayPlaceholder
 import com.horizondev.habitbloom.habits.presentation.home.components.TimeOfDaySwitcher
 import com.horizondev.habitbloom.habits.presentation.home.components.UserHabitItem
+import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.app_name
 import org.jetbrains.compose.resources.stringResource
@@ -34,6 +38,15 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier, screeModel: HomeScreenModel) {
     val uiState by screeModel.state.collectAsState()
+    val navigator = LocalNavigator.currentOrThrow.parent
+
+    screeModel.uiIntent.collectAsEffect { uiIntent ->
+        when (uiIntent) {
+            is HomeScreenUiIntent.OpenHabitDetails -> {
+                navigator?.push(HabitDetailsScreen(uiIntent.userHabitId))
+            }
+        }
+    }
 
     HomeScreenContent(
         uiState = uiState,
@@ -59,6 +72,9 @@ private fun HomeScreenContent(
             uiState = uiState,
             onHabitStatusChanged = { id, isCompleted ->
                 handleUiEvent(HomeScreenUiEvent.ChangeHabitCompletionStatus(id, isCompleted))
+            },
+            onHabitClicked = {
+                handleUiEvent(HomeScreenUiEvent.OpenHabitDetails(it))
             }
         )
     }
@@ -108,7 +124,8 @@ private fun LazyListScope.timeOfDaySwitcher(
 @OptIn(ExperimentalFoundationApi::class)
 private fun LazyListScope.habitsList(
     uiState: HomeScreenUiState,
-    onHabitStatusChanged: (Long, Boolean) -> Unit
+    onHabitStatusChanged: (Long, Boolean) -> Unit,
+    onHabitClicked: (Long) -> Unit
 ) {
     if (uiState.userHabits.isEmpty()) {
         item(key = "no_habits_placeholder") {
@@ -143,7 +160,8 @@ private fun LazyListScope.habitsList(
                     .animateItemPlacement()
                     .padding(horizontal = 16.dp),
                 habitInfo = it,
-                onCompletionStatusChanged = onHabitStatusChanged
+                onCompletionStatusChanged = onHabitStatusChanged,
+                onClick = { onHabitClicked(it.userHabitId) }
             )
             Spacer(modifier = Modifier.height(24.dp))
         }

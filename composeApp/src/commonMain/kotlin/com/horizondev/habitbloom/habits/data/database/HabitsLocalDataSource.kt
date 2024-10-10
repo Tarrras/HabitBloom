@@ -38,6 +38,12 @@ class HabitsLocalDataSource(
         return userHabitsQueries.selectUserHabitById(userHabitId).executeAsOne().habitId
     }
 
+    suspend fun getUserHabitInfo(userHabitId: Long): UserHabit {
+        return withContext(Dispatchers.IO) {
+            userHabitsQueries.selectUserHabitById(userHabitId).executeAsOne().toDomainModel()
+        }
+    }
+
     suspend fun getHabitDayStreak(
         userHabitId: Long,
         byDate: LocalDate,
@@ -184,6 +190,18 @@ class HabitsLocalDataSource(
                 rows.map { row ->
                     row.toDomainModel()
                 }.filter { it.date <= untilDate }
+            }
+    }
+
+    fun getAllUserHabitRecordsForHabitId(userHabitId: Long): Flow<List<UserHabitRecord>> {
+        return userHabitRecordsQueries
+            .selectUserHabitRecordsEntityByUserHabitId(userHabitId)
+            .asFlow()
+            .mapToList()
+            .map { rows ->
+                rows.map { row ->
+                    row.toDomainModel()
+                }
             }
     }
 

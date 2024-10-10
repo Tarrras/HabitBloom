@@ -5,6 +5,8 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.horizondev.habitbloom.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getTimeOfDay
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
@@ -21,6 +23,9 @@ class HomeScreenModel(
         selectedTimeOfDay = getTimeOfDay()
     )
 ) {
+
+    private val _uiIntent = MutableSharedFlow<HomeScreenUiIntent>()
+    val uiIntent = _uiIntent.asSharedFlow()
 
     private val selectedTimeOfDayFlow = state.map {
         it.selectedTimeOfDay
@@ -62,6 +67,12 @@ class HomeScreenModel(
                         habitRecordId = uiEvent.id,
                         date = getCurrentDate()
                     )
+                }
+            }
+
+            is HomeScreenUiEvent.OpenHabitDetails -> {
+                screenModelScope.launch {
+                    _uiIntent.emit(HomeScreenUiIntent.OpenHabitDetails(uiEvent.userHabitId))
                 }
             }
         }
