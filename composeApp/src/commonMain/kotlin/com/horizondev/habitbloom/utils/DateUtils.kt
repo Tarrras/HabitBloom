@@ -1,11 +1,26 @@
 package com.horizondev.habitbloom.utils
 
+import androidx.compose.runtime.Composable
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.month_april
+import habitbloom.composeapp.generated.resources.month_august
+import habitbloom.composeapp.generated.resources.month_december
+import habitbloom.composeapp.generated.resources.month_february
+import habitbloom.composeapp.generated.resources.month_january
+import habitbloom.composeapp.generated.resources.month_july
+import habitbloom.composeapp.generated.resources.month_june
+import habitbloom.composeapp.generated.resources.month_march
+import habitbloom.composeapp.generated.resources.month_may
+import habitbloom.composeapp.generated.resources.month_november
+import habitbloom.composeapp.generated.resources.month_october
+import habitbloom.composeapp.generated.resources.month_september
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.MonthNames
@@ -14,6 +29,7 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import org.jetbrains.compose.resources.stringResource
 
 private val customFormat = LocalDate.Format {
     monthName(MonthNames.ENGLISH_ABBREVIATED); char(' '); dayOfMonth(); chars(", "); year()
@@ -107,4 +123,21 @@ fun LocalDate.minusDays(days: Long): LocalDate {
 
 fun LocalDate.plusDays(days: Long): LocalDate {
     return this.plus(days, DateTimeUnit.DAY)
+}
+
+@Composable
+fun Month.getTitle() = when (this) {
+    Month.JANUARY -> stringResource(Res.string.month_january)
+    Month.FEBRUARY -> stringResource(Res.string.month_february)
+    Month.MARCH -> stringResource(Res.string.month_march)
+    Month.APRIL -> stringResource(Res.string.month_april)
+    Month.MAY -> stringResource(Res.string.month_may)
+    Month.JUNE -> stringResource(Res.string.month_june)
+    Month.JULY -> stringResource(Res.string.month_july)
+    Month.AUGUST -> stringResource(Res.string.month_august)
+    Month.SEPTEMBER -> stringResource(Res.string.month_september)
+    Month.OCTOBER -> stringResource(Res.string.month_october)
+    Month.NOVEMBER -> stringResource(Res.string.month_november)
+    Month.DECEMBER -> stringResource(Res.string.month_december)
+    else -> stringResource(Res.string.month_january)
 }

@@ -20,6 +20,19 @@
     <string name="no_afternoon_habits">No afternoon Habits Yet</string>
     <string name="no_evening_habits">No evening Habits Yet</string>
 
+    <string name="month_january">January</string>
+    <string name="month_february">February</string>
+    <string name="month_march">March</string>
+    <string name="month_april">April</string>
+    <string name="month_may">May</string>
+    <string name="month_june">June</string>
+    <string name="month_july">July</string>
+    <string name="month_august">August</string>
+    <string name="month_september">September</string>
+    <string name="month_october">October</string>
+    <string name="month_november">November</string>
+    <string name="month_december">December</string>
+
     <string name="add_new_habit">Add New Habit</string>
     <string name="choose_category">Choose category</string>
     <string name="choose_habit">Choose habit</string>
@@ -106,4 +119,9 @@
     <string name="completed_n_times">Completed: %1$d</string>
 
     <string name="habit_details">Habit details</string>
+    <string name="habit_schedule">Habit schedule</string>
+
+    <string name="habit_day_state_completed">Completed</string>
+    <string name="habit_day_state_missed">Missed</string>
+    <string name="habit_day_state_future">To be completed</string>
 </resources>
