@@ -45,6 +45,7 @@
     <string name="choose_habit_days_and_duration">Choose days and duration</string>
     <string name="search_habit">Search habit</string>
     <string name="select_days_for_habit">Select days for habit</string>
+    <string name="repeats">Repeats</string>
     <string name="select_repeats">Select repeats</string>
     <string name="start_date">Start date: %1$d</string>
 
@@ -71,6 +72,7 @@
     <string name="back">Back</string>
     <string name="complete">Complete</string>
     <string name="finish">Finish</string>
+    <string name="edit">Edit</string>
 
     <string name="quick_action">Quick actions</string>
     <string name="every_day">Every day</string>
@@ -120,6 +122,9 @@
 
     <string name="habit_details">Habit details</string>
     <string name="habit_schedule">Habit schedule</string>
+    <string name="habit_duration">Habit duration</string>
+    <string name="habit_repeats">Habit repeats</string>
+    <string name="habit_active_days">Habit active days</string>
 
     <string name="habit_day_state_completed">Completed</string>
     <string name="habit_day_state_missed">Missed</string>

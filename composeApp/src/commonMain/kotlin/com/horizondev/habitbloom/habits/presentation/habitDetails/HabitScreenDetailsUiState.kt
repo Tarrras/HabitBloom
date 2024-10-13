@@ -4,7 +4,7 @@ import com.horizondev.habitbloom.habits.domain.models.UserHabitFullInfo
 
 data class HabitScreenDetailsUiState(
     val habitInfo: UserHabitFullInfo? = null,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = true
 )
 
 sealed interface HabitScreenDetailsUiEvent {

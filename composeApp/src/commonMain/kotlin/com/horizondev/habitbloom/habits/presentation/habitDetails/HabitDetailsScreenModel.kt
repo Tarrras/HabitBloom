@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -22,12 +21,15 @@ class HabitDetailsScreenModel(
 
     private val habitDetailsFlow = repository.getUserHabitWithAllRecordsFlow(
         userHabitId = userHabitId
-    ).onStart {
-        mutableState.update { it.copy(isLoading = true) }
-    }.catch {
+    ).catch {
         mutableState.update { it.copy(isLoading = false) }
     }.onEach { userHabitFullInfo ->
-        mutableState.update { it.copy(habitInfo = userHabitFullInfo) }
+        mutableState.update {
+            it.copy(
+                habitInfo = userHabitFullInfo,
+                isLoading = false
+            )
+        }
     }.launchIn(screenModelScope)
 
     fun handleUiEvent(event: HabitScreenDetailsUiEvent) {
