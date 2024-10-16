@@ -19,7 +19,6 @@ import habitbloom.composeapp.generated.resources.monday_short
 import habitbloom.composeapp.generated.resources.morning
 import habitbloom.composeapp.generated.resources.saturday_short
 import habitbloom.composeapp.generated.resources.some_percentage_task_done
-import habitbloom.composeapp.generated.resources.some_tasks_completed
 import habitbloom.composeapp.generated.resources.sunday_short
 import habitbloom.composeapp.generated.resources.thursday_short
 import habitbloom.composeapp.generated.resources.tuesday_short
@@ -28,12 +27,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.stringResource
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -104,9 +99,44 @@ fun taskCompletionPercentage(habitsCount: Int, completedHabits: Int): Float {
     }
 }
 
+fun calculateCompletedRepeats(
+    dayOfCreation: LocalDate,
+    basicRepeats: Int,
+    habitDays: List<DayOfWeek>
+): Int {
+    val today = getCurrentDate()
+    val dayOfCreationInWeek = dayOfCreation.dayOfWeek
+    val startOfWeekOfCreationDate = dayOfCreation.minusDays(dayOfCreationInWeek.ordinal.toLong())
+    val firstDatesOfHabit = habitDays.sortedBy {
+        it.ordinal
+    }.map { startOfWeekOfCreationDate.plusDays(it.ordinal.toLong()) }
+
+    var completedRepeats = 0
+    var repeatDates = firstDatesOfHabit
+
+    while (true) {
+        val startDateOfRepeat = repeatDates.first()
+        val endDateOfRepeat = repeatDates.last()
+
+        when {
+            completedRepeats >= basicRepeats -> break
+            today in startDateOfRepeat..endDateOfRepeat -> {
+                break
+            }
+
+            else -> {
+                completedRepeats += 1
+                repeatDates = repeatDates.map { it.plusDays(7) } //move to the next week
+            }
+        }
+    }
+
+    return completedRepeats
+}
+
 @Composable
 fun TimeOfDay.getTitle(): String {
-    return when(this) {
+    return when (this) {
         TimeOfDay.Morning -> stringResource(Res.string.morning)
         TimeOfDay.Afternoon -> stringResource(Res.string.afternoon)
         TimeOfDay.Evening -> stringResource(Res.string.evening)
@@ -115,7 +145,7 @@ fun TimeOfDay.getTitle(): String {
 
 @Composable
 fun DayOfWeek.getShortTitle(): String {
-    return when(this) {
+    return when (this) {
         DayOfWeek.MONDAY -> stringResource(Res.string.monday_short)
         DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday_short)
         DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday_short)
@@ -126,3 +156,7 @@ fun DayOfWeek.getShortTitle(): String {
         else -> stringResource(Res.string.sunday_short)
     }
 }
+
+fun List<DayOfWeek>.mapToString() = this.toSet()
+    .sortedBy { it.ordinal }
+    .joinToString(",") { it.name }

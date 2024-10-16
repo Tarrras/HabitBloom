@@ -16,7 +16,8 @@ fun localDataModule() = module {
         val database = get<HabitBloomDatabase>()
         HabitsLocalDataSource(
             userHabitsQueries = database.userHabitsEntityQueries,
-            userHabitRecordsQueries = database.userHabitRecordsEntityQueries
+            userHabitRecordsQueries = database.userHabitRecordsEntityQueries,
+            database = database
         )
     }
 }

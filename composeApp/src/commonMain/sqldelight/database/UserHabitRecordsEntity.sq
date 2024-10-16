@@ -37,3 +37,13 @@ deleteUserHabitRecordsEntityByUserHabitId:
 DELETE FROM UserHabitRecordsEntity
 WHERE userHabitId = ?;
 
+-- Delete habit records for a specific user habit and date
+deleteUserHabitRecordsEntityByUserHabitIdAndDate:
+DELETE FROM UserHabitRecordsEntity
+WHERE userHabitId = ? AND date = ?;
+
+-- Delete habit records for a specific user habit after specific date
+deleteUserHabitRecordsEntityAfterSpecificDateByUserHabitId:
+DELETE FROM UserHabitRecordsEntity
+WHERE userHabitId = ? AND date >= ?;
+

@@ -53,6 +53,10 @@
         <item quantity="one">Duration: %1$d repeat</item>
         <item quantity="other">Duration: %1$d repeats</item>
     </plurals>
+    <plurals name="completed_repeats">
+        <item quantity="one">Completed repeats: %1$d repeat</item>
+        <item quantity="other">Completed repeats: %1$d repeats</item>
+    </plurals>
 
     <string name="when_do_you_want_to_start">When do you want to start?</string>
     <string name="this_week">This Week</string>
@@ -73,6 +77,7 @@
     <string name="complete">Complete</string>
     <string name="finish">Finish</string>
     <string name="edit">Edit</string>
+    <string name="save">Save</string>
 
     <string name="quick_action">Quick actions</string>
     <string name="every_day">Every day</string>
@@ -129,4 +134,7 @@
     <string name="habit_day_state_completed">Completed</string>
     <string name="habit_day_state_missed">Missed</string>
     <string name="habit_day_state_future">To be completed</string>
+
+    <string name="update_habit_error">Something went wrong! Please try another parameters or try later</string>
+    <string name="update_habit_success">Habit updated successfully!</string>
 </resources>

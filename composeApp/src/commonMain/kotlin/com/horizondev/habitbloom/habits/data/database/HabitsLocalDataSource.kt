@@ -1,10 +1,12 @@
 package com.horizondev.habitbloom.habits.data.database
 
 import app.cash.sqldelight.coroutines.asFlow
+import com.horizondev.habitbloom.database.HabitBloomDatabase
 import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.utils.calculateStartOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.mapToString
 import com.horizondev.habitbloom.utils.plusDays
 import database.UserHabitRecordsEntityQueries
 import database.UserHabitsEntityQueries
@@ -20,6 +22,7 @@ import kotlinx.datetime.plus
 import kotlin.math.max
 
 class HabitsLocalDataSource(
+    private val database: HabitBloomDatabase,
     private val userHabitsQueries: UserHabitsEntityQueries,
     private val userHabitRecordsQueries: UserHabitRecordsEntityQueries
 ) {
@@ -71,6 +74,63 @@ class HabitsLocalDataSource(
         return completedBefore + when {
             includingToday -> if (isCompletedToday) 1 else 0
             else -> 0
+        }
+    }
+
+    suspend fun updateUserHabit(
+        userHabitId: Long,
+        allRepeats: Int,
+        repeatsToChangeRecords: Int,
+        days: List<DayOfWeek>,
+        updateAfterDate: LocalDate = getCurrentDate()
+    ) = withContext(Dispatchers.IO) {
+        database.transaction {
+            val existingHabit = userHabitsQueries.selectUserHabitById(
+                userHabitId
+            ).executeAsOneOrNull()
+
+            if (existingHabit == null) throw IllegalStateException()
+
+            userHabitsQueries.updateUserHabitById(
+                startDate = existingHabit.startDate,
+                repeats = allRepeats.toLong(),
+                daysOfWeek = days.mapToString(),
+                id = existingHabit.id
+            )
+
+            val existingHabitRecords =
+                userHabitRecordsQueries.selectUserHabitRecordsEntityByUserHabitId(
+                    userHabitId = userHabitId
+                ).executeAsList()
+
+            val todayDate = getCurrentDate()
+            val isHabitCompletedToday = existingHabitRecords.find {
+                it.date == todayDate.toString()
+            }?.isCompleted ?: 0
+
+            //update outdated habit records
+            userHabitRecordsQueries.deleteUserHabitRecordsEntityAfterSpecificDateByUserHabitId(
+                userHabitId = userHabitId,
+                date = todayDate.toString()
+            )
+
+            val habitDates = generateHabitDates(
+                startDate = updateAfterDate,
+                habitDays = days.sortedBy { it.ordinal },
+                repeats = repeatsToChangeRecords
+            )
+
+            habitDates.forEach { date ->
+                val isCompleted = when (date) {
+                    todayDate -> isHabitCompletedToday
+                    else -> 0
+                }
+                userHabitRecordsQueries.insertOrReplaceUserHabitRecord(
+                    userHabitId = userHabitId,
+                    date = date.toString(),
+                    isCompleted = isCompleted
+                )
+            }
         }
     }
 

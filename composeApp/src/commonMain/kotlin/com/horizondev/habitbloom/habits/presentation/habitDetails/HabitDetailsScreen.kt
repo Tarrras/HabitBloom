@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.habits.presentation.habitDetails
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -23,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
@@ -30,6 +33,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallFilledActionButton
 import com.horizondev.habitbloom.core.designComponents.calendar.CalendarDayStatusColors
 import com.horizondev.habitbloom.core.designComponents.calendar.CalendarTitle
 import com.horizondev.habitbloom.core.designComponents.calendar.Day
@@ -38,10 +42,11 @@ import com.horizondev.habitbloom.core.designComponents.calendar.MonthHeader
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
+import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.UserHabitFullInfo
-import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.DurationSlider
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -52,14 +57,21 @@ import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.cancel
+import habitbloom.composeapp.generated.resources.completed_repeats
 import habitbloom.composeapp.generated.resources.edit
 import habitbloom.composeapp.generated.resources.habit_active_days
 import habitbloom.composeapp.generated.resources.habit_details
 import habitbloom.composeapp.generated.resources.habit_repeats
 import habitbloom.composeapp.generated.resources.habit_schedule
+import habitbloom.composeapp.generated.resources.save
+import habitbloom.composeapp.generated.resources.selected_repeats
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DayOfWeek
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
+import kotlin.math.roundToInt
 
 class HabitDetailsScreen(
     val userHabitId: Long
@@ -73,15 +85,25 @@ class HabitDetailsScreen(
         val uiState by screenModel.state.collectAsState()
         val navigator = LocalNavigator.currentOrThrow
 
+        val scope = rememberCoroutineScope()
+        val snackBarState = remember { SnackbarHostState() }
+
         screenModel.uiIntent.collectAsEffect { uiIntent ->
             when (uiIntent) {
                 HabitScreenDetailsUiIntent.NavigateBack -> navigator.pop()
+                is HabitScreenDetailsUiIntent.ShowSnackbar -> {
+                    scope.launch {
+                        snackBarState.showSnackbar(uiIntent.visuals)
+                    }
+                }
             }
         }
 
+
         HabitDetailsScreenContent(
             uiState = uiState,
-            handleUiEvent = screenModel::handleUiEvent
+            handleUiEvent = screenModel::handleUiEvent,
+            snackbarHostState = snackBarState
         )
     }
 }
@@ -89,7 +111,8 @@ class HabitDetailsScreen(
 @Composable
 fun HabitDetailsScreenContent(
     uiState: HabitScreenDetailsUiState,
-    handleUiEvent: (HabitScreenDetailsUiEvent) -> Unit
+    handleUiEvent: (HabitScreenDetailsUiEvent) -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     Scaffold(
         containerColor = BloomTheme.colors.background,
@@ -101,9 +124,17 @@ fun HabitDetailsScreenContent(
                     handleUiEvent(HabitScreenDetailsUiEvent.BackPressed)
                 }
             )
+        },
+        snackbarHost = {
+            BloomSnackbarHost(
+                modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                snackBarState = snackbarHostState
+            )
         }
     ) { paddingValues ->
-        Box {
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ) {
             if (uiState.habitInfo != null) {
                 Column(
                     modifier = Modifier
@@ -126,7 +157,27 @@ fun HabitDetailsScreenContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        habitInfo = uiState.habitInfo
+                        isEditMode = uiState.habitDurationEditMode,
+                        days = uiState.habitDays,
+                        repeats = uiState.habitRepeats,
+                        completedRepeats = uiState.habitInfo.completedRepeats,
+                        dayStateChanged = { dayOfWeek, isActive ->
+                            handleUiEvent(
+                                HabitScreenDetailsUiEvent.DayStateChanged(
+                                    dayOfWeek = dayOfWeek,
+                                    isActive = isActive
+                                )
+                            )
+                        },
+                        onEditModeChanged = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DurationEditModeChanged)
+                        },
+                        onDurationChanged = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DurationChanged(it))
+                        },
+                        onUpdateHabitDuration = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.UpdateHabitDuration)
+                        }
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -197,7 +248,14 @@ private fun UserHabitFullInfoCard(
 @Composable
 private fun UserHabitDurationCard(
     modifier: Modifier = Modifier,
-    habitInfo: UserHabitFullInfo
+    repeats: Int,
+    completedRepeats: Int,
+    days: List<DayOfWeek>,
+    isEditMode: Boolean,
+    dayStateChanged: (DayOfWeek, Boolean) -> Unit,
+    onDurationChanged: (Int) -> Unit,
+    onEditModeChanged: () -> Unit,
+    onUpdateHabitDuration: () -> Unit
 ) {
     BloomSurface(
         modifier = modifier
@@ -212,9 +270,9 @@ private fun UserHabitDurationCard(
 
             DayPicker(
                 modifier = Modifier.fillMaxWidth(),
-                activeDays = habitInfo.days,
-                dayStateChanged = { _, _ -> },
-                enabled = false
+                activeDays = days,
+                dayStateChanged = dayStateChanged,
+                enabled = isEditMode
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -224,18 +282,71 @@ private fun UserHabitDurationCard(
                 color = BloomTheme.colors.textColor.primary,
             )
             Spacer(modifier = Modifier.height(12.dp))
-            DurationSlider(
-                duration = habitInfo.repeats,
-                onDurationChanged = { },
-                modifier = Modifier.fillMaxWidth()
+
+            AnimatedVisibility(isEditMode) {
+                BloomSlider(
+                    value = repeats.toFloat(),
+                    onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
+                    valueRange = (completedRepeats.toFloat() + 1)..12f, // Set the range from 1 to 12
+                    steps = 11, // 11 steps because we start from 1
+                    enabled = isEditMode
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = pluralStringResource(
+                    resource = Res.plurals.selected_repeats,
+                    quantity = repeats,
+                    repeats
+                ),
+                style = BloomTheme.typography.body,
+                color = BloomTheme.colors.textColor.primary,
+                textDecoration = TextDecoration.Underline,
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = pluralStringResource(
+                    resource = Res.plurals.completed_repeats,
+                    quantity = completedRepeats,
+                    completedRepeats
+                ),
+                style = BloomTheme.typography.body,
+                color = BloomTheme.colors.textColor.primary,
+                textDecoration = TextDecoration.Underline,
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            BloomSmallActionButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.edit),
-                onClick = {}
-            )
+            AnimatedVisibility(isEditMode) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    BloomSmallFilledActionButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(Res.string.save),
+                        onClick = {
+                            onUpdateHabitDuration()
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    BloomSmallActionButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = stringResource(Res.string.cancel),
+                        onClick = {
+                            onEditModeChanged()
+                        }
+                    )
+                }
+            }
+
+            AnimatedVisibility(!isEditMode) {
+                BloomSmallActionButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.edit),
+                    onClick = {
+                        onEditModeChanged()
+                    }
+                )
+            }
         }
     }
 }

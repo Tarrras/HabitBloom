@@ -2,7 +2,6 @@ package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,11 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getNavigatorScreenModel
@@ -309,7 +304,8 @@ private fun SelectDurationForHabitCard(
 fun DurationSlider(
     modifier: Modifier = Modifier,
     duration: Int,
-    onDurationChanged: (Int) -> Unit
+    onDurationChanged: (Int) -> Unit,
+    enabled: Boolean = true
 ) {
     Column {
         BloomSlider(
@@ -317,7 +313,8 @@ fun DurationSlider(
             onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
             valueRange = 1f..12f, // Set the range from 1 to 12
             steps = 11, // 11 steps because we start from 1
-            modifier = modifier
+            modifier = modifier,
+            enabled = enabled
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(

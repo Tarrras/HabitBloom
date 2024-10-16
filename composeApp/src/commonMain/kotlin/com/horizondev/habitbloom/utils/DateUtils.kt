@@ -81,17 +81,17 @@ fun getFirstDateFromDaysList(daysList: List<DayOfWeek>): LocalDate? {
     return datesInCurrentWeek.minOrNull()
 }
 
-fun getFirstDateAfterTodayOrNextWeek(
+fun getFirstDateAfterStartDateOrNextWeek(
     daysList: List<DayOfWeek>,
-    startOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK
+    startOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
+    startDate: LocalDate = getCurrentDate()
 ): LocalDate? {
     if (daysList.isEmpty()) return null
     val sortedDays = daysList.sortedBy { it.ordinal }
 
     // Get today's date and day of the week
-    val today = getCurrentDate()
-    val daysSinceMonday = today.dayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
-    val startOfWeek = today.minusDays(daysSinceMonday.toLong())
+    val daysSinceMonday = startDate.dayOfWeek.ordinal - DayOfWeek.MONDAY.ordinal
+    val startOfWeek = startDate.minusDays(daysSinceMonday.toLong())
 
     // Map each DayOfWeek to its LocalDate in the current week
     val datesInCurrentWeek = sortedDays.map { dayOfWeek ->
@@ -99,7 +99,7 @@ fun getFirstDateAfterTodayOrNextWeek(
         startOfWeek.plusDays(daysDifference.toLong())
     }
 
-    val firstDayFromToday = datesInCurrentWeek.firstOrNull { it >= today }
+    val firstDayFromToday = datesInCurrentWeek.firstOrNull { it >= startDate }
     return when (startOption) {
         HabitWeekStartOption.THIS_WEEK -> firstDayFromToday
         HabitWeekStartOption.NEXT_WEEK -> {
@@ -140,4 +140,10 @@ fun Month.getTitle() = when (this) {
     Month.NOVEMBER -> stringResource(Res.string.month_november)
     Month.DECEMBER -> stringResource(Res.string.month_december)
     else -> stringResource(Res.string.month_january)
+}
+
+fun String.toCommonDate() = LocalDate.parse(this)
+
+fun LocalDate.isOnTheSameWeekWithAnotherDay(anotherDay: LocalDate): Boolean {
+    return this.calculateStartOfWeek() == anotherDay.calculateStartOfWeek()
 }

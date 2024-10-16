@@ -1,6 +1,5 @@
 package com.horizondev.habitbloom.core.designComponents.snackbar
 
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
@@ -10,7 +9,6 @@ import androidx.compose.material3.SnackbarData
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 
 @Composable
@@ -18,11 +16,13 @@ fun BloomSnackbar(
     modifier: Modifier = Modifier,
     snackbarData: SnackbarData
 ) {
+    val state = snackbarData.visuals.actionLabel?.let {
+        BloomSnackbarState.valueOf(it)
+    } ?: BloomSnackbarState.Warning
+
     Snackbar(
         modifier = modifier,
-        containerColor = BloomTheme.colors.secondary,
-        contentColor = BloomTheme.colors.textColor.primary,
-        actionContentColor = BloomTheme.colors.textColor.primary,
+        containerColor = state.snackBarBackgroundColor(),
         dismissAction = {
             IconButton(
                 onClick = { snackbarData.dismiss() },
@@ -30,7 +30,7 @@ fun BloomSnackbar(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "close",
-                        tint = BloomTheme.colors.textColor.primary
+                        tint = state.snackBarTextColor()
                     )
                 }
             )
@@ -39,8 +39,28 @@ fun BloomSnackbar(
             Text(
                 text = snackbarData.visuals.message,
                 style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary
+                color = state.snackBarTextColor()
             )
         }
     )
+}
+
+enum class BloomSnackbarState {
+    Success,
+    Warning,
+    Error
+}
+
+@Composable
+fun BloomSnackbarState.snackBarBackgroundColor() = when (this) {
+    BloomSnackbarState.Success -> BloomTheme.colors.success
+    BloomSnackbarState.Warning -> BloomTheme.colors.secondary
+    BloomSnackbarState.Error -> BloomTheme.colors.error
+}
+
+@Composable
+fun BloomSnackbarState.snackBarTextColor() = when (this) {
+    BloomSnackbarState.Success -> BloomTheme.colors.textColor.white
+    BloomSnackbarState.Warning -> BloomTheme.colors.textColor.primary
+    BloomSnackbarState.Error -> BloomTheme.colors.textColor.white
 }

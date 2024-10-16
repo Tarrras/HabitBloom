@@ -9,6 +9,7 @@ import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.utils.calculateCompletedRepeats
 import com.horizondev.habitbloom.utils.getCurrentDate
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
@@ -88,6 +89,22 @@ class HabitsRepository(
         }.map { true }
     }
 
+    suspend fun updateExistingHabit(
+        userHabitId: Long,
+        allRepeats: Int,
+        repeatsToChangeRecords: Int,
+        days: List<DayOfWeek>
+    ): Result<Boolean> {
+        return runCatching {
+            localDataSource.updateUserHabit(
+                userHabitId = userHabitId,
+                allRepeats = allRepeats,
+                repeatsToChangeRecords = repeatsToChangeRecords,
+                days = days
+            )
+        }.map { true }
+    }
+
     suspend fun updateHabitCompletion(habitRecordId: Long, date: LocalDate, isCompleted: Boolean) {
         localDataSource.updateHabitCompletion(
             habitRecordId = habitRecordId,
@@ -139,7 +156,12 @@ class HabitsRepository(
                 records = localHabitRecords,
                 startDate = userHabitInfo.startDate,
                 days = userHabitInfo.daysOfWeek,
-                repeats = userHabitInfo.repeats
+                repeats = userHabitInfo.repeats,
+                completedRepeats = calculateCompletedRepeats(
+                    dayOfCreation = userHabitInfo.startDate,
+                    basicRepeats = userHabitInfo.repeats,
+                    habitDays = userHabitInfo.daysOfWeek
+                )
             )
         }.flowOn(Dispatchers.IO)
     }

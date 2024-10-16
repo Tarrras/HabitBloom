@@ -16,5 +16,6 @@ data class UserHabitFullInfo(
     val daysStreak: Int,
     val records: List<UserHabitRecord>,
     val repeats: Int,
+    val completedRepeats: Int,
     val days: List<DayOfWeek>
 )

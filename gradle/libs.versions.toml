@@ -1,12 +1,12 @@
 [versions]
 androidDriver = "2.0.0"
-composeMultiplatform = "2.5.4"
+calendarComposeMultiplatform = "2.6.0-beta01"
 kamelImage = "0.9.5"
 sqlDelight = "2.0.0"
 firebaseBom = "33.2.0"
 firebaseCommonKtx = "20.3.3"
 kotlin = "2.0.10"
-compose = "1.6.11"
+compose = "1.7.0"
 koinCore = "3.5.6"
 koinAndroid = "3.5.6"
 gradle = "8.2.2"
@@ -83,7 +83,7 @@ voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voy
 
 core-library-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "core-library-desugaring" }
 accompanist-systemUIController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist-systemUIController" }
-calendar-compose-multiplatform = { module = "com.kizitonwose.calendar:compose-multiplatform", version.ref = "composeMultiplatform" }
+calendar-compose-multiplatform = { module = "com.kizitonwose.calendar:compose-multiplatform", version.ref = "calendarComposeMultiplatform" }
 
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 
