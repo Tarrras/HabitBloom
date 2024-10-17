@@ -114,7 +114,7 @@ class HabitDetailsScreenModel(
                             HabitScreenDetailsUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(
                                     message = getString(Res.string.update_habit_error),
-                                    actionLabel = BloomSnackbarState.Error.toString(),
+                                    state = BloomSnackbarState.Error,
                                     duration = SnackbarDuration.Short,
                                     withDismissAction = true
                                 )
@@ -139,7 +139,7 @@ class HabitDetailsScreenModel(
                             HabitScreenDetailsUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(
                                     message = getString(Res.string.update_habit_success),
-                                    actionLabel = BloomSnackbarState.Success.toString(),
+                                    state = BloomSnackbarState.Success,
                                     duration = SnackbarDuration.Short,
                                     withDismissAction = true
                                 )
@@ -151,7 +151,7 @@ class HabitDetailsScreenModel(
                             HabitScreenDetailsUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(
                                     message = getString(Res.string.update_habit_error),
-                                    actionLabel = BloomSnackbarState.Error.toString(),
+                                    state = BloomSnackbarState.Error,
                                     duration = SnackbarDuration.Short,
                                     withDismissAction = true
                                 )
@@ -159,6 +159,37 @@ class HabitDetailsScreenModel(
                         )
                     }
                 }
+            }
+
+            HabitScreenDetailsUiEvent.DeleteHabit -> {
+                screenModelScope.launch {
+                    repository.deleteUserHabit(userHabitId = userHabitId).onSuccess {
+                        _uiIntent.emit(HabitScreenDetailsUiIntent.NavigateBack)
+                    }.onFailure {
+                        _uiIntent.emit(
+                            HabitScreenDetailsUiIntent.ShowSnackbar(
+                                visuals = BloomSnackbarVisuals(
+                                    message = getString(Res.string.update_habit_error),
+                                    state = BloomSnackbarState.Error,
+                                    duration = SnackbarDuration.Short,
+                                    withDismissAction = true
+                                )
+                            )
+                        )
+                    }
+                }
+            }
+
+            HabitScreenDetailsUiEvent.DismissHabitDeletion -> {
+                mutableState.update {
+                    it.copy(
+                        showDeleteDialog = false
+                    )
+                }
+            }
+
+            HabitScreenDetailsUiEvent.RequestDeleteHabit -> {
+                mutableState.update { it.copy(showDeleteDialog = true) }
             }
         }
     }

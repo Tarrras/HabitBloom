@@ -14,14 +14,17 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 fun BloomPrimaryOutlinedButton(
     modifier: Modifier = Modifier,
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    borderStroke: BorderStroke = BorderStroke(
+        width = 2.dp, color = BloomTheme.colors.primary
+    )
 ) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        border = BorderStroke(width = 2.dp, color = BloomTheme.colors.primary)
+        border = borderStroke
     ) {
         Text(
             text = text,

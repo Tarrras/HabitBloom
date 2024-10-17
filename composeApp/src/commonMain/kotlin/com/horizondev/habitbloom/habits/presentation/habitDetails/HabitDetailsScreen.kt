@@ -1,6 +1,8 @@
 package com.horizondev.habitbloom.habits.presentation.habitDetails
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -25,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
@@ -32,6 +36,8 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallFilledActionButton
 import com.horizondev.habitbloom.core.designComponents.calendar.CalendarDayStatusColors
@@ -41,6 +47,7 @@ import com.horizondev.habitbloom.core.designComponents.calendar.HabitDayState
 import com.horizondev.habitbloom.core.designComponents.calendar.MonthHeader
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
+import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
@@ -59,15 +66,21 @@ import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.completed_repeats
+import habitbloom.composeapp.generated.resources.delete
+import habitbloom.composeapp.generated.resources.delete_habit
+import habitbloom.composeapp.generated.resources.delete_habit_description
+import habitbloom.composeapp.generated.resources.delete_habit_question
 import habitbloom.composeapp.generated.resources.edit
 import habitbloom.composeapp.generated.resources.habit_active_days
 import habitbloom.composeapp.generated.resources.habit_details
 import habitbloom.composeapp.generated.resources.habit_repeats
 import habitbloom.composeapp.generated.resources.habit_schedule
+import habitbloom.composeapp.generated.resources.ic_warning_filled
 import habitbloom.composeapp.generated.resources.save
 import habitbloom.composeapp.generated.resources.selected_repeats
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
@@ -114,88 +127,115 @@ fun HabitDetailsScreenContent(
     handleUiEvent: (HabitScreenDetailsUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    Scaffold(
-        containerColor = BloomTheme.colors.background,
-        topBar = {
-            BloomToolbar(
-                modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-                title = stringResource(Res.string.habit_details),
-                onBackPressed = {
-                    handleUiEvent(HabitScreenDetailsUiEvent.BackPressed)
-                }
-            )
-        },
-        snackbarHost = {
-            BloomSnackbarHost(
-                modifier = Modifier.fillMaxSize().statusBarsPadding(),
-                snackBarState = snackbarHostState
-            )
-        }
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            if (uiState.habitInfo != null) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .verticalScroll(
-                            rememberScrollState()
-                        )
-                ) {
-                    Spacer(modifier = Modifier.height(32.dp))
-                    UserHabitFullInfoCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        habitInfo = uiState.habitInfo
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    UserHabitDurationCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        isEditMode = uiState.habitDurationEditMode,
-                        days = uiState.habitDays,
-                        repeats = uiState.habitRepeats,
-                        completedRepeats = uiState.habitInfo.completedRepeats,
-                        dayStateChanged = { dayOfWeek, isActive ->
-                            handleUiEvent(
-                                HabitScreenDetailsUiEvent.DayStateChanged(
-                                    dayOfWeek = dayOfWeek,
-                                    isActive = isActive
-                                )
-                            )
-                        },
-                        onEditModeChanged = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.DurationEditModeChanged)
-                        },
-                        onDurationChanged = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.DurationChanged(it))
-                        },
-                        onUpdateHabitDuration = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.UpdateHabitDuration)
-                        }
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    UserHabitScheduleCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        habitInfo = uiState.habitInfo
-                    )
-
-                    Spacer(modifier = Modifier.navigationBarsPadding())
-                }
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            containerColor = BloomTheme.colors.background,
+            topBar = {
+                BloomToolbar(
+                    modifier = Modifier.fillMaxWidth().statusBarsPadding(),
+                    title = stringResource(Res.string.habit_details),
+                    onBackPressed = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.BackPressed)
+                    }
+                )
+            },
+            snackbarHost = {
+                BloomSnackbarHost(
+                    modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                    snackBarState = snackbarHostState
+                )
             }
-            BloomLoader(
-                modifier = Modifier.align(Alignment.Center),
-                isLoading = uiState.isLoading
-            )
+        ) { paddingValues ->
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (uiState.habitInfo != null) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .verticalScroll(
+                                rememberScrollState()
+                            )
+                    ) {
+                        Spacer(modifier = Modifier.height(32.dp))
+                        UserHabitFullInfoCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            habitInfo = uiState.habitInfo
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        UserHabitDurationCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            isEditMode = uiState.habitDurationEditMode,
+                            days = uiState.habitDays,
+                            repeats = uiState.habitRepeats,
+                            completedRepeats = uiState.habitInfo.completedRepeats,
+                            dayStateChanged = { dayOfWeek, isActive ->
+                                handleUiEvent(
+                                    HabitScreenDetailsUiEvent.DayStateChanged(
+                                        dayOfWeek = dayOfWeek,
+                                        isActive = isActive
+                                    )
+                                )
+                            },
+                            onEditModeChanged = {
+                                handleUiEvent(HabitScreenDetailsUiEvent.DurationEditModeChanged)
+                            },
+                            onDurationChanged = {
+                                handleUiEvent(HabitScreenDetailsUiEvent.DurationChanged(it))
+                            },
+                            onUpdateHabitDuration = {
+                                handleUiEvent(HabitScreenDetailsUiEvent.UpdateHabitDuration)
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                        UserHabitScheduleCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            habitInfo = uiState.habitInfo
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        BloomPrimaryOutlinedButton(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            text = stringResource(Res.string.delete_habit),
+                            onClick = {
+                                handleUiEvent(HabitScreenDetailsUiEvent.RequestDeleteHabit)
+                            },
+                            borderStroke = BorderStroke(
+                                width = 2.dp,
+                                color = BloomTheme.colors.error
+                            )
+                        )
+
+                        Spacer(modifier = Modifier.navigationBarsPadding())
+                    }
+                }
+                BloomLoader(
+                    modifier = Modifier.align(Alignment.Center),
+                    isLoading = uiState.isLoading
+                )
+            }
         }
+
+
+        DeleteHabitDialog(
+            showDeleteDialog = uiState.showDeleteDialog,
+            onDismiss = {
+                handleUiEvent(HabitScreenDetailsUiEvent.DismissHabitDeletion)
+            },
+            onDelete = {
+                handleUiEvent(HabitScreenDetailsUiEvent.DeleteHabit)
+            }
+        )
     }
 }
 
@@ -428,6 +468,67 @@ private fun UserHabitScheduleCard(
                     val daysOfWeek = month.weekDays.first().map { it.date.dayOfWeek }
                     MonthHeader(daysOfWeek = daysOfWeek, modifier = Modifier.fillMaxWidth())
                 }
+            )
+        }
+    }
+}
+
+@Composable
+fun DeleteHabitDialog(
+    modifier: Modifier = Modifier,
+    showDeleteDialog: Boolean,
+    onDismiss: () -> Unit,
+    onDelete: () -> Unit
+) {
+    BloomAlertDialog(
+        isShown = showDeleteDialog,
+        onDismiss = onDismiss,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(resource = Res.drawable.ic_warning_filled),
+                modifier = Modifier.size(48.dp),
+                contentDescription = "warning"
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = stringResource(Res.string.delete_habit_question),
+                color = BloomTheme.colors.textColor.primary,
+                style = BloomTheme.typography.subheading,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(Res.string.delete_habit_description),
+                color = BloomTheme.colors.textColor.primary,
+                style = BloomTheme.typography.body,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+            BloomPrimaryFilledButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.delete),
+                onClick = onDelete,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BloomTheme.colors.error,
+                    contentColor = BloomTheme.colors.textColor.white
+                )
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            BloomPrimaryOutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.cancel),
+                onClick = onDismiss,
+                borderStroke = BorderStroke(
+                    width = 2.dp,
+                    color = BloomTheme.colors.error
+                )
             )
         }
     }

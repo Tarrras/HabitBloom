@@ -9,6 +9,19 @@ class BloomSnackbarVisuals(
     override val withDismissAction: Boolean,
     override val duration: SnackbarDuration
 ) : SnackbarVisuals {
+
+    constructor(
+        message: String,
+        state: BloomSnackbarState,
+        withDismissAction: Boolean,
+        duration: SnackbarDuration
+    ) : this(
+        message = message,
+        actionLabel = state.toString(),
+        withDismissAction = withDismissAction,
+        duration = duration
+    )
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false

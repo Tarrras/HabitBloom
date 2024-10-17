@@ -11,13 +11,18 @@ data class HabitScreenDetailsUiState(
     val habitDays: List<DayOfWeek> = emptyList(),
     val habitRepeats: Int = 0,
     val durationUpdateButtonEnabled: Boolean = true,
-    val isLoading: Boolean = true
+    val isLoading: Boolean = true,
+    val showDeleteDialog: Boolean = false,
 )
 
 sealed interface HabitScreenDetailsUiEvent {
     data object BackPressed : HabitScreenDetailsUiEvent
     data object DurationEditModeChanged : HabitScreenDetailsUiEvent
     data object UpdateHabitDuration : HabitScreenDetailsUiEvent
+
+    data object RequestDeleteHabit : HabitScreenDetailsUiEvent
+    data object DeleteHabit : HabitScreenDetailsUiEvent
+    data object DismissHabitDeletion : HabitScreenDetailsUiEvent
 
     data class DurationChanged(val duration: Int) : HabitScreenDetailsUiEvent
     data class DayStateChanged(

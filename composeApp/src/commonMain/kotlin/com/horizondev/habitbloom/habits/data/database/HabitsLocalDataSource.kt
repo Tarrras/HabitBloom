@@ -227,6 +227,15 @@ class HabitsLocalDataSource(
         return habitDates
     }
 
+    suspend fun deleteUserHabit(userHabitId: Long) {
+        withContext(Dispatchers.IO) {
+            database.transaction {
+                userHabitsQueries.deleteUserHabitById(userHabitId)
+                userHabitRecordsQueries.deleteUserHabitRecordsEntityByUserHabitId(userHabitId)
+            }
+        }
+    }
+
     suspend fun getUserHabitsByDate(date: LocalDate): List<UserHabitRecord> {
         return userHabitRecordsQueries
             .selectUserHabitRecordsEntityByDate(date.toString())

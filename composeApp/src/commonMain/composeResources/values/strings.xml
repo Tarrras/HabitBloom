@@ -78,6 +78,7 @@
     <string name="finish">Finish</string>
     <string name="edit">Edit</string>
     <string name="save">Save</string>
+    <string name="delete">Delete</string>
 
     <string name="quick_action">Quick actions</string>
     <string name="every_day">Every day</string>
@@ -137,4 +138,7 @@
 
     <string name="update_habit_error">Something went wrong! Please try another parameters or try later</string>
     <string name="update_habit_success">Habit updated successfully!</string>
+    <string name="delete_habit">Delete Habit</string>
+    <string name="delete_habit_question">Delete Habit?</string>
+    <string name="delete_habit_description">Are you sure you want to delete this habit? This will remove all progress, history, and reminders.</string>
 </resources>

@@ -19,7 +19,7 @@ fun BloomToolbar(
     title: String,
     onBackPressed: (() -> Unit)? = null
 ) {
-    Box(modifier = modifier.padding(horizontal = 16.dp)) {
+    Box(modifier = modifier.padding(16.dp)) {
         onBackPressed?.let { callback ->
             Icon(
                 imageVector = Icons.AutoMirrored.Default.ArrowBack,

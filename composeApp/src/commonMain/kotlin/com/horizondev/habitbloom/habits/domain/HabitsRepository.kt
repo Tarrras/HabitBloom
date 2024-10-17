@@ -196,4 +196,10 @@ class HabitsRepository(
             )
         }
     }
+
+    suspend fun deleteUserHabit(
+        userHabitId: Long
+    ) = runCatching {
+        localDataSource.deleteUserHabit(userHabitId)
+    }
 }
