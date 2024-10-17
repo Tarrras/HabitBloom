@@ -62,6 +62,8 @@ class HabitsRepository(
             remoteHabits,
             localDataSource.getUserHabitsByDateFlow(day)
         ) { detailedHabits, habitRecords ->
+            Napier.d("getUserHabitsByDayFlow $habitRecords", tag = TAG)
+
             mergeLocalHabitRecordsWithRemote(
                 habitRecords = habitRecords,
                 detailedHabits = detailedHabits,
@@ -135,8 +137,9 @@ class HabitsRepository(
             localDataSource.getAllUserHabitRecordsForHabitId(userHabitId)
         ) { allHabitsResult, localHabitRecords ->
             val allHabits = allHabitsResult.getOrNull() ?: emptyList()
-            val userHabitInfo = localDataSource.getUserHabitInfo(userHabitId)
+            val userHabitInfo = localDataSource.getUserHabitInfo(userHabitId) ?: return@combine null
             val originId = localDataSource.getHabitOriginId(userHabitId)
+
 
             val habitDetailedInfo = allHabits.find {
                 it.id == originId

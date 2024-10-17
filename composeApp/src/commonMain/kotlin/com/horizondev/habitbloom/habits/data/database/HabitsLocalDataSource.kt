@@ -10,6 +10,7 @@ import com.horizondev.habitbloom.utils.mapToString
 import com.horizondev.habitbloom.utils.plusDays
 import database.UserHabitRecordsEntityQueries
 import database.UserHabitsEntityQueries
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -37,13 +38,17 @@ class HabitsLocalDataSource(
         }
     }
 
-    suspend fun getHabitOriginId(userHabitId: Long): String {
-        return userHabitsQueries.selectUserHabitById(userHabitId).executeAsOne().habitId
+    suspend fun getHabitOriginId(userHabitId: Long): String? {
+        return withContext(Dispatchers.IO) {
+            val allHabits = userHabitsQueries.selectAllUserHabitsEntity().executeAsList()
+            Napier.d("getHabitOriginId all habits $allHabits", tag = "TAG")
+            userHabitsQueries.selectUserHabitById(userHabitId).executeAsOneOrNull()?.habitId
+        }
     }
 
-    suspend fun getUserHabitInfo(userHabitId: Long): UserHabit {
+    suspend fun getUserHabitInfo(userHabitId: Long): UserHabit? {
         return withContext(Dispatchers.IO) {
-            userHabitsQueries.selectUserHabitById(userHabitId).executeAsOne().toDomainModel()
+            userHabitsQueries.selectUserHabitById(userHabitId).executeAsOneOrNull()?.toDomainModel()
         }
     }
 
@@ -169,7 +174,12 @@ class HabitsLocalDataSource(
                 daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
                 timeOfDay = userHabit.timeOfDay.ordinal.toLong()
             )
-            userHabitsQueries.lastInsertRowId().executeAsOne()
+            val lastInsertRowId = userHabitsQueries
+                .selectUserHabitByRemoteId(userHabit.habitId)
+                .executeAsOneOrNull()?.id ?: 0
+
+            Napier.d("lastInsertRowId $lastInsertRowId for userHabit $userHabit", tag = "TAG")
+            lastInsertRowId
         }
 
         // Generate habit records
