@@ -139,7 +139,7 @@ class HabitsLocalDataSource(
         }
     }
 
-    suspend fun insertUserHabit(userHabit: UserHabit) {
+    suspend fun insertUserHabit(userHabit: UserHabit) = withContext(Dispatchers.IO) {
         val existingHabit = userHabitsQueries.selectUserHabitByRemoteId(
             userHabit.habitId
         ).executeAsOneOrNull()

@@ -157,7 +157,7 @@ private fun LazyListScope.habitsList(
             UserHabitItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .animateItemPlacement()
+                    .animateItem()
                     .padding(horizontal = 16.dp),
                 habitInfo = it,
                 onCompletionStatusChanged = onHabitStatusChanged,
