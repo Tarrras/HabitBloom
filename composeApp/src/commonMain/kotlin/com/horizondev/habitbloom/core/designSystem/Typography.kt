@@ -7,6 +7,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import habitbloom.composeapp.generated.resources.Poppins_Black
+import habitbloom.composeapp.generated.resources.Poppins_Bold
+import habitbloom.composeapp.generated.resources.Poppins_ExtraBold
+import habitbloom.composeapp.generated.resources.Poppins_ExtraLight
+import habitbloom.composeapp.generated.resources.Poppins_Light
+import habitbloom.composeapp.generated.resources.Poppins_Medium
+import habitbloom.composeapp.generated.resources.Poppins_Regular
+import habitbloom.composeapp.generated.resources.Poppins_SemiBold
+import habitbloom.composeapp.generated.resources.Poppins_Thin
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.montserrat_black
 import habitbloom.composeapp.generated.resources.montserrat_bold
@@ -95,6 +104,82 @@ fun montserrat(): FontFamily {
     )
 }
 
+@Composable
+fun poppins(): FontFamily {
+    val fixeltextRegular =
+        Font(
+            resource = Res.font.Poppins_Regular,
+            weight = FontWeight.Normal,
+            style = FontStyle.Normal,
+        )
+
+    val fixeltextBold =
+        Font(
+            resource = Res.font.Poppins_Bold,
+            FontWeight.Bold,
+            FontStyle.Normal,
+        )
+
+    val fixeltextLight =
+        Font(
+            resource = Res.font.Poppins_Light,
+            FontWeight.Light,
+            FontStyle.Normal,
+        )
+
+    val fixeltextMedium =
+        Font(
+            resource = Res.font.Poppins_Medium,
+            FontWeight.Medium,
+            FontStyle.Normal,
+        )
+
+    val fixeltextSemiBold =
+        Font(
+            resource = Res.font.Poppins_SemiBold,
+            FontWeight.SemiBold,
+            FontStyle.Normal,
+        )
+
+    val fixeltextThin =
+        Font(
+            resource = Res.font.Poppins_Thin,
+            FontWeight.Thin,
+            FontStyle.Normal,
+        )
+
+    val fixeltextExtraBold =
+        Font(
+            resource = Res.font.Poppins_ExtraBold,
+            FontWeight.ExtraBold,
+            FontStyle.Normal,
+        )
+
+    val fixeltextExtraLight =
+        Font(
+            resource = Res.font.Poppins_ExtraLight,
+            FontWeight.ExtraLight,
+            FontStyle.Normal,
+        )
+    val fixeltextBlack = Font(
+        resource = Res.font.Poppins_Black,
+        FontWeight.Black,
+        FontStyle.Normal,
+    )
+
+    return FontFamily(
+        fixeltextThin,
+        fixeltextExtraLight,
+        fixeltextLight,
+        fixeltextRegular,
+        fixeltextMedium,
+        fixeltextSemiBold,
+        fixeltextBold,
+        fixeltextExtraBold,
+        fixeltextBlack,
+    )
+}
+
 data class BloomTypography(
     val title: TextStyle,
     val heading: TextStyle,
@@ -107,55 +192,48 @@ data class BloomTypography(
 
 @Composable
 fun bloomTypography(): BloomTypography {
-    val montserrat = montserrat()
+    val fontFamily = poppins()
     return BloomTypography(
         title = TextStyle(
-            fontFamily = montserrat,
+            fontFamily = fontFamily,
             fontSize = 24.sp,
             lineHeight = 32.sp,
-            letterSpacing = 0.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         ),
         heading = TextStyle(
-            fontFamily = montserrat,
+            fontFamily = fontFamily,
             fontSize = 20.sp,
             lineHeight = 28.sp,
-            letterSpacing = 0.sp,
             fontWeight = FontWeight.Medium
         ),
         subheading = TextStyle(
-            fontFamily = montserrat,
+            fontFamily = fontFamily,
             fontSize = 16.sp,
             lineHeight = 24.sp,
-            letterSpacing = 0.sp,
             fontWeight = FontWeight.Normal
         ),
         body = TextStyle(
-            fontFamily = montserrat,
+            fontFamily = fontFamily,
             fontSize = 14.sp,
             lineHeight = 20.sp,
-            letterSpacing = 0.sp,
             fontWeight = FontWeight.Normal
         ),
         small = TextStyle(
-            fontFamily = montserrat,
+            fontFamily = fontFamily,
             fontSize = 12.sp,
             lineHeight = 16.sp,
-            letterSpacing = 0.sp,
             fontWeight = FontWeight.Normal
         ),
         button = TextStyle(
-            fontFamily = montserrat,
+            fontFamily = fontFamily,
             fontSize = 16.sp,
             lineHeight = 24.sp,
-            letterSpacing = 0.sp,
             fontWeight = FontWeight.Medium
         ),
         formLabel = TextStyle(
-            fontFamily = montserrat,
+            fontFamily = fontFamily,
             fontSize = 14.sp,
             lineHeight = 20.sp,
-            letterSpacing = 0.sp,
             fontWeight = FontWeight.Normal
         )
     )

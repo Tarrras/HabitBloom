@@ -34,7 +34,7 @@ fun Day(
     ) {
         Text(
             text = day.date.dayOfMonth.toString(),
-            style = BloomTheme.typography.body.copy(
+            style = BloomTheme.typography.subheading.copy(
                 fontWeight = if (selected) {
                     FontWeight.Bold
                 } else FontWeight.Normal

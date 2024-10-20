@@ -57,6 +57,7 @@
         <item quantity="one">Completed repeats: %1$d repeat</item>
         <item quantity="other">Completed repeats: %1$d repeats</item>
     </plurals>
+    <string name="completed_repeats_of">%1$d of %2$d repeats completed!</string>
 
     <string name="when_do_you_want_to_start">When do you want to start?</string>
     <string name="this_week">This Week</string>

@@ -1,6 +1,6 @@
 package com.horizondev.habitbloom.habits.presentation.habitDetails
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -44,6 +44,7 @@ import com.horizondev.habitbloom.core.designComponents.calendar.CalendarTitle
 import com.horizondev.habitbloom.core.designComponents.calendar.Day
 import com.horizondev.habitbloom.core.designComponents.calendar.HabitDayState
 import com.horizondev.habitbloom.core.designComponents.calendar.MonthHeader
+import com.horizondev.habitbloom.core.designComponents.charts.BloomProgressIndicator
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
@@ -74,6 +75,7 @@ import habitbloom.composeapp.generated.resources.habit_active_days
 import habitbloom.composeapp.generated.resources.habit_repeats
 import habitbloom.composeapp.generated.resources.habit_schedule
 import habitbloom.composeapp.generated.resources.ic_warning_filled
+import habitbloom.composeapp.generated.resources.repeats
 import habitbloom.composeapp.generated.resources.save
 import habitbloom.composeapp.generated.resources.selected_repeats
 import kotlinx.coroutines.launch
@@ -296,6 +298,8 @@ private fun UserHabitDurationCard(
     onEditModeChanged: () -> Unit,
     onUpdateHabitDuration: () -> Unit
 ) {
+    val completedRepeatsRate = (completedRepeats.toFloat() / repeats.toFloat())
+
     BloomSurface(
         modifier = modifier
     ) {
@@ -320,71 +324,110 @@ private fun UserHabitDurationCard(
                 style = BloomTheme.typography.heading,
                 color = BloomTheme.colors.textColor.primary,
             )
-            Spacer(modifier = Modifier.height(12.dp))
 
-            AnimatedVisibility(isEditMode) {
-                BloomSlider(
-                    value = repeats.toFloat(),
-                    onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
-                    valueRange = (completedRepeats.toFloat() + 1)..12f, // Set the range from 1 to 12
-                    steps = 11, // 11 steps because we start from 1
-                    enabled = isEditMode
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = pluralStringResource(
-                    resource = Res.plurals.selected_repeats,
-                    quantity = repeats,
-                    repeats
-                ),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary,
-                textDecoration = TextDecoration.Underline,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = pluralStringResource(
-                    resource = Res.plurals.completed_repeats,
-                    quantity = completedRepeats,
-                    completedRepeats
-                ),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary,
-                textDecoration = TextDecoration.Underline,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+            AnimatedContent(isEditMode) { isEditModeState ->
+                if (isEditModeState) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(modifier = Modifier.height(12.dp))
 
-            AnimatedVisibility(isEditMode) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    BloomSmallFilledActionButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(Res.string.save),
-                        onClick = {
-                            onUpdateHabitDuration()
+                        if (completedRepeats <= 10) {
+                            BloomSlider(
+                                value = repeats.toFloat(),
+                                onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
+                                valueRange = (completedRepeats.toFloat() + 1)..12f, // Set the range from 1 to 12
+                                steps = 11, // 11 steps because we start from 1
+                                enabled = true
+                            )
                         }
-                    )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = pluralStringResource(
+                                resource = Res.plurals.selected_repeats,
+                                quantity = repeats,
+                                repeats
+                            ),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.primary,
+                            textDecoration = TextDecoration.Underline,
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = pluralStringResource(
+                                resource = Res.plurals.completed_repeats,
+                                quantity = completedRepeats,
+                                completedRepeats
+                            ),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.primary,
+                            textDecoration = TextDecoration.Underline,
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    BloomSmallActionButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = stringResource(Res.string.cancel),
-                        onClick = {
-                            onEditModeChanged()
-                        }
-                    )
-                }
-            }
+                        BloomSmallFilledActionButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(Res.string.save),
+                            onClick = {
+                                onUpdateHabitDuration()
+                            }
+                        )
 
-            AnimatedVisibility(!isEditMode) {
-                BloomSmallActionButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(Res.string.edit),
-                    onClick = {
-                        onEditModeChanged()
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        BloomSmallActionButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(Res.string.cancel),
+                            onClick = {
+                                onEditModeChanged()
+                            }
+                        )
                     }
-                )
+                } else {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Box(Modifier.fillMaxWidth()) {
+                            BloomProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center),
+                                percentage = completedRepeatsRate,
+                                radius = 24.dp
+                            )
+
+                            Column(
+                                modifier = Modifier.align(Alignment.Center),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = "$completedRepeats/$repeats",
+                                    style = BloomTheme.typography.heading,
+                                    color = BloomTheme.colors.textColor.primary,
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Text(
+                                    text = stringResource(Res.string.repeats).lowercase(),
+                                    style = BloomTheme.typography.small,
+                                    color = BloomTheme.colors.textColor.secondary,
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+
+                        BloomSmallActionButton(
+                            modifier = Modifier.fillMaxWidth(),
+                            text = stringResource(Res.string.edit),
+                            onClick = {
+                                onEditModeChanged()
+                            }
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                }
             }
         }
     }

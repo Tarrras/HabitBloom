@@ -24,20 +24,20 @@ data class BloomTextColorScheme(
 )
 
 val lightColorScheme = BloomColorScheme(
-    primary = Color(0xFF4EC4B5),
-    secondary = Color(0xFFF8bfb9),
-    tertiary = Color(0xFFF4E4B2),
-    background = Color(0xFFF5F5F5),
-    surface = Color(0xFFFFFFFF),
-    success = Color(0xFF7BC86C),
-    error = Color(0xFFE57373),
-    disabled = Color(0xFFBDC3C7),
+    primary = Color(0xFF2CB8A6), // Brighter teal
+    secondary = Color(0xFFFE8A81), // Coral/Pink
+    tertiary = Color(0xFFFDCB6E), // Bright golden yellow
+    background = Color(0xFFF9F8F4), // Soft warm off-white
+    surface = Color(0xFFFFFFFF), // White surface
+    success = Color(0xFF64C764), // Vivid green for success
+    error = Color(0xFFD32F2F), // Bold red for errors
+    disabled = Color(0xFFB0BEC5), // Soft gray for disabled elements
     textColor = BloomTextColorScheme(
-        primary = Color(0xFF333333),
-        secondary = Color(0xFF9E9E9E),
-        accent = Color(0xFFFF6F61),
-        disabled = Color(0xFFBDC3C7),
-        white = Color(0xFFFFFFFF)
+        primary = Color(0xFF333333), // Dark gray for primary text
+        secondary = Color(0xFF9E9E9E), // Medium gray for secondary text
+        accent = Color(0xFFFC5C65), // Bright pinkish-red for accent text
+        disabled = Color(0xFFBDC3C7), // Light gray for disabled text
+        white = Color(0xFFFFFFFF) // White for text on dark backgrounds
     )
 )
 
