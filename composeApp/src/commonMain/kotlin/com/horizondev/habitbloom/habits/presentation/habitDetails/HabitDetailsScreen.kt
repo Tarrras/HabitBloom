@@ -167,6 +167,16 @@ fun HabitDetailsScreenContent(
                                 )
                         ) {
                             Spacer(modifier = Modifier.height(16.dp))
+
+                            UserHabitProgressCard(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                uiState = uiState.progressUiState
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             UserHabitDurationCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -195,6 +205,7 @@ fun HabitDetailsScreenContent(
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
+
                             UserHabitScheduleCard(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -239,6 +250,7 @@ fun HabitDetailsScreenContent(
         )
     }
 }
+
 
 @Composable
 private fun UserHabitFullInfoCard(

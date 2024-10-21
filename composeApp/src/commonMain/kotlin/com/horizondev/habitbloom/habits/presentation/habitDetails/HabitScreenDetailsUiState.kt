@@ -13,6 +13,14 @@ data class HabitScreenDetailsUiState(
     val durationUpdateButtonEnabled: Boolean = true,
     val isLoading: Boolean = true,
     val showDeleteDialog: Boolean = false,
+    val progressUiState: UserHabitProgressUiState? = null
+)
+
+data class UserHabitProgressUiState(
+    val currentStreak: Int,
+    val bestStreak: Int,
+    val totalDone: Int,
+    val overallRate: Float
 )
 
 sealed interface HabitScreenDetailsUiEvent {

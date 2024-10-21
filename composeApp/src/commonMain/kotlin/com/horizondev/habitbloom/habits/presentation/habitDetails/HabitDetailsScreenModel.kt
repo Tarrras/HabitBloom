@@ -6,8 +6,10 @@ import cafe.adriel.voyager.core.model.screenModelScope
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.habits.domain.HabitsRepository
+import com.horizondev.habitbloom.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
+import com.horizondev.habitbloom.utils.getLongestCompletionStreak
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.update_habit_error
 import habitbloom.composeapp.generated.resources.update_habit_success
@@ -40,7 +42,8 @@ class HabitDetailsScreenModel(
                 habitRepeats = userHabitFullInfo?.repeats ?: 0,
                 habitDays = userHabitFullInfo?.days ?: emptyList(),
                 habitDurationEditMode = false,
-                habitDurationEditEnabled = (userHabitFullInfo?.completedRepeats ?: 12) < 12
+                habitDurationEditEnabled = (userHabitFullInfo?.completedRepeats ?: 12) < 12,
+                progressUiState = userHabitFullInfo?.let { info -> calculateHabitProgress(info) }
             )
         }
     }.launchIn(screenModelScope)
@@ -192,5 +195,31 @@ class HabitDetailsScreenModel(
                 mutableState.update { it.copy(showDeleteDialog = true) }
             }
         }
+    }
+
+    private fun calculateHabitProgress(
+        info: UserHabitFullInfo
+    ): UserHabitProgressUiState {
+        val currentStreak = info.daysStreak
+        val bestStreak = info.records.getLongestCompletionStreak()
+        val habitRecordsBeforeUntilToday = info.records
+            .sortedBy {
+                it.date
+            }.filter {
+                it.date <= getCurrentDate()
+            }
+
+        val totalDone = habitRecordsBeforeUntilToday.count { it.isCompleted }
+        val overallRate = habitRecordsBeforeUntilToday.let {
+            totalDone.toFloat() / it.count().toFloat()
+        } * 100f
+
+        return UserHabitProgressUiState(
+            currentStreak = currentStreak,
+            bestStreak = bestStreak,
+            totalDone = totalDone,
+            overallRate = overallRate
+        )
+
     }
 }

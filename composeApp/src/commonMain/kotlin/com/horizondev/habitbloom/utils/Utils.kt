@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources._0_percentage_task_done
@@ -160,3 +161,26 @@ fun DayOfWeek.getShortTitle(): String {
 fun List<DayOfWeek>.mapToString() = this.toSet()
     .sortedBy { it.ordinal }
     .joinToString(",") { it.name }
+
+fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
+    // Step 1: Sort the records by date
+    val sortedRecords = this.sortedBy { it.date }
+
+    // Step 2: Initialize variables
+    var currentStreak = 0
+    var maxStreak = 0
+
+    // Step 3: Iterate through the records
+    for (record in sortedRecords) {
+        if (record.isCompleted) {
+            currentStreak += 1
+            if (currentStreak > maxStreak) {
+                maxStreak = currentStreak
+            }
+        } else {
+            currentStreak = 0
+        }
+    }
+
+    return maxStreak
+}
