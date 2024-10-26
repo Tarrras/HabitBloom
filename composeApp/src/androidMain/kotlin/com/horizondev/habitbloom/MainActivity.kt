@@ -6,7 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import com.horizondev.habitbloom.di.KoinInit
+import com.horizondev.habitbloom.app.App
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 

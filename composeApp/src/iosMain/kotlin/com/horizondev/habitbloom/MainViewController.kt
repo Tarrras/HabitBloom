@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom
 
 import androidx.compose.ui.window.ComposeUIViewController
+import com.horizondev.habitbloom.app.App
 import com.horizondev.habitbloom.di.KoinInit
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.crashlytics.crashlytics

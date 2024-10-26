@@ -58,9 +58,11 @@ multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-setti
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }
 firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
+
 gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
 gitlive-firebase-common = { module = "dev.gitlive:firebase-common", version.ref = "firebase-gitlive-sdk" }
 gitlive-firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebase-gitlive-sdk" }
 
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }
