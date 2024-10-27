@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
@@ -44,10 +44,15 @@ fun BloomTextField(
     shape: Shape = RoundedCornerShape(6.dp),
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         unfocusedBorderColor = BloomTheme.colors.textColor.disabled,
-        focusedTextColor = BloomTheme.colors.primary,
+        focusedBorderColor = BloomTheme.colors.primary,
+        focusedTextColor = BloomTheme.colors.textColor.primary,
         unfocusedTextColor = BloomTheme.colors.textColor.primary,
         focusedContainerColor = BloomTheme.colors.surface,
         unfocusedContainerColor = BloomTheme.colors.surface,
+        selectionColors = TextSelectionColors(
+            backgroundColor = BloomTheme.colors.primary.copy(alpha = 0.4f),
+            handleColor = BloomTheme.colors.primary
+        )
     )
 ) {
     BloomBaseOutlinedTextField(

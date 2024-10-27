@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,13 +11,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getNavigatorScreenModel
@@ -24,7 +33,9 @@ import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.inputText.BloomSearchTextField
+import com.horizondev.habitbloom.core.designComponents.list.NoResultsPlaceholders
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
@@ -33,7 +44,10 @@ import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.Add
 import com.horizondev.habitbloom.habits.presentation.components.HabitListItem
 import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.add_your_own_personal_habit_to_start_tracking
 import habitbloom.composeapp.generated.resources.choose_habit_to_acquire
+import habitbloom.composeapp.generated.resources.create_personal_habit
+import habitbloom.composeapp.generated.resources.no_habits_found
 import habitbloom.composeapp.generated.resources.search_habit
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
@@ -75,6 +89,13 @@ fun AddHabitChoiceScreenContent(
     uiState: AddHabitChoiceUiState,
     handleUiEvent: (AddHabitChoiceUiEvent) -> Unit
 ) {
+    val lazyListState = rememberLazyListState()
+    val showCreateButton by remember {
+        derivedStateOf {
+            lazyListState.firstVisibleItemIndex > 0
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
@@ -93,13 +114,59 @@ fun AddHabitChoiceScreenContent(
                 placeholderText = stringResource(Res.string.search_habit)
             )
             Spacer(modifier = Modifier.height(24.dp))
-            LazyColumn {
-                habits(
-                    habits = uiState.habits,
-                    onHabitClicked = {
-                        handleUiEvent(AddHabitChoiceUiEvent.SubmitHabit(it))
+            if (uiState.habits.isNotEmpty()) {
+                LazyColumn(
+                    state = lazyListState
+                ) {
+                    habits(
+                        habits = uiState.habits,
+                        onHabitClicked = {
+                            handleUiEvent(AddHabitChoiceUiEvent.SubmitHabit(it))
+                        }
+                    )
+                }
+            } else {
+                NoResultsPlaceholders(
+                    modifier = Modifier.fillMaxSize(),
+                    title = {
+                        Text(
+                            textAlign = TextAlign.Center,
+                            text = buildAnnotatedString {
+                                withStyle(
+                                    SpanStyle(
+                                        fontStyle = BloomTheme.typography.body.fontStyle
+                                    )
+                                ) {
+                                    append(stringResource(Res.string.no_habits_found))
+                                    append(" ")
+                                }
+                                withStyle(
+                                    SpanStyle(
+                                        textDecoration = TextDecoration.Underline,
+                                        fontStyle = BloomTheme.typography.body.fontStyle,
+                                        color = BloomTheme.colors.primary
+                                    )
+                                ) {
+                                    append(stringResource(Res.string.add_your_own_personal_habit_to_start_tracking))
+                                }
+                            }
+                        )
                     }
                 )
+            }
+        }
+
+        AnimatedVisibility(
+            modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth(),
+            visible = showCreateButton
+        ) {
+            Column {
+                BloomPrimaryFilledButton(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                    text = stringResource(Res.string.create_personal_habit),
+                    onClick = {}
+                )
+                Spacer(modifier = Modifier.height(4.dp))
             }
         }
 

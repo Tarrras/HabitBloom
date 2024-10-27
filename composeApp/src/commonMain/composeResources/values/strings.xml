@@ -152,4 +152,8 @@
     <string name="best_streak">Best streak</string>
     <string name="total_done">Total done</string>
     <string name="overall_rate">Overall rate</string>
+
+    <string name="create_personal_habit">Create personal habit</string>
+    <string name="no_habits_found">No habits found!</string>
+    <string name="add_your_own_personal_habit_to_start_tracking">Add your own personal habit to start tracking!</string>
 </resources>

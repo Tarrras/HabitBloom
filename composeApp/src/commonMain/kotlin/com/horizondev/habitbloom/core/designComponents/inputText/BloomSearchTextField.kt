@@ -13,8 +13,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -44,15 +42,7 @@ fun BloomSearchTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = RoundedCornerShape(6.dp),
-    colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
-        unfocusedBorderColor = BloomTheme.colors.textColor.disabled,
-        focusedBorderColor = BloomTheme.colors.primary,
-        focusedTextColor = BloomTheme.colors.textColor.primary,
-        unfocusedTextColor = BloomTheme.colors.textColor.primary,
-        focusedContainerColor = BloomTheme.colors.surface,
-        unfocusedContainerColor = BloomTheme.colors.surface,
-    )
+    shape: Shape = RoundedCornerShape(6.dp)
 ) {
     val clearButtonInteractionSource = remember { MutableInteractionSource() }
 
@@ -104,6 +94,5 @@ fun BloomSearchTextField(
         minLines = minLines,
         interactionSource = interactionSource,
         shape = shape,
-        colors = colors
     )
 }
