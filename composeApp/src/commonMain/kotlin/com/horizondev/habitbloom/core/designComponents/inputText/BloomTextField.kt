@@ -1,7 +1,10 @@
 package com.horizondev.habitbloom.core.designComponents.inputText
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -11,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.TextStyle
@@ -28,6 +32,8 @@ fun BloomTextField(
     readOnly: Boolean = false,
     textStyle: TextStyle = BloomTheme.typography.formLabel,
     placeholderText: String? = null,
+    title: String? = null,
+    maxSymbols: Int? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     prefix: @Composable (() -> Unit)? = null,
@@ -52,39 +58,61 @@ fun BloomTextField(
         selectionColors = TextSelectionColors(
             backgroundColor = BloomTheme.colors.primary.copy(alpha = 0.4f),
             handleColor = BloomTheme.colors.primary
-        )
+        ),
+        errorContainerColor = BloomTheme.colors.surface,
+        errorBorderColor = BloomTheme.colors.error
     )
 ) {
-    BloomBaseOutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        enabled = enabled,
-        readOnly = readOnly,
-        textStyle = textStyle,
-        placeholder = placeholderText?.let {
-            {
-                Text(
-                    text = it,
-                    style = BloomTheme.typography.formLabel,
-                    color = BloomTheme.colors.textColor.secondary
-                )
-            }
-        },
-        leadingIcon = leadingIcon,
-        trailingIcon = trailingIcon,
-        prefix = prefix,
-        suffix = suffix,
-        supportingText = supportingText,
-        isError = isError,
-        visualTransformation = visualTransformation,
-        colors = colors,
-        shape = shape,
-        interactionSource = interactionSource,
-        maxLines = maxLines,
-        minLines = minLines,
-        keyboardActions = keyboardActions,
-        keyboardOptions = keyboardOptions,
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
-    )
+    Column {
+        title?.let {
+            Text(
+                text = title,
+                style = BloomTheme.typography.heading,
+                color = BloomTheme.colors.textColor.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        BloomBaseOutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            modifier = modifier,
+            enabled = enabled,
+            readOnly = readOnly,
+            textStyle = textStyle,
+            placeholder = placeholderText?.let {
+                {
+                    Text(
+                        text = it,
+                        style = BloomTheme.typography.formLabel,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+                }
+            },
+            leadingIcon = leadingIcon,
+            trailingIcon = trailingIcon,
+            prefix = prefix,
+            suffix = suffix,
+            supportingText = supportingText,
+            isError = isError,
+            visualTransformation = visualTransformation,
+            colors = colors,
+            shape = shape,
+            interactionSource = interactionSource,
+            maxLines = maxLines,
+            minLines = minLines,
+            keyboardActions = keyboardActions,
+            keyboardOptions = keyboardOptions,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+        )
+
+        maxSymbols?.let {
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${value.length}/$maxSymbols",
+                style = BloomTheme.typography.small,
+                color = BloomTheme.colors.textColor.secondary,
+                modifier = Modifier.align(Alignment.End)
+            )
+        }
+    }
 }

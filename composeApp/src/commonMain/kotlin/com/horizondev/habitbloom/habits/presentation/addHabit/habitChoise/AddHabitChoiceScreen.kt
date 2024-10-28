@@ -1,6 +1,8 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -42,7 +44,9 @@ import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostMo
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
 import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.components.HabitListItem
+import com.horizondev.habitbloom.habits.presentation.createHabit.CreatePersonalHabitScreen
 import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.parentOrThrow
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_your_own_personal_habit_to_start_tracking
 import habitbloom.composeapp.generated.resources.choose_habit_to_acquire
@@ -57,6 +61,8 @@ class AddHabitChoiceScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val parentNavigator = LocalNavigator.parentOrThrow
+
         val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
 
         val screenModel = getScreenModel<AddHabitChoiceScreenModel> {
@@ -73,6 +79,10 @@ class AddHabitChoiceScreen : Screen {
                 is AddHabitChoiceUiIntent.NavigateNext -> {
                     hostModel.updateSelectedHabit(uiIntent.info)
                     navigator.push(AddHabitDurationChoiceScreen())
+                }
+
+                is AddHabitChoiceUiIntent.NavigateToHabitCreation -> {
+                    parentNavigator.push(CreatePersonalHabitScreen(uiIntent.timeOfDay))
                 }
             }
         }
@@ -127,7 +137,15 @@ fun AddHabitChoiceScreenContent(
                 }
             } else {
                 NoResultsPlaceholders(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {
+                                handleUiEvent(AddHabitChoiceUiEvent.CreatePersonalHabit)
+                            }
+                        ),
                     title = {
                         Text(
                             textAlign = TextAlign.Center,
@@ -164,7 +182,9 @@ fun AddHabitChoiceScreenContent(
                 BloomPrimaryFilledButton(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
                     text = stringResource(Res.string.create_personal_habit),
-                    onClick = {}
+                    onClick = {
+                        handleUiEvent(AddHabitChoiceUiEvent.CreatePersonalHabit)
+                    }
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }

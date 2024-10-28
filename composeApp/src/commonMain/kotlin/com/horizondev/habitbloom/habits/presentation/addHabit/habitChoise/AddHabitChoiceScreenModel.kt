@@ -1,6 +1,5 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise
 
-import cafe.adriel.voyager.core.model.ScreenModel
 import cafe.adriel.voyager.core.model.StateScreenModel
 import cafe.adriel.voyager.core.model.screenModelScope
 import com.horizondev.habitbloom.habits.domain.HabitsRepository
@@ -45,6 +44,14 @@ class AddHabitChoiceScreenModel(
             is AddHabitChoiceUiEvent.SubmitHabit -> {
                 screenModelScope.launch {
                     uiIntent.emit(AddHabitChoiceUiIntent.NavigateNext(uiEvent.info))
+                }
+            }
+
+            AddHabitChoiceUiEvent.CreatePersonalHabit -> {
+                timeOfDay?.let {
+                    screenModelScope.launch {
+                        uiIntent.emit(AddHabitChoiceUiIntent.NavigateToHabitCreation(timeOfDay))
+                    }
                 }
             }
         }

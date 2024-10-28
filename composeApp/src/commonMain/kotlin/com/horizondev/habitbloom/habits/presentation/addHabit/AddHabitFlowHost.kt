@@ -54,7 +54,9 @@ class AddHabitFlowHost : Screen {
 
 @Composable
 fun AddHabitFlowHostContent(modifier: Modifier = Modifier) {
-    Navigator(screen = AddHabitTimeOfDayChoiceScreen()) { navigator ->
+    Navigator(
+        screen = AddHabitTimeOfDayChoiceScreen()
+    ) { navigator ->
         val scope = rememberCoroutineScope()
         val snackBarState = remember { SnackbarHostState() }
 

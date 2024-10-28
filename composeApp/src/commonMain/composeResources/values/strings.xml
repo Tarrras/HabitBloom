@@ -85,6 +85,9 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
 
+    <string name="title">Title</string>
+    <string name="description">Description</string>
+
     <string name="quick_action">Quick actions</string>
     <string name="every_day">Every day</string>
     <string name="only_weekends">Weekends only</string>
@@ -156,4 +159,9 @@
     <string name="create_personal_habit">Create personal habit</string>
     <string name="no_habits_found">No habits found!</string>
     <string name="add_your_own_personal_habit_to_start_tracking">Add your own personal habit to start tracking!</string>
+
+    <string name="enter_habit_title">Enter habit title</string>
+    <string name="enter_habit_description">Enter habit description</string>
+    <string name="habit_title">Habit title</string>
+    <string name="habit_description">Habit description</string>
 </resources>
