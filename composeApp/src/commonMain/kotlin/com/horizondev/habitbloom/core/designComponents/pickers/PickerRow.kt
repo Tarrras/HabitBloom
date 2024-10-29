@@ -30,7 +30,7 @@ fun PickerRow(
                 color = backgroundColor,
                 shape = RoundedCornerShape(shapeSize)
             ).border(
-                width = 2.dp,
+                width = 1.dp,
                 color = BloomTheme.colors.primary,
                 shape = RoundedCornerShape(shapeSize)
             ),

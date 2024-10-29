@@ -52,6 +52,18 @@ class CreatePersonalHabitScreenModel(
                     )
                 }
             }
+
+            CreatePersonalHabitUiEvent.CreateHabit -> {
+                mutableState.update { it.copy(showCreateHabitDialog = true) }
+            }
+
+            CreatePersonalHabitUiEvent.HideCreateHabitDialog -> {
+                mutableState.update { it.copy(showCreateHabitDialog = false) }
+            }
+
+            CreatePersonalHabitUiEvent.SubmitHabitCreation -> {
+                mutableState.update { it.copy(showCreateHabitDialog = false) }
+            }
         }
     }
 }

@@ -16,7 +16,7 @@ fun BloomPrimaryOutlinedButton(
     text: String,
     onClick: () -> Unit,
     borderStroke: BorderStroke = BorderStroke(
-        width = 2.dp, color = BloomTheme.colors.primary
+        width = 1.dp, color = BloomTheme.colors.primary
     )
 ) {
     OutlinedButton(

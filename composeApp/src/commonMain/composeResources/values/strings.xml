@@ -84,6 +84,7 @@
     <string name="edit">Edit</string>
     <string name="save">Save</string>
     <string name="delete">Delete</string>
+    <string name="create">Create</string>
 
     <string name="title">Title</string>
     <string name="description">Description</string>
@@ -135,6 +136,7 @@
     <string name="completed_n_times">Completed: %1$d</string>
 
     <string name="habit_details">Habit details</string>
+    <string name="habit_category">Habit category</string>
     <string name="habit_schedule">Habit schedule</string>
     <string name="habit_duration">Habit duration</string>
     <string name="habit_repeats">Habit repeats</string>
@@ -164,4 +166,6 @@
     <string name="enter_habit_description">Enter habit description</string>
     <string name="habit_title">Habit title</string>
     <string name="habit_description">Habit description</string>
+    <string name="create_habit_question">Create Habit?</string>
+    <string name="create_habit_description">Are you sure you want to create this habit? You will be able to add this habit to your schedule, edit or delete it.</string>
 </resources>
