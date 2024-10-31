@@ -9,6 +9,8 @@ import com.horizondev.habitbloom.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.profile.data.ProfileRemoteDataSource
+import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.calculateCompletedRepeats
 import com.horizondev.habitbloom.utils.getCurrentDate
 import io.github.aakira.napier.Napier
@@ -27,6 +29,7 @@ import kotlinx.datetime.LocalDate
 
 class HabitsRepository(
     private val remoteDataSource: HabitsRemoteDataSource,
+    private val profileRemoteDataSource: ProfileRemoteDataSource,
     private val localDataSource: HabitsLocalDataSource
 ) {
     private val TAG = "HabitsRepository"
@@ -44,7 +47,8 @@ class HabitsRepository(
     private suspend fun getAllHabits(): Result<List<HabitInfo>> {
         return withContext(Dispatchers.IO) {
             Napier.d("Fetching network habits...", tag = TAG)
-            remoteDataSource.getHabits()
+            val userId = profileRemoteDataSource.getUser().getOrNull()?.id
+            remoteDataSource.getHabits(userId)
                 .mapCatching { data -> data.map { habit -> habit.toDomainModel() } }
         }
     }
@@ -113,6 +117,24 @@ class HabitsRepository(
             date = date,
             isCompleted = isCompleted
         )
+    }
+
+    suspend fun createPersonalHabit(
+        userId: String,
+        timeOfDay: TimeOfDay,
+        title: String,
+        description: String,
+        icon: String = DEFAULT_PHOTO_URL
+    ): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            remoteDataSource.savePersonalHabit(
+                userId = userId,
+                timeOfDay = timeOfDay,
+                title = title,
+                description = description,
+                icon = icon
+            )
+        }
     }
 
     fun getListOfAllUserHabitRecordsFlow(): Flow<List<UserHabitRecordFullInfo>> {

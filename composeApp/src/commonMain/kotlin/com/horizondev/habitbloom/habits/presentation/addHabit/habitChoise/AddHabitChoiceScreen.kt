@@ -44,7 +44,7 @@ import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostMo
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
 import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.components.HabitListItem
-import com.horizondev.habitbloom.habits.presentation.createHabit.CreatePersonalHabitScreen
+import com.horizondev.habitbloom.habits.presentation.createHabit.details.CreatePersonalHabitScreen
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.parentOrThrow
 import habitbloom.composeapp.generated.resources.Res

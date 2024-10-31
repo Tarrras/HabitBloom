@@ -11,7 +11,8 @@ data class HabitInfoResponse(
     val iconUrl: String,
     val name: String,
     val shortInfo: String,
-    val timeOfDay: TimeOfDayResponse
+    val timeOfDay: TimeOfDayResponse,
+    val userId: String? = null
 )
 
 
@@ -34,4 +35,10 @@ fun TimeOfDayResponse.toDomainModel() = when (this) {
     TimeOfDayResponse.Morning -> TimeOfDay.Morning
     TimeOfDayResponse.Afternoon -> TimeOfDay.Afternoon
     TimeOfDayResponse.Evening -> TimeOfDay.Evening
+}
+
+fun TimeOfDay.toNetworkModel() = when (this) {
+    TimeOfDay.Morning -> TimeOfDayResponse.Morning
+    TimeOfDay.Afternoon -> TimeOfDayResponse.Afternoon
+    TimeOfDay.Evening -> TimeOfDayResponse.Evening
 }

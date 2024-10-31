@@ -19,7 +19,8 @@ fun BloomPrimaryFilledButton(
     enabled: Boolean = true,
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = BloomTheme.colors.primary,
-        contentColor = BloomTheme.colors.textColor.white
+        contentColor = BloomTheme.colors.textColor.white,
+        disabledContainerColor = BloomTheme.colors.primary.copy(alpha = DisabledContainerOpacity)
     )
 ) {
     Button(
@@ -38,3 +39,5 @@ fun BloomPrimaryFilledButton(
         )
     }
 }
+
+const val DisabledContainerOpacity = 0.2f

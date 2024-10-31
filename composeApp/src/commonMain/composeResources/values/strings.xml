@@ -168,4 +168,7 @@
     <string name="habit_description">Habit description</string>
     <string name="create_habit_question">Create Habit?</string>
     <string name="create_habit_description">Are you sure you want to create this habit? You will be able to add this habit to your schedule, edit or delete it.</string>
+    <string name="save_habit_error">Something went wrong! Please try again or later</string>
+    <string name="habit_created_success">Great job! Your new habit is created!</string>
+    <string name="habit_created_description">Your new habit is now set up and ready to track. Consistency is key — let’s get started!</string>
 </resources>

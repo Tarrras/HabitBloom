@@ -287,13 +287,15 @@ private fun UserHabitFullInfoCard(
                 color = BloomTheme.colors.textColor.primary,
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            if (habitInfo.shortInfo.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Text(
-                text = habitInfo.shortInfo,
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary,
-            )
+                Text(
+                    text = habitInfo.shortInfo,
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary,
+                )
+            }
         }
     }
 }

@@ -1,18 +1,55 @@
 package com.horizondev.habitbloom.habits.data.remote
 
 import com.horizondev.habitbloom.core.data.HABITS_COLLECTION_ROUTE
+import com.horizondev.habitbloom.core.data.USER_HABITS_COLLECTION_ROUTE
+import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import dev.gitlive.firebase.firestore.FirebaseFirestore
+import dev.gitlive.firebase.firestore.QuerySnapshot
 import kotlinx.serialization.Serializable
 
 class HabitsRemoteDataSource(
     private val firestore: FirebaseFirestore
 ) {
-    suspend fun getHabits(): Result<List<HabitInfoResponse>> {
-        return runCatching {
-            val habitResponse = firestore.collection(HABITS_COLLECTION_ROUTE).get()
-            habitResponse.documents.map { document ->
+    suspend fun getHabits(userId: String?): Result<List<HabitInfoResponse>> {
+        fun extractHabits(
+            querySnapshot: QuerySnapshot
+        ): List<HabitInfoResponse> {
+            return querySnapshot.documents.map { document ->
                 document.data(HabitInfoResponse.serializer()).copy(id = document.id)
             }
+        }
+
+        return runCatching {
+            val habitResponse = firestore.collection(HABITS_COLLECTION_ROUTE).get().let {
+                extractHabits(it)
+            }
+            val habitPersonalHabits = firestore.collection(USER_HABITS_COLLECTION_ROUTE).get().let {
+                extractHabits(it)
+            }.filter { userId == userId }
+
+            habitResponse + habitPersonalHabits
+        }
+    }
+
+    suspend fun savePersonalHabit(
+        userId: String,
+        timeOfDay: TimeOfDay,
+        title: String,
+        description: String,
+        icon: String = DEFAULT_PHOTO_URL
+    ): Result<Boolean> {
+        return runCatching {
+            firestore.collection(USER_HABITS_COLLECTION_ROUTE).add(
+                data = HabitInfoResponse(
+                    description = description,
+                    name = title,
+                    iconUrl = icon,
+                    userId = userId,
+                    shortInfo = "",
+                    timeOfDay = timeOfDay.toNetworkModel()
+                )
+            ).id.isNotEmpty()
         }
     }
 
@@ -173,5 +210,6 @@ data class Habit(
     val iconUrl: String,
     val name: String,
     val shortInfo: String,
-    val timeOfDay: String
+    val timeOfDay: String,
+    val userId: String? = null
 )

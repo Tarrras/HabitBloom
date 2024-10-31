@@ -6,7 +6,7 @@ import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostMo
 import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreenModel
 import com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreenModel
 import com.horizondev.habitbloom.habits.presentation.addHabit.summary.AddHabitSummaryScreenModel
-import com.horizondev.habitbloom.habits.presentation.createHabit.CreatePersonalHabitScreenModel
+import com.horizondev.habitbloom.habits.presentation.createHabit.details.CreatePersonalHabitScreenModel
 import com.horizondev.habitbloom.habits.presentation.habitDetails.HabitDetailsScreenModel
 import com.horizondev.habitbloom.habits.presentation.home.HomeScreenModel
 import com.horizondev.habitbloom.profile.presentation.ProfileScreenModel

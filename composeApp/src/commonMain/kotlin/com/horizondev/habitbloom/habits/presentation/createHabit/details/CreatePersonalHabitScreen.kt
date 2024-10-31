@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.habits.presentation.createHabit
+package com.horizondev.habitbloom.habits.presentation.createHabit.details
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +16,13 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -29,6 +32,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.koin.getScreenModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
@@ -36,8 +40,10 @@ import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.inputText.BloomTextField
 import com.horizondev.habitbloom.core.designComponents.pickers.SingleOptionPicker
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.habits.presentation.createHabit.success.CreatePersonalHabitSuccessScreen
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
@@ -55,6 +61,7 @@ import habitbloom.composeapp.generated.resources.habit_category
 import habitbloom.composeapp.generated.resources.habit_description
 import habitbloom.composeapp.generated.resources.habit_title
 import habitbloom.composeapp.generated.resources.next
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.core.parameter.parametersOf
 
@@ -70,14 +77,27 @@ class CreatePersonalHabitScreen(
         }
         val uiState by screenModel.state.collectAsState()
 
+        val scope = rememberCoroutineScope()
+        val snackBarState = remember { SnackbarHostState() }
+
         screenModel.uiIntent.collectAsEffect { uiIntent ->
             when (uiIntent) {
                 CreatePersonalHabitUiIntent.NavigateBack -> navigator.pop()
+                CreatePersonalHabitUiIntent.OpenSuccessScreen -> {
+                    navigator.replace(CreatePersonalHabitSuccessScreen())
+                }
+
+                is CreatePersonalHabitUiIntent.ShowSnackbar -> {
+                    scope.launch {
+                        snackBarState.showSnackbar(uiIntent.visuals)
+                    }
+                }
             }
         }
 
         CreatePersonalHabitScreenContent(
             uiState = uiState,
+            snackbarHostState = snackBarState,
             handleUiEvent = screenModel::handleUiEvent
         )
     }
@@ -86,6 +106,7 @@ class CreatePersonalHabitScreen(
 @Composable
 fun CreatePersonalHabitScreenContent(
     uiState: CreatePersonalHabitUiState,
+    snackbarHostState: SnackbarHostState,
     handleUiEvent: (CreatePersonalHabitUiEvent) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -98,6 +119,12 @@ fun CreatePersonalHabitScreenContent(
                 )
             },
             containerColor = BloomTheme.colors.background,
+            snackbarHost = {
+                BloomSnackbarHost(
+                    modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                    snackBarState = snackbarHostState
+                )
+            },
             modifier = Modifier.imePadding()
         ) { paddingValues ->
             Column(
@@ -185,6 +212,8 @@ fun CreatePersonalHabitScreenContent(
                 handleUiEvent(CreatePersonalHabitUiEvent.SubmitHabitCreation)
             }
         )
+
+        BloomLoader(isLoading = uiState.isLoading, modifier = Modifier.align(Alignment.Center))
     }
 }
 
