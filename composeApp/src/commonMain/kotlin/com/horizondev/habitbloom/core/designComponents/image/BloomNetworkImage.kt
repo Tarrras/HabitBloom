@@ -1,7 +1,6 @@
 package com.horizondev.habitbloom.core.designComponents.image
 
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
@@ -11,9 +10,10 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.BloomCircularProgressIndicator
-import io.kamel.image.KamelImage
-import io.kamel.image.asyncPainterResource
+import coil3.compose.AsyncImage
+import coil3.compose.LocalPlatformContext
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 
 @Composable
 fun BloomNetworkImage(
@@ -23,20 +23,17 @@ fun BloomNetworkImage(
     iconUrl: String,
     contentDescription: String?
 ) {
-    KamelImage(
-        resource = asyncPainterResource(data = iconUrl),
-        modifier = modifier.size(size).clip(shape),
-        contentDescription = contentDescription,
-        contentScale = ContentScale.FillBounds,
-        onLoading = { progress ->
-            BloomCircularProgressIndicator(
-                progress = {
-                    progress
-                }, modifier = Modifier
-                    .matchParentSize()
-                    .padding(4.dp)
-            )
-        },
-        animationSpec = tween()
-    )
+    Box(modifier = modifier.size(size)) {
+        AsyncImage(
+            model = ImageRequest.Builder(LocalPlatformContext.current)
+                .data(iconUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = contentDescription,
+            modifier = Modifier
+                .matchParentSize()
+                .clip(shape),
+            contentScale = ContentScale.Crop
+        )
+    }
 }

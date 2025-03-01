@@ -120,7 +120,9 @@ kotlin {
 
             implementation(libs.stately.common)
 
-            implementation(libs.kamel.image)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
+            
             implementation(libs.ktor.client.core)
 
             implementation(libs.calendar.compose.multiplatform)
@@ -130,7 +132,7 @@ kotlin {
 
 android {
     namespace = "com.horizondev.habitbloom"
-    compileSdk = 34
+    compileSdk = 35
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
@@ -139,7 +141,7 @@ android {
     defaultConfig {
         applicationId = "com.horizondev.habitbloom"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
     }

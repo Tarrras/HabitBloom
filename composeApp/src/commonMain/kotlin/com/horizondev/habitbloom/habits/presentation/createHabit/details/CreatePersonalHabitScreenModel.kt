@@ -7,6 +7,8 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.platform.ImagePicker
+import com.horizondev.habitbloom.platform.ImagePickerResult
 import com.horizondev.habitbloom.profile.domain.ProfileRepository
 import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
@@ -14,6 +16,8 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.save_habit_error
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -21,15 +25,43 @@ import org.jetbrains.compose.resources.getString
 class CreatePersonalHabitScreenModel(
     private val habitRepository: HabitsRepository,
     private val profileRepository: ProfileRepository,
+    private val imagePicker: ImagePicker,
     timeOfDay: TimeOfDay?
 ) : StateScreenModel<CreatePersonalHabitUiState>(
     CreatePersonalHabitUiState(
         timeOfDay = timeOfDay ?: TimeOfDay.Morning
     )
 ) {
-
     private val _uiIntent = MutableSharedFlow<CreatePersonalHabitUiIntent>()
     val uiIntent = _uiIntent.asSharedFlow()
+
+    init {
+        imagePicker.imagePickerResult
+            .onEach { result ->
+                mutableState.update { it.copy(imagePickerState = result) }
+                when (result) {
+                    is ImagePickerResult.Success -> {
+                        mutableState.update { it.copy(selectedImageUrl = result.imageUrl) }
+                    }
+
+                    is ImagePickerResult.Error -> {
+                        _uiIntent.emit(
+                            CreatePersonalHabitUiIntent.ShowSnackbar(
+                                visuals = BloomSnackbarVisuals(
+                                    message = result.message,
+                                    state = BloomSnackbarState.Error,
+                                    duration = SnackbarDuration.Short,
+                                    withDismissAction = true
+                                )
+                            )
+                        )
+                    }
+
+                    else -> Unit
+                }
+            }
+            .launchIn(screenModelScope)
+    }
 
     fun handleUiEvent(uiEvent: CreatePersonalHabitUiEvent) {
         when (uiEvent) {
@@ -74,6 +106,12 @@ class CreatePersonalHabitScreenModel(
             CreatePersonalHabitUiEvent.SubmitHabitCreation -> {
                 saveUserHabit()
             }
+
+            CreatePersonalHabitUiEvent.PickImage -> {
+                screenModelScope.launch {
+                    imagePicker.pickImage()
+                }
+            }
         }
     }
 
@@ -86,7 +124,8 @@ class CreatePersonalHabitScreenModel(
             userId = userId,
             timeOfDay = uiState.timeOfDay,
             title = uiState.title,
-            description = uiState.description
+            description = uiState.description,
+            icon = uiState.selectedImageUrl ?: ""
         ).onSuccess {
             mutableState.update { it.copy(isLoading = false) }
             _uiIntent.emit(CreatePersonalHabitUiIntent.OpenSuccessScreen)

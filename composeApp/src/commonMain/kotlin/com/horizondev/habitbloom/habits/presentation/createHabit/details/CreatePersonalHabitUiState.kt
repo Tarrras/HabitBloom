@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.habits.presentation.createHabit.details
 
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.platform.ImagePickerResult
 
 data class CreatePersonalHabitUiState(
     val timeOfDay: TimeOfDay = TimeOfDay.Morning,
@@ -10,7 +11,9 @@ data class CreatePersonalHabitUiState(
     val description: String = "",
     val isDescriptionInputError: Boolean = false,
     val showCreateHabitDialog: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val selectedImageUrl: String? = null,
+    val imagePickerState: ImagePickerResult = ImagePickerResult.None
 ) {
     val nextButtonEnabled: Boolean = title.isNotEmpty()
             && isTitleInputError.not()
@@ -27,6 +30,7 @@ sealed interface CreatePersonalHabitUiEvent {
     data object CreateHabit : CreatePersonalHabitUiEvent
     data object SubmitHabitCreation : CreatePersonalHabitUiEvent
     data object HideCreateHabitDialog : CreatePersonalHabitUiEvent
+    data object PickImage : CreatePersonalHabitUiEvent
 }
 
 sealed interface CreatePersonalHabitUiIntent {

@@ -7,14 +7,21 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.horizondev.habitbloom.app.App
+import com.horizondev.habitbloom.platform.AndroidImagePicker
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
+    private val imagePicker: AndroidImagePicker by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         Napier.base(DebugAntilog())
+
+        // Register image picker
+        imagePicker.register(this)
 
         setContent {
             App()
