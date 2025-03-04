@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -123,10 +124,11 @@ fun AddHabitChoiceScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 placeholderText = stringResource(Res.string.search_habit)
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(12.dp))
             if (uiState.habits.isNotEmpty()) {
                 LazyColumn(
-                    state = lazyListState
+                    state = lazyListState,
+                    contentPadding = PaddingValues(top = 12.dp, bottom = 54.dp)
                 ) {
                     habits(
                         habits = uiState.habits,

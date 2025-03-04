@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.habits.domain
 
 import com.horizondev.habitbloom.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.habits.data.remote.HabitsRemoteDataSource
+import com.horizondev.habitbloom.habits.data.remote.SupabaseStorageService
 import com.horizondev.habitbloom.habits.data.remote.toDomainModel
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
@@ -30,7 +31,8 @@ import kotlinx.datetime.LocalDate
 class HabitsRepository(
     private val remoteDataSource: HabitsRemoteDataSource,
     private val profileRemoteDataSource: ProfileRemoteDataSource,
-    private val localDataSource: HabitsLocalDataSource
+    private val localDataSource: HabitsLocalDataSource,
+    private val storageService: SupabaseStorageService
 ) {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
@@ -38,6 +40,9 @@ class HabitsRepository(
     suspend fun initData(): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             //remoteDataSource.pushHabitsToFirestore()
+            // Initialize Supabase storage bucket
+            storageService.initializeBucket()
+            
             getAllHabits().onSuccess { habits ->
                 remoteHabits.update { habits }
             }.map { true }
@@ -127,12 +132,39 @@ class HabitsRepository(
         icon: String = DEFAULT_PHOTO_URL
     ): Result<Boolean> {
         return withContext(Dispatchers.IO) {
+            // If icon is a local file path, upload it to Supabase Storage
+            val iconUrl =
+                if (icon.isNotEmpty() && (icon.startsWith("/") || icon.startsWith("file://"))) {
+                    Napier.d("Uploading image from local path: $icon", tag = TAG)
+
+                    // Upload the image file to Supabase Storage
+                    storageService.uploadHabitImage(icon).fold(
+                        onSuccess = { url ->
+                            Napier.d(
+                                "Image uploaded successfully to Supabase before adding habit",
+                                tag = TAG
+                            )
+                            url
+                        },
+                        onFailure = { error ->
+                            Napier.e(
+                                "Failed to upload image to Supabase: ${error.message}",
+                                tag = TAG
+                            )
+                            return@withContext Result.failure(error)
+                        }
+                    )
+                } else {
+                    icon
+                }
+
+            // Save the habit with the icon URL (either direct URL or uploaded image URL)
             remoteDataSource.savePersonalHabit(
                 userId = userId,
                 timeOfDay = timeOfDay,
                 title = title,
                 description = description,
-                icon = icon
+                icon = iconUrl
             )
         }
     }

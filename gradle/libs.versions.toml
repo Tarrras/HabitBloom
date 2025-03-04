@@ -1,10 +1,11 @@
 [versions]
 androidDriver = "2.0.0"
 calendarComposeMultiplatform = "2.6.0-beta01"
-coilCompose = "3.1.0"
+coilCompose = "3.0.4"
 kamelImage = "0.9.5"
 sqlDelight = "2.0.0"
 firebaseBom = "33.2.0"
+supabaseBom = "3.1.2"
 firebaseCommonKtx = "20.3.3"
 kotlin = "2.0.10"
 compose = "1.7.3"
@@ -67,6 +68,10 @@ gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlyti
 gitlive-firebase-common = { module = "dev.gitlive:firebase-common", version.ref = "firebase-gitlive-sdk" }
 gitlive-firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase-gitlive-sdk" }
 gitlive-firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-storage = { module = "dev.gitlive:firebase-storage", version.ref = "firebase-gitlive-sdk" }
+
+supabase-bom = { module = "o.github.jan-tennert.supabase:bom", version.ref = "supabaseBom" }
+supabase-storage-ktx = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "supabaseBom" }
 
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koinAndroid" }

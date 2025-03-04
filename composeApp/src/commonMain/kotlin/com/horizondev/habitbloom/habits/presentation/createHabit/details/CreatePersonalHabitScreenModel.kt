@@ -14,6 +14,7 @@ import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.save_habit_error
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
@@ -38,17 +39,22 @@ class CreatePersonalHabitScreenModel(
     init {
         imagePicker.imagePickerResult
             .onEach { result ->
-                mutableState.update { it.copy(imagePickerState = result) }
+                mutableState.update {
+                    it.copy(imagePickerState = result)
+                }
+
                 when (result) {
                     is ImagePickerResult.Success -> {
-                        mutableState.update { it.copy(selectedImageUrl = result.imageUrl) }
+                        Napier.d("Image picked: ${result.imageUrl}")
+                        mutableState.update {
+                            it.copy(selectedImageUrl = result.imageUrl)
+                        }
                     }
-
                     is ImagePickerResult.Error -> {
                         _uiIntent.emit(
                             CreatePersonalHabitUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(
-                                    message = result.message,
+                                    message = "Failed to pick image: ${result.message}",
                                     state = BloomSnackbarState.Error,
                                     duration = SnackbarDuration.Short,
                                     withDismissAction = true
@@ -57,7 +63,8 @@ class CreatePersonalHabitScreenModel(
                         )
                     }
 
-                    else -> Unit
+                    else -> { /* Do nothing for other states */
+                    }
                 }
             }
             .launchIn(screenModelScope)
@@ -120,6 +127,9 @@ class CreatePersonalHabitScreenModel(
 
         val uiState = mutableState.value
         val userId = profileRepository.getUserInfo().getOrNull()?.id ?: return@launch
+
+        Napier.d("Creating habit with image: ${uiState.selectedImageUrl ?: "No image"}")
+        
         habitRepository.createPersonalHabit(
             userId = userId,
             timeOfDay = uiState.timeOfDay,
@@ -130,6 +140,7 @@ class CreatePersonalHabitScreenModel(
             mutableState.update { it.copy(isLoading = false) }
             _uiIntent.emit(CreatePersonalHabitUiIntent.OpenSuccessScreen)
         }.onFailure {
+            Napier.e("Failed to save habit", it)
             mutableState.update { it.copy(isLoading = false) }
             _uiIntent.emit(
                 CreatePersonalHabitUiIntent.ShowSnackbar(
