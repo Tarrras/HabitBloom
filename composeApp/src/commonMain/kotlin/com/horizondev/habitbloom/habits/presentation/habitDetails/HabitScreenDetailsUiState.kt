@@ -13,6 +13,7 @@ data class HabitScreenDetailsUiState(
     val durationUpdateButtonEnabled: Boolean = true,
     val isLoading: Boolean = true,
     val showDeleteDialog: Boolean = false,
+    val showClearHistoryDialog: Boolean = false,
     val progressUiState: UserHabitProgressUiState? = null
 )
 
@@ -31,6 +32,10 @@ sealed interface HabitScreenDetailsUiEvent {
     data object RequestDeleteHabit : HabitScreenDetailsUiEvent
     data object DeleteHabit : HabitScreenDetailsUiEvent
     data object DismissHabitDeletion : HabitScreenDetailsUiEvent
+
+    data object RequestClearHistory : HabitScreenDetailsUiEvent
+    data object ClearHistory : HabitScreenDetailsUiEvent
+    data object DismissClearHistory : HabitScreenDetailsUiEvent
 
     data class DurationChanged(val duration: Int) : HabitScreenDetailsUiEvent
     data class DayStateChanged(

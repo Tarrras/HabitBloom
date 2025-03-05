@@ -194,6 +194,44 @@ class HabitDetailsScreenModel(
             HabitScreenDetailsUiEvent.RequestDeleteHabit -> {
                 mutableState.update { it.copy(showDeleteDialog = true) }
             }
+
+            HabitScreenDetailsUiEvent.RequestClearHistory -> {
+                mutableState.update { it.copy(showClearHistoryDialog = true) }
+            }
+
+            HabitScreenDetailsUiEvent.DismissClearHistory -> {
+                mutableState.update { it.copy(showClearHistoryDialog = false) }
+            }
+
+            HabitScreenDetailsUiEvent.ClearHistory -> {
+                screenModelScope.launch {
+                    mutableState.update { it.copy(showClearHistoryDialog = false) }
+
+                    repository.clearPastRecords(userHabitId = userHabitId).onSuccess { count ->
+                        _uiIntent.emit(
+                            HabitScreenDetailsUiIntent.ShowSnackbar(
+                                visuals = BloomSnackbarVisuals(
+                                    message = getString(Res.string.clear_history_success, count),
+                                    state = BloomSnackbarState.Success,
+                                    duration = SnackbarDuration.Short,
+                                    withDismissAction = true
+                                )
+                            )
+                        )
+                    }.onFailure {
+                        _uiIntent.emit(
+                            HabitScreenDetailsUiIntent.ShowSnackbar(
+                                visuals = BloomSnackbarVisuals(
+                                    message = getString(Res.string.clear_history_error),
+                                    state = BloomSnackbarState.Error,
+                                    duration = SnackbarDuration.Short,
+                                    withDismissAction = true
+                                )
+                            )
+                        )
+                    }
+                }
+            }
         }
     }
 

@@ -47,3 +47,8 @@ deleteUserHabitRecordsEntityAfterSpecificDateByUserHabitId:
 DELETE FROM UserHabitRecordsEntity
 WHERE userHabitId = ? AND date >= ?;
 
+-- Delete habit records for a specific user habit before a specific date
+clearPastRecordsBeforeDate:
+DELETE FROM UserHabitRecordsEntity
+WHERE userHabitId = ? AND date < ?;
+

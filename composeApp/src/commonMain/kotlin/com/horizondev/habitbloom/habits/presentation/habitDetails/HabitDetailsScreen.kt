@@ -65,10 +65,14 @@ import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
+import habitbloom.composeapp.generated.resources.clear
+import habitbloom.composeapp.generated.resources.clear_history
+import habitbloom.composeapp.generated.resources.clear_history_description
+import habitbloom.composeapp.generated.resources.clear_history_question
 import habitbloom.composeapp.generated.resources.completed_repeats
 import habitbloom.composeapp.generated.resources.delete
-import habitbloom.composeapp.generated.resources.delete_habit
 import habitbloom.composeapp.generated.resources.delete_habit_description
+import habitbloom.composeapp.generated.resources.delete_habit_menu
 import habitbloom.composeapp.generated.resources.delete_habit_question
 import habitbloom.composeapp.generated.resources.edit
 import habitbloom.composeapp.generated.resources.habit_active_days
@@ -136,7 +140,15 @@ fun HabitDetailsScreenContent(
                     title = uiState.habitInfo?.name.orEmpty(),
                     onBackPressed = {
                         handleUiEvent(HabitScreenDetailsUiEvent.BackPressed)
-                    }
+                    },
+                    menuItems = listOf(
+                        stringResource(Res.string.clear_history) to {
+                            handleUiEvent(HabitScreenDetailsUiEvent.RequestClearHistory)
+                        },
+                        stringResource(Res.string.delete_habit_menu) to {
+                            handleUiEvent(HabitScreenDetailsUiEvent.RequestDeleteHabit)
+                        }
+                    )
                 )
             },
             snackbarHost = {
@@ -214,19 +226,6 @@ fun HabitDetailsScreenContent(
                             )
 
                             Spacer(modifier = Modifier.height(32.dp))
-
-                            BloomPrimaryOutlinedButton(
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                                text = stringResource(Res.string.delete_habit),
-                                onClick = {
-                                    handleUiEvent(HabitScreenDetailsUiEvent.RequestDeleteHabit)
-                                },
-                                borderStroke = BorderStroke(
-                                    width = 2.dp,
-                                    color = BloomTheme.colors.error
-                                )
-                            )
-
                             Spacer(modifier = Modifier.navigationBarsPadding())
                         }
                     }
@@ -246,6 +245,16 @@ fun HabitDetailsScreenContent(
             },
             onDelete = {
                 handleUiEvent(HabitScreenDetailsUiEvent.DeleteHabit)
+            }
+        )
+
+        ClearHistoryDialog(
+            showDialog = uiState.showClearHistoryDialog,
+            onDismiss = {
+                handleUiEvent(HabitScreenDetailsUiEvent.DismissClearHistory)
+            },
+            onConfirm = {
+                handleUiEvent(HabitScreenDetailsUiEvent.ClearHistory)
             }
         )
     }
@@ -571,6 +580,67 @@ fun DeleteHabitDialog(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(Res.string.delete),
                 onClick = onDelete,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = BloomTheme.colors.error,
+                    contentColor = BloomTheme.colors.textColor.white
+                )
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            BloomPrimaryOutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.cancel),
+                onClick = onDismiss,
+                borderStroke = BorderStroke(
+                    width = 2.dp,
+                    color = BloomTheme.colors.error
+                )
+            )
+        }
+    }
+}
+
+@Composable
+fun ClearHistoryDialog(
+    modifier: Modifier = Modifier,
+    showDialog: Boolean,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    BloomAlertDialog(
+        isShown = showDialog,
+        onDismiss = onDismiss,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Image(
+                painter = painterResource(resource = Res.drawable.ic_warning_filled),
+                modifier = Modifier.size(48.dp),
+                contentDescription = "warning"
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = stringResource(Res.string.clear_history_question),
+                color = BloomTheme.colors.textColor.primary,
+                style = BloomTheme.typography.subheading,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(Res.string.clear_history_description),
+                color = BloomTheme.colors.textColor.primary,
+                style = BloomTheme.typography.body,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+            BloomPrimaryFilledButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.clear),
+                onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BloomTheme.colors.error,
                     contentColor = BloomTheme.colors.textColor.white

@@ -259,4 +259,25 @@ class HabitsRepository(
     ) = runCatching {
         localDataSource.deleteUserHabit(userHabitId)
     }
+
+    /**
+     * Clears all past records for a specific habit up to the current date.
+     * Current and future records are preserved.
+     *
+     * @param userHabitId The ID of the user habit
+     * @return Result containing the number of records deleted on success, or the error on failure
+     */
+    suspend fun clearPastRecords(userHabitId: Long): Result<Int> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val currentDate = getCurrentDate()
+                val count = localDataSource.clearPastRecords(userHabitId, currentDate)
+                Napier.d("Cleared $count past records for habit $userHabitId", tag = TAG)
+                Result.success(count)
+            } catch (e: Exception) {
+                Napier.e("Failed to clear past records for habit $userHabitId", e, tag = TAG)
+                Result.failure(e)
+            }
+        }
+    }
 }

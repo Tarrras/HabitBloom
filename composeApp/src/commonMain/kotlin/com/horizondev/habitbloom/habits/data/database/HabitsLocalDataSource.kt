@@ -295,4 +295,32 @@ class HabitsLocalDataSource(
                 }
             }
     }
+
+    /**
+     * Clears all past habit records for a user habit up to a specific date (exclusive).
+     * Current date and future records are preserved.
+     *
+     * @param userHabitId The ID of the user habit
+     * @param currentDate The date threshold (records before this date will be deleted)
+     * @return The number of records that were deleted
+     */
+    suspend fun clearPastRecords(userHabitId: Long, currentDate: LocalDate): Int {
+        return withContext(Dispatchers.IO) {
+            // First count how many records will be affected
+            val recordsToDelete = userHabitRecordsQueries
+                .selectUserHabitRecordsEntityByUserHabitId(userHabitId)
+                .executeAsList()
+                .count { LocalDate.parse(it.date) < currentDate }
+
+            // Then perform the deletion
+            database.transaction {
+                userHabitRecordsQueries.clearPastRecordsBeforeDate(
+                    userHabitId = userHabitId,
+                    date = currentDate.toString()
+                )
+            }
+
+            recordsToDelete
+        }
+    }
 }
