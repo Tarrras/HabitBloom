@@ -6,6 +6,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,7 +24,8 @@ import com.horizondev.habitbloom.habits.domain.models.HabitInfo
 fun HabitListItem(
     modifier: Modifier = Modifier,
     habitInfo: HabitInfo,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDelete: (() -> Unit)? = null
 ) {
     BloomCard(
         modifier = modifier,
@@ -35,7 +40,7 @@ fun HabitListItem(
                 contentDescription = habitInfo.name
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = habitInfo.name,
                     style = BloomTheme.typography.heading,
@@ -47,6 +52,16 @@ fun HabitListItem(
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.secondary
                 )
+            }
+
+            if (habitInfo.isCustomHabit && onDelete != null) {
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete custom habit",
+                        tint = BloomTheme.colors.error
+                    )
+                }
             }
         }
     }

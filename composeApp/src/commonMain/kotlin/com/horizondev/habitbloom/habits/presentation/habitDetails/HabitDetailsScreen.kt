@@ -66,13 +66,11 @@ import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.clear
-import habitbloom.composeapp.generated.resources.clear_history
 import habitbloom.composeapp.generated.resources.clear_history_description
 import habitbloom.composeapp.generated.resources.clear_history_question
 import habitbloom.composeapp.generated.resources.completed_repeats
 import habitbloom.composeapp.generated.resources.delete
 import habitbloom.composeapp.generated.resources.delete_habit_description
-import habitbloom.composeapp.generated.resources.delete_habit_menu
 import habitbloom.composeapp.generated.resources.delete_habit_question
 import habitbloom.composeapp.generated.resources.edit
 import habitbloom.composeapp.generated.resources.habit_active_days
@@ -142,10 +140,10 @@ fun HabitDetailsScreenContent(
                         handleUiEvent(HabitScreenDetailsUiEvent.BackPressed)
                     },
                     menuItems = listOf(
-                        stringResource(Res.string.clear_history) to {
+                        "Clear History" to {
                             handleUiEvent(HabitScreenDetailsUiEvent.RequestClearHistory)
                         },
-                        stringResource(Res.string.delete_habit_menu) to {
+                        "Delete Habit" to {
                             handleUiEvent(HabitScreenDetailsUiEvent.RequestDeleteHabit)
                         }
                     )

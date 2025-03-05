@@ -6,7 +6,8 @@ data class HabitInfo(
     val iconUrl: String,
     val name: String,
     val shortInfo: String,
-    val timeOfDay: TimeOfDay
+    val timeOfDay: TimeOfDay,
+    val isCustomHabit: Boolean = false
 )
 
 

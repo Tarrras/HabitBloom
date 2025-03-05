@@ -28,7 +28,8 @@ fun HabitInfoResponse.toDomainModel() = HabitInfo(
     iconUrl = iconUrl,
     name = name,
     shortInfo = shortInfo,
-    timeOfDay = timeOfDay.toDomainModel()
+    timeOfDay = timeOfDay.toDomainModel(),
+    isCustomHabit = userId != null || id?.startsWith("user_") == true
 )
 
 fun TimeOfDayResponse.toDomainModel() = when (this) {

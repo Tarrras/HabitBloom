@@ -280,4 +280,33 @@ class HabitsRepository(
             }
         }
     }
+
+    /**
+     * Deletes a custom habit by its ID.
+     *
+     * @param habitId The ID of the custom habit to delete
+     * @return Result containing success (true) or failure with error
+     */
+    suspend fun deleteCustomHabit(habitId: String): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                // First try to delete from remote storage
+                remoteDataSource.deleteCustomHabit(habitId).fold(
+                    onSuccess = {
+                        // If successful, update the cached habits list
+                        val updatedHabits = remoteHabits.value.filter { it.id != habitId }
+                        remoteHabits.update { updatedHabits }
+                        Result.success(true)
+                    },
+                    onFailure = { error ->
+                        Napier.e("Failed to delete custom habit: ${error.message}", tag = TAG)
+                        Result.failure(error)
+                    }
+                )
+            } catch (e: Exception) {
+                Napier.e("Error deleting custom habit", e, tag = TAG)
+                Result.failure(e)
+            }
+        }
+    }
 }

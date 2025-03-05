@@ -211,7 +211,7 @@ class HabitDetailsScreenModel(
                         _uiIntent.emit(
                             HabitScreenDetailsUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(
-                                    message = getString(Res.string.clear_history_success, count),
+                                    message = "History cleared: $count past records deleted",
                                     state = BloomSnackbarState.Success,
                                     duration = SnackbarDuration.Short,
                                     withDismissAction = true
@@ -222,7 +222,7 @@ class HabitDetailsScreenModel(
                         _uiIntent.emit(
                             HabitScreenDetailsUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(
-                                    message = getString(Res.string.clear_history_error),
+                                    message = "Failed to clear history",
                                     state = BloomSnackbarState.Error,
                                     duration = SnackbarDuration.Short,
                                     withDismissAction = true

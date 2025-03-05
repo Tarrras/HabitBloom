@@ -112,14 +112,14 @@ class HabitsRemoteDataSource(
                 timeOfDay = "Morning"
             ),
             Habit(
-                description = "Writing down things you’re grateful for in the morning boosts positivity and can improve mental health over time.",
+                description = "Writing down things you're grateful for in the morning boosts positivity and can improve mental health over time.",
                 iconUrl = "https://i.ibb.co/3cW4xBY/image.webp",
                 name = "Gratitude Journal",
-                shortInfo = "Write 3 things you’re grateful for each morning to cultivate a positive mindset.",
+                shortInfo = "Write 3 things you're grateful for each morning to cultivate a positive mindset.",
                 timeOfDay = "Morning"
             ),
             Habit(
-                description = "Morning stretching or yoga increases blood flow, reduces muscle tension, and prepares your body for the day’s activities.",
+                description = "Morning stretching or yoga increases blood flow, reduces muscle tension, and prepares your body for the day's activities.",
                 iconUrl = "https://i.ibb.co/3cW4xBY/image.webp",
                 name = "Stretching/Yoga",
                 shortInfo = "Spend 5-10 minutes stretching or doing a few simple yoga poses.",
@@ -199,6 +199,19 @@ class HabitsRemoteDataSource(
 
         morningHabits.forEach { habit ->
             firestore.collection("habits").add(habit)
+        }
+    }
+
+    /**
+     * Deletes a custom habit from Firebase Firestore.
+     *
+     * @param habitId The ID of the custom habit to delete
+     * @return Result containing success (true) or failure with error
+     */
+    suspend fun deleteCustomHabit(habitId: String): Result<Boolean> {
+        return runCatching {
+            firestore.collection(USER_HABITS_COLLECTION_ROUTE).document(habitId).delete()
+            true
         }
     }
 }
