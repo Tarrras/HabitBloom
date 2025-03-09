@@ -39,6 +39,7 @@
     <string name="choose_days">Choose days</string>
     <string name="choose_duration">Choose duration</string>
     <string name="summary">Summary</string>
+    <string name="success">Success</string>
 
     <string name="choose_habit_category">Choose habit category</string>
     <string name="choose_habit_to_acquire">Choose habit to acquire</string>

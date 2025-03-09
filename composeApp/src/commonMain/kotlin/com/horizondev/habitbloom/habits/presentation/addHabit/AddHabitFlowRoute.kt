@@ -44,8 +44,6 @@ sealed class AddHabitFlowRoute : NavTarget {
     data object Success : AddHabitFlowRoute()
 
     companion object {
-        // Regex pattern to extract route name and parameters
-        private val ROUTE_PATTERN = """.*?([A-Za-z]+)(?:\((.+)\))?$""".toRegex()
 
         /**
          * Simplified approach to parse route strings
@@ -77,7 +75,8 @@ sealed class AddHabitFlowRoute : NavTarget {
                 is HabitChoice -> AddHabitFlowScreenStep.CHOOSE_HABIT
                 is DurationChoice -> AddHabitFlowScreenStep.CHOOSE_DURATION
                 is Summary -> AddHabitFlowScreenStep.SUMMARY
-                is Success, null -> AddHabitFlowScreenStep.CHOOSE_CATEGORY
+                is Success -> AddHabitFlowScreenStep.SUCCESS
+                null -> AddHabitFlowScreenStep.CHOOSE_CATEGORY
             }
         }
     }
