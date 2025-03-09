@@ -93,11 +93,17 @@ class AddHabitChoiceViewModel(
         launch {
             updateState { it.copy(isLoading = true) }
 
-            try {
-                val habits = repository.getHabits(query, timeOfDay = timeOfDay ?: TimeOfDay.Morning)
-                updateState { it.copy(habits = habits, isLoading = false) }
-            } catch (e: Exception) {
-                Napier.e("Failed to search habits", e)
+            runCatching {
+                repository.getHabits(query, timeOfDay = timeOfDay ?: TimeOfDay.Morning)
+            }.onSuccess { habitsResult ->
+                habitsResult.onSuccess { habits ->
+                    updateState { it.copy(habits = habits, isLoading = false) }
+                }.onFailure {
+                    Napier.e("Failed to search habits", it)
+                    updateState { it.copy(isLoading = false) }
+                }
+            }.onFailure {
+                Napier.e("Failed to search habits", it)
                 updateState { it.copy(isLoading = false) }
             }
         }
@@ -117,11 +123,7 @@ class AddHabitChoiceViewModel(
 
                 result.onSuccess {
                     // Refresh the list
-                    val habits = repository.getHabits(
-                        state.value.searchInput,
-                        timeOfDay = timeOfDay ?: TimeOfDay.Morning
-                    )
-                    updateState { it.copy(habits = habits, isLoading = false) }
+                    searchHabits(query = state.value.searchInput)
 
                     // Show success message
                     emitUiIntent(

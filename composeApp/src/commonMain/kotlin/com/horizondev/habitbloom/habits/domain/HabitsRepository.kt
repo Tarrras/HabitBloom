@@ -42,7 +42,7 @@ class HabitsRepository(
             //remoteDataSource.pushHabitsToFirestore()
             // Initialize Supabase storage bucket
             storageService.initializeBucket()
-            
+
             getAllHabits().onSuccess { habits ->
                 remoteHabits.update { habits }
             }.map { true }
@@ -58,11 +58,13 @@ class HabitsRepository(
         }
     }
 
-    fun getHabits(searchInput: String, timeOfDay: TimeOfDay): List<HabitInfo> {
-        return remoteHabits.value.filter {
-            it.timeOfDay == timeOfDay
-        }.filter {
-            it.name.lowercase().contains(searchInput.lowercase())
+    suspend fun getHabits(searchInput: String, timeOfDay: TimeOfDay): Result<List<HabitInfo>> {
+        return getAllHabits().mapCatching { remoteHabits ->
+            remoteHabits.filter {
+                it.timeOfDay == timeOfDay
+            }.filter {
+                it.name.lowercase().contains(searchInput.lowercase())
+            }
         }
     }
 
