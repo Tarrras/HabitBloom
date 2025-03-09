@@ -13,17 +13,20 @@ data class AddHabitChoiceUiState(
 )
 
 sealed interface AddHabitChoiceUiEvent {
-    data class PerformSearch(val input: String): AddHabitChoiceUiEvent
-    data class SubmitHabit(val info: HabitInfo): AddHabitChoiceUiEvent
-    data class DeleteHabit(val info: HabitInfo) : AddHabitChoiceUiEvent
+    data class UpdateSearchInput(val input: String) : AddHabitChoiceUiEvent
+    data class SelectHabit(val habit: HabitInfo) : AddHabitChoiceUiEvent
+    data class DeleteHabit(val habit: HabitInfo) : AddHabitChoiceUiEvent
     data object ConfirmDeleteHabit : AddHabitChoiceUiEvent
     data object CancelDeleteHabit : AddHabitChoiceUiEvent
 
-    data object CreatePersonalHabit : AddHabitChoiceUiEvent
+    data object CreateCustomHabit : AddHabitChoiceUiEvent
+    data object NavigateBack : AddHabitChoiceUiEvent
 }
 
 sealed interface AddHabitChoiceUiIntent {
     data class NavigateNext(val info: HabitInfo): AddHabitChoiceUiIntent
-    data class NavigateToHabitCreation(val timeOfDay: TimeOfDay) : AddHabitChoiceUiIntent
+    data class NavigateToCreateCustomHabit(val timeOfDay: TimeOfDay) : AddHabitChoiceUiIntent
     data class ShowSnackbar(val visuals: BloomSnackbarVisuals) : AddHabitChoiceUiIntent
+
+    data object NavigateBack : AddHabitChoiceUiIntent
 }

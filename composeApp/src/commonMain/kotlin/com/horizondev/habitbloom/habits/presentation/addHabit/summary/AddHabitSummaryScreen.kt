@@ -23,21 +23,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getNavigatorScreenModel
-import cafe.adriel.voyager.koin.getScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
-import com.horizondev.habitbloom.habits.presentation.addHabit.success.AddHabitSuccessScreen
-import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowUiEvent
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowViewModel
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.complete
@@ -46,47 +39,60 @@ import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-class AddHabitSummaryScreen : Screen {
+@Composable
+fun AddHabitSummaryScreen(
+    sharedViewModel: AddHabitFlowViewModel,
+    onSuccess: () -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val addHabitState by sharedViewModel.state.collectAsState()
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
+    // Create ViewModel using Koin
+    val viewModel = koinViewModel<AddHabitSummaryViewModel> {
+        parametersOf(addHabitState)
+    }
 
-        val screenModel = getScreenModel<AddHabitSummaryScreenModel> {
-            parametersOf(hostModel.getNewHabitInfo())
-        }
+    // Collect state and setup UI
+    val uiState by viewModel.state.collectAsState()
 
-        screenModel.uiIntent.collectAsEffect { uiIntent ->
+    // Handle UI intents from ViewModel
+    LaunchedEffect(viewModel) {
+        viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
-                AddHabitSummaryUiIntent.NavigateBack -> navigator.pop()
-                AddHabitSummaryUiIntent.NavigateToSuccess -> {
-                    navigator.parent?.replace(AddHabitSuccessScreen())
+                is AddHabitSummaryUiIntent.ShowSnackBar -> {
+                    sharedViewModel.handleUiEvent(
+                        AddHabitFlowUiEvent.ShowSnackbar(
+                            uiIntent.visuals
+                        )
+                    )
                 }
 
-                is AddHabitSummaryUiIntent.ShowSnackBar -> {
-                    hostModel.showSnackBar(uiIntent.visuals)
+                AddHabitSummaryUiIntent.NavigateToSuccess -> {
+                    onSuccess()
+                }
+
+                AddHabitSummaryUiIntent.NavigateBack -> {
+                    onBack()
                 }
             }
         }
+    }
 
-        val uiState by screenModel.state.collectAsState()
-
-        LaunchedEffect(Unit) {
-            hostModel.updatedFlowPage(AddHabitFlowScreenStep.SUMMARY)
-        }
-
-        AddHabitSummaryScreenContent(
+    // UI Content
+    Box(modifier = modifier.padding(horizontal = 16.dp)) {
+        AddHabitSummaryContent(
             uiState = uiState,
-            handleUiEvent = screenModel::handleUiEvent
+            handleUiEvent = viewModel::handleUiEvent
         )
     }
 }
 
 @Composable
-fun AddHabitSummaryScreenContent(
+private fun AddHabitSummaryContent(
     uiState: AddHabitSummaryUiState,
     handleUiEvent: (AddHabitSummaryUiEvent) -> Unit
 ) {

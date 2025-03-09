@@ -3,8 +3,6 @@ package com.horizondev.habitbloom.di
 import com.horizondev.habitbloom.app.AppScreenModel
 import com.horizondev.habitbloom.calendar.CalendarScreenModel
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreenModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreenModel
 import com.horizondev.habitbloom.habits.presentation.addHabit.summary.AddHabitSummaryScreenModel
 import com.horizondev.habitbloom.habits.presentation.createHabit.details.CreatePersonalHabitScreenModel
 import com.horizondev.habitbloom.habits.presentation.habitDetails.HabitDetailsScreenModel
@@ -23,8 +21,6 @@ fun screenModelModule() = module {
     factoryOf(::StatisticScreenModel)
     factoryOf(::CalendarScreenModel)
     factoryOf(::AddHabitFlowHostModel)
-    factoryOf(::AddHabitChoiceScreenModel)
-    factoryOf(::AddHabitDurationChoiceScreenModel)
     factoryOf(::AddHabitSummaryScreenModel)
     factoryOf(::HabitDetailsScreenModel)
     factoryOf(::CreatePersonalHabitScreenModel)

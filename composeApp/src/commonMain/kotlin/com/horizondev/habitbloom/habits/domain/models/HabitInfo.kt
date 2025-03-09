@@ -1,5 +1,7 @@
 package com.horizondev.habitbloom.habits.domain.models
 
+import kotlinx.serialization.Serializable
+
 data class HabitInfo(
     val id: String,
     val description: String,
@@ -10,7 +12,7 @@ data class HabitInfo(
     val isCustomHabit: Boolean = false
 )
 
-
+@Serializable
 enum class TimeOfDay {
     Morning,
     Afternoon,

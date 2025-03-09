@@ -10,17 +10,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getNavigatorScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
-import com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.components.HabitCategoryCard
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.choose_habit_category
@@ -35,30 +30,51 @@ import habitbloom.composeapp.generated.resources.morning_habit_title
 import habitbloom.composeapp.generated.resources.morning_routine
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
-class AddHabitTimeOfDayChoiceScreen : Screen {
+/**
+ * Screen for selecting the time of day for a habit.
+ */
+@Composable
+fun AddHabitTimeOfDayChoiceScreen(
+    onTimeOfDaySelected: (TimeOfDay) -> Unit,
+    onBack: () -> Unit
+) {
+    // Create ViewModel using Koin
+    val viewModel = koinViewModel<AddHabitTimeOfDayViewModel>()
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
+    // Collect state
+    val uiState by viewModel.state.collectAsState()
 
-        LaunchedEffect(Unit) {
-            hostModel.updatedFlowPage(AddHabitFlowScreenStep.CHOOSE_CATEGORY)
-        }
+    // Handle UI intents
+    LaunchedEffect(viewModel) {
+        viewModel.uiIntents.collect { uiIntent ->
+            when (uiIntent) {
+                is AddHabitTimeOfDayUiIntent.NavigateWithTimeOfDay -> {
+                    onTimeOfDaySelected(uiIntent.timeOfDay)
+                }
 
-        AddHabitTimeOfDayChoiceScreenContent(
-            onTimeDaySelected = {
-                hostModel.updateTimeOfDaySelection(timeOfDay = it)
-                navigator.push(AddHabitChoiceScreen())
+                AddHabitTimeOfDayUiIntent.NavigateBack -> {
+                    onBack()
+                }
             }
-        )
+        }
     }
+
+    // Render content
+    AddHabitTimeOfDayChoiceScreenContent(
+        uiState = uiState,
+        handleUiEvent = viewModel::handleUiEvent
+    )
 }
 
+/**
+ * Content for the time of day choice screen.
+ */
 @Composable
 fun AddHabitTimeOfDayChoiceScreenContent(
-    onTimeDaySelected: (TimeOfDay) -> Unit
+    uiState: AddHabitTimeOfDayUiState,
+    handleUiEvent: (AddHabitTimeOfDayUiEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -79,21 +95,21 @@ fun AddHabitTimeOfDayChoiceScreenContent(
             title = stringResource(Res.string.morning_habit_title),
             description = stringResource(Res.string.morning_habit_description),
             imageRes = painterResource(Res.drawable.morning_routine),
-            onClick = { onTimeDaySelected(TimeOfDay.Morning) }
+            onClick = { handleUiEvent(AddHabitTimeOfDayUiEvent.SelectTimeOfDay(TimeOfDay.Morning)) }
         )
         Spacer(modifier = Modifier.height(16.dp))
         HabitCategoryCard(
             title = stringResource(Res.string.midday_focus_title),
             description = stringResource(Res.string.midday_focus_description),
             imageRes = painterResource(Res.drawable.midday_focus),
-            onClick = { onTimeDaySelected(TimeOfDay.Afternoon) }
+            onClick = { handleUiEvent(AddHabitTimeOfDayUiEvent.SelectTimeOfDay(TimeOfDay.Afternoon)) }
         )
         Spacer(modifier = Modifier.height(16.dp))
         HabitCategoryCard(
             title = stringResource(Res.string.evening_reflection_title),
             description = stringResource(Res.string.evening_reflection_description),
             imageRes = painterResource(Res.drawable.evening_reflection_2),
-            onClick = { onTimeDaySelected(TimeOfDay.Evening) }
+            onClick = { handleUiEvent(AddHabitTimeOfDayUiEvent.SelectTimeOfDay(TimeOfDay.Evening)) }
         )
         Spacer(modifier = Modifier.height(16.dp))
     }

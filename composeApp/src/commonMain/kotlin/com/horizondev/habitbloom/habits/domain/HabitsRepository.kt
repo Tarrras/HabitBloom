@@ -309,4 +309,39 @@ class HabitsRepository(
             }
         }
     }
+
+    /**
+     * Adds a habit for the user with the specified duration and start date.
+     *
+     * @param habitInfo The information about the habit to add
+     * @param durationInDays The number of days the habit should run for
+     * @param startDate The date when the habit should start
+     * @param selectedDays The specific days of the week for the habit (optional)
+     * @return Result containing success (true) or failure with error
+     */
+    suspend fun addUserHabit(
+        habitInfo: HabitInfo,
+        durationInDays: Int,
+        startDate: LocalDate,
+        selectedDays: List<DayOfWeek> = DayOfWeek.entries
+    ): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+
+                // Use provided days or default to all days
+                val days = selectedDays.ifEmpty { DayOfWeek.entries }
+
+                // Add the habit with specified parameters
+                addHabit(
+                    habitInfo = habitInfo,
+                    startDate = startDate,
+                    repeats = durationInDays,
+                    days = days
+                )
+            } catch (e: Exception) {
+                Napier.e("Error adding user habit", e, tag = TAG)
+                Result.failure(e)
+            }
+        }
+    }
 }

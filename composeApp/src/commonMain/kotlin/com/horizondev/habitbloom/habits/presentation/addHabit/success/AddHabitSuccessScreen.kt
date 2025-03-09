@@ -4,55 +4,68 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceUiEvent
-import com.horizondev.habitbloom.habits.presentation.home.components.placeholderImage
-import com.horizondev.habitbloom.habits.presentation.home.components.placeholderText
-import com.horizondev.habitbloom.habits.presentation.home.components.placeholderTitle
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.finish
 import habitbloom.composeapp.generated.resources.habit_added_description
 import habitbloom.composeapp.generated.resources.habit_added_success
-import habitbloom.composeapp.generated.resources.next
-import habitbloom.composeapp.generated.resources.summary
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 
-class AddHabitSuccessScreen : Screen {
+/**
+ * Screen shown after successfully adding a habit.
+ */
+@Composable
+fun AddHabitSuccessScreen(
+    onFinish: () -> Unit
+) {
+    // Create ViewModel using Koin
+    val viewModel = koinViewModel<AddHabitSuccessViewModel>()
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
+    // Collect state
+    val uiState by viewModel.state.collectAsState()
 
-
-
-        AddHabitSuccessScreenContent(onFinish = {
-            navigator.popUntilRoot()
-        })
+    // Handle UI intents
+    LaunchedEffect(viewModel) {
+        viewModel.uiIntents.collect { uiIntent ->
+            when (uiIntent) {
+                AddHabitSuccessUiIntent.FinishFlow -> {
+                    onFinish()
+                }
+            }
+        }
     }
+
+    // Render content
+    AddHabitSuccessScreenContent(
+        uiState = uiState,
+        handleUiEvent = viewModel::handleUiEvent
+    )
 }
 
+/**
+ * Content for the success screen.
+ */
 @Composable
 private fun AddHabitSuccessScreenContent(
-    onFinish: () -> Unit
+    uiState: AddHabitSuccessUiState,
+    handleUiEvent: (AddHabitSuccessUiEvent) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
         Column(
@@ -87,7 +100,7 @@ private fun AddHabitSuccessScreenContent(
                 .fillMaxWidth(),
             text = stringResource(Res.string.finish),
             onClick = {
-                onFinish()
+                handleUiEvent(AddHabitSuccessUiEvent.FinishFlow)
             },
         )
     }

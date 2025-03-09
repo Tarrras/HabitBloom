@@ -80,6 +80,8 @@ kotlin {
         commonMain.dependencies {
             api(libs.koin.core)
             api(libs.koin.compose)
+            api(libs.koin.compose.viewmodel)
+            api(libs.koin.compose.viewmodel.navigation)
 
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -129,6 +131,11 @@ kotlin {
             implementation(libs.ktor.client.core)
 
             implementation(libs.calendar.compose.multiplatform)
+
+            implementation(libs.navigation.compose)
+            // KMP ViewModel
+            implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
+
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,21 +11,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getNavigatorScreenModel
-import cafe.adriel.voyager.koin.getScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
@@ -32,12 +31,9 @@ import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
-import com.horizondev.habitbloom.habits.presentation.addHabit.summary.AddHabitSummaryScreen
-import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
@@ -53,36 +49,48 @@ import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date
 import habitbloom.composeapp.generated.resources.twelve_repeats
 import habitbloom.composeapp.generated.resources.when_do_you_want_to_start
+import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import kotlin.math.roundToInt
 
-class AddHabitDurationChoiceScreen : Screen {
+/*class AddHabitDurationChoiceScreen : Screen {
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
 
-        val screenModel = getScreenModel<AddHabitDurationChoiceScreenModel>()
-        val uiState by screenModel.state.collectAsState()
+        val viewModel = koinViewModel<AddHabitDurationViewModel> {
+            parametersOf(21, kotlinx.datetime.Clock.System.now())
+        }
+        val uiState by viewModel.state.collectAsState()
+        val snackbarHostState = remember { SnackbarHostState() }
+        val scope = rememberCoroutineScope()
 
-        screenModel.uiIntent.collectAsEffect { uiIntent ->
-            when (uiIntent) {
-                AddHabitDurationChoiceUiIntent.NavigateBack -> navigator.pop()
-                is AddHabitDurationChoiceUiIntent.NavigateToSummary -> {
-                    hostModel.updateDaysAndDuration(
-                        days = uiIntent.selectedDays,
-                        duration = uiIntent.selectedDuration,
-                        startDate = uiIntent.startDate,
-                        weekStartOption = uiIntent.habitWeekStartOption
-                    )
-                    navigator.push(AddHabitSummaryScreen())
-                }
-
-                is AddHabitDurationChoiceUiIntent.ShowSnackBar -> {
-                    hostModel.showSnackBar(uiIntent.visuals)
+        LaunchedEffect(viewModel) {
+            viewModel.uiIntents.collect { uiIntent ->
+                when (uiIntent) {
+                    is AddHabitDurationUiIntent.NavigateNext -> {
+                        hostModel.updateDaysAndDuration(
+                            days = uiIntent.selectedDays,
+                            duration = uiIntent.durationInDays,
+                            startDate = uiIntent.startDate,
+                            weekStartOption = uiIntent.weekStartOption
+                        )
+                        navigator.push(AddHabitSummaryScreen())
+                    }
+                    AddHabitDurationUiIntent.NavigateBack -> {
+                        navigator.pop()
+                    }
+                    is AddHabitDurationUiIntent.ShowValidationError -> {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(uiIntent.visuals)
+                        }
+                    }
                 }
             }
         }
@@ -91,74 +99,210 @@ class AddHabitDurationChoiceScreen : Screen {
             hostModel.updatedFlowPage(AddHabitFlowScreenStep.CHOOSE_DURATION)
         }
 
-        AddHabitDurationChoiceScreenContent(
-            uiState = uiState,
-            handleUiEvent = screenModel::handleUiEvent
-        )
+        Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(
+                        rememberScrollState()
+                    ),
+            ) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(Res.string.choose_habit_days_and_duration),
+                    style = BloomTheme.typography.title,
+                    color = BloomTheme.colors.textColor.primary,
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                SelectDaysForHabitCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    startDate = uiState.displayedStartDate,
+                    activeDays = uiState.activeDays,
+                    weekStartOption = uiState.weekStartOption,
+                    dayStateChanged = { day, isActive ->
+                        viewModel.handleUiEvent(AddHabitDurationUiEvent.UpdateDayState(day, isActive))
+                    },
+                    selectGroupOfDays = {
+                        viewModel.handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(it))
+                    },
+                    onOptionSelected = {
+                        viewModel.handleUiEvent(AddHabitDurationUiEvent.SelectWeekStartOption(it))
+                    }
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                SelectDurationForHabitCard(
+                    modifier = Modifier.fillMaxWidth(),
+                    duration = uiState.durationInDays,
+                    onDurationChanged = {
+                        viewModel.handleUiEvent(AddHabitDurationUiEvent.DurationChanged(it))
+                    }
+                )
+                
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                BloomPrimaryFilledButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.next),
+                    onClick = {
+                        viewModel.handleUiEvent(AddHabitDurationUiEvent.OnNext)
+                    },
+                    enabled = uiState.displayedStartDate != null
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                BloomPrimaryOutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.cancel),
+                    onClick = {
+                        viewModel.handleUiEvent(AddHabitDurationUiEvent.Cancel)
+                    },
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
+            // Show snackbar for errors
+            BloomSnackbarHost(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                snackBarState = snackbarHostState
+            )
+        }
     }
+}*/
+
+@Composable
+fun AddHabitDurationChoiceScreen(
+    onDurationSelected: (Int, LocalDate, List<DayOfWeek>, HabitWeekStartOption) -> Unit,
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    // Create ViewModel using Koin
+    val viewModel = koinViewModel<AddHabitDurationViewModel>()
+
+    // Collect state and setup UI
+    val uiState by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // Handle UI intents from ViewModel
+    LaunchedEffect(viewModel) {
+        viewModel.uiIntents.collect { uiIntent ->
+            when (uiIntent) {
+                is AddHabitDurationUiIntent.NavigateNext -> {
+                    onDurationSelected(
+                        uiIntent.durationInDays,
+                        uiIntent.startDate,
+                        uiIntent.selectedDays,
+                        uiIntent.weekStartOption
+                    )
+                }
+
+                AddHabitDurationUiIntent.NavigateBack -> {
+                    onBack()
+                }
+
+                is AddHabitDurationUiIntent.ShowValidationError -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(uiIntent.visuals)
+                    }
+                }
+            }
+        }
+    }
+
+    // UI Content
+    AddHabitDurationChoiceScreenContent(
+        uiState = uiState,
+        snackbarHostState = snackbarHostState,
+        handleUiEvent = viewModel::handleUiEvent,
+        modifier = modifier
+    )
 }
 
 @Composable
-fun AddHabitDurationChoiceScreenContent(
-    uiState: AddHabitDurationChoiceUiState,
-    handleUiEvent: (AddHabitDurationChoiceUiEvent) -> Unit
+private fun AddHabitDurationChoiceScreenContent(
+    uiState: AddHabitDurationUiState,
+    snackbarHostState: SnackbarHostState,
+    handleUiEvent: (AddHabitDurationUiEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(
-                rememberScrollState()
-            ),
-    ) {
-        Spacer(modifier = Modifier.height(12.dp))
-        Text(
-            text = stringResource(Res.string.choose_habit_days_and_duration),
-            style = BloomTheme.typography.title,
-            color = BloomTheme.colors.textColor.primary,
+    Box(modifier = modifier.padding(horizontal = 16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp)
+                .verticalScroll(
+                    rememberScrollState()
+                ),
+        ) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(Res.string.choose_habit_days_and_duration),
+                style = BloomTheme.typography.title,
+                color = BloomTheme.colors.textColor.primary,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SelectDaysForHabitCard(
+                modifier = Modifier.fillMaxWidth(),
+                startDate = uiState.displayedStartDate,
+                activeDays = uiState.activeDays,
+                weekStartOption = uiState.weekStartOption,
+                dayStateChanged = { day, isActive ->
+                    handleUiEvent(AddHabitDurationUiEvent.UpdateDayState(day, isActive))
+                },
+                selectGroupOfDays = {
+                    handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(it))
+                },
+                onOptionSelected = {
+                    handleUiEvent(AddHabitDurationUiEvent.SelectWeekStartOption(it))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            SelectDurationForHabitCard(
+                modifier = Modifier.fillMaxWidth(),
+                duration = uiState.durationInDays,
+                onDurationChanged = {
+                    handleUiEvent(AddHabitDurationUiEvent.DurationChanged(it))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            BloomPrimaryFilledButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.next),
+                onClick = {
+                    handleUiEvent(AddHabitDurationUiEvent.OnNext)
+                },
+                enabled = uiState.displayedStartDate != null
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            BloomPrimaryOutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.cancel),
+                onClick = {
+                    handleUiEvent(AddHabitDurationUiEvent.Cancel)
+                },
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Show snackbar for errors
+        BloomSnackbarHost(
+            modifier = Modifier.align(Alignment.BottomCenter),
+            snackBarState = snackbarHostState
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        SelectDaysForHabitCard(
-            modifier = Modifier.fillMaxWidth(),
-            startDate = uiState.startDate,
-            activeDays = uiState.activeDays,
-            weekStartOption = uiState.weekStartOption,
-            dayStateChanged = { day, isActive ->
-                handleUiEvent(AddHabitDurationChoiceUiEvent.UpdateDayState(day, isActive))
-            },
-            selectGroupOfDays = {
-                handleUiEvent(AddHabitDurationChoiceUiEvent.SelectGroupOfDays(it))
-            },
-            onOptionSelected = {
-                handleUiEvent(AddHabitDurationChoiceUiEvent.SelectWeekStartOption(it))
-            }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        SelectDurationForHabitCard(
-            modifier = Modifier.fillMaxWidth(),
-            duration = uiState.duration,
-            onDurationChanged = {
-                handleUiEvent(AddHabitDurationChoiceUiEvent.DurationChanged(it))
-            }
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        BloomPrimaryFilledButton(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(Res.string.next),
-            onClick = {
-                handleUiEvent(AddHabitDurationChoiceUiEvent.OnNext)
-            },
-            enabled = uiState.nextButtonEnabled
-        )
-        Spacer(modifier = Modifier.height(12.dp))
-        BloomPrimaryOutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(Res.string.cancel),
-            onClick = {
-                handleUiEvent(AddHabitDurationChoiceUiEvent.Cancel)
-            },
-        )
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

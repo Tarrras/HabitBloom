@@ -32,7 +32,7 @@ import cafe.adriel.voyager.navigator.tab.TabNavigator
 import com.horizondev.habitbloom.common.mainTabs.HabitBloomTab
 import com.horizondev.habitbloom.common.mainTabs.TabFilledIcon
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHost
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreen
 
 class MainScreen : Screen {
 
@@ -56,7 +56,7 @@ class MainScreen : Screen {
                         modifier = Modifier.size(48.dp).offset(y = 42.dp),
                         containerColor = BloomTheme.colors.primary,
                         onClick = {
-                            navigator?.push(AddHabitFlowHost())
+                            navigator?.push(AddHabitFlowScreen())
                         },
                         elevation = FloatingActionButtonDefaults.elevation(
                             defaultElevation = 0.dp,

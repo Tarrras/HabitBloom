@@ -26,11 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getNavigatorScreenModel
-import cafe.adriel.voyager.koin.getScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
@@ -40,13 +35,8 @@ import com.horizondev.habitbloom.core.designComponents.list.NoResultsPlaceholder
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.HabitInfo
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowHostModel
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowScreenStep
-import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
+import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.presentation.components.HabitListItem
-import com.horizondev.habitbloom.habits.presentation.createHabit.details.CreatePersonalHabitScreen
-import com.horizondev.habitbloom.utils.collectAsEffect
-import com.horizondev.habitbloom.utils.parentOrThrow
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_your_own_personal_habit_to_start_tracking
 import habitbloom.composeapp.generated.resources.cancel
@@ -59,53 +49,59 @@ import habitbloom.composeapp.generated.resources.no_habits_found
 import habitbloom.composeapp.generated.resources.search_habit
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-class AddHabitChoiceScreen : Screen {
+/**
+ * The first screen in the Add Habit flow where users select a habit.
+ */
+@Composable
+fun AddHabitChoiceScreen(
+    timeOfDay: TimeOfDay?,
+    onHabitSelected: (HabitInfo) -> Unit,
+    onCreateCustomHabit: (TimeOfDay) -> Unit,
+    onBack: () -> Unit,
+) {
+    // Create ViewModel using Koin
+    val viewModel = koinViewModel<AddHabitChoiceViewModel> {
+        parametersOf(timeOfDay)
+    }
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val parentNavigator = LocalNavigator.parentOrThrow
+    // Collect state and setup UI
+    val uiState by viewModel.state.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
-        val hostModel = navigator.getNavigatorScreenModel<AddHabitFlowHostModel>()
-
-        val screenModel = getScreenModel<AddHabitChoiceScreenModel> {
-            parametersOf(hostModel.getNewHabitInfo().timeOfDay)
-        }
-        val uiState by screenModel.state.collectAsState()
-        val snackbarHostState = remember { SnackbarHostState() }
-        val scope = rememberCoroutineScope()
-
-        LaunchedEffect(Unit) {
-            hostModel.updatedFlowPage(AddHabitFlowScreenStep.CHOOSE_HABIT)
-        }
-
-        screenModel.uiIntent.collectAsEffect { uiIntent ->
+    // Handle UI intents (navigation and messages)
+    LaunchedEffect(viewModel) {
+        viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
-                is AddHabitChoiceUiIntent.NavigateNext -> {
-                    hostModel.updateSelectedHabit(uiIntent.info)
-                    navigator.push(AddHabitDurationChoiceScreen())
-                }
-
-                is AddHabitChoiceUiIntent.NavigateToHabitCreation -> {
-                    parentNavigator.push(CreatePersonalHabitScreen(uiIntent.timeOfDay))
-                }
-
                 is AddHabitChoiceUiIntent.ShowSnackbar -> {
                     scope.launch {
                         snackbarHostState.showSnackbar(uiIntent.visuals)
                     }
                 }
+
+                is AddHabitChoiceUiIntent.NavigateNext -> {
+                    onHabitSelected(uiIntent.info)
+                }
+
+                is AddHabitChoiceUiIntent.NavigateToCreateCustomHabit -> {
+                    onCreateCustomHabit(uiIntent.timeOfDay)
+                }
+
+                AddHabitChoiceUiIntent.NavigateBack -> {
+                    onBack()
+                }
             }
         }
-
-        AddHabitChoiceScreenContent(
-            uiState = uiState,
-            handleUiEvent = screenModel::handleUiEvent,
-            snackbarHostState = snackbarHostState
-        )
     }
+
+    AddHabitChoiceScreenContent(
+        uiState = uiState,
+        handleUiEvent = viewModel::handleUiEvent,
+        snackbarHostState = snackbarHostState
+    )
 }
 
 @Composable
@@ -114,16 +110,8 @@ fun AddHabitChoiceScreenContent(
     handleUiEvent: (AddHabitChoiceUiEvent) -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    val lazyListState = rememberLazyListState()
-    val showCreateButton by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex > 0
-        }
-    }
-
-    val scope = rememberCoroutineScope()
-
-    Box(modifier = Modifier.fillMaxSize()) {
+    // UI Content
+    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
         Column(
             modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
         ) {
@@ -136,26 +124,26 @@ fun AddHabitChoiceScreenContent(
             Spacer(modifier = Modifier.height(24.dp))
             BloomSearchTextField(
                 value = uiState.searchInput,
-                onValueChange = { handleUiEvent(AddHabitChoiceUiEvent.PerformSearch(it)) },
+                onValueChange = {
+                    handleUiEvent(AddHabitChoiceUiEvent.UpdateSearchInput(it))
+                },
                 modifier = Modifier.fillMaxWidth(),
                 placeholderText = stringResource(Res.string.search_habit)
             )
             Spacer(modifier = Modifier.height(12.dp))
             if (uiState.habits.isNotEmpty()) {
-                LazyColumn(
-                    state = lazyListState,
-                    contentPadding = PaddingValues(top = 12.dp, bottom = 54.dp)
-                ) {
-                    habits(
-                        habits = uiState.habits,
-                        onHabitClicked = {
-                            handleUiEvent(AddHabitChoiceUiEvent.SubmitHabit(it))
-                        },
-                        onHabitDelete = {
-                            handleUiEvent(AddHabitChoiceUiEvent.DeleteHabit(it))
-                        }
-                    )
-                }
+                HabitsList(
+                    habits = uiState.habits,
+                    onHabitClicked = {
+                        handleUiEvent(AddHabitChoiceUiEvent.SelectHabit(it))
+                    },
+                    onHabitDelete = {
+                        handleUiEvent(AddHabitChoiceUiEvent.DeleteHabit(it))
+                    },
+                    onCreateHabit = {
+                        handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
+                    }
+                )
             } else if (!uiState.isLoading) {
                 NoResultsPlaceholders(
                     modifier = Modifier.fillMaxWidth(),
@@ -163,25 +151,9 @@ fun AddHabitChoiceScreenContent(
                     description = stringResource(Res.string.add_your_own_personal_habit_to_start_tracking),
                     buttonText = stringResource(Res.string.create_personal_habit),
                     onButtonClick = {
-                        handleUiEvent(AddHabitChoiceUiEvent.CreatePersonalHabit)
+                        handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
                     }
                 )
-            }
-        }
-
-        AnimatedVisibility(
-            visible = showCreateButton,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp)
-        ) {
-            Column {
-                BloomPrimaryFilledButton(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                    text = stringResource(Res.string.create_personal_habit),
-                    onClick = {
-                        handleUiEvent(AddHabitChoiceUiEvent.CreatePersonalHabit)
-                    }
-                )
-                Spacer(modifier = Modifier.height(4.dp))
             }
         }
 
@@ -202,6 +174,50 @@ fun AddHabitChoiceScreenContent(
             onConfirm = { handleUiEvent(AddHabitChoiceUiEvent.ConfirmDeleteHabit) },
             onDismiss = { handleUiEvent(AddHabitChoiceUiEvent.CancelDeleteHabit) }
         )
+    }
+}
+
+/**
+ * Displays the list of habits.
+ */
+@Composable
+private fun HabitsList(
+    habits: List<HabitInfo>,
+    onHabitClicked: (HabitInfo) -> Unit,
+    onHabitDelete: (HabitInfo) -> Unit,
+    onCreateHabit: () -> Unit
+) {
+    val lazyListState = rememberLazyListState()
+    val showCreateButton by remember {
+        derivedStateOf {
+            lazyListState.firstVisibleItemIndex > 0
+        }
+    }
+
+    Box {
+        LazyColumn(
+            state = lazyListState,
+            contentPadding = PaddingValues(top = 12.dp, bottom = 54.dp)
+        ) {
+            habits(
+                habits = habits,
+                onHabitClicked = onHabitClicked,
+                onHabitDelete = onHabitDelete
+            )
+        }
+
+        AnimatedVisibility(
+            visible = showCreateButton,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp)
+        ) {
+            BloomPrimaryFilledButton(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+                text = stringResource(Res.string.create_personal_habit),
+                onClick = {
+                    onCreateHabit()
+                }
+            )
+        }
     }
 }
 
