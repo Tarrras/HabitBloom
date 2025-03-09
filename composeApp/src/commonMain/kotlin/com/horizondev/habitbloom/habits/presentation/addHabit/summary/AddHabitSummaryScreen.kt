@@ -28,9 +28,9 @@ import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFille
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowUiEvent
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowViewModel
+import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowState
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.complete
@@ -44,16 +44,16 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AddHabitSummaryScreen(
-    sharedViewModel: AddHabitFlowViewModel,
+    hostState: AddHabitFlowState,
     onSuccess: () -> Unit,
     onBack: () -> Unit,
+    showSnackbar: (BloomSnackbarVisuals) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val addHabitState by sharedViewModel.state.collectAsState()
 
     // Create ViewModel using Koin
     val viewModel = koinViewModel<AddHabitSummaryViewModel> {
-        parametersOf(addHabitState)
+        parametersOf(hostState)
     }
 
     // Collect state and setup UI
@@ -64,10 +64,8 @@ fun AddHabitSummaryScreen(
         viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
                 is AddHabitSummaryUiIntent.ShowSnackBar -> {
-                    sharedViewModel.handleUiEvent(
-                        AddHabitFlowUiEvent.ShowSnackbar(
-                            uiIntent.visuals
-                        )
+                    showSnackbar(
+                        uiIntent.visuals
                     )
                 }
 

@@ -11,15 +11,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextDecoration
@@ -31,7 +28,7 @@ import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
-import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.GroupOfDays
 import habitbloom.composeapp.generated.resources.Res
@@ -49,7 +46,6 @@ import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date
 import habitbloom.composeapp.generated.resources.twelve_repeats
 import habitbloom.composeapp.generated.resources.when_do_you_want_to_start
-import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.pluralStringResource
@@ -179,6 +175,7 @@ import kotlin.math.roundToInt
 fun AddHabitDurationChoiceScreen(
     onDurationSelected: (Int, LocalDate, List<DayOfWeek>, HabitWeekStartOption) -> Unit,
     onBack: () -> Unit,
+    showSnackbar: (BloomSnackbarVisuals) -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Create ViewModel using Koin
@@ -186,8 +183,6 @@ fun AddHabitDurationChoiceScreen(
 
     // Collect state and setup UI
     val uiState by viewModel.state.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
 
     // Handle UI intents from ViewModel
     LaunchedEffect(viewModel) {
@@ -207,9 +202,7 @@ fun AddHabitDurationChoiceScreen(
                 }
 
                 is AddHabitDurationUiIntent.ShowValidationError -> {
-                    scope.launch {
-                        snackbarHostState.showSnackbar(uiIntent.visuals)
-                    }
+                    showSnackbar(uiIntent.visuals)
                 }
             }
         }
@@ -218,7 +211,6 @@ fun AddHabitDurationChoiceScreen(
     // UI Content
     AddHabitDurationChoiceScreenContent(
         uiState = uiState,
-        snackbarHostState = snackbarHostState,
         handleUiEvent = viewModel::handleUiEvent,
         modifier = modifier
     )
@@ -227,7 +219,6 @@ fun AddHabitDurationChoiceScreen(
 @Composable
 private fun AddHabitDurationChoiceScreenContent(
     uiState: AddHabitDurationUiState,
-    snackbarHostState: SnackbarHostState,
     handleUiEvent: (AddHabitDurationUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -297,12 +288,6 @@ private fun AddHabitDurationChoiceScreenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
         }
-
-        // Show snackbar for errors
-        BloomSnackbarHost(
-            modifier = Modifier.align(Alignment.BottomCenter),
-            snackBarState = snackbarHostState
-        )
     }
 }
 

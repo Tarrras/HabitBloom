@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
@@ -40,7 +41,6 @@ import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.platform.StatusBarColors
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -56,9 +56,7 @@ fun AddHabitFlowNavHost(
     onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit,
     navigator: CommonNavigator = koinInject()
 ) {
-
     val navController = rememberNavController()
-
     val coroutineScope = rememberCoroutineScope()
     val snackBarState = remember { SnackbarHostState() }
 
@@ -68,18 +66,16 @@ fun AddHabitFlowNavHost(
     // Observe the state
     val flowState by viewModel.state.collectAsState()
 
-    // Handle UI intents (navigation and events)
+    // Handle UI intents
     LaunchedEffect(viewModel) {
         viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
                 AddHabitFlowUiIntent.NavigateToCreateCustomHabit -> {
                     onNavigateToCreateCustomHabit(flowState.timeOfDay)
                 }
-
                 AddHabitFlowUiIntent.ExitFlow -> {
                     onFinishFlow()
                 }
-
                 is AddHabitFlowUiIntent.ShowShackbar -> {
                     coroutineScope.launch {
                         snackBarState.showSnackbar(uiIntent.visuals)
@@ -89,19 +85,9 @@ fun AddHabitFlowNavHost(
         }
     }
 
-    // Determine current step based on the route
-    val currentStep = remember(navController.currentDestination) {
-        val route = navController.currentDestination?.route
-        Napier.d("Current route $route")
-
-        // Test route conversion
-        testRouteConversion(route)
-
-        // Log current screen info
-        val screenInfo = navController.getCurrentScreenInfo()
-        Napier.d("Current screen: ${screenInfo["screen"]}, Step: ${screenInfo["step"]}")
-
-        AddHabitFlowRoute.getScreenStepFromRoute(route)
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = remember(backStackEntry) {
+        backStackEntry?.destination?.getAddHabitRouteInfo()
     }
 
     StatusBarColors(
@@ -113,15 +99,11 @@ fun AddHabitFlowNavHost(
         modifier = modifier.imePadding(),
         topBar = {
             AddHabitFlowHostTopBar(
-                currentPageIndex = currentStep.ordinal,
-                onBackPressed = if (navController.previousBackStackEntry != null) {
-                    {
-                        navController.popBackStack()
-                    }
+                currentPageIndex = currentRoute?.step?.ordinal ?: 0,
+                onBackPressed = if (currentRoute?.step?.ordinal != 0) {
+                    { navController.popBackStack() }
                 } else null,
-                onClearPressed = {
-                    onFinishFlow()
-                }
+                onClearPressed = { onFinishFlow() }
             )
         },
         content = { paddingValues ->
@@ -132,7 +114,7 @@ fun AddHabitFlowNavHost(
                 navigator = navigator,
                 startDestination = AddHabitFlowGlobalNavEntryPoint
             ) {
-                // Add all routes from our sealed class using extension function
+                // Add all routes from our sealed class
                 addHabitFlowGraph(
                     navController = navController,
                     viewModel = viewModel,
@@ -149,7 +131,6 @@ fun AddHabitFlowNavHost(
         }
     )
 }
-
 
 @Composable
 fun AddHabitFlowHostTopBar(
@@ -170,9 +151,7 @@ fun AddHabitFlowHostTopBar(
                         .clip(CircleShape)
                         .size(24.dp)
                         .align(Alignment.TopStart)
-                        .clickable {
-                            onBackPressed()
-                        },
+                        .clickable { onBackPressed() },
                     contentDescription = "back"
                 )
             }
@@ -190,9 +169,7 @@ fun AddHabitFlowHostTopBar(
                     .clip(CircleShape)
                     .size(24.dp)
                     .align(Alignment.TopEnd)
-                    .clickable {
-                        onClearPressed()
-                    },
+                    .clickable { onClearPressed() },
                 contentDescription = "close"
             )
         }
@@ -203,17 +180,4 @@ fun AddHabitFlowHostTopBar(
             currentItemIndex = currentPageIndex
         )
     }
-}
-
-/**
- * Helper function to test and log route conversion details
- */
-private fun testRouteConversion(routeString: String?) {
-    Napier.d("Testing route conversion for: $routeString")
-
-    val parsedRoute = AddHabitFlowRoute.fromRouteString(routeString)
-    Napier.d("Converted to: $parsedRoute")
-
-    val step = AddHabitFlowRoute.getScreenStepFromRoute(routeString)
-    Napier.d("Step determined: $step")
 }

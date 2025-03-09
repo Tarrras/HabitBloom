@@ -55,7 +55,7 @@ class SupabaseStorageService(
             // Generate a unique filename if not provided
             val storageFileName =
                 fileName ?: "habit_${Clock.System.now().toEpochMilliseconds()}.jpg"
-            val storagePath = "$storageFileName"
+            val storagePath = "public/$storageFileName"
 
             // Read file as bytes
             val fileBytes = readFileAsBytes(filePath)

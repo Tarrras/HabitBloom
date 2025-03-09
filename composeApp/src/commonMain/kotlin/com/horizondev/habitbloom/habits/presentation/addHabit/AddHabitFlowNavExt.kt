@@ -1,6 +1,9 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit
 
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
+import androidx.navigation.NavDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -37,11 +40,11 @@ fun NavGraphBuilder.addHabitFlowGraph(
         }
 
         // Choose habit screen
-        composable<AddHabitFlowRoute.HabitChoice> { backStackEntry ->
-            val timeOfDayArg = backStackEntry.toRoute<TimeOfDay>()
+        composable<AddHabitFlowRoute.HabitChoice> { entry ->
+            val timeOfDay = entry.toRoute<AddHabitFlowRoute.HabitChoice>().timeOfDay
 
             AddHabitChoiceScreen(
-                timeOfDay = timeOfDayArg,
+                timeOfDay = timeOfDay,
                 onHabitSelected = { habit ->
                     viewModel.handleUiEvent(AddHabitFlowUiEvent.UpdateHabit(habit))
                     navController.navigate(AddHabitFlowRoute.DurationChoice)
@@ -51,6 +54,9 @@ fun NavGraphBuilder.addHabitFlowGraph(
                 },
                 onBack = {
                     navController.popBackStack()
+                },
+                showSnackbar = {
+                    viewModel.handleUiEvent(AddHabitFlowUiEvent.ShowSnackbar(it))
                 }
             )
         }
@@ -71,19 +77,27 @@ fun NavGraphBuilder.addHabitFlowGraph(
                 },
                 onBack = {
                     navController.popBackStack()
+                },
+                showSnackbar = {
+                    viewModel.handleUiEvent(AddHabitFlowUiEvent.ShowSnackbar(it))
                 }
             )
         }
 
         // Summary screen
         composable<AddHabitFlowRoute.Summary> {
+            val hostState by viewModel.state.collectAsState()
+
             AddHabitSummaryScreen(
-                sharedViewModel = viewModel,
+                hostState = hostState,
                 onSuccess = {
                     navController.navigate(AddHabitFlowRoute.Success)
                 },
                 onBack = {
                     navController.popBackStack()
+                },
+                showSnackbar = {
+                    viewModel.handleUiEvent(AddHabitFlowUiEvent.ShowSnackbar(it))
                 }
             )
         }
@@ -100,41 +114,23 @@ fun NavGraphBuilder.addHabitFlowGraph(
 }
 
 /**
- * Extension function to extract screen information from the current destination
- * Useful for analytics or tracking.
+ * Extension function to get current route information for analytics
  */
-fun NavController.getCurrentScreenInfo(): Map<String, String> {
-    val destination = currentDestination?.route ?: return emptyMap()
-    return when (val parsedRoute = AddHabitFlowRoute.fromRouteString(destination)) {
-        is AddHabitFlowRoute.TimeOfDayChoice -> mapOf(
-            "screen" to "time_of_day_choice",
-            "step" to "1"
-        )
-
-        is AddHabitFlowRoute.HabitChoice -> mapOf(
-            "screen" to "habit_choice",
-            "step" to "2",
-            "timeOfDay" to (parsedRoute.timeOfDay.name)
-        )
-
-        is AddHabitFlowRoute.DurationChoice -> mapOf(
-            "screen" to "duration_choice",
-            "step" to "3"
-        )
-
-        is AddHabitFlowRoute.Summary -> mapOf(
-            "screen" to "summary",
-            "step" to "4"
-        )
-
-        is AddHabitFlowRoute.Success -> mapOf(
-            "screen" to "success",
-            "step" to "5"
-        )
-
-        else -> mapOf(
-            "screen" to "unknown",
-            "route" to destination
-        )
-    }
+fun NavDestination.getAddHabitRouteInfo(): RouteInfo {
+    val route = this.route
+    val parsedRoute = AddHabitFlowRoute.fromRoute(route)
+    return RouteInfo(
+        routeString = route,
+        route = parsedRoute,
+        step = AddHabitFlowRoute.toScreenStep(parsedRoute)
+    )
 }
+
+/**
+ * Helper class containing route information
+ */
+data class RouteInfo(
+    val routeString: String?,
+    val route: AddHabitFlowRoute?,
+    val step: AddHabitFlowScreenStep
+)
