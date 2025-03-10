@@ -38,6 +38,8 @@ import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
+import com.horizondev.habitbloom.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
+import com.horizondev.habitbloom.habits.presentation.createHabit.createPersonalHabitFlowGraph
 import com.horizondev.habitbloom.platform.StatusBarColors
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
@@ -120,9 +122,16 @@ fun AddHabitFlowNavHost(
                 startDestination = AddHabitFlowGlobalNavEntryPoint
             ) {
                 // Add all routes from our sealed class
-                addHabitFlowGraph(
+                createHabitFlowGraph(
                     navController = navController,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    onNavigateToCreateCustomHabit = { timeOfDay ->
+                        navController.navigate(CreatePersonalHabitFlowRoute.CreateHabit(timeOfDay))
+                    }
+                )
+
+                createPersonalHabitFlowGraph(
+                    navController = navController
                 )
             }
         },

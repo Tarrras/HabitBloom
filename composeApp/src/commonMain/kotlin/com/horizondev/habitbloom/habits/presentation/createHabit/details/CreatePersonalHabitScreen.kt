@@ -63,20 +63,16 @@ import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.tap_to_change_photo
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Content for the Create Personal Habit screen.
- *
- * @param viewModel The ViewModel for this screen.
- * @param onNavigateBack Callback to navigate back.
- * @param onOpenSuccessScreen Callback to navigate to the success screen.
+ * Screen for creating a personal habit.
  */
 @Composable
 fun CreatePersonalHabitScreen(
-    viewModel: CreatePersonalHabitScreenModel = koinViewModel(),
+    viewModel: CreatePersonalHabitScreenModel,
     onNavigateBack: () -> Unit,
-    onOpenSuccessScreen: () -> Unit
+    onOpenSuccessScreen: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
