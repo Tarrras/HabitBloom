@@ -20,11 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
-import com.horizondev.habitbloom.habits.presentation.habitDetails.HabitDetailsScreen
 import com.horizondev.habitbloom.habits.presentation.home.components.AllHabitsCompletedMessage
 import com.horizondev.habitbloom.habits.presentation.home.components.DailyHabitProgressWidget
 import com.horizondev.habitbloom.habits.presentation.home.components.EmptyHabitsForTimeOfDayPlaceholder
@@ -35,22 +32,29 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.app_name
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * Home screen composable that displays user habits for the current time of day.
+ */
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier, screeModel: HomeScreenModel) {
-    val uiState by screeModel.state.collectAsState()
-    val navigator = LocalNavigator.currentOrThrow.parent
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    viewModel: HomeViewModel
+) {
+    val uiState by viewModel.state.collectAsState()
 
-    screeModel.uiIntent.collectAsEffect { uiIntent ->
+    // Collect UI intents for navigation
+    viewModel.uiIntents.collectAsEffect { uiIntent ->
         when (uiIntent) {
             is HomeScreenUiIntent.OpenHabitDetails -> {
-                navigator?.push(HabitDetailsScreen(uiIntent.userHabitId))
+                // Navigation is now handled by parent NavHost
+                // This will be implemented later
             }
         }
     }
 
     HomeScreenContent(
         uiState = uiState,
-        handleUiEvent = screeModel::handleUiEvent
+        handleUiEvent = viewModel::handleUiEvent
     )
 }
 

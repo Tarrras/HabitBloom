@@ -5,7 +5,7 @@ import com.horizondev.habitbloom.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.platform.DatabaseDriverFactory
 import org.koin.dsl.module
 
-fun localDataModule() = module {
+val localDataModule = module {
     single<HabitBloomDatabase> {
         HabitBloomDatabase(
             driver = get<DatabaseDriverFactory>().createDriver(),

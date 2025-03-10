@@ -4,7 +4,7 @@ import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-actual fun platformModule(): Module = module {
+actual val platformModule: Module = module {
     single { DatabaseDriverFactory(context = get()) }
     single { AndroidImagePicker(context = get()) } bind ImagePicker::class
 }

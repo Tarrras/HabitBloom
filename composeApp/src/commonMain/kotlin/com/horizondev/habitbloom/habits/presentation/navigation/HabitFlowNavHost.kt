@@ -6,8 +6,6 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
 import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowGlobalNavEntryPoint
-import com.horizondev.habitbloom.habits.presentation.addHabit.createAddHabitFlowGraph
-import com.horizondev.habitbloom.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
 import com.horizondev.habitbloom.habits.presentation.createHabit.createPersonalHabitFlowGraph
 import com.horizondev.habitbloom.platform.StatusBarColors
 import org.koin.compose.koinInject
@@ -33,13 +31,13 @@ fun HabitFlowNavHost(
         startDestination = AddHabitFlowGlobalNavEntryPoint
     ) {
         // Add all routes from our sealed class
-        createAddHabitFlowGraph(
+        /*addHabitFlowGraph(
             navController = navController,
             onFinishFlow = onFinishFlow,
             onNavigateToCreateCustomHabit = { timeOfDay ->
                 navController.navigate(CreatePersonalHabitFlowRoute.CreateHabit(timeOfDay))
             }
-        )
+        )*/
 
         createPersonalHabitFlowGraph(
             navController = navController

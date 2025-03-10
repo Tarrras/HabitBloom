@@ -10,13 +10,12 @@ class KoinInit {
         return startKoin {
             modules(
                 listOf(
-                    remoteDataModule(),
-                    localDataModule(),
-                    domainModule(),
-                    screenModelModule(),
-                    viewModelModule(),
-                    platformModule(),
-                    navigationModule()
+                    remoteDataModule,
+                    localDataModule,
+                    domainModule,
+                    viewModelModule,
+                    platformModule,
+                    navigationModule
                 ),
             )
             appDeclaration()

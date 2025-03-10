@@ -35,6 +35,7 @@ import com.horizondev.habitbloom.core.designComponents.text.ToolbarTitleText
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.statistic.components.NoCompletedHabitsPlaceholder
+import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getShortTitle
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
@@ -56,13 +57,28 @@ import io.github.koalaplot.core.xygraph.rememberIntLinearAxisModel
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
 
+/**
+ * Statistics screen composable that displays habit statistics.
+ */
 @Composable
-fun StatisticScreen(modifier: Modifier = Modifier, screeModel: StatisticScreenModel) {
-    val uiState by screeModel.state.collectAsState()
+fun StatisticScreen(
+    viewModel: StatisticViewModel,
+    modifier: Modifier = Modifier
+) {
+    val uiState by viewModel.state.collectAsState()
 
+    // Handle navigation
+    viewModel.uiIntents.collectAsEffect { intent ->
+        when (intent) {
+            is StatisticUiIntent.OpenHabitDetails -> {
+                // Navigation will be handled by parent NavHost
+            }
+        }
+    }
+    
     StatisticScreenContent(
         uiState = uiState,
-        handleUiEvent = screeModel::handleUiEvent
+        handleUiEvent = viewModel::handleUiEvent,
     )
 }
 

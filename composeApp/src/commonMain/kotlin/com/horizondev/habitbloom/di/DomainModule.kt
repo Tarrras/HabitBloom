@@ -6,7 +6,7 @@ import com.horizondev.habitbloom.profile.domain.ProfileRepository
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.module
 
-fun domainModule() = module {
+val domainModule = module {
     singleOf(::HabitsRepository)
     singleOf(::AuthRepository)
     singleOf(::ProfileRepository)

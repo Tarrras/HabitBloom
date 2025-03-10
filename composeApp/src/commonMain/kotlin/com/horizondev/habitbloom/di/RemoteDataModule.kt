@@ -16,7 +16,7 @@ import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
-fun remoteDataModule() = module {
+val remoteDataModule = module {
     // Firebase components (still using Firebase for auth/firestore)
     single { Firebase.firestore } bind FirebaseFirestore::class
     single { Firebase.auth } bind FirebaseAuth::class

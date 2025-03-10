@@ -18,14 +18,13 @@ import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.Ad
 /**
  * Extension function for NavGraphBuilder to add routes defined in AddHabitFlowRoute
  */
-fun NavGraphBuilder.createAddHabitFlowGraph(
+fun NavGraphBuilder.addHabitFlowGraph(
     navController: NavController,
-    onFinishFlow: () -> Unit,
     onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
 ) {
     composable<AddHabitFlowGlobalNavEntryPoint> {
         AddHabitFlowNavHost(
-            onFinishFlow = onFinishFlow,
+            onFinishFlow = { navController.popBackStack() },
             onNavigateToCreateCustomHabit = onNavigateToCreateCustomHabit
         )
     }

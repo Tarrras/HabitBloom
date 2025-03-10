@@ -1,8 +1,8 @@
 package com.horizondev.habitbloom.statistic
 
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.designComponents.pickers.TimeUnit
+import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
@@ -17,13 +17,16 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.update
 import kotlinx.datetime.DayOfWeek
 
-class StatisticScreenModel(
+/**
+ * ViewModel for the Statistics screen.
+ */
+class StatisticViewModel(
     private val repository: HabitsRepository
-) : StateScreenModel<StatisticUiState>(StatisticUiState()) {
-
+) : BloomViewModel<StatisticUiState, StatisticUiIntent>(
+    StatisticUiState(isLoading = true)
+) {
     private val filteredHabitFlow = combine(
         state.map { it.selectedTimeUnit }.distinctUntilChanged(),
         repository.getListOfAllUserHabitRecordsFlow()
@@ -33,17 +36,17 @@ class StatisticScreenModel(
             selectedTimeUnit = selectedTimeUnit
         )
     }.onStart {
-        mutableState.update { it.copy(isLoading = true) }
+        updateState { it.copy(isLoading = true) }
     }.onCompletion {
-        mutableState.update { it.copy(isLoading = false) }
+        updateState { it.copy(isLoading = false) }
     }.catch {
-        mutableState.update { it.copy(isLoading = false) }
-    }.launchIn(screenModelScope)
+        updateState { it.copy(isLoading = false) }
+    }.launchIn(viewModelScope)
 
     fun handleUiEvent(uiEvent: StatisticUiEvent) {
         when (uiEvent) {
             is StatisticUiEvent.SelectTimeUnit -> {
-                mutableState.update { it.copy(selectedTimeUnit = uiEvent.timeUnit) }
+                updateState { it.copy(selectedTimeUnit = uiEvent.timeUnit) }
             }
 
             is StatisticUiEvent.OpenHabitDetails -> TODO()
@@ -63,7 +66,7 @@ class StatisticScreenModel(
             completedHabits = completedHabits
         )
 
-        mutableState.update {
+        updateState {
             it.copy(
                 isLoading = false,
                 completeHabitsByTimeOfDay = completeHabitsByTimeOfDay,
@@ -128,4 +131,4 @@ class StatisticScreenModel(
 
         return weekDaysWithCompletedHabits
     }
-}
+} 
