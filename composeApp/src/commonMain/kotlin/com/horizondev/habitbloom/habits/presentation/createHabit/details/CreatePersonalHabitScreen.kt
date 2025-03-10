@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -31,10 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.koin.getScreenModel
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
@@ -46,12 +43,10 @@ import com.horizondev.habitbloom.core.designComponents.pickers.SingleOptionPicke
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
-import com.horizondev.habitbloom.habits.presentation.createHabit.success.CreatePersonalHabitSuccessScreen
 import com.horizondev.habitbloom.platform.ImagePickerResult
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
-import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
@@ -68,30 +63,30 @@ import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.tap_to_change_photo
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
-import org.koin.core.parameter.parametersOf
+import org.koin.compose.viewmodel.koinViewModel
 
-class CreatePersonalHabitScreen(
-    val timeOfDay: TimeOfDay?
-) : Screen {
+/**
+ * Content for the Create Personal Habit screen.
+ *
+ * @param viewModel The ViewModel for this screen.
+ * @param onNavigateBack Callback to navigate back.
+ * @param onOpenSuccessScreen Callback to navigate to the success screen.
+ */
+@Composable
+fun CreatePersonalHabitScreen(
+    viewModel: CreatePersonalHabitScreenModel = koinViewModel(),
+    onNavigateBack: () -> Unit,
+    onOpenSuccessScreen: () -> Unit
+) {
+    val uiState by viewModel.state.collectAsState()
+    val scope = rememberCoroutineScope()
+    val snackBarState = remember { SnackbarHostState() }
 
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-        val screenModel = getScreenModel<CreatePersonalHabitScreenModel> {
-            parametersOf(timeOfDay)
-        }
-        val uiState by screenModel.state.collectAsState()
-
-        val scope = rememberCoroutineScope()
-        val snackBarState = remember { SnackbarHostState() }
-
-        screenModel.uiIntent.collectAsEffect { uiIntent ->
+    LaunchedEffect(key1 = viewModel) {
+        viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
-                CreatePersonalHabitUiIntent.NavigateBack -> navigator.pop()
-                CreatePersonalHabitUiIntent.OpenSuccessScreen -> {
-                    navigator.replace(CreatePersonalHabitSuccessScreen())
-                }
-
+                CreatePersonalHabitUiIntent.NavigateBack -> onNavigateBack()
+                CreatePersonalHabitUiIntent.OpenSuccessScreen -> onOpenSuccessScreen()
                 is CreatePersonalHabitUiIntent.ShowSnackbar -> {
                     scope.launch {
                         snackBarState.showSnackbar(uiIntent.visuals)
@@ -99,13 +94,13 @@ class CreatePersonalHabitScreen(
                 }
             }
         }
-
-        CreatePersonalHabitScreenContent(
-            uiState = uiState,
-            snackbarHostState = snackBarState,
-            handleUiEvent = screenModel::handleUiEvent
-        )
     }
+
+    CreatePersonalHabitScreenContent(
+        uiState = uiState,
+        snackbarHostState = snackBarState,
+        handleUiEvent = viewModel::handleUiEvent
+    )
 }
 
 @Composable
@@ -318,12 +313,6 @@ private fun CreateHabitDialog(
                 text = stringResource(Res.string.create),
                 onClick = onCreate,
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            BloomPrimaryOutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.cancel),
-                onClick = onDismiss,
-            )
         }
     }
-}
+} 

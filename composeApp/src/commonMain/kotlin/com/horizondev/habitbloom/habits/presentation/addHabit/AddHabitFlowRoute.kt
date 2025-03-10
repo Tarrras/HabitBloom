@@ -43,6 +43,18 @@ sealed class AddHabitFlowRoute : NavTarget {
     @Serializable
     data object Success : AddHabitFlowRoute()
 
+    /**
+     * Create personal habit screen.
+     */
+    @Serializable
+    data class CreatePersonalHabit(val timeOfDay: TimeOfDay?) : AddHabitFlowRoute()
+
+    /**
+     * Create personal habit success screen.
+     */
+    @Serializable
+    data object CreatePersonalHabitSuccess : AddHabitFlowRoute()
+
     companion object {
 
         /**
@@ -62,6 +74,12 @@ sealed class AddHabitFlowRoute : NavTarget {
                 routeString.contains(DurationChoice::class.qualifiedName.toString()) -> DurationChoice
                 routeString.contains(Summary::class.qualifiedName.toString()) -> Summary
                 routeString.contains(Success::class.qualifiedName.toString()) -> Success
+
+                routeString.contains(CreatePersonalHabit::class.qualifiedName.toString()) -> CreatePersonalHabit(
+                    timeOfDay = TimeOfDay.Morning
+                )
+
+                routeString.contains(CreatePersonalHabitSuccess::class.qualifiedName.toString()) -> CreatePersonalHabitSuccess
                 else -> null
             }
         }
@@ -69,14 +87,14 @@ sealed class AddHabitFlowRoute : NavTarget {
         /**
          * Maps route to screen step - with defaults for typical flow order
          */
-        fun toScreenStep(route: AddHabitFlowRoute?): AddHabitFlowScreenStep {
+        fun toScreenStep(route: AddHabitFlowRoute?): AddHabitFlowScreenStep? {
             return when (route) {
                 is TimeOfDayChoice -> AddHabitFlowScreenStep.CHOOSE_CATEGORY
                 is HabitChoice -> AddHabitFlowScreenStep.CHOOSE_HABIT
                 is DurationChoice -> AddHabitFlowScreenStep.CHOOSE_DURATION
                 is Summary -> AddHabitFlowScreenStep.SUMMARY
                 is Success -> AddHabitFlowScreenStep.SUCCESS
-                null -> AddHabitFlowScreenStep.CHOOSE_CATEGORY
+                else -> null
             }
         }
     }

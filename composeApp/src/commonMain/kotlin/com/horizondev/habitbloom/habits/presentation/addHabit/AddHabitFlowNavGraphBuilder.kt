@@ -8,12 +8,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
-import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreen
 import com.horizondev.habitbloom.habits.presentation.addHabit.success.AddHabitSuccessScreen
 import com.horizondev.habitbloom.habits.presentation.addHabit.summary.AddHabitSummaryScreen
 import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayChoiceScreen
+import com.horizondev.habitbloom.habits.presentation.createHabit.details.CreatePersonalHabitScreen
+import com.horizondev.habitbloom.habits.presentation.createHabit.details.CreatePersonalHabitScreenModel
+import com.horizondev.habitbloom.habits.presentation.createHabit.success.CreatePersonalHabitSuccessScreen
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
 
 /**
  * Extension function for NavGraphBuilder to add routes defined in AddHabitFlowRoute
@@ -21,7 +25,6 @@ import com.horizondev.habitbloom.habits.presentation.addHabit.timeOfDayChoice.Ad
 fun NavGraphBuilder.addHabitFlowGraph(
     navController: NavController,
     viewModel: AddHabitFlowViewModel,
-    onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
 ) {
     navigation<AddHabitFlowGlobalNavEntryPoint>(
         startDestination = AddHabitFlowRoute.TimeOfDayChoice
@@ -50,7 +53,7 @@ fun NavGraphBuilder.addHabitFlowGraph(
                     navController.navigate(AddHabitFlowRoute.DurationChoice)
                 },
                 onCreateCustomHabit = { selectedTimeOfDay ->
-                    onNavigateToCreateCustomHabit(selectedTimeOfDay)
+                    navController.navigate(AddHabitFlowRoute.CreatePersonalHabit(selectedTimeOfDay))
                 },
                 onBack = {
                     navController.popBackStack()
@@ -110,6 +113,34 @@ fun NavGraphBuilder.addHabitFlowGraph(
                 }
             )
         }
+
+        // Create Personal Habit Screen
+        composable<AddHabitFlowRoute.CreatePersonalHabit> { entry ->
+            val timeOfDay = entry.toRoute<AddHabitFlowRoute.CreatePersonalHabit>().timeOfDay
+
+            val createPersonalHabitViewModel = koinViewModel<CreatePersonalHabitScreenModel> {
+                parametersOf(timeOfDay)
+            }
+
+            CreatePersonalHabitScreen(
+                viewModel = createPersonalHabitViewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onOpenSuccessScreen = {
+                    navController.navigate(AddHabitFlowRoute.CreatePersonalHabitSuccess)
+                }
+            )
+        }
+
+        // Create Personal Habit Success Screen
+        composable<AddHabitFlowRoute.CreatePersonalHabitSuccess> {
+            CreatePersonalHabitSuccessScreen(
+                onFinish = {
+                    navController.popBackStack<AddHabitFlowRoute.HabitChoice>(inclusive = false)
+                }
+            )
+        }
     }
 }
 
@@ -132,5 +163,5 @@ fun NavDestination.getAddHabitRouteInfo(): RouteInfo {
 data class RouteInfo(
     val routeString: String?,
     val route: AddHabitFlowRoute?,
-    val step: AddHabitFlowScreenStep
+    val step: AddHabitFlowScreenStep?
 )

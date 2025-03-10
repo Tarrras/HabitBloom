@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.habits.presentation.addHabit
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -37,7 +38,6 @@ import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
-import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.platform.StatusBarColors
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
@@ -53,7 +53,6 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AddHabitFlowNavHost(
     modifier: Modifier = Modifier,
     onFinishFlow: () -> Unit,
-    onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit,
     navigator: CommonNavigator = koinInject()
 ) {
     val navController = rememberNavController()
@@ -70,12 +69,10 @@ fun AddHabitFlowNavHost(
     LaunchedEffect(viewModel) {
         viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
-                AddHabitFlowUiIntent.NavigateToCreateCustomHabit -> {
-                    onNavigateToCreateCustomHabit(flowState.timeOfDay)
-                }
                 AddHabitFlowUiIntent.ExitFlow -> {
                     onFinishFlow()
                 }
+
                 is AddHabitFlowUiIntent.ShowShackbar -> {
                     coroutineScope.launch {
                         snackBarState.showSnackbar(uiIntent.visuals)
@@ -98,18 +95,26 @@ fun AddHabitFlowNavHost(
     Scaffold(
         modifier = modifier.imePadding(),
         topBar = {
-            AddHabitFlowHostTopBar(
-                currentPageIndex = currentRoute?.step?.ordinal ?: 0,
-                onBackPressed = if (currentRoute?.step?.ordinal != 0) {
-                    { navController.popBackStack() }
-                } else null,
-                onClearPressed = { onFinishFlow() }
-            )
+            when {
+                currentRoute?.step != null -> {
+                    AddHabitFlowHostTopBar(
+                        currentPageIndex = currentRoute.step.ordinal,
+                        onBackPressed = if (currentRoute.step.ordinal != 0) {
+                            { navController.popBackStack() }
+                        } else null,
+                        onClearPressed = { onFinishFlow() }
+                    )
+                }
+            }
         },
         content = { paddingValues ->
             // Navigation host with type-safe routes
             NavigationComponent(
-                modifier = Modifier.padding(paddingValues),
+                modifier = Modifier.padding(
+                    if (currentRoute?.step != null) {
+                        paddingValues
+                    } else PaddingValues(0.dp)
+                ),
                 navController = navController,
                 navigator = navigator,
                 startDestination = AddHabitFlowGlobalNavEntryPoint
@@ -117,8 +122,7 @@ fun AddHabitFlowNavHost(
                 // Add all routes from our sealed class
                 addHabitFlowGraph(
                     navController = navController,
-                    viewModel = viewModel,
-                    onNavigateToCreateCustomHabit = onNavigateToCreateCustomHabit
+                    viewModel = viewModel
                 )
             }
         },

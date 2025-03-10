@@ -1,10 +1,10 @@
 package com.horizondev.habitbloom.habits.presentation.createHabit.details
 
 import androidx.compose.material3.SnackbarDuration
-import cafe.adriel.voyager.core.model.StateScreenModel
-import cafe.adriel.voyager.core.model.screenModelScope
+import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
+import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.platform.ImagePicker
@@ -15,43 +15,40 @@ import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.save_habit_error
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
 
+/**
+ * ViewModel for the Create Personal Habit screen.
+ */
 class CreatePersonalHabitScreenModel(
     private val habitRepository: HabitsRepository,
     private val profileRepository: ProfileRepository,
     private val imagePicker: ImagePicker,
     timeOfDay: TimeOfDay?
-) : StateScreenModel<CreatePersonalHabitUiState>(
-    CreatePersonalHabitUiState(
+) : BloomViewModel<CreatePersonalHabitUiState, CreatePersonalHabitUiIntent>(
+    initialState = CreatePersonalHabitUiState(
         timeOfDay = timeOfDay ?: TimeOfDay.Morning
     )
 ) {
-    private val _uiIntent = MutableSharedFlow<CreatePersonalHabitUiIntent>()
-    val uiIntent = _uiIntent.asSharedFlow()
-
     init {
+        // Observe image picker results
         imagePicker.imagePickerResult
             .onEach { result ->
-                mutableState.update {
+                updateState {
                     it.copy(imagePickerState = result)
                 }
 
                 when (result) {
                     is ImagePickerResult.Success -> {
                         Napier.d("Image picked: ${result.imageUrl}")
-                        mutableState.update {
+                        updateState {
                             it.copy(selectedImageUrl = result.imageUrl)
                         }
                     }
                     is ImagePickerResult.Error -> {
-                        _uiIntent.emit(
+                        emitUiIntent(
                             CreatePersonalHabitUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(
                                     message = "Failed to pick image: ${result.message}",
@@ -66,21 +63,21 @@ class CreatePersonalHabitScreenModel(
                     else -> { /* Do nothing for other states */
                     }
                 }
-            }
-            .launchIn(screenModelScope)
+            }.launchIn(viewModelScope)
     }
 
+    /**
+     * Handle UI events from the view.
+     */
     fun handleUiEvent(uiEvent: CreatePersonalHabitUiEvent) {
         when (uiEvent) {
             CreatePersonalHabitUiEvent.NavigateBack -> {
-                screenModelScope.launch {
-                    _uiIntent.emit(CreatePersonalHabitUiIntent.NavigateBack)
-                }
+                emitUiIntent(CreatePersonalHabitUiIntent.NavigateBack)
             }
 
             is CreatePersonalHabitUiEvent.UpdateDescription -> {
                 val input = uiEvent.input
-                mutableState.update {
+                updateState {
                     it.copy(
                         description = input,
                         isDescriptionInputError = input.length > HABIT_DESCRIPTION_MAX_LENGTH
@@ -89,12 +86,12 @@ class CreatePersonalHabitScreenModel(
             }
 
             is CreatePersonalHabitUiEvent.UpdateTimeOfDay -> {
-                mutableState.update { it.copy(timeOfDay = uiEvent.timeOfDay) }
+                updateState { it.copy(timeOfDay = uiEvent.timeOfDay) }
             }
 
             is CreatePersonalHabitUiEvent.UpdateTitle -> {
                 val input = uiEvent.input
-                mutableState.update {
+                updateState {
                     it.copy(
                         title = input,
                         isTitleInputError = input.length > HABIT_TITLE_MAX_LENGTH
@@ -103,11 +100,11 @@ class CreatePersonalHabitScreenModel(
             }
 
             CreatePersonalHabitUiEvent.CreateHabit -> {
-                mutableState.update { it.copy(showCreateHabitDialog = true) }
+                updateState { it.copy(showCreateHabitDialog = true) }
             }
 
             CreatePersonalHabitUiEvent.HideCreateHabitDialog -> {
-                mutableState.update { it.copy(showCreateHabitDialog = false) }
+                updateState { it.copy(showCreateHabitDialog = false) }
             }
 
             CreatePersonalHabitUiEvent.SubmitHabitCreation -> {
@@ -115,43 +112,48 @@ class CreatePersonalHabitScreenModel(
             }
 
             CreatePersonalHabitUiEvent.PickImage -> {
-                screenModelScope.launch {
+                launch {
                     imagePicker.pickImage()
                 }
             }
         }
     }
 
-    private fun saveUserHabit() = screenModelScope.launch {
-        mutableState.update { it.copy(showCreateHabitDialog = false, isLoading = true) }
+    /**
+     * Save the user habit to the repository.
+     */
+    private fun saveUserHabit() {
+        launch {
+            updateState { it.copy(showCreateHabitDialog = false, isLoading = true) }
 
-        val uiState = mutableState.value
-        val userId = profileRepository.getUserInfo().getOrNull()?.id ?: return@launch
+            val uiState = state.value
+            val userId = profileRepository.getUserInfo().getOrNull()?.id ?: return@launch
 
-        Napier.d("Creating habit with image: ${uiState.selectedImageUrl ?: "No image"}")
-        
-        habitRepository.createPersonalHabit(
-            userId = userId,
-            timeOfDay = uiState.timeOfDay,
-            title = uiState.title,
-            description = uiState.description,
-            icon = uiState.selectedImageUrl ?: ""
-        ).onSuccess {
-            mutableState.update { it.copy(isLoading = false) }
-            _uiIntent.emit(CreatePersonalHabitUiIntent.OpenSuccessScreen)
-        }.onFailure {
-            Napier.e("Failed to save habit", it)
-            mutableState.update { it.copy(isLoading = false) }
-            _uiIntent.emit(
-                CreatePersonalHabitUiIntent.ShowSnackbar(
-                    visuals = BloomSnackbarVisuals(
-                        message = getString(Res.string.save_habit_error),
-                        state = BloomSnackbarState.Error,
-                        duration = SnackbarDuration.Short,
-                        withDismissAction = true
+            Napier.d("Creating habit with image: ${uiState.selectedImageUrl ?: "No image"}")
+
+            habitRepository.createPersonalHabit(
+                userId = userId,
+                timeOfDay = uiState.timeOfDay,
+                title = uiState.title,
+                description = uiState.description,
+                icon = uiState.selectedImageUrl ?: ""
+            ).onSuccess {
+                updateState { it.copy(isLoading = false) }
+                emitUiIntent(CreatePersonalHabitUiIntent.OpenSuccessScreen)
+            }.onFailure {
+                Napier.e("Failed to save habit", it)
+                updateState { it.copy(isLoading = false) }
+                emitUiIntent(
+                    CreatePersonalHabitUiIntent.ShowSnackbar(
+                        visuals = BloomSnackbarVisuals(
+                            message = getString(Res.string.save_habit_error),
+                            state = BloomSnackbarState.Error,
+                            duration = SnackbarDuration.Short,
+                            withDismissAction = true
+                        )
                     )
                 )
-            )
+            }
         }
     }
 }

@@ -15,9 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.currentOrThrow
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import habitbloom.composeapp.generated.resources.Res
@@ -28,20 +25,13 @@ import habitbloom.composeapp.generated.resources.habit_created_success
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-class CreatePersonalHabitSuccessScreen : Screen {
-
-    @Composable
-    override fun Content() {
-        val navigator = LocalNavigator.currentOrThrow
-
-        CreatePersonalHabitSuccessScreenContent(onFinish = {
-            navigator.popUntilRoot()
-        })
-    }
-}
-
+/**
+ * Content for the Create Personal Habit Success screen.
+ *
+ * @param onFinish Callback to finish the flow.
+ */
 @Composable
-private fun CreatePersonalHabitSuccessScreenContent(
+fun CreatePersonalHabitSuccessScreen(
     onFinish: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
@@ -81,4 +71,4 @@ private fun CreatePersonalHabitSuccessScreenContent(
             },
         )
     }
-}
+} 

@@ -46,10 +46,6 @@ class AddHabitFlowViewModel : BloomViewModel<AddHabitFlowState, AddHabitFlowUiIn
                 emitUiIntent(AddHabitFlowUiIntent.ExitFlow)
             }
 
-            AddHabitFlowUiEvent.NavigateToCreateCustomHabit -> {
-                emitUiIntent(AddHabitFlowUiIntent.NavigateToCreateCustomHabit)
-            }
-
             is AddHabitFlowUiEvent.ShowSnackbar -> {
                 emitUiIntent(AddHabitFlowUiIntent.ShowShackbar(visuals = event.visuals))
             }
@@ -74,7 +70,6 @@ sealed interface AddHabitFlowUiEvent {
     data class ShowSnackbar(val visuals: BloomSnackbarVisuals) : AddHabitFlowUiEvent
 
     data object CancelFlow : AddHabitFlowUiEvent
-    data object NavigateToCreateCustomHabit : AddHabitFlowUiEvent
 }
 
 /**
@@ -82,7 +77,6 @@ sealed interface AddHabitFlowUiEvent {
  */
 sealed interface AddHabitFlowUiIntent {
     data class ShowShackbar(val visuals: BloomSnackbarVisuals) : AddHabitFlowUiIntent
-    data object NavigateToCreateCustomHabit : AddHabitFlowUiIntent
     data object ExitFlow : AddHabitFlowUiIntent
 }
 
