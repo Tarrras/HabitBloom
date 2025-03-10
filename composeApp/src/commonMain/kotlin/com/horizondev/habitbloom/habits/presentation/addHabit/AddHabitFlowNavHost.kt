@@ -38,9 +38,7 @@ import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
-import com.horizondev.habitbloom.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
-import com.horizondev.habitbloom.habits.presentation.createHabit.createPersonalHabitFlowGraph
-import com.horizondev.habitbloom.platform.StatusBarColors
+import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
 import kotlinx.coroutines.launch
@@ -54,8 +52,9 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AddHabitFlowNavHost(
     modifier: Modifier = Modifier,
+    navigator: CommonNavigator = koinInject(),
     onFinishFlow: () -> Unit,
-    navigator: CommonNavigator = koinInject()
+    onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
 ) {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
@@ -89,11 +88,6 @@ fun AddHabitFlowNavHost(
         backStackEntry?.destination?.getAddHabitRouteInfo()
     }
 
-    StatusBarColors(
-        statusBarColor = BloomTheme.colors.background,
-        navBarColor = BloomTheme.colors.background
-    )
-
     Scaffold(
         modifier = modifier.imePadding(),
         topBar = {
@@ -122,16 +116,12 @@ fun AddHabitFlowNavHost(
                 startDestination = AddHabitFlowGlobalNavEntryPoint
             ) {
                 // Add all routes from our sealed class
-                createHabitFlowGraph(
+                createHabitNestedFlowGraph(
                     navController = navController,
                     viewModel = viewModel,
                     onNavigateToCreateCustomHabit = { timeOfDay ->
-                        navController.navigate(CreatePersonalHabitFlowRoute.CreateHabit(timeOfDay))
+                        onNavigateToCreateCustomHabit(timeOfDay)
                     }
-                )
-
-                createPersonalHabitFlowGraph(
-                    navController = navController
                 )
             }
         },

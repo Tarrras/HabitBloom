@@ -1,11 +1,10 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
+import com.horizondev.habitbloom.habits.presentation.navigation.HabitFlowNavHost
 
 /**
  * Voyager screen that hosts the Add Habit flow implemented with KMP Navigation.
@@ -18,8 +17,7 @@ class AddHabitFlowScreen : Screen {
         val navigator = LocalNavigator.currentOrThrow
 
         // Use our NavHost with KMP Navigation and type-safe routes
-        AddHabitFlowNavHost(
-            modifier = Modifier.fillMaxSize(),
+        HabitFlowNavHost(
             onFinishFlow = { navigator.pop() }
         )
     }
