@@ -1,5 +1,9 @@
 package com.horizondev.habitbloom.common
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -56,12 +60,29 @@ fun MainScreen() {
     val navController = rememberNavController()
     val commonNavigator: CommonNavigator = koinInject()
 
+    val navItems = getBottomNavItems()
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = navBackStackEntry?.destination
+    val showBottomNavigation = navItems.any {
+        currentDestination?.route?.contains(
+            it.route::class.qualifiedName.toString()
+        ) == true
+    }
+
     Scaffold(
         containerColor = BloomTheme.colors.background,
         content = { innerPadding ->
 
             NavigationComponent(
-                modifier = Modifier.padding(innerPadding),
+                modifier = Modifier.padding(
+                    when {
+                        showBottomNavigation -> {
+                            PaddingValues(bottom = innerPadding.calculateBottomPadding())
+                        }
+
+                        else -> PaddingValues(0.dp)
+                    }
+                ),
                 navController = navController,
                 navigator = commonNavigator,
                 startDestination = BottomNavItem.Home
@@ -100,75 +121,83 @@ fun MainScreen() {
         },
         floatingActionButtonPosition = FabPosition.Center,
         floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier.size(48.dp).offset(y = 42.dp),
-                containerColor = BloomTheme.colors.primary,
-                onClick = {
-                    navController.navigate(AddHabitFlowGlobalNavEntryPoint)
-                },
-                elevation = FloatingActionButtonDefaults.elevation(
-                    defaultElevation = 0.dp,
-                ),
-                shape = CircleShape,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = "Add Habit",
-                    tint = BloomTheme.colors.surface,
-                    modifier = Modifier.size(24.dp),
-                )
+            if (showBottomNavigation) {
+                FloatingActionButton(
+                    modifier = Modifier.size(48.dp).offset(y = 42.dp),
+                    containerColor = BloomTheme.colors.primary,
+                    onClick = {
+                        navController.navigate(AddHabitFlowGlobalNavEntryPoint)
+                    },
+                    elevation = FloatingActionButtonDefaults.elevation(
+                        defaultElevation = 0.dp,
+                    ),
+                    shape = CircleShape,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Add,
+                        contentDescription = "Add Habit",
+                        tint = BloomTheme.colors.surface,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
             }
         },
         bottomBar = {
-            BottomNavigation(
-                backgroundColor = BloomTheme.colors.surface,
+            AnimatedVisibility(
+                visible = showBottomNavigation,
+                enter = slideInVertically(
+                    initialOffsetY = { fullHeight -> fullHeight }
+                ),
+                exit = slideOutVertically(
+                    targetOffsetY = { fullHeight -> fullHeight }
+                )
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
-                    verticalAlignment = Alignment.CenterVertically
+                BottomNavigation(
+                    backgroundColor = BloomTheme.colors.surface,
                 ) {
-                    val navItems = getBottomNavItems()
-                    val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentDestination = navBackStackEntry?.destination
+                    Row(
+                        modifier = Modifier.fillMaxWidth().navigationBarsPadding(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        navItems.forEach { navItem ->
+                            val isSelected = currentDestination?.hierarchy?.any {
+                                it.hasRoute(navItem.route::class)
+                            } == true
 
-                    navItems.forEach { navItem ->
-                        val isSelected = currentDestination?.hierarchy?.any {
-                            it.hasRoute(navItem.route::class)
-                        } == true
-
-                        BottomNavigationItem(
-                            selected = isSelected,
-                            onClick = {
-                                navController.navigate(navItem.route) {
-                                    // Pop up to the start destination of the graph to
-                                    // avoid building up a large stack of destinations
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    // Avoid multiple copies of the same destination
-                                    launchSingleTop = true
-                                    // Restore state when navigating back to a tab
-                                    restoreState = true
-                                }
-                            },
-                            icon = {
-                                Icon(
-                                    painter = painterResource(
-                                        resource = if (isSelected) {
-                                            navItem.filledIconRes
-                                        } else {
-                                            navItem.outlinedIconRes
+                            BottomNavigationItem(
+                                selected = isSelected,
+                                onClick = {
+                                    navController.navigate(navItem.route) {
+                                        // Pop up to the start destination of the graph to
+                                        // avoid building up a large stack of destinations
+                                        popUpTo(navController.graph.findStartDestination().id) {
+                                            saveState = true
                                         }
-                                    ),
-                                    contentDescription = navItem.name,
-                                    tint = if (isSelected) {
-                                        BloomTheme.colors.primary
-                                    } else {
-                                        BloomTheme.colors.disabled
-                                    },
-                                )
-                            },
-                        )
+                                        // Avoid multiple copies of the same destination
+                                        launchSingleTop = true
+                                        // Restore state when navigating back to a tab
+                                        restoreState = true
+                                    }
+                                },
+                                icon = {
+                                    Icon(
+                                        painter = painterResource(
+                                            resource = if (isSelected) {
+                                                navItem.filledIconRes
+                                            } else {
+                                                navItem.outlinedIconRes
+                                            }
+                                        ),
+                                        contentDescription = navItem.name,
+                                        tint = if (isSelected) {
+                                            BloomTheme.colors.primary
+                                        } else {
+                                            BloomTheme.colors.disabled
+                                        },
+                                    )
+                                },
+                            )
+                        }
                     }
                 }
             }

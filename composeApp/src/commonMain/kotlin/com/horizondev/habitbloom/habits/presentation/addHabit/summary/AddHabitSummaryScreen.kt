@@ -81,12 +81,10 @@ fun AddHabitSummaryScreen(
     }
 
     // UI Content
-    Box(modifier = modifier.padding(horizontal = 16.dp)) {
-        AddHabitSummaryContent(
-            uiState = uiState,
-            handleUiEvent = viewModel::handleUiEvent
-        )
-    }
+    AddHabitSummaryContent(
+        uiState = uiState,
+        handleUiEvent = viewModel::handleUiEvent
+    )
 }
 
 @Composable

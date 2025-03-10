@@ -1,7 +1,6 @@
 package com.horizondev.habitbloom.habits.presentation.addHabit.durationChoice
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -105,72 +104,70 @@ private fun AddHabitDurationChoiceScreenContent(
     handleUiEvent: (AddHabitDurationUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(modifier = modifier.padding(horizontal = 16.dp)) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(
-                    rememberScrollState()
-                ),
-        ) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = stringResource(Res.string.choose_habit_days_and_duration),
-                style = BloomTheme.typography.title,
-                color = BloomTheme.colors.textColor.primary,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+            .verticalScroll(
+                rememberScrollState()
+            ),
+    ) {
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(Res.string.choose_habit_days_and_duration),
+            style = BloomTheme.typography.title,
+            color = BloomTheme.colors.textColor.primary,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
-            SelectDaysForHabitCard(
-                modifier = Modifier.fillMaxWidth(),
-                startDate = uiState.displayedStartDate,
-                activeDays = uiState.activeDays,
-                weekStartOption = uiState.weekStartOption,
-                dayStateChanged = { day, isActive ->
-                    handleUiEvent(AddHabitDurationUiEvent.UpdateDayState(day, isActive))
-                },
-                selectGroupOfDays = {
-                    handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(it))
-                },
-                onOptionSelected = {
-                    handleUiEvent(AddHabitDurationUiEvent.SelectWeekStartOption(it))
-                }
-            )
+        SelectDaysForHabitCard(
+            modifier = Modifier.fillMaxWidth(),
+            startDate = uiState.displayedStartDate,
+            activeDays = uiState.activeDays,
+            weekStartOption = uiState.weekStartOption,
+            dayStateChanged = { day, isActive ->
+                handleUiEvent(AddHabitDurationUiEvent.UpdateDayState(day, isActive))
+            },
+            selectGroupOfDays = {
+                handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(it))
+            },
+            onOptionSelected = {
+                handleUiEvent(AddHabitDurationUiEvent.SelectWeekStartOption(it))
+            }
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            SelectDurationForHabitCard(
-                modifier = Modifier.fillMaxWidth(),
-                duration = uiState.durationInDays,
-                onDurationChanged = {
-                    handleUiEvent(AddHabitDurationUiEvent.DurationChanged(it))
-                }
-            )
+        SelectDurationForHabitCard(
+            modifier = Modifier.fillMaxWidth(),
+            duration = uiState.durationInDays,
+            onDurationChanged = {
+                handleUiEvent(AddHabitDurationUiEvent.DurationChanged(it))
+            }
+        )
 
-            Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
-            BloomPrimaryFilledButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.next),
-                onClick = {
-                    handleUiEvent(AddHabitDurationUiEvent.OnNext)
-                },
-                enabled = uiState.displayedStartDate != null
-            )
+        BloomPrimaryFilledButton(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(Res.string.next),
+            onClick = {
+                handleUiEvent(AddHabitDurationUiEvent.OnNext)
+            },
+            enabled = uiState.displayedStartDate != null
+        )
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
-            BloomPrimaryOutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.cancel),
-                onClick = {
-                    handleUiEvent(AddHabitDurationUiEvent.Cancel)
-                },
-            )
+        BloomPrimaryOutlinedButton(
+            modifier = Modifier.fillMaxWidth(),
+            text = stringResource(Res.string.cancel),
+            onClick = {
+                handleUiEvent(AddHabitDurationUiEvent.Cancel)
+            },
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
@@ -63,7 +64,7 @@ private fun HomeScreenContent(
     uiState: HomeScreenUiState,
     handleUiEvent: (HomeScreenUiEvent) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    LazyColumn(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
         toolbar(modifier = Modifier.fillMaxWidth())
         dailySummary(uiState = uiState)
         timeOfDaySwitcher(
