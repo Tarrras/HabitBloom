@@ -1,9 +1,10 @@
 package com.horizondev.habitbloom.core.designComponents.bottomBar
 
-import androidx.compose.ui.graphics.vector.ImageVector
+import org.jetbrains.compose.resources.DrawableResource
 
 data class TopLevelRoute<T : Any>(
     val name: String,
     val route: T,
-    val icon: ImageVector
+    val outlinedIconRes: DrawableResource,
+    val filledIconRes: DrawableResource
 )

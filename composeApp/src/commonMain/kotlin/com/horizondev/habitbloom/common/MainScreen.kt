@@ -21,6 +21,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination.Companion.hasRoute
+import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -42,7 +44,6 @@ import com.horizondev.habitbloom.profile.presentation.ProfileScreen
 import com.horizondev.habitbloom.profile.presentation.ProfileViewModel
 import com.horizondev.habitbloom.statistic.StatisticScreen
 import com.horizondev.habitbloom.statistic.StatisticViewModel
-import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -128,11 +129,15 @@ fun MainScreen() {
                 ) {
                     val navItems = getBottomNavItems()
                     val navBackStackEntry by navController.currentBackStackEntryAsState()
-                    val currentRoute = navBackStackEntry?.destination?.route
+                    val currentDestination = navBackStackEntry?.destination
 
                     navItems.forEach { navItem ->
+                        val isSelected = currentDestination?.hierarchy?.any {
+                            it.hasRoute(navItem.route::class)
+                        } == true
+
                         BottomNavigationItem(
-                            selected = currentRoute == navItem.route,
+                            selected = isSelected,
                             onClick = {
                                 navController.navigate(navItem.route) {
                                     // Pop up to the start destination of the graph to
@@ -149,16 +154,14 @@ fun MainScreen() {
                             icon = {
                                 Icon(
                                     painter = painterResource(
-                                        resource = DrawableResource(
-                                            if (currentRoute == navItem.route) {
-                                                navItem.filledIconRes
-                                            } else {
-                                                navItem.outlinedIconRes
-                                            }
-                                        )
+                                        resource = if (isSelected) {
+                                            navItem.filledIconRes
+                                        } else {
+                                            navItem.outlinedIconRes
+                                        }
                                     ),
-                                    contentDescription = navItem.title,
-                                    tint = if (currentRoute == navItem.route) {
+                                    contentDescription = navItem.name,
+                                    tint = if (isSelected) {
                                         BloomTheme.colors.primary
                                     } else {
                                         BloomTheme.colors.disabled
