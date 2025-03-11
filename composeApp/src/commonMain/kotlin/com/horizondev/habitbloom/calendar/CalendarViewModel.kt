@@ -1,7 +1,7 @@
 package com.horizondev.habitbloom.calendar
 
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.habits.domain.HabitsRepository
+import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone

@@ -2,7 +2,7 @@ package com.horizondev.habitbloom.utils
 
 import androidx.compose.runtime.Composable
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
-import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.month_april
 import habitbloom.composeapp.generated.resources.month_august

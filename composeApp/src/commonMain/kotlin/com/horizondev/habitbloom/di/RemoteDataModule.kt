@@ -1,10 +1,10 @@
 package com.horizondev.habitbloom.di
 
 import com.horizondev.habitbloom.auth.data.AuthRemoteDataSource
-import com.horizondev.habitbloom.habits.data.remote.HabitsRemoteDataSource
-import com.horizondev.habitbloom.habits.data.remote.SupabaseConfig
-import com.horizondev.habitbloom.habits.data.remote.SupabaseStorageService
-import com.horizondev.habitbloom.profile.data.ProfileRemoteDataSource
+import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
+import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseConfig
+import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
+import com.horizondev.habitbloom.screens.profile.data.ProfileRemoteDataSource
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuth
 import dev.gitlive.firebase.auth.auth

@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ProvidableCompositionLocal
 import cafe.adriel.voyager.navigator.Navigator
-import com.horizondev.habitbloom.habits.domain.models.TimeOfDay
-import com.horizondev.habitbloom.habits.domain.models.UserHabitRecord
-import com.horizondev.habitbloom.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
+import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources._0_percentage_task_done
 import habitbloom.composeapp.generated.resources._100_percentage_task_done

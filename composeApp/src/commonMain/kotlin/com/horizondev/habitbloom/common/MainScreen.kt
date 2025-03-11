@@ -31,6 +31,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.horizondev.habitbloom.calendar.CalendarScreen
 import com.horizondev.habitbloom.calendar.CalendarViewModel
 import com.horizondev.habitbloom.common.navigation.BottomNavItem
@@ -38,16 +39,18 @@ import com.horizondev.habitbloom.common.navigation.getBottomNavItems
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
-import com.horizondev.habitbloom.habits.presentation.addHabit.AddHabitFlowGlobalNavEntryPoint
-import com.horizondev.habitbloom.habits.presentation.addHabit.addHabitFlowGraph
-import com.horizondev.habitbloom.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
-import com.horizondev.habitbloom.habits.presentation.createHabit.createPersonalHabitFlowGraph
-import com.horizondev.habitbloom.habits.presentation.home.HomeScreen
-import com.horizondev.habitbloom.habits.presentation.home.HomeViewModel
-import com.horizondev.habitbloom.profile.presentation.ProfileScreen
-import com.horizondev.habitbloom.profile.presentation.ProfileViewModel
-import com.horizondev.habitbloom.statistic.StatisticScreen
-import com.horizondev.habitbloom.statistic.StatisticViewModel
+import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowGlobalNavEntryPoint
+import com.horizondev.habitbloom.screens.habits.presentation.addHabit.addHabitFlowGraph
+import com.horizondev.habitbloom.screens.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
+import com.horizondev.habitbloom.screens.habits.presentation.createHabit.createPersonalHabitFlowGraph
+import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsDestination
+import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsScreen
+import com.horizondev.habitbloom.screens.habits.presentation.home.HomeScreen
+import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
+import com.horizondev.habitbloom.screens.profile.presentation.ProfileScreen
+import com.horizondev.habitbloom.screens.profile.presentation.ProfileViewModel
+import com.horizondev.habitbloom.screens.statistic.StatisticScreen
+import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -89,7 +92,9 @@ fun MainScreen() {
             ) {
                 composable<BottomNavItem.Home> {
                     val viewModel = koinViewModel<HomeViewModel>()
-                    HomeScreen(viewModel = viewModel)
+                    HomeScreen(viewModel = viewModel, navigateToHabitDetails = { userHabitId ->
+                        navController.navigate(HabitDetailsDestination(userHabitId))
+                    })
                 }
 
                 composable<BottomNavItem.Statistics> {
@@ -105,6 +110,14 @@ fun MainScreen() {
                 composable<BottomNavItem.Profile> {
                     val viewModel = koinViewModel<ProfileViewModel>()
                     ProfileScreen(viewModel = viewModel)
+                }
+
+                composable<HabitDetailsDestination> { entry ->
+                    val data = entry.toRoute<HabitDetailsDestination>()
+
+                    HabitDetailsScreen(userHabitId = data.habitId, popBackStack = {
+                        navController.popBackStack()
+                    })
                 }
 
                 addHabitFlowGraph(
