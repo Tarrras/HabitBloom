@@ -91,12 +91,6 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
 
-            implementation(libs.voyager.navigator)
-            implementation(libs.voyager.bottomSheetNavigator)
-            implementation(libs.voyager.transitions)
-            implementation(libs.voyager.tabNavigator)
-            implementation(libs.voyager.koin)
-
             implementation(libs.kotlinX.serializationJson)
 
             implementation(libs.material3.window.size.multiplatform)

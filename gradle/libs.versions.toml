@@ -16,7 +16,6 @@ gradle = "8.5.2"
 statelyCommon = "2.0.5"
 statelyIsoCollections = "2.0.5"
 statelyIsolate = "2.0.5"
-voyager = "1.0.0"
 multiplatformSettings = "1.1.1"
 koin-compose = "4.0.2"
 core = "1.13.1"
@@ -90,13 +89,6 @@ toast4j = { module = "de.mobanisto:toast4j", version.ref = "toast4j" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
 ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
-
-# Voyager
-voyager-navigator = { module = "cafe.adriel.voyager:voyager-navigator", version.ref = "voyager" }
-voyager-bottomSheetNavigator = { module = "cafe.adriel.voyager:voyager-bottom-sheet-navigator", version.ref = "voyager" }
-voyager-tabNavigator = { module = "cafe.adriel.voyager:voyager-tab-navigator", version.ref = "voyager" }
-voyager-transitions = { module = "cafe.adriel.voyager:voyager-transitions", version.ref = "voyager" }
-voyager-koin = { module = "cafe.adriel.voyager:voyager-koin", version.ref = "voyager" }
 
 core-library-desugaring = { module = "com.android.tools:desugar_jdk_libs", version.ref = "core-library-desugaring" }
 accompanist-systemUIController = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist-systemUIController" }

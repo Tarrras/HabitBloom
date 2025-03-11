@@ -2,8 +2,6 @@ package com.horizondev.habitbloom.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.ProvidableCompositionLocal
-import cafe.adriel.voyager.navigator.Navigator
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
@@ -186,7 +184,3 @@ fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
 
     return maxStreak
 }
-
-val ProvidableCompositionLocal<Navigator?>.parentOrThrow: Navigator
-    @Composable
-    get() = current?.parent ?: error("CompositionLocal is null")
