@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,6 +20,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
@@ -63,7 +66,30 @@ private fun HomeScreenContent(
     uiState: HomeScreenUiState,
     handleUiEvent: (HomeScreenUiEvent) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+
+    //todo add to theme
+    val gradientColors = when (uiState.selectedTimeOfDay) {
+        TimeOfDay.Morning -> listOf(
+            Color(0xFFFFF8E1),
+            Color(0xFFF1F8E9)
+        ) // Світло-жовтий → ніжно-зелений
+        TimeOfDay.Afternoon -> listOf(
+            Color(0xFFE3F2FD),
+            Color(0xFFF1F8E9)
+        ) // Світло-блакитний → ніжно-зелений
+        TimeOfDay.Evening -> listOf(Color(0xFFF3E5F5), Color(0xFFE1F5FE)) // Фіолетові
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = gradientColors
+                )
+            )
+            .statusBarsPadding()
+    ) {
         toolbar(modifier = Modifier.fillMaxWidth())
         dailySummary(uiState = uiState)
         timeOfDaySwitcher(

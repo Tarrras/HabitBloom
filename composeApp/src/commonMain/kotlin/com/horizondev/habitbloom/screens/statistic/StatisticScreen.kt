@@ -37,7 +37,7 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.statistic.components.NoCompletedHabitsPlaceholder
 import com.horizondev.habitbloom.utils.collectAsEffect
-import com.horizondev.habitbloom.utils.getChartBorder
+import com.horizondev.habitbloom.utils.getChartColor
 import com.horizondev.habitbloom.utils.getShortTitle
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
@@ -184,7 +184,7 @@ fun GeneralCompletedHabitsChartCard(
                             TimeOfDay.Morning.ordinal -> TimeOfDay.Morning
                             TimeOfDay.Afternoon.ordinal -> TimeOfDay.Afternoon
                             else -> TimeOfDay.Evening
-                        }.getChartBorder()
+                        }.getChartColor()
 
                         DefaultSlice(color = color)
                     },
@@ -222,7 +222,7 @@ fun GeneralCompletedHabitsChartCard(
                             modifier = Modifier
                                 .size(24.dp)
                                 .background(
-                                    color = timeOfDay.getChartBorder(),
+                                    color = timeOfDay.getChartColor(),
                                     shape = CircleShape
                                 )
                         )

@@ -3,6 +3,7 @@ androidDriver = "2.0.0"
 calendarComposeMultiplatform = "2.6.0-beta01"
 coilCompose = "3.0.4"
 kamelImage = "0.9.5"
+lifecycleCommon = "2.8.4"
 navigationCompose = "2.9.0-alpha14"
 sqlDelight = "2.0.0"
 firebaseBom = "33.2.0"
@@ -55,6 +56,8 @@ koin-compose-viewmodel-navigation = { module = "io.insert-koin:koin-compose-view
 
 kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-swing", version.ref = "kotlinxCoroutinesSwing" }
 kotlinX-serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationJson" }
+lifecycle-common = { module = "org.jetbrains.androidx.lifecycle:lifecycle-common", version.ref = "lifecycleCommon" }
+lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleCommon" }
 material3-window-size-multiplatform = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "material3WindowSizeClassMultiplatform" }
 native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "androidDriver" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }

@@ -163,8 +163,10 @@ class HabitDetailsViewModel(
             HabitScreenDetailsUiEvent.DeleteHabit -> {
                 viewModelScope.launch {
                     repository.deleteUserHabit(userHabitId = userHabitId).onSuccess {
+                        updateState { it.copy(showDeleteDialog = false) }
                         emitUiIntent(HabitScreenDetailsUiIntent.NavigateBack)
                     }.onFailure {
+                        updateState { it.copy(showDeleteDialog = false) }
                         emitUiIntent(
                             HabitScreenDetailsUiIntent.ShowSnackbar(
                                 visuals = BloomSnackbarVisuals(

@@ -1,6 +1,6 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,13 +17,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
@@ -44,6 +46,7 @@ import habitbloom.composeapp.generated.resources.delete
 import habitbloom.composeapp.generated.resources.delete_custom_habit_description
 import habitbloom.composeapp.generated.resources.delete_custom_habit_question
 import habitbloom.composeapp.generated.resources.no_habits_found
+import habitbloom.composeapp.generated.resources.or_create_your_own_habit
 import habitbloom.composeapp.generated.resources.search_habit
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -91,6 +94,13 @@ fun AddHabitChoiceScreen(
         }
     }
 
+    val currentState by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
+    LaunchedEffect(currentState) {
+        if (currentState == Lifecycle.State.RESUMED) {
+            viewModel.handleUiEvent(AddHabitChoiceUiEvent.RefreshPage)
+        }
+    }
+
     AddHabitChoiceScreenContent(
         uiState = uiState,
         handleUiEvent = viewModel::handleUiEvent,
@@ -113,6 +123,19 @@ fun AddHabitChoiceScreenContent(
                 style = BloomTheme.typography.title,
                 color = BloomTheme.colors.textColor.primary,
             )
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Add clickable underlined text
+            Text(
+                text = stringResource(Res.string.or_create_your_own_habit),
+                style = BloomTheme.typography.body.copy(fontWeight = FontWeight.Medium),
+                color = BloomTheme.colors.primary,
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.clickable {
+                    handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
+                }
+            )
+            
             Spacer(modifier = Modifier.height(24.dp))
             BloomSearchTextField(
                 value = uiState.searchInput,
@@ -131,9 +154,6 @@ fun AddHabitChoiceScreenContent(
                     },
                     onHabitDelete = {
                         handleUiEvent(AddHabitChoiceUiEvent.DeleteHabit(it))
-                    },
-                    onCreateHabit = {
-                        handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
                     }
                 )
             } else if (!uiState.isLoading) {
@@ -171,41 +191,22 @@ fun AddHabitChoiceScreenContent(
 private fun HabitsList(
     habits: List<HabitInfo>,
     onHabitClicked: (HabitInfo) -> Unit,
-    onHabitDelete: (HabitInfo) -> Unit,
-    onCreateHabit: () -> Unit
+    onHabitDelete: (HabitInfo) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
-    val showCreateButton by remember {
-        derivedStateOf {
-            lazyListState.firstVisibleItemIndex > 0
-        }
+
+    LazyColumn(
+        state = lazyListState,
+        contentPadding = PaddingValues(top = 12.dp, bottom = 24.dp)
+    ) {
+        habits(
+            habits = habits,
+            onHabitClicked = onHabitClicked,
+            onHabitDelete = onHabitDelete
+        )
     }
 
-    Box {
-        LazyColumn(
-            state = lazyListState,
-            contentPadding = PaddingValues(top = 12.dp, bottom = 54.dp)
-        ) {
-            habits(
-                habits = habits,
-                onHabitClicked = onHabitClicked,
-                onHabitDelete = onHabitDelete
-            )
-        }
-
-        AnimatedVisibility(
-            visible = showCreateButton,
-            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 12.dp)
-        ) {
-            BloomPrimaryFilledButton(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
-                text = stringResource(Res.string.create_personal_habit),
-                onClick = {
-                    onCreateHabit()
-                }
-            )
-        }
-    }
+    // Removed the floating "create personal habit" button that appears when scrolling
 }
 
 @Composable

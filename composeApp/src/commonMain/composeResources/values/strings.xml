@@ -43,6 +43,7 @@
 
     <string name="choose_habit_category">Choose habit category</string>
     <string name="choose_habit_to_acquire">Choose habit to acquire</string>
+    <string name="or_create_your_own_habit">or create your own habit</string>
     <string name="choose_habit_days_and_duration">Choose days and duration</string>
     <string name="search_habit">Search habit</string>
     <string name="select_days_for_habit">Select days for habit</string>

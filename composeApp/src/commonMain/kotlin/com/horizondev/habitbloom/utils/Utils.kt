@@ -189,7 +189,7 @@ fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
 @Composable
 fun TimeOfDay.getChartBorder(): Color {
     return when (this) {
-        TimeOfDay.Morning -> Color(0xFF187ff5)
+        TimeOfDay.Morning -> Color(0xFFffc76e)
         TimeOfDay.Afternoon -> Color(0xFF34d9ed)
         TimeOfDay.Evening -> Color(0xFF9165f7)
     }
@@ -198,7 +198,7 @@ fun TimeOfDay.getChartBorder(): Color {
 @Composable
 fun TimeOfDay.getChartColor(): Color {
     return when (this) {
-        TimeOfDay.Morning -> Color(0xFFD4E7FD)
+        TimeOfDay.Morning -> Color(0xFFFFF3E0)
         TimeOfDay.Afternoon -> Color(0xFFE1F1F3)
         TimeOfDay.Evening -> Color(0xFFEAE2FD)
     }

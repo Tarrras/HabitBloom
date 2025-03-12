@@ -16,11 +16,12 @@ sealed interface AddHabitChoiceUiEvent {
     data class UpdateSearchInput(val input: String) : AddHabitChoiceUiEvent
     data class SelectHabit(val habit: HabitInfo) : AddHabitChoiceUiEvent
     data class DeleteHabit(val habit: HabitInfo) : AddHabitChoiceUiEvent
+
     data object ConfirmDeleteHabit : AddHabitChoiceUiEvent
     data object CancelDeleteHabit : AddHabitChoiceUiEvent
-
     data object CreateCustomHabit : AddHabitChoiceUiEvent
     data object NavigateBack : AddHabitChoiceUiEvent
+    data object RefreshPage : AddHabitChoiceUiEvent
 }
 
 sealed interface AddHabitChoiceUiIntent {

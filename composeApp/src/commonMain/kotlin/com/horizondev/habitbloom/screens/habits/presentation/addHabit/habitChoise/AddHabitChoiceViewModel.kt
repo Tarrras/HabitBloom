@@ -83,6 +83,10 @@ class AddHabitChoiceViewModel(
             AddHabitChoiceUiEvent.NavigateBack -> {
                 emitUiIntent(AddHabitChoiceUiIntent.NavigateBack)
             }
+
+            AddHabitChoiceUiEvent.RefreshPage -> {
+                searchHabits(state.value.searchInput)
+            }
         }
     }
 

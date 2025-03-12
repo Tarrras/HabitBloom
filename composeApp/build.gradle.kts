@@ -128,7 +128,8 @@ kotlin {
 
             implementation(libs.navigation.compose)
             // KMP ViewModel
-            implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.2")
+            implementation(libs.lifecycle.viewmodel.compose)
+            implementation(libs.lifecycle.common)
 
         }
     }
