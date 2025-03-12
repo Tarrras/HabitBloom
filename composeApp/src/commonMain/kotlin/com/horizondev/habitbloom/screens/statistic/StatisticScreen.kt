@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -36,6 +37,7 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.statistic.components.NoCompletedHabitsPlaceholder
 import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.getChartBorder
 import com.horizondev.habitbloom.utils.getShortTitle
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
@@ -75,7 +77,7 @@ fun StatisticScreen(
             }
         }
     }
-    
+
     StatisticScreenContent(
         uiState = uiState,
         handleUiEvent = viewModel::handleUiEvent,
@@ -94,6 +96,8 @@ fun StatisticScreenContent(
                 .padding(horizontal = 16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
+            Spacer(Modifier.statusBarsPadding())
+
             ToolbarTitleText(
                 text = stringResource(Res.string.habit_statistic),
                 modifier = Modifier.fillMaxWidth()
@@ -180,7 +184,7 @@ fun GeneralCompletedHabitsChartCard(
                             TimeOfDay.Morning.ordinal -> TimeOfDay.Morning
                             TimeOfDay.Afternoon.ordinal -> TimeOfDay.Afternoon
                             else -> TimeOfDay.Evening
-                        }.getChartColor()
+                        }.getChartBorder()
 
                         DefaultSlice(color = color)
                     },
@@ -218,7 +222,7 @@ fun GeneralCompletedHabitsChartCard(
                             modifier = Modifier
                                 .size(24.dp)
                                 .background(
-                                    color = timeOfDay.getChartColor(),
+                                    color = timeOfDay.getChartBorder(),
                                     shape = CircleShape
                                 )
                         )
@@ -289,14 +293,5 @@ fun WeeklyCompletedHabitsChartCard(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun TimeOfDay.getChartColor(): Color {
-    return when (this) {
-        TimeOfDay.Morning -> Color(0xFFFFD54F)
-        TimeOfDay.Afternoon -> Color(0xFFFF7043)
-        TimeOfDay.Evening -> Color(0xFF7986CB)
     }
 }

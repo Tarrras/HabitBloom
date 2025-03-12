@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.di
 
+import CreatePersonalHabitViewModel
 import com.horizondev.habitbloom.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationViewModel
@@ -35,4 +36,5 @@ val viewModelModule: Module = module {
     viewModelOf(::AddHabitDurationViewModel)
     viewModelOf(::AddHabitSummaryViewModel)
     viewModelOf(::AddHabitSuccessViewModel)
+    viewModelOf(::CreatePersonalHabitViewModel)
 }

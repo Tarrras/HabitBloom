@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
@@ -183,4 +184,22 @@ fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
     }
 
     return maxStreak
+}
+
+@Composable
+fun TimeOfDay.getChartBorder(): Color {
+    return when (this) {
+        TimeOfDay.Morning -> Color(0xFF187ff5)
+        TimeOfDay.Afternoon -> Color(0xFF34d9ed)
+        TimeOfDay.Evening -> Color(0xFF9165f7)
+    }
+}
+
+@Composable
+fun TimeOfDay.getChartColor(): Color {
+    return when (this) {
+        TimeOfDay.Morning -> Color(0xFFD4E7FD)
+        TimeOfDay.Afternoon -> Color(0xFFE1F1F3)
+        TimeOfDay.Evening -> Color(0xFFEAE2FD)
+    }
 }

@@ -1,4 +1,3 @@
-package com.horizondev.habitbloom.screens.habits.presentation.createHabit.details
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
@@ -9,6 +8,9 @@ import com.horizondev.habitbloom.platform.ImagePicker
 import com.horizondev.habitbloom.platform.ImagePickerResult
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiEvent
+import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiIntent
+import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiState
 import com.horizondev.habitbloom.screens.profile.domain.ProfileRepository
 import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
@@ -22,7 +24,7 @@ import org.jetbrains.compose.resources.getString
 /**
  * ViewModel for the Create Personal Habit screen.
  */
-class CreatePersonalHabitScreenModel(
+class CreatePersonalHabitViewModel(
     private val habitRepository: HabitsRepository,
     private val profileRepository: ProfileRepository,
     private val imagePicker: ImagePicker,

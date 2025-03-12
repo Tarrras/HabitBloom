@@ -154,7 +154,6 @@ private fun SummaryHabitCard(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
                 BloomNetworkImage(
                     iconUrl = habitInfo.iconUrl,

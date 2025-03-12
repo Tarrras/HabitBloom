@@ -1,6 +1,6 @@
 package com.horizondev.habitbloom.screens.habits.presentation.home.components
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -25,6 +25,8 @@ import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.utils.getChartBorder
+import com.horizondev.habitbloom.utils.getChartColor
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_cup
 import habitbloom.composeapp.generated.resources.streak_days
@@ -41,13 +43,13 @@ fun UserHabitItem(
     val isCompleted = habitInfo.isCompleted
     val daysStreak = habitInfo.daysStreak
 
-    val titleColor by animateColorAsState(
-        if (isCompleted) BloomTheme.colors.primary
-        else BloomTheme.colors.textColor.primary
-    )
     BloomCard(
         modifier = modifier,
-        onClick = onClick
+        onClick = onClick,
+        colors = CardDefaults.cardColors(
+            containerColor = habitInfo.timeOfDay.getChartColor()
+        ),
+        border = BorderStroke(width = 3.dp, color = habitInfo.timeOfDay.getChartBorder())
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -67,19 +69,22 @@ fun UserHabitItem(
                     Text(
                         text = habitInfo.name,
                         style = BloomTheme.typography.heading,
-                        color = titleColor,
+                        color = BloomTheme.colors.textColor.primary,
                         textDecoration = if (isCompleted) TextDecoration.LineThrough else null
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = habitInfo.description,
                         style = BloomTheme.typography.body,
-                        color = BloomTheme.colors.textColor.secondary
+                        color = BloomTheme.colors.textColor.primary
                     )
                 }
+                Spacer(modifier = Modifier.width(16.dp))
 
                 BloomCheckBox(
-                    checked = habitInfo.isCompleted, onCheckedChange = { isCompleted ->
+                    size = 32.dp,
+                    checked = habitInfo.isCompleted,
+                    onCheckedChange = { isCompleted ->
                         onCompletionStatusChanged(habitInfo.id, isCompleted)
                     }
                 )
@@ -109,7 +114,7 @@ fun UserHabitItem(
                         color = BloomTheme.colors.textColor.white
                     )
 
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Spacer(modifier = Modifier.width(12.dp))
 
                     Image(
                         painter = painterResource(Res.drawable.ic_cup),

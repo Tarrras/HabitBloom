@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.habits.presentation.createHabit.details
 
+import CreatePersonalHabitViewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -69,7 +70,7 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 fun CreatePersonalHabitScreen(
-    viewModel: CreatePersonalHabitScreenModel,
+    viewModel: CreatePersonalHabitViewModel,
     onNavigateBack: () -> Unit,
     onOpenSuccessScreen: () -> Unit,
     modifier: Modifier = Modifier

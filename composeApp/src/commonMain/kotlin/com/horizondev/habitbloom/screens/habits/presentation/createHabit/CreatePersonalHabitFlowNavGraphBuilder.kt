@@ -1,12 +1,12 @@
 package com.horizondev.habitbloom.screens.habits.presentation.createHabit
 
+import CreatePersonalHabitViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitScreen
-import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitScreenModel
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.success.CreatePersonalHabitSuccessScreen
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -26,7 +26,7 @@ fun NavGraphBuilder.createPersonalHabitFlowGraph(
         composable<CreatePersonalHabitFlowRoute.CreateHabit> { entry ->
             val timeOfDay = entry.toRoute<CreatePersonalHabitFlowRoute.CreateHabit>().timeOfDay
 
-            val createPersonalHabitViewModel = koinViewModel<CreatePersonalHabitScreenModel> {
+            val createPersonalHabitViewModel = koinViewModel<CreatePersonalHabitViewModel> {
                 parametersOf(timeOfDay)
             }
 
