@@ -1,7 +1,7 @@
 package com.horizondev.habitbloom.di
 
 import CreatePersonalHabitViewModel
-import com.horizondev.habitbloom.calendar.CalendarViewModel
+import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceViewModel

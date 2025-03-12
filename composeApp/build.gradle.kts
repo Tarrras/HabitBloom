@@ -2,6 +2,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
+    //alias(libs.plugins.nativeCocoapod)
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlinX.serialization.plugin)
@@ -62,6 +63,9 @@ kotlin {
             implementation(libs.firebase.android.crashlytics.ktx)
 
             implementation(libs.ktor.client.okhttp)
+
+            // Add Lottie dependency for Android
+            implementation("com.airbnb.android:lottie-compose:6.1.0")
         }
 
         iosMain.dependencies {
@@ -120,6 +124,7 @@ kotlin {
             implementation(libs.stately.common)
 
             implementation(libs.coil.compose)
+            implementation(libs.coil.gif)
             implementation(libs.coil.network.ktor3)
             
             implementation(libs.ktor.client.core)
@@ -130,9 +135,28 @@ kotlin {
             // KMP ViewModel
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.common)
-
         }
     }
+
+    /*    cocoapods {
+            summary = "Some description for the Shared Module"
+            homepage = "Link to the Shared Module homepage"
+            version = "1.0"
+            ios.deploymentTarget = "16.0"
+            podfile = project.file("../iosApp/Podfile")
+            framework {
+                baseName = "shared"
+                isStatic = true
+            }
+
+            // Update the Lottie iOS pod configuration to match our imports
+            pod("lottie-ios") {
+                version = "4.5.1"
+                // This must match the import path in code: cocoapods.Lottie.*
+                moduleName = "Lottie"
+                extraOpts += listOf("-compiler-option", "-fmodules")
+            }
+        }*/
 }
 
 android {

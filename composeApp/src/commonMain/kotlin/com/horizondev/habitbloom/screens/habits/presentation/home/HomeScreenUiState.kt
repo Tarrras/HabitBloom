@@ -4,6 +4,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 
 data class HomeScreenUiState(
+    val isLoading: Boolean = true,
     val selectedTimeOfDay: TimeOfDay = TimeOfDay.Morning,
     val habitsCount: Int = 0,
     val completedHabitsCount: Int = 0,

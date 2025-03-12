@@ -31,11 +31,14 @@ class HomeViewModel(
         val selectedTimeOfDayFlow = state.map {
             it.selectedTimeOfDay
         }.distinctUntilChanged()
+        updateState { it.copy(isLoading = true) }
 
         combine(
             selectedTimeOfDayFlow,
             repository.getUserHabitsByDayFlow(getCurrentDate())
         ) { selectedTimeOfDay, userHabits ->
+            updateState { it.copy(isLoading = true) }
+
             Triple(
                 first = userHabits.size,
                 second = userHabits.count { it.isCompleted },
@@ -44,13 +47,14 @@ class HomeViewModel(
         }.onStart {
             repository.initData()
         }.onEach { (userHabitsCount, completedHabitsCount, dailyHabits) ->
+            updateState { it.copy(isLoading = false) }
             updateState {
                 it.copy(
                     userHabits = dailyHabits,
                     completedHabitsCount = completedHabitsCount,
                     habitsCount = userHabitsCount,
                     userCompletedAllHabitsForTimeOfDay = dailyHabits.isNotEmpty()
-                            && dailyHabits.all { habit -> habit.isCompleted }
+                            && dailyHabits.all { habit -> habit.isCompleted },
                 )
             }
         }.launchIn(viewModelScope)

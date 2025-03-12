@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.BloomLoader
+import com.horizondev.habitbloom.core.designComponents.animation.BloomLottie
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
@@ -73,6 +73,7 @@ import habitbloom.composeapp.generated.resources.habit_active_days
 import habitbloom.composeapp.generated.resources.habit_repeats
 import habitbloom.composeapp.generated.resources.habit_schedule
 import habitbloom.composeapp.generated.resources.ic_warning_filled
+import habitbloom.composeapp.generated.resources.loading_habit_details
 import habitbloom.composeapp.generated.resources.repeats
 import habitbloom.composeapp.generated.resources.save
 import habitbloom.composeapp.generated.resources.selected_repeats
@@ -223,10 +224,33 @@ fun HabitDetailsScreenContent(
                     }
                 }
             }
-            BloomLoader(
-                modifier = Modifier.align(Alignment.Center),
-                isLoading = uiState.isLoading
-            )
+            if (uiState.isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        BloomLottie(
+                            assetName = "ic_bloom_animation",
+                            modifier = Modifier.size(200.dp),
+                            loop = true
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Text(
+                            text = stringResource(Res.string.loading_habit_details),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.primary,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 

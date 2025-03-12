@@ -32,13 +32,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.horizondev.habitbloom.calendar.CalendarScreen
-import com.horizondev.habitbloom.calendar.CalendarViewModel
 import com.horizondev.habitbloom.common.navigation.BottomNavItem
 import com.horizondev.habitbloom.common.navigation.getBottomNavItems
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
+import com.horizondev.habitbloom.screens.calendar.CalendarScreen
+import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowGlobalNavEntryPoint
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.addHabitFlowGraph
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.CreatePersonalHabitFlowRoute

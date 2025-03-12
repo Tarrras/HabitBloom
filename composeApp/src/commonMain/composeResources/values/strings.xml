@@ -184,4 +184,6 @@
     <string name="delete_custom_habit_question">Delete Custom Habit?</string>
     <string name="delete_custom_habit_description">Are you sure you want to delete this custom habit? This will permanently remove the habit from your available habits list.</string>
     <string name="delete_custom_habit_success">Custom habit successfully deleted</string>
+
+    <string name="loading_habit_details">Loading habit details...</string>
 </resources>

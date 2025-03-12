@@ -9,7 +9,7 @@ sqlDelight = "2.0.0"
 firebaseBom = "33.2.0"
 supabaseBom = "3.1.2"
 firebaseCommonKtx = "20.3.3"
-kotlin = "2.0.10"
+kotlin = "2.1.0"
 compose = "1.7.3"
 koinCore = "3.5.6"
 koinAndroid = "3.5.6"
@@ -41,6 +41,7 @@ firebase-gitlive-sdk = "2.1.0"
 [libraries]
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "androidDriver" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }
 coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
 core = { module = "androidx.core:core", version.ref = "core" }
