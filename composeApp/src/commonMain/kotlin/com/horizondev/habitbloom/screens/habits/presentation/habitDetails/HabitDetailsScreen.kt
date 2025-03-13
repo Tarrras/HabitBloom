@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.habits.presentation.habitDetails
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -27,10 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.animation.BloomLottie
+import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
@@ -51,6 +53,7 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHos
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.getBackgroundGradientColors
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
@@ -73,7 +76,6 @@ import habitbloom.composeapp.generated.resources.habit_active_days
 import habitbloom.composeapp.generated.resources.habit_repeats
 import habitbloom.composeapp.generated.resources.habit_schedule
 import habitbloom.composeapp.generated.resources.ic_warning_filled
-import habitbloom.composeapp.generated.resources.loading_habit_details
 import habitbloom.composeapp.generated.resources.repeats
 import habitbloom.composeapp.generated.resources.save
 import habitbloom.composeapp.generated.resources.selected_repeats
@@ -153,7 +155,12 @@ fun HabitDetailsScreenContent(
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize().background(
+                brush = Brush.verticalGradient(
+                    colors = uiState.habitInfo?.timeOfDay?.getBackgroundGradientColors()
+                        ?: listOf(BloomTheme.colors.background, BloomTheme.colors.background)
+                )
+            )
         ) {
             if (uiState.habitInfo != null) {
                 Column(
@@ -231,24 +238,9 @@ fun HabitDetailsScreenContent(
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        BloomLottie(
-                            assetName = "ic_bloom_animation",
-                            modifier = Modifier.size(200.dp),
-                            loop = true
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Text(
-                            text = stringResource(Res.string.loading_habit_details),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.primary,
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    BloomLoadingAnimation(
+                        modifier = Modifier.align(Alignment.Center).size(150.dp),
+                    )
                 }
             }
         }

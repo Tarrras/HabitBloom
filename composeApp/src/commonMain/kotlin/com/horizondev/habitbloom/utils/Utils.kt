@@ -117,7 +117,7 @@ fun calculateCompletedRepeats(
         val pastWeeklyRecords = records.filter { record ->
             if (isRepeatThisWeekCompleted) {
                 record.date.calculateStartOfWeek() <= startOfCurrentWeek
-            } else record.date.calculateStartOfWeek() <= startOfCurrentWeek
+            } else record.date.calculateStartOfWeek() < startOfCurrentWeek
         }
 
         val weeklyRecords =
