@@ -1,7 +1,10 @@
 package com.horizondev.habitbloom.utils
 
+import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
@@ -216,3 +219,11 @@ fun TimeOfDay.getBackgroundGradientColors(): List<Color> = when (this) {
 
     TimeOfDay.Evening -> listOf(Color(0xFFF3E5F5), Color(0xFFE1F5FE))
 }
+
+
+@Composable
+fun Modifier.bloomGradientBackground(
+    timeOfDay: TimeOfDay
+): Modifier = Modifier.background(
+    brush = Brush.verticalGradient(colors = timeOfDay.getBackgroundGradientColors())
+)

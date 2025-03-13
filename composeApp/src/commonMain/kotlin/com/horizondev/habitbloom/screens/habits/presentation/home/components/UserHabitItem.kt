@@ -86,7 +86,8 @@ fun UserHabitItem(
                     checked = habitInfo.isCompleted,
                     onCheckedChange = { isCompleted ->
                         onCompletionStatusChanged(habitInfo.id, isCompleted)
-                    }
+                    },
+                    iconSize = 20.dp
                 )
             }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
@@ -26,7 +27,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.horizondev.habitbloom.core.designComponents.BloomLoader
+import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
@@ -135,44 +136,47 @@ fun AddHabitChoiceScreenContent(
                     handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
                 }
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            BloomSearchTextField(
-                value = uiState.searchInput,
-                onValueChange = {
-                    handleUiEvent(AddHabitChoiceUiEvent.UpdateSearchInput(it))
-                },
-                modifier = Modifier.fillMaxWidth(),
-                placeholderText = stringResource(Res.string.search_habit)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            if (uiState.habits.isNotEmpty()) {
-                HabitsList(
-                    habits = uiState.habits,
-                    onHabitClicked = {
-                        handleUiEvent(AddHabitChoiceUiEvent.SelectHabit(it))
+            if (uiState.isLoading.not()) {
+                BloomSearchTextField(
+                    value = uiState.searchInput,
+                    onValueChange = {
+                        handleUiEvent(AddHabitChoiceUiEvent.UpdateSearchInput(it))
                     },
-                    onHabitDelete = {
-                        handleUiEvent(AddHabitChoiceUiEvent.DeleteHabit(it))
-                    }
-                )
-            } else if (!uiState.isLoading) {
-                NoResultsPlaceholders(
                     modifier = Modifier.fillMaxWidth(),
-                    title = stringResource(Res.string.no_habits_found),
-                    description = stringResource(Res.string.add_your_own_personal_habit_to_start_tracking),
-                    buttonText = stringResource(Res.string.create_personal_habit),
-                    onButtonClick = {
-                        handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
-                    }
+                    placeholderText = stringResource(Res.string.search_habit)
                 )
+                Spacer(modifier = Modifier.height(12.dp))
+                if (uiState.habits.isNotEmpty()) {
+                    HabitsList(
+                        habits = uiState.habits,
+                        onHabitClicked = {
+                            handleUiEvent(AddHabitChoiceUiEvent.SelectHabit(it))
+                        },
+                        onHabitDelete = {
+                            handleUiEvent(AddHabitChoiceUiEvent.DeleteHabit(it))
+                        }
+                    )
+                } else {
+                    NoResultsPlaceholders(
+                        modifier = Modifier.fillMaxWidth(),
+                        title = stringResource(Res.string.no_habits_found),
+                        description = stringResource(Res.string.add_your_own_personal_habit_to_start_tracking),
+                        buttonText = stringResource(Res.string.create_personal_habit),
+                        onButtonClick = {
+                            handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
+                        }
+                    )
+                }
             }
         }
 
-        BloomLoader(
-            modifier = Modifier.align(Alignment.Center),
-            isLoading = uiState.isLoading
-        )
+        if (uiState.isLoading) {
+            BloomLoadingAnimation(
+                modifier = Modifier.align(Alignment.Center).size(150.dp),
+            )
+        }
 
         // Delete confirmation dialog
         DeleteCustomHabitDialog(

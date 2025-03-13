@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.habits.presentation.createHabit.details
 
 import CreatePersonalHabitViewModel
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -18,10 +19,14 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -61,7 +66,6 @@ import habitbloom.composeapp.generated.resources.habit_category
 import habitbloom.composeapp.generated.resources.habit_description
 import habitbloom.composeapp.generated.resources.habit_title
 import habitbloom.composeapp.generated.resources.next
-import habitbloom.composeapp.generated.resources.tap_to_change_photo
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.stringResource
 
@@ -135,43 +139,14 @@ fun CreatePersonalHabitScreenContent(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Box(
+                CreateHabitIconPicker(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
-                    contentAlignment = Alignment.Center
-                ) {
-                    BloomNetworkImage(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .size(124.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                handleUiEvent(CreatePersonalHabitUiEvent.PickImage)
-                            },
-                        iconUrl = uiState.selectedImageUrl ?: DEFAULT_PHOTO_URL,
-                        contentDescription = stringResource(Res.string.create_personal_habit)
-                    )
-
-                    when (uiState.imagePickerState) {
-                        is ImagePickerResult.Loading -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(32.dp),
-                                color = BloomTheme.colors.primary
-                            )
-                        }
-
-                        else -> {
-                            Text(
-                                text = stringResource(Res.string.tap_to_change_photo),
-                                style = BloomTheme.typography.subheading,
-                                color = BloomTheme.colors.textColor.secondary,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.align(Alignment.BottomCenter)
-                            )
-                        }
+                    imagePickerState = uiState.imagePickerState,
+                    selectedImageUri = uiState.selectedImageUrl,
+                    onPickImage = {
+                        handleUiEvent(CreatePersonalHabitUiEvent.PickImage)
                     }
-                }
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -312,4 +287,63 @@ private fun CreateHabitDialog(
             )
         }
     }
-} 
+}
+
+@Composable
+fun CreateHabitIconPicker(
+    modifier: Modifier = Modifier,
+    imagePickerState: ImagePickerResult,
+    selectedImageUri: String?,
+    onPickImage: () -> Unit
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        BloomNetworkImage(
+            modifier = Modifier
+                .clip(CircleShape)
+                .size(124.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {
+                    onPickImage()
+                },
+            iconUrl = selectedImageUri ?: DEFAULT_PHOTO_URL,
+            contentDescription = stringResource(Res.string.create_personal_habit)
+        )
+
+        when (imagePickerState) {
+            is ImagePickerResult.Loading -> {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(32.dp),
+                    color = BloomTheme.colors.primary
+                )
+            }
+
+            else -> {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .size(32.dp)
+                        .background(color = BloomTheme.colors.primary, shape = CircleShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = false),
+                            onClick = {
+                                onPickImage()
+                            }
+                        )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        tint = BloomTheme.colors.surface,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp).align(Alignment.Center)
+                    )
+                }
+            }
+        }
+    }
+}
