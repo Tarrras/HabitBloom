@@ -1,22 +1,15 @@
 PODS:
-  - composeApp (1.0):
-    - lottie-ios (= 4.5.1)
-  - lottie-ios (4.5.1)
+  - composeApp (1.0)
 
 DEPENDENCIES:
   - composeApp (from `../composeApp`)
-
-SPEC REPOS:
-  trunk:
-    - lottie-ios
 
 EXTERNAL SOURCES:
   composeApp:
     :path: "../composeApp"
 
 SPEC CHECKSUMS:
-  composeApp: f64cefcee058938a68e9632b719e4fe36cb8f21e
-  lottie-ios: 248b380fa1b97d18e792c37d90da7ab2aa0d6562
+  composeApp: c5db997ed8492264ef91de13586066ad2b3423fc
 
 PODFILE CHECKSUM: 501c9565884acd2f13287e4df5f64b146b918298
 

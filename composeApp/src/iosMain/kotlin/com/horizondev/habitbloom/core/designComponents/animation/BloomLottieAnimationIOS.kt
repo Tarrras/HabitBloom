@@ -2,7 +2,6 @@ package com.horizondev.habitbloom.core.designComponents.animation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import cocoapods.lottie_ios.LottieAnimationView
 import kotlinx.cinterop.ExperimentalForeignApi
 
 /**
@@ -10,7 +9,6 @@ import kotlinx.cinterop.ExperimentalForeignApi
  */
 actual class LottieAnimation {
     @OptIn(ExperimentalForeignApi::class)
-    private var animationView: LottieAnimationView? = null
     private var isPlaying = false
     private var progress = 0f
     private var loop = false
