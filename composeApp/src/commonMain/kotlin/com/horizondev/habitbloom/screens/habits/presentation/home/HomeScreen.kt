@@ -23,7 +23,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
@@ -35,6 +34,7 @@ import com.horizondev.habitbloom.screens.habits.presentation.home.components.Emp
 import com.horizondev.habitbloom.screens.habits.presentation.home.components.TimeOfDaySwitcher
 import com.horizondev.habitbloom.screens.habits.presentation.home.components.UserHabitItem
 import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.getBackgroundGradientColors
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.app_name
 import org.jetbrains.compose.resources.stringResource
@@ -70,26 +70,13 @@ private fun HomeScreenContent(
     handleUiEvent: (HomeScreenUiEvent) -> Unit
 ) {
 
-    //todo add to theme
-    val gradientColors = when (uiState.selectedTimeOfDay) {
-        TimeOfDay.Morning -> listOf(
-            Color(0xFFFFF8E1),
-            Color(0xFFF1F8E9)
-        ) // Світло-жовтий → ніжно-зелений
-        TimeOfDay.Afternoon -> listOf(
-            Color(0xFFE3F2FD),
-            Color(0xFFF1F8E9)
-        ) // Світло-блакитний → ніжно-зелений
-        TimeOfDay.Evening -> listOf(Color(0xFFF3E5F5), Color(0xFFE1F5FE)) // Фіолетові
-    }
-
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = gradientColors
+                        colors = uiState.selectedTimeOfDay.getBackgroundGradientColors()
                     )
                 )
                 .statusBarsPadding()
@@ -122,7 +109,7 @@ private fun HomeScreenContent(
 
         if (uiState.isLoading) {
             BloomLoadingAnimation(
-                modifier = Modifier.align(Alignment.Center).size(100.dp),
+                modifier = Modifier.align(Alignment.Center).size(150.dp),
             )
         }
     }

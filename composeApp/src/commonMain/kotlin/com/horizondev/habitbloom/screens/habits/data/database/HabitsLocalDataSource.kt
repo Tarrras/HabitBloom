@@ -20,7 +20,6 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
-import kotlin.math.max
 
 class HabitsLocalDataSource(
     private val database: HabitBloomDatabase,
@@ -150,7 +149,7 @@ class HabitsLocalDataSource(
                 existingStartDate < userHabit.startDate -> existingStartDate
                 else -> userHabit.startDate
             }
-            val repeats = max(existingHabit.repeats, userHabit.repeats.toLong())
+            val repeats = (existingHabit.repeats + userHabit.repeats.toLong()).coerceAtMost(12)
             val existingDays = existingHabit.daysOfWeek.split(",").map {
                 DayOfWeek.valueOf(it)
             }

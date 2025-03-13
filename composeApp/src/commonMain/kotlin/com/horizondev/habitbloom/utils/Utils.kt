@@ -103,37 +103,37 @@ fun taskCompletionPercentage(habitsCount: Int, completedHabits: Int): Float {
 
 fun calculateCompletedRepeats(
     dayOfCreation: LocalDate,
-    basicRepeats: Int,
-    habitDays: List<DayOfWeek>
+    records: List<UserHabitRecord>,
 ): Int {
-    val today = getCurrentDate()
-    val dayOfCreationInWeek = dayOfCreation.dayOfWeek
-    val startOfWeekOfCreationDate = dayOfCreation.minusDays(dayOfCreationInWeek.ordinal.toLong())
-    val firstDatesOfHabit = habitDays.sortedBy {
-        it.ordinal
-    }.map { startOfWeekOfCreationDate.plusDays(it.ordinal.toLong()) }
+    if (records.isNotEmpty()) {
+        val today = getCurrentDate()
+        val creationWeekStartDate = dayOfCreation.calculateStartOfWeek()
+        val startOfCurrentWeek = today.calculateStartOfWeek()
 
-    var completedRepeats = 0
-    var repeatDates = firstDatesOfHabit
+        val isRepeatThisWeekCompleted = records.filter { record ->
+            record.date.calculateStartOfWeek() == startOfCurrentWeek
+        }.maxBy { it.date }.isCompleted
 
-    while (true) {
-        val startDateOfRepeat = repeatDates.first()
-        val endDateOfRepeat = repeatDates.last()
-
-        when {
-            completedRepeats >= basicRepeats -> break
-            today in startDateOfRepeat..endDateOfRepeat -> {
-                break
-            }
-
-            else -> {
-                completedRepeats += 1
-                repeatDates = repeatDates.map { it.plusDays(7) } //move to the next week
-            }
+        val pastWeeklyRecords = records.filter { record ->
+            if (isRepeatThisWeekCompleted) {
+                record.date.calculateStartOfWeek() <= startOfCurrentWeek
+            } else record.date.calculateStartOfWeek() <= startOfCurrentWeek
         }
-    }
 
-    return completedRepeats
+        val weeklyRecords =
+            pastWeeklyRecords.groupBy { record ->
+                val recordDate = record.date
+                val weekStartDate = recordDate.calculateStartOfWeek()
+
+                val weeksBetween =
+                    (weekStartDate.toEpochDays() - creationWeekStartDate.toEpochDays()) / 7
+                weeksBetween
+            }
+
+        val completedWeeks = weeklyRecords.size
+        return completedWeeks
+
+    } else return 0
 }
 
 @Composable
@@ -164,14 +164,11 @@ fun List<DayOfWeek>.mapToString() = this.toSet()
     .joinToString(",") { it.name }
 
 fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
-    // Step 1: Sort the records by date
     val sortedRecords = this.sortedBy { it.date }
 
-    // Step 2: Initialize variables
     var currentStreak = 0
     var maxStreak = 0
 
-    // Step 3: Iterate through the records
     for (record in sortedRecords) {
         if (record.isCompleted) {
             currentStreak += 1
@@ -202,4 +199,20 @@ fun TimeOfDay.getChartColor(): Color {
         TimeOfDay.Afternoon -> Color(0xFFE1F1F3)
         TimeOfDay.Evening -> Color(0xFFEAE2FD)
     }
+}
+
+
+@Composable
+fun TimeOfDay.getBackgroundGradientColors(): List<Color> = when (this) {
+    TimeOfDay.Morning -> listOf(
+        Color(0xFFFFF8E1),
+        Color(0xFFF1F8E9)
+    )
+
+    TimeOfDay.Afternoon -> listOf(
+        Color(0xFFE3F2FD),
+        Color(0xFFF1F8E9)
+    )
+
+    TimeOfDay.Evening -> listOf(Color(0xFFF3E5F5), Color(0xFFE1F5FE))
 }

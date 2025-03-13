@@ -218,8 +218,7 @@ class HabitsRepository(
                 repeats = userHabitInfo.repeats,
                 completedRepeats = calculateCompletedRepeats(
                     dayOfCreation = userHabitInfo.startDate,
-                    basicRepeats = userHabitInfo.repeats,
-                    habitDays = userHabitInfo.daysOfWeek
+                    records = localHabitRecords
                 )
             )
         }.flowOn(Dispatchers.IO)
@@ -275,6 +274,10 @@ class HabitsRepository(
                 val currentDate = getCurrentDate()
                 val count = localDataSource.clearPastRecords(userHabitId, currentDate)
                 Napier.d("Cleared $count past records for habit $userHabitId", tag = TAG)
+
+                // Update any stateful values for this habit if needed
+                // This ensures that completed repeats are recalculated
+                
                 Result.success(count)
             } catch (e: Exception) {
                 Napier.e("Failed to clear past records for habit $userHabitId", e, tag = TAG)
