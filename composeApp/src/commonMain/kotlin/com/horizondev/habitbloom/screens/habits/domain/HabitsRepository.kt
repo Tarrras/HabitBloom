@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
@@ -70,7 +71,7 @@ class HabitsRepository(
 
     fun getUserHabitsByDayFlow(day: LocalDate): Flow<List<UserHabitRecordFullInfo>> {
         return combine(
-            remoteHabits,
+            remoteHabits.filter { it.isEmpty().not() },
             localDataSource.getUserHabitsByDateFlow(day)
         ) { detailedHabits, habitRecords ->
             Napier.d("getUserHabitsByDayFlow $habitRecords", tag = TAG)

@@ -43,7 +43,7 @@ fun EmptyHabitsForTimeOfDayPlaceholder(
         Image(
             painter = selectTimeOfDay.placeholderImage(),
             contentDescription = selectTimeOfDay.name,
-            modifier = Modifier.size(250.dp),
+            modifier = Modifier.size(150.dp),
             contentScale = ContentScale.FillBounds
         )
         Spacer(modifier = Modifier.height(16.dp))

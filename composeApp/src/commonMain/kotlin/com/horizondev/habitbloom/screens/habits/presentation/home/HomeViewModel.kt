@@ -85,7 +85,6 @@ class HomeViewModel(
                     isLoading = false
                 )
             }
-            Napier.e("loading state false 1")
         }.catch { error ->
             Napier.e("Error loading habits", error, tag = TAG)
             updateState { it.copy(isLoading = false) }
@@ -138,9 +137,12 @@ class HomeViewModel(
             }
 
             is HomeScreenUiEvent.SelectDate -> {
+                val newDate = event.date
+                val editMode = newDate == getCurrentDate()
+
                 // Update the date in both state and flow
-                updateState { it.copy(selectedDate = event.date) }
-                selectedDateFlow.value = event.date
+                updateState { it.copy(selectedDate = newDate, habitStatusEditMode = editMode) }
+                selectedDateFlow.value = newDate
             }
 
             is HomeScreenUiEvent.OpenHabitDetails -> {

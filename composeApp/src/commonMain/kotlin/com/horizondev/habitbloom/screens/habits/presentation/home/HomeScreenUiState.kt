@@ -13,6 +13,7 @@ data class HomeScreenUiState(
     val completedHabitsCount: Int = 0,
     val userCompletedAllHabitsForTimeOfDay: Boolean = false,
     val userHabits: List<UserHabitRecordFullInfo> = emptyList(),
+    val habitStatusEditMode: Boolean = true
 )
 
 sealed interface HomeScreenUiEvent {

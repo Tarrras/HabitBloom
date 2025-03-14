@@ -235,6 +235,7 @@ private fun LazyListScope.habitsList(
                     .padding(horizontal = 16.dp),
                 habitInfo = it,
                 onCompletionStatusChanged = onHabitStatusChanged,
+                editModeEnabled = uiState.habitStatusEditMode,
                 onClick = { onHabitClicked(it.userHabitId) }
             )
             Spacer(modifier = Modifier.height(24.dp))

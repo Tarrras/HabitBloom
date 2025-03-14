@@ -37,6 +37,7 @@ import org.jetbrains.compose.resources.pluralStringResource
 fun UserHabitItem(
     modifier: Modifier = Modifier,
     habitInfo: UserHabitRecordFullInfo,
+    editModeEnabled: Boolean,
     onCompletionStatusChanged: (Long, Boolean) -> Unit,
     onClick: () -> Unit = {},
 ) {
@@ -88,7 +89,8 @@ fun UserHabitItem(
                         onCompletionStatusChanged(habitInfo.id, isCompleted)
                     },
                     iconSize = 16.dp,
-                    shape = RoundedCornerShape(8.dp)
+                    shape = RoundedCornerShape(8.dp),
+                    enabled = editModeEnabled
                 )
             }
 
