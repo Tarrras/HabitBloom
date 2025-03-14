@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    alias(libs.plugins.nativeCocoapod)
+    //alias(libs.plugins.nativeCocoapod)
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlinX.serialization.plugin)
@@ -138,20 +138,20 @@ kotlin {
         }
     }
 
-    cocoapods {
+    /*cocoapods {
         summary = "Some description for the Shared Module"
         homepage = "Link to the Shared Module homepage"
         version = "1.0"
         ios.deploymentTarget = "16.0"
         podfile = project.file("../iosApp/Podfile")
         framework {
-            baseName = "shared"
+            baseName = "ComposeApp"
             isStatic = true
         }
 
         // Update the Lottie iOS pod configuration to match our imports
         //pod("lottie-ios")
-    }
+    }*/
 }
 
 android {

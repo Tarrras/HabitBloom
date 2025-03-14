@@ -22,7 +22,6 @@
 		24BEB9532C93562900F30F5C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB9522C93562900F30F5C /* FirebaseDatabase */; };
 		24BEB9552C93562900F30F5C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB9542C93562900F30F5C /* FirebaseFirestore */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
-		8C7176C3E1B5FF004B4A80F0 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DB4CE0F65E65CD1A7F52133F /* Pods_iosApp.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,7 +35,6 @@
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		982625A57C52D3FDE2E4455F /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
-		DB4CE0F65E65CD1A7F52133F /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -54,7 +52,6 @@
 				24BEB94D2C93562900F30F5C /* FirebaseAnalyticsOnDeviceConversion in Frameworks */,
 				245614372D77683E00BFEF11 /* FirebaseAuth in Frameworks */,
 				24BEB9552C93562900F30F5C /* FirebaseFirestore in Frameworks */,
-				8C7176C3E1B5FF004B4A80F0 /* Pods_iosApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -67,7 +64,6 @@
 				982625A57C52D3FDE2E4455F /* Pods-iosApp.debug.xcconfig */,
 				28FCD05564AEDD07D7E30774 /* Pods-iosApp.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -82,7 +78,6 @@
 		42799AB246E5F90AF97AA0EF /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				DB4CE0F65E65CD1A7F52133F /* Pods_iosApp.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";

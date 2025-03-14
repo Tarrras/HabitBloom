@@ -37,6 +37,7 @@
 
 /* Begin PBXFileReference section */
 		032CB4153F783165B7699D3535F22B82 /* composeApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = composeApp.debug.xcconfig; sourceTree = "<group>"; };
+		05A020C26820F065AB73DF2CECC727AA /* ComposeApp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ComposeApp.framework; path = build/cocoapods/framework/ComposeApp.framework; sourceTree = "<group>"; };
 		257390D34074D2442461A69FE6970CBD /* Pods-iosApp-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-iosApp-resources.sh"; sourceTree = "<group>"; };
 		384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		4D3E6DCB9CAB65A8A05C467E2BBC1F0D /* Pods-iosApp-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-iosApp-acknowledgements.markdown"; sourceTree = "<group>"; };
@@ -45,7 +46,6 @@
 		9BC3BD8CAFAE0C8EB92CD04E5FC24E61 /* Pods-iosApp-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-iosApp-dummy.m"; sourceTree = "<group>"; };
 		9C49AEBC7AA7C80C03295804C6F07963 /* Pods-iosApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-iosApp.release.xcconfig"; sourceTree = "<group>"; };
 		9D940727FF8FB9C785EB98E56350EF41 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
-		9F46B0BE1247DC544B4F99A8ECB5E238 /* shared.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = shared.framework; path = build/cocoapods/framework/shared.framework; sourceTree = "<group>"; };
 		A8BD58C20EC78311D90FC09CF7DA9FF3 /* composeApp.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = composeApp.release.xcconfig; sourceTree = "<group>"; };
 		B097DD7534E741D5C41838011D755842 /* Pods-iosApp */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; name = "Pods-iosApp"; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C5BDF5855B72A637C980E90C3CDF718F /* composeApp.podspec */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; indentWidth = 2; lastKnownFileType = text; path = composeApp.podspec; sourceTree = "<group>"; tabWidth = 2; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
@@ -79,7 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				F7A5B900D2B0E4CA24E399F5A9E541CF /* compose-resources */,
-				9BE586DC698957AF46A0B8441664C9B2 /* Frameworks */,
+				F0B5F1E50E5285114702333978B978CF /* Frameworks */,
 				BCCE556DBF5A4CC04766086353CAA747 /* Pod */,
 				7ADFBEFCCED76991DC9C36124D5A1C96 /* Support Files */,
 			);
@@ -120,14 +120,6 @@
 			);
 			name = "Support Files";
 			path = "../iosApp/Pods/Target Support Files/composeApp";
-			sourceTree = "<group>";
-		};
-		9BE586DC698957AF46A0B8441664C9B2 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				9F46B0BE1247DC544B4F99A8ECB5E238 /* shared.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		BCCE556DBF5A4CC04766086353CAA747 /* Pod */ = {
@@ -171,6 +163,14 @@
 				384DDA2CB25005BD6479B5987C619DD4 /* Foundation.framework */,
 			);
 			name = iOS;
+			sourceTree = "<group>";
+		};
+		F0B5F1E50E5285114702333978B978CF /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				05A020C26820F065AB73DF2CECC727AA /* ComposeApp.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

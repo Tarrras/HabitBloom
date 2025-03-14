@@ -6,15 +6,15 @@ Pod::Spec.new do |spec|
     spec.authors                  = ''
     spec.license                  = ''
     spec.summary                  = 'Some description for the Shared Module'
-    spec.vendored_frameworks      = 'build/cocoapods/framework/shared.framework'
+    spec.vendored_frameworks      = 'build/cocoapods/framework/ComposeApp.framework'
     spec.libraries                = 'c++'
     spec.ios.deployment_target    = '16.0'
                 
                 
-    if !Dir.exist?('build/cocoapods/framework/shared.framework') || Dir.empty?('build/cocoapods/framework/shared.framework')
+    if !Dir.exist?('build/cocoapods/framework/ComposeApp.framework') || Dir.empty?('build/cocoapods/framework/ComposeApp.framework')
         raise "
 
-        Kotlin framework 'shared' doesn't exist yet, so a proper Xcode project can't be generated.
+        Kotlin framework 'ComposeApp' doesn't exist yet, so a proper Xcode project can't be generated.
         'pod install' should be executed after running ':generateDummyFramework' Gradle task:
 
             ./gradlew :composeApp:generateDummyFramework
@@ -28,7 +28,7 @@ Pod::Spec.new do |spec|
                 
     spec.pod_target_xcconfig = {
         'KOTLIN_PROJECT_PATH' => ':composeApp',
-        'PRODUCT_MODULE_NAME' => 'shared',
+        'PRODUCT_MODULE_NAME' => 'ComposeApp',
     }
                 
     spec.script_phases = [
