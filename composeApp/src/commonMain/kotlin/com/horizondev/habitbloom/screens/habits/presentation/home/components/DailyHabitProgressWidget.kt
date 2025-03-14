@@ -8,9 +8,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.utils.habitsCompleteMessage
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.daily_summary
-import habitbloom.composeapp.generated.resources.some_tasks_completed
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -29,10 +29,9 @@ fun DailyHabitProgressWidget(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = stringResource(
-                Res.string.some_tasks_completed,
-                completedHabitsCount,
-                habitsCount
+            text = habitsCompleteMessage(
+                habitsCount = habitsCount,
+                completedHabits = completedHabitsCount
             ),
             style = BloomTheme.typography.subheading,
             color = BloomTheme.colors.textColor.primary,

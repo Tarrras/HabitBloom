@@ -50,7 +50,8 @@ fun UserHabitItem(
         colors = CardDefaults.cardColors(
             containerColor = habitInfo.timeOfDay.getChartColor()
         ),
-        border = BorderStroke(width = 3.dp, color = habitInfo.timeOfDay.getChartBorder())
+        border = BorderStroke(width = 3.dp, color = habitInfo.timeOfDay.getChartBorder()),
+        elevation = CardDefaults.cardElevation(0.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)

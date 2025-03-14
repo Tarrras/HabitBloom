@@ -21,8 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.utils.habitsCompleteMessage
 import com.horizondev.habitbloom.utils.taskCompletionPercentage
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.some_tasks_completed
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HabitProgressIndicator(
@@ -77,12 +79,14 @@ fun HabitProgressIndicator(
 
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = habitsCompleteMessage(
-                habitsCount = dailyHabits,
-                completedHabits = completedHabits
+            text = stringResource(
+                Res.string.some_tasks_completed,
+                completedHabits,
+                dailyHabits
             ),
             style = BloomTheme.typography.body,
-            color = BloomTheme.colors.textColor.secondary,
+            color = BloomTheme.colors.textColor.primary,
         )
+
     }
 }
