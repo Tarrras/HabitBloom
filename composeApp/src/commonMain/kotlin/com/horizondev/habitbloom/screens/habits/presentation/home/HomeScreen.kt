@@ -20,12 +20,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.calendar.DateSelectorStrip
 import com.horizondev.habitbloom.core.designComponents.switcher.TimeOfDaySwitcher
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
@@ -35,8 +38,12 @@ import com.horizondev.habitbloom.screens.habits.presentation.home.components.Emp
 import com.horizondev.habitbloom.screens.habits.presentation.home.components.UserHabitItem
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getBackgroundGradientColors
+import com.horizondev.habitbloom.utils.getTimeOfDay
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.app_name
+import habitbloom.composeapp.generated.resources.good_afternoon
+import habitbloom.composeapp.generated.resources.good_evening
+import habitbloom.composeapp.generated.resources.good_morning
+import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -69,6 +76,8 @@ private fun HomeScreenContent(
     uiState: HomeScreenUiState,
     handleUiEvent: (HomeScreenUiEvent) -> Unit
 ) {
+    // Get the current time of day (not selected)
+    val currentTimeOfDay = remember { getTimeOfDay() }
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
@@ -81,7 +90,10 @@ private fun HomeScreenContent(
                 )
                 .statusBarsPadding()
         ) {
-            toolbar(modifier = Modifier.fillMaxWidth())
+            greeting(currentTimeOfDay)
+            dateSelector(
+                uiState = uiState,
+                onDateSelected = { handleUiEvent(HomeScreenUiEvent.SelectDate(it)) })
             dailySummary(uiState = uiState)
             if (uiState.isLoading.not()) {
                 timeOfDaySwitcher(
@@ -115,16 +127,41 @@ private fun HomeScreenContent(
     }
 }
 
-private fun LazyListScope.toolbar(modifier: Modifier = Modifier) {
-    item(key = "toolbar") {
+private fun LazyListScope.greeting(timeOfDay: TimeOfDay) {
+    item(key = "greeting") {
+        val greetingRes = when (timeOfDay) {
+            TimeOfDay.Morning -> Res.string.good_morning
+            TimeOfDay.Afternoon -> Res.string.good_afternoon
+            TimeOfDay.Evening -> Res.string.good_evening
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = stringResource(Res.string.app_name),
-            style = BloomTheme.typography.heading,
+            text = stringResource(greetingRes),
+            style = BloomTheme.typography.title,
+            fontWeight = FontWeight.Medium,
             color = BloomTheme.colors.textColor.primary,
-            textAlign = TextAlign.Center,
-            modifier = modifier
+            textAlign = TextAlign.Start,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+private fun LazyListScope.dateSelector(
+    uiState: HomeScreenUiState,
+    onDateSelected: (LocalDate) -> Unit
+) {
+    item(key = "date_selector") {
+        Spacer(modifier = Modifier.height(8.dp))
+        DateSelectorStrip(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            selectedDate = uiState.selectedDate,
+            onDateSelected = onDateSelected,
+            daysToShow = 7,
+            startFromToday = false
+        )
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
@@ -132,7 +169,7 @@ private fun LazyListScope.dailySummary(
     uiState: HomeScreenUiState
 ) {
     item(key = "daily_summary") {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         DailyHabitProgressWidget(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             completedHabitsCount = uiState.completedHabitsCount,
@@ -147,7 +184,7 @@ private fun LazyListScope.timeOfDaySwitcher(
     onTimeOfDayChanged: (TimeOfDay) -> Unit
 ) {
     item(key = "time_of_day_switcher") {
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         TimeOfDaySwitcher(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             selectedTimeOfDay = uiState.selectedTimeOfDay,

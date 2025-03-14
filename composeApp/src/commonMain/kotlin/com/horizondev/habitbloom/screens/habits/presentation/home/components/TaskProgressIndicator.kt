@@ -75,17 +75,14 @@ fun HabitProgressIndicator(
             )
         }
 
-
-        if (dailyHabits > 0) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = habitsCompleteMessage(
-                    habitsCount = dailyHabits,
-                    completedHabits = completedHabits
-                ),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.secondary,
-            )
-        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = habitsCompleteMessage(
+                habitsCount = dailyHabits,
+                completedHabits = completedHabits
+            ),
+            style = BloomTheme.typography.body,
+            color = BloomTheme.colors.textColor.secondary,
+        )
     }
 }

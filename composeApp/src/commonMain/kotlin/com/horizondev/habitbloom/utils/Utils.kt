@@ -22,6 +22,7 @@ import habitbloom.composeapp.generated.resources.evening
 import habitbloom.composeapp.generated.resources.friday_short
 import habitbloom.composeapp.generated.resources.monday_short
 import habitbloom.composeapp.generated.resources.morning
+import habitbloom.composeapp.generated.resources.no_habits_today
 import habitbloom.composeapp.generated.resources.saturday_short
 import habitbloom.composeapp.generated.resources.some_percentage_task_done
 import habitbloom.composeapp.generated.resources.sunday_short
@@ -53,6 +54,10 @@ fun <T> Flow<T>.collectAsEffect(
 fun habitsCompleteMessage(habitsCount: Int, completedHabits: Int): String {
     val taskCompletionPercentage = taskCompletionPercentage(habitsCount, completedHabits)
     return when {
+        habitsCount == 0 -> {
+            stringResource(Res.string.no_habits_today)
+        }
+
         completedHabits == habitsCount && completedHabits != 0 -> {
             stringResource(Res.string._100_percentage_task_done)
         }
