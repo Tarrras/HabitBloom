@@ -18,13 +18,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-
-private val shape = CircleShape
 
 @Composable
 fun BloomCheckBox(
@@ -34,7 +33,8 @@ fun BloomCheckBox(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    shape: Shape = CircleShape
 ) {
     val backgroundColor by animateColorAsState(
         if (checked) BloomTheme.colors.primary else BloomTheme.colors.surface

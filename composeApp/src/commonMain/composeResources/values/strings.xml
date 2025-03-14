@@ -16,9 +16,9 @@
     <string name="add_morning_habit">Start your day right! Add a morning habit to kickstart your routine.</string>
     <string name="add_afternoon_habit">Boost your productivity with an afternoon habit.</string>
     <string name="add_evening_habit">Wind down your day with a relaxing evening habit.</string>
-    <string name="no_morning_habits">No morning Habits Yet</string>
-    <string name="no_afternoon_habits">No afternoon Habits Yet</string>
-    <string name="no_evening_habits">No evening Habits Yet</string>
+    <string name="no_morning_habits">No morning habits today</string>
+    <string name="no_afternoon_habits">No afternoon habits today</string>
+    <string name="no_evening_habits">No evening habits today</string>
 
     <string name="month_january">January</string>
     <string name="month_february">February</string>

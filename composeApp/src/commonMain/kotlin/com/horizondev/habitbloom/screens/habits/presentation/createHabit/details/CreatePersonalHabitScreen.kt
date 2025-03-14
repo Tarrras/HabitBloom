@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,15 +44,14 @@ import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.inputText.BloomTextField
-import com.horizondev.habitbloom.core.designComponents.pickers.SingleOptionPicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
+import com.horizondev.habitbloom.core.designComponents.switcher.TimeOfDaySwitcher
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.platform.ImagePickerResult
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
-import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.create
@@ -150,12 +148,13 @@ fun CreatePersonalHabitScreenContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                TimeOfDaySelector(
+                CreateHabitTimeOfDaySelector(
                     selectedTimeOfDay = uiState.timeOfDay,
                     onTimeOfDaySelected = {
                         handleUiEvent(CreatePersonalHabitUiEvent.UpdateTimeOfDay(it))
                     }
                 )
+
                 Spacer(modifier = Modifier.height(24.dp))
                 BloomTextField(
                     modifier = Modifier.fillMaxWidth(),
@@ -219,8 +218,7 @@ fun CreatePersonalHabitScreenContent(
 }
 
 @Composable
-private fun ColumnScope.TimeOfDaySelector(
-    modifier: Modifier = Modifier,
+private fun CreateHabitTimeOfDaySelector(
     selectedTimeOfDay: TimeOfDay,
     onTimeOfDaySelected: (TimeOfDay) -> Unit
 ) {
@@ -230,21 +228,10 @@ private fun ColumnScope.TimeOfDaySelector(
         color = BloomTheme.colors.textColor.primary
     )
     Spacer(modifier = Modifier.height(8.dp))
-    SingleOptionPicker(
+
+    TimeOfDaySwitcher(
         modifier = Modifier.fillMaxWidth(),
-        options = TimeOfDay.entries,
-        selectedOption = selectedTimeOfDay,
-        onOptionSelected = {
-            onTimeOfDaySelected(it)
-        }, content = { option ->
-            Text(
-                textAlign = TextAlign.Center,
-                text = option.getTitle(),
-                color = if (option == selectedTimeOfDay) BloomTheme.colors.textColor.white
-                else BloomTheme.colors.textColor.primary,
-                modifier = Modifier.align(Alignment.Center)
-            )
-        }
+        selectedTimeOfDay = selectedTimeOfDay, onTimeOfDaySelected = onTimeOfDaySelected
     )
 }
 

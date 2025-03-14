@@ -26,12 +26,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.switcher.TimeOfDaySwitcher
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.presentation.home.components.AllHabitsCompletedMessage
 import com.horizondev.habitbloom.screens.habits.presentation.home.components.DailyHabitProgressWidget
 import com.horizondev.habitbloom.screens.habits.presentation.home.components.EmptyHabitsForTimeOfDayPlaceholder
-import com.horizondev.habitbloom.screens.habits.presentation.home.components.TimeOfDaySwitcher
 import com.horizondev.habitbloom.screens.habits.presentation.home.components.UserHabitItem
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getBackgroundGradientColors
@@ -151,7 +151,7 @@ private fun LazyListScope.timeOfDaySwitcher(
         TimeOfDaySwitcher(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
             selectedTimeOfDay = uiState.selectedTimeOfDay,
-            onTimeChanged = onTimeOfDayChanged
+            onTimeOfDaySelected = onTimeOfDayChanged
         )
     }
 }

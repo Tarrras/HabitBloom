@@ -82,12 +82,13 @@ fun UserHabitItem(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 BloomCheckBox(
-                    size = 32.dp,
+                    size = 28.dp,
                     checked = habitInfo.isCompleted,
                     onCheckedChange = { isCompleted ->
                         onCompletionStatusChanged(habitInfo.id, isCompleted)
                     },
-                    iconSize = 20.dp
+                    iconSize = 16.dp,
+                    shape = RoundedCornerShape(8.dp)
                 )
             }
 
