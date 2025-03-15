@@ -13,6 +13,9 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Notifications
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,8 +38,10 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.complete
 import habitbloom.composeapp.generated.resources.do_you_want_add_this_habit
+import habitbloom.composeapp.generated.resources.reminder_set_for
 import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date
+import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -197,10 +202,39 @@ private fun SummaryHabitCard(
                 ),
                 style = BloomTheme.typography.body,
                 color = BloomTheme.colors.textColor.primary,
-                textDecoration = TextDecoration.Underline,
+                textDecoration = TextDecoration.Underline
             )
+
+            // Reminder information
+            if (uiState.reminderEnabled && uiState.reminderTime != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Notifications,
+                        contentDescription = "Reminder",
+                        tint = BloomTheme.colors.primary
+                    )
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    Text(
+                        text = stringResource(
+                            Res.string.reminder_set_for,
+                            formatTime(uiState.reminderTime)
+                        ),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.primary
+                    )
+                }
+            }
         }
     }
+}
+
+private fun formatTime(time: LocalTime): String {
+    return "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
 }
 
 

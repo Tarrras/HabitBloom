@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationC
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,19 +29,23 @@ import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
+import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
+import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.every_day
 import habitbloom.composeapp.generated.resources.four_repeats
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_repeat
 import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.quick_action
+import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.select_days_for_habit
+import habitbloom.composeapp.generated.resources.select_reminder_time
 import habitbloom.composeapp.generated.resources.select_repeats
 import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date
@@ -47,6 +53,7 @@ import habitbloom.composeapp.generated.resources.twelve_repeats
 import habitbloom.composeapp.generated.resources.when_do_you_want_to_start
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -55,7 +62,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun AddHabitDurationChoiceScreen(
-    onDurationSelected: (Int, LocalDate, List<DayOfWeek>, HabitWeekStartOption) -> Unit,
+    onDurationSelected: (Int, LocalDate, List<DayOfWeek>, HabitWeekStartOption, Boolean, LocalTime) -> Unit,
     onBack: () -> Unit,
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
     modifier: Modifier = Modifier
@@ -75,7 +82,9 @@ fun AddHabitDurationChoiceScreen(
                         uiIntent.durationInDays,
                         uiIntent.startDate,
                         uiIntent.selectedDays,
-                        uiIntent.weekStartOption
+                        uiIntent.weekStartOption,
+                        uiIntent.reminderEnabled,
+                        uiIntent.reminderTime
                     )
                 }
 
@@ -146,6 +155,20 @@ private fun AddHabitDurationChoiceScreenContent(
             }
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ReminderSettingsCard(
+            modifier = Modifier.fillMaxWidth(),
+            reminderEnabled = uiState.reminderEnabled,
+            reminderTime = uiState.reminderTime,
+            onReminderEnabledChanged = { enabled ->
+                handleUiEvent(AddHabitDurationUiEvent.ReminderEnabledChanged(enabled))
+            },
+            onReminderTimeChanged = { time ->
+                handleUiEvent(AddHabitDurationUiEvent.ReminderTimeChanged(time))
+            }
+        )
+
         Spacer(modifier = Modifier.height(32.dp))
 
         BloomPrimaryFilledButton(
@@ -164,10 +187,10 @@ private fun AddHabitDurationChoiceScreenContent(
             text = stringResource(Res.string.cancel),
             onClick = {
                 handleUiEvent(AddHabitDurationUiEvent.Cancel)
-            },
+            }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -248,6 +271,71 @@ private fun SelectDaysForHabitCard(
                     selectGroupOfDays(GroupOfDays.WEEKENDS)
                 }
             )
+        }
+    }
+}
+
+@Composable
+private fun ReminderSettingsCard(
+    modifier: Modifier = Modifier,
+    reminderEnabled: Boolean,
+    reminderTime: LocalTime,
+    onReminderEnabledChanged: (Boolean) -> Unit,
+    onReminderTimeChanged: (LocalTime) -> Unit
+) {
+    Surface(
+        color = BloomTheme.colors.surface,
+        shape = RoundedCornerShape(16.dp),
+        shadowElevation = 6.dp
+    ) {
+        Column(
+            modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.Start
+        ) {
+            Text(
+                text = stringResource(Res.string.reminder_settings),
+                style = BloomTheme.typography.heading,
+                color = BloomTheme.colors.textColor.primary
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.enable_reminder),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Switch(
+                    checked = reminderEnabled,
+                    onCheckedChange = onReminderEnabledChanged
+                )
+            }
+
+            AnimatedVisibility(visible = reminderEnabled) {
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = stringResource(Res.string.select_reminder_time),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    TimePicker(
+                        time = reminderTime,
+                        onTimeSelected = onReminderTimeChanged,
+                        use24HourFormat = true
+                    )
+                }
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -37,7 +38,9 @@ class AddHabitFlowViewModel : BloomViewModel<AddHabitFlowState, AddHabitFlowUiIn
                         durationInDays = event.durationInDays,
                         startDate = event.startDate,
                         selectedDays = event.selectedDays,
-                        weekStartOption = event.weekStartOption
+                        weekStartOption = event.weekStartOption,
+                        reminderEnabled = event.reminderEnabled,
+                        reminderTime = event.reminderTime
                     )
                 }
             }
@@ -64,7 +67,9 @@ sealed interface AddHabitFlowUiEvent {
         val durationInDays: Int,
         val startDate: LocalDate,
         val selectedDays: List<DayOfWeek>,
-        val weekStartOption: HabitWeekStartOption
+        val weekStartOption: HabitWeekStartOption,
+        val reminderEnabled: Boolean,
+        val reminderTime: LocalTime
     ) : AddHabitFlowUiEvent
 
     data class ShowSnackbar(val visuals: BloomSnackbarVisuals) : AddHabitFlowUiEvent
@@ -91,5 +96,7 @@ data class AddHabitFlowState(
         .toLocalDateTime(TimeZone.currentSystemDefault()).date,
     val isSubmitting: Boolean = false,
     val selectedDays: List<DayOfWeek> = DayOfWeek.entries,
-    val weekStartOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK
+    val weekStartOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
+    val reminderEnabled: Boolean = false,
+    val reminderTime: LocalTime = LocalTime(8, 0) // Default reminder time set to 8:00 AM
 ) 

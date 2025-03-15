@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.habits.domain
 
+import com.horizondev.habitbloom.core.notifications.NotificationManager
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
@@ -10,6 +11,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.screens.habits.domain.models.toTimeString
 import com.horizondev.habitbloom.screens.profile.data.ProfileRemoteDataSource
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.calculateCompletedRepeats
@@ -28,13 +30,16 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import org.koin.core.component.KoinComponent
 
 class HabitsRepository(
     private val remoteDataSource: HabitsRemoteDataSource,
     private val profileRemoteDataSource: ProfileRemoteDataSource,
     private val localDataSource: HabitsLocalDataSource,
-    private val storageService: SupabaseStorageService
-) {
+    private val storageService: SupabaseStorageService,
+    private val notificationManager: NotificationManager
+) : KoinComponent {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
 
@@ -278,7 +283,7 @@ class HabitsRepository(
 
                 // Update any stateful values for this habit if needed
                 // This ensures that completed repeats are recalculated
-                
+
                 Result.success(count)
             } catch (e: Exception) {
                 Napier.e("Failed to clear past records for habit $userHabitId", e, tag = TAG)
@@ -323,29 +328,135 @@ class HabitsRepository(
      * @param durationInDays The number of days the habit should run for
      * @param startDate The date when the habit should start
      * @param selectedDays The specific days of the week for the habit (optional)
-     * @return Result containing success (true) or failure with error
+     * @param reminderEnabled Whether a reminder should be set for this habit
+     * @param reminderTime The time at which to send the reminder (if enabled)
+     * @return Result containing the habit ID on success or failure with error
      */
     suspend fun addUserHabit(
         habitInfo: HabitInfo,
         durationInDays: Int,
         startDate: LocalDate,
-        selectedDays: List<DayOfWeek> = DayOfWeek.entries
-    ): Result<Boolean> {
+        selectedDays: List<DayOfWeek> = DayOfWeek.entries,
+        reminderEnabled: Boolean = false,
+        reminderTime: LocalTime? = null
+    ): Result<Long> {
         return withContext(Dispatchers.IO) {
             try {
-
                 // Use provided days or default to all days
                 val days = selectedDays.ifEmpty { DayOfWeek.entries }
 
-                // Add the habit with specified parameters
-                addHabit(
-                    habitInfo = habitInfo,
+                // Create UserHabit object with reminder settings
+                val userHabit = UserHabit(
+                    id = 0L,
+                    habitId = habitInfo.id,
                     startDate = startDate,
                     repeats = durationInDays,
-                    days = days
+                    daysOfWeek = days,
+                    timeOfDay = habitInfo.timeOfDay,
+                    reminderEnabled = reminderEnabled,
+                    reminderTime = reminderTime
                 )
+
+                // Insert the habit and return the ID
+                val habitId = localDataSource.insertUserHabit(
+                    userHabit = userHabit
+                )
+
+                Result.success(habitId)
             } catch (e: Exception) {
                 Napier.e("Error adding user habit", e, tag = TAG)
+                Result.failure(e)
+            }
+        }
+    }
+
+    /**
+     * Schedules a reminder for a habit using the platform-specific NotificationManager
+     *
+     * @param habitId The ID of the habit to set a reminder for
+     * @param habitName The name of the habit to display in the notification
+     * @param description The description of the habit
+     * @param time The time at which to show the notification
+     * @param activeDays The days on which the notification should be shown
+     * @return Result containing success (true) or failure with error
+     */
+    suspend fun scheduleReminder(
+        habitId: Long,
+        habitName: String,
+        description: String,
+        time: LocalTime,
+        activeDays: List<DayOfWeek>
+    ): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                if (!notificationManager.areNotificationsPermitted()) {
+                    val permissionGranted = notificationManager.requestNotificationPermission()
+                    if (!permissionGranted) {
+                        return@withContext Result.failure(Exception("Notification permission denied"))
+                    }
+                }
+
+                val success = notificationManager.scheduleHabitReminder(
+                    habitId = habitId,
+                    habitName = habitName,
+                    description = description,
+                    time = time,
+                    activeDays = activeDays
+                )
+
+                Result.success(success)
+            } catch (e: Exception) {
+                Napier.e("Error scheduling reminder", e, tag = TAG)
+                Result.failure(e)
+            }
+        }
+    }
+
+    /**
+     * Updates the reminder settings for an existing habit
+     *
+     * @param habitId The ID of the habit
+     * @param enabled Whether the reminder is enabled
+     * @param reminderTime The time for the reminder (null to keep existing)
+     * @return Result containing success (true) or failure with error
+     */
+    suspend fun updateHabitReminder(
+        habitId: Long,
+        enabled: Boolean,
+        reminderTime: LocalTime?
+    ): Result<Boolean> {
+        return withContext(Dispatchers.IO) {
+            try {
+                localDataSource.updateHabitReminder(
+                    habitId = habitId,
+                    enabled = enabled,
+                    reminderTime = reminderTime?.toTimeString()
+                )
+
+                val userHabit = localDataSource.getUserHabitInfo(habitId)
+                    ?: return@withContext Result.failure(Exception("Habit not found"))
+
+                // If reminder is enabled and we have a time, update the notification
+                if (enabled && reminderTime != null) {
+                    val habitInfo = localDataSource.getHabitOriginId(habitId).let { originId ->
+                        remoteHabits.value.find { it.id == originId }
+                    } ?: return@withContext Result.failure(Exception("Habit info not found"))
+
+                    notificationManager.updateHabitReminder(
+                        habitId = habitId,
+                        habitName = habitInfo.name,
+                        description = habitInfo.description,
+                        time = reminderTime,
+                        activeDays = userHabit.daysOfWeek
+                    )
+                } else if (!enabled) {
+                    // If reminder is disabled, cancel any existing notifications
+                    notificationManager.cancelHabitReminder(habitId)
+                }
+
+                Result.success(true)
+            } catch (e: Exception) {
+                Napier.e("Error updating habit reminder", e, tag = TAG)
                 Result.failure(e)
             }
         }

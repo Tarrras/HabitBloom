@@ -135,6 +135,11 @@ kotlin {
             // KMP ViewModel
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.common)
+
+            // Add moko-permissions
+            implementation("dev.icerock.moko:permissions:0.19.1")
+            implementation("dev.icerock.moko:permissions-notifications:0.19.1")
+            implementation("dev.icerock.moko:permissions-compose:0.19.1")
         }
     }
 

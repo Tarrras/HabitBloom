@@ -6,13 +6,15 @@ CREATE TABLE UserHabitsEntity (
     startDate TEXT NOT NULL,                        -- Start date of the habit (ISO 8601 format)
     repeats INTEGER NOT NULL,                       -- Repeats (1 to 12)
     daysOfWeek TEXT NOT NULL,                       -- Comma-separated list of days (e.g., "MONDAY,WEDNESDAY")
-    timeOfDay INTEGER NOT NULL                      -- Time of day (e.g. Morning, Afternoon) origin
+    timeOfDay INTEGER NOT NULL,                     -- Time of day (e.g. Morning, Afternoon) origin
+    reminderEnabled INTEGER DEFAULT 0 NOT NULL,     -- Whether a reminder is enabled (0 = false, 1 = true)
+    reminderTime TEXT DEFAULT NULL                 -- Time for reminder notification in HH:MM format (e.g., "08:00")
 );
 
 -- Insert a new user habit
 insertUserHabit:
-INSERT INTO UserHabitsEntity (habitId, startDate, repeats, daysOfWeek, timeOfDay)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO UserHabitsEntity (habitId, startDate, repeats, daysOfWeek, timeOfDay, reminderEnabled, reminderTime)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 -- Select all user habits
 selectAllUserHabitsEntity:
@@ -34,6 +36,13 @@ UPDATE UserHabitsEntity SET
     startDate = :startDate,
     repeats = :repeats,
     daysOfWeek = :daysOfWeek
+WHERE id = :id;
+
+-- Update reminder settings for a habit
+updateHabitReminder:
+UPDATE UserHabitsEntity SET
+    reminderEnabled = :reminderEnabled,
+    reminderTime = :reminderTime
 WHERE id = :id;
 
 -- Delete a user habit by ID

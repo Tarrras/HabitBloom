@@ -6,6 +6,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 data class AddHabitSummaryUiState(
     val timeOfDay: TimeOfDay,
@@ -14,6 +15,8 @@ data class AddHabitSummaryUiState(
     val duration: Int,
     val startDate: LocalDate,
     val weekStartOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
+    val reminderEnabled: Boolean = false,
+    val reminderTime: LocalTime? = null,
     val isLoading: Boolean = false
 )
 

@@ -4,18 +4,23 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
+import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
 import com.horizondev.habitbloom.utils.formatToMmDdYy
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
 import com.horizondev.habitbloom.utils.mmDdYyToDate
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.notification_permission_denied
+import habitbloom.composeapp.generated.resources.notifications_required
 import habitbloom.composeapp.generated.resources.the_habit_cannot_start_on_past_days
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 /**
  * ViewModel for the duration choice step in the Add Habit flow.
@@ -24,7 +29,9 @@ class AddHabitDurationViewModel : BloomViewModel<AddHabitDurationUiState, AddHab
     initialState = AddHabitDurationUiState(
         activeDays = DayOfWeek.entries,
     )
-) {
+), KoinComponent {
+
+    private val permissionsManager: PermissionsManager by inject()
 
     init {
         // Setup derived state for start date
@@ -81,6 +88,40 @@ class AddHabitDurationViewModel : BloomViewModel<AddHabitDurationUiState, AddHab
                 updateState { it.copy(durationInDays = event.duration) }
             }
 
+            is AddHabitDurationUiEvent.ReminderEnabledChanged -> {
+                viewModelScope.launch {
+                    if (event.enabled) {
+                        // Request notification permission when enabling reminders
+                        val permissionGranted = permissionsManager.requestNotificationPermission()
+
+                        if (permissionGranted) {
+                            updateState { it.copy(reminderEnabled = true) }
+                        } else {
+                            // Show error if permission denied
+                            emitUiIntent(
+                                AddHabitDurationUiIntent.ShowValidationError(
+                                    BloomSnackbarVisuals(
+                                        message = getString(Res.string.notification_permission_denied),
+                                        state = BloomSnackbarState.Error,
+                                        duration = SnackbarDuration.Short,
+                                        withDismissAction = true
+                                    )
+                                )
+                            )
+                            // Ensure switch remains off
+                            updateState { it.copy(reminderEnabled = false) }
+                        }
+                    } else {
+                        // Simply disable reminders if turning off
+                        updateState { it.copy(reminderEnabled = false) }
+                    }
+                }
+            }
+
+            is AddHabitDurationUiEvent.ReminderTimeChanged -> {
+                updateState { it.copy(reminderTime = event.time) }
+            }
+
             AddHabitDurationUiEvent.Cancel -> {
                 emitUiIntent(AddHabitDurationUiIntent.NavigateBack)
             }
@@ -100,13 +141,32 @@ class AddHabitDurationViewModel : BloomViewModel<AddHabitDurationUiState, AddHab
                         )
                     )
                 } else {
+                    // Check if reminders are enabled but permissions are not granted
+                    if (currentState.reminderEnabled && !permissionsManager.hasNotificationPermission()) {
+                        emitUiIntent(
+                            AddHabitDurationUiIntent.ShowValidationError(
+                                BloomSnackbarVisuals(
+                                    message = getString(Res.string.notifications_required),
+                                    state = BloomSnackbarState.Warning,
+                                    duration = SnackbarDuration.Short,
+                                    withDismissAction = true
+                                )
+                            )
+                        )
+                        // Disable reminders since permissions were not granted
+                        updateState { it.copy(reminderEnabled = false) }
+                        return@launch
+                    }
+                    
                     val calculatedStartedDate = currentState.startDate.mmDdYyToDate()
                     emitUiIntent(
                         AddHabitDurationUiIntent.NavigateNext(
                             selectedDays = currentState.activeDays,
                             durationInDays = currentState.durationInDays,
                             weekStartOption = currentState.weekStartOption,
-                            startDate = calculatedStartedDate
+                            startDate = calculatedStartedDate,
+                            reminderEnabled = currentState.reminderEnabled,
+                            reminderTime = currentState.reminderTime
                         )
                     )
                 }

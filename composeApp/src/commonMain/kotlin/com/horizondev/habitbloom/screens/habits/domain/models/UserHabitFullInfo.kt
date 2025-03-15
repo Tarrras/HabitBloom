@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.habits.domain.models
 import androidx.compose.runtime.Immutable
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 
 @Immutable
 data class UserHabitFullInfo(
@@ -17,5 +18,7 @@ data class UserHabitFullInfo(
     val records: List<UserHabitRecord>,
     val repeats: Int,
     val completedRepeats: Int,
-    val days: List<DayOfWeek>
+    val days: List<DayOfWeek>,
+    val reminderEnabled: Boolean = false,
+    val reminderTime: LocalTime? = null
 )

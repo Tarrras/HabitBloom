@@ -21,7 +21,10 @@ class AddHabitSummaryViewModel(
         habitInfo = addHabitState.habitInfo ?: throw IllegalStateException("Habit info is null"),
         days = addHabitState.selectedDays,
         duration = addHabitState.durationInDays,
-        startDate = addHabitState.startDate
+        startDate = addHabitState.startDate,
+        weekStartOption = addHabitState.weekStartOption,
+        reminderEnabled = addHabitState.reminderEnabled,
+        reminderTime = addHabitState.reminderTime
     )
 ) {
 
@@ -45,6 +48,7 @@ class AddHabitSummaryViewModel(
      */
     private fun submitHabit() {
         val info = addHabitState.habitInfo ?: return
+        val currentState = state.value
 
         launch {
             updateState { it.copy(isLoading = true) }
@@ -53,12 +57,25 @@ class AddHabitSummaryViewModel(
                 val result = repository.addUserHabit(
                     habitInfo = info,
                     durationInDays = addHabitState.durationInDays,
-                    startDate = addHabitState.startDate
+                    startDate = addHabitState.startDate,
+                    reminderEnabled = currentState.reminderEnabled,
+                    reminderTime = currentState.reminderTime
                 )
 
                 result.fold(
-                    onSuccess = {
+                    onSuccess = { habitId ->
                         updateState { it.copy(isLoading = false) }
+
+                        // Schedule reminder if enabled
+                        if (currentState.reminderEnabled && currentState.reminderTime != null) {
+                            repository.scheduleReminder(
+                                habitId = habitId,
+                                habitName = info.name,
+                                description = info.description,
+                                time = currentState.reminderTime,
+                                activeDays = currentState.days
+                            )
+                        }
 
                         // Navigate to the success screen
                         emitUiIntent(AddHabitSummaryUiIntent.NavigateToSuccess)

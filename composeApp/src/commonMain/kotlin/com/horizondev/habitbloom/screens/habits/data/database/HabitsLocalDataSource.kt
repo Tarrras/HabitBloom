@@ -138,6 +138,18 @@ class HabitsLocalDataSource(
         }
     }
 
+    suspend fun updateHabitReminder(
+        habitId: Long,
+        enabled: Boolean,
+        reminderTime: String?
+    ) = withContext(Dispatchers.IO) {
+        userHabitsQueries.updateHabitReminder(
+            id = habitId,
+            reminderEnabled = if (enabled) 1L else 0L,
+            reminderTime = reminderTime
+        )
+    }
+
     suspend fun insertUserHabit(userHabit: UserHabit) = withContext(Dispatchers.IO) {
         val existingHabit = userHabitsQueries.selectUserHabitByRemoteId(
             userHabit.habitId
@@ -171,7 +183,9 @@ class HabitsLocalDataSource(
                 startDate = userHabit.startDate.toString(),
                 repeats = userHabit.repeats.toLong(),
                 daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
-                timeOfDay = userHabit.timeOfDay.ordinal.toLong()
+                timeOfDay = userHabit.timeOfDay.ordinal.toLong(),
+                reminderEnabled = if (userHabit.reminderEnabled) 1L else 0L,
+                reminderTime = userHabit.reminderTime?.let { "${it.hour}:${it.minute}" }
             )
             val lastInsertRowId = userHabitsQueries
                 .selectUserHabitByRemoteId(userHabit.habitId)
@@ -182,7 +196,7 @@ class HabitsLocalDataSource(
         }
 
         // Generate habit records
-        generateHabitRecords(localHabitId, userHabit)
+        return@withContext generateHabitRecords(localHabitId, userHabit)
     }
 
     private suspend fun generateHabitRecords(userHabitId: Long, userHabit: UserHabit) =
@@ -209,6 +223,8 @@ class HabitsLocalDataSource(
                     )
                 }
             }
+
+            return@withContext userHabitId
         }
 
     private fun generateHabitDates(
