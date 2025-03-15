@@ -8,7 +8,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -33,124 +32,20 @@ class AndroidNotificationManager(private val context: Context) :
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val name = "Habit Reminders"
-            val descriptionText = "Notifications for habit reminders"
-            val importance = NotificationManager.IMPORTANCE_HIGH
-            val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
-                description = descriptionText
-            }
-
-            val notificationManager =
-                context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+        val name = "Habit Reminders"
+        val descriptionText = "Notifications for habit reminders"
+        val importance = NotificationManager.IMPORTANCE_HIGH
+        val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
+            description = descriptionText
         }
-    }
 
-    override suspend fun requestNotificationPermission(): Boolean = withContext(Dispatchers.IO) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return@withContext ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-        return@withContext true
-    }
-
-    override suspend fun areNotificationsPermitted(): Boolean = withContext(Dispatchers.IO) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            return@withContext ActivityCompat.checkSelfPermission(
-                context,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        }
-        return@withContext true
-    }
-
-    override suspend fun scheduleHabitReminder(
-        habitId: Long,
-        habitName: String,
-        description: String,
-        time: LocalTime,
-        activeDays: List<DayOfWeek>
-    ): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
-            // Cancel any existing alarms for this habit
-            cancelHabitReminder(habitId)
-
-            // Schedule new alarms for each active day
-            for (dayOfWeek in activeDays) {
-                val intent = Intent(context, HabitReminderReceiver::class.java).apply {
-                    putExtra("HABIT_ID", habitId)
-                    putExtra("HABIT_NAME", habitName)
-                    putExtra("HABIT_DESCRIPTION", description)
-                    putExtra("DAY_OF_WEEK", dayOfWeek.ordinal)
-                }
-
-                val requestCode = generateRequestCodeForHabit(habitId, dayOfWeek)
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    requestCode,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-                )
-
-                // Set up the alarm time
-                val calendar = Calendar.getInstance().apply {
-                    set(Calendar.HOUR_OF_DAY, time.hour)
-                    set(Calendar.MINUTE, time.minute)
-                    set(Calendar.SECOND, 0)
-
-                    // If the time today has already passed, schedule for next occurrence
-                    val currentTimeMillis = System.currentTimeMillis()
-                    if (timeInMillis <= currentTimeMillis) {
-                        add(Calendar.DAY_OF_MONTH, 1)
-                    }
-
-                    // Adjust to the correct day of week
-                    val calendarDayOfWeek = when (dayOfWeek) {
-                        DayOfWeek.MONDAY -> Calendar.MONDAY
-                        DayOfWeek.TUESDAY -> Calendar.TUESDAY
-                        DayOfWeek.WEDNESDAY -> Calendar.WEDNESDAY
-                        DayOfWeek.THURSDAY -> Calendar.THURSDAY
-                        DayOfWeek.FRIDAY -> Calendar.FRIDAY
-                        DayOfWeek.SATURDAY -> Calendar.SATURDAY
-                        DayOfWeek.SUNDAY -> Calendar.SUNDAY
-                    }
-
-                    // Set to the next occurrence of this day of week
-                    while (get(Calendar.DAY_OF_WEEK) != calendarDayOfWeek) {
-                        add(Calendar.DAY_OF_MONTH, 1)
-                    }
-                }
-
-                // Schedule a repeating alarm
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    alarmManager.setExactAndAllowWhileIdle(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                } else {
-                    alarmManager.setExact(
-                        AlarmManager.RTC_WAKEUP,
-                        calendar.timeInMillis,
-                        pendingIntent
-                    )
-                }
-            }
-
-            return@withContext true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return@withContext false
-        }
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.createNotificationChannel(channel)
     }
 
     override suspend fun cancelHabitReminder(habitId: Long): Unit = withContext(Dispatchers.IO) {
-        try {
+        runCatching {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
             // Cancel for all possible days
@@ -169,29 +64,9 @@ class AndroidNotificationManager(private val context: Context) :
                     it.cancel()
                 }
             }
-        } catch (e: Exception) {
-            e.printStackTrace()
+        }.onFailure {
+            it.printStackTrace()
         }
-    }
-
-    override suspend fun updateHabitReminder(
-        habitId: Long,
-        habitName: String,
-        description: String,
-        time: LocalTime,
-        activeDays: List<DayOfWeek>
-    ): Boolean = withContext(Dispatchers.IO) {
-        // First cancel any existing reminders
-        cancelHabitReminder(habitId)
-
-        // Then schedule new ones
-        return@withContext scheduleHabitReminder(
-            habitId = habitId,
-            habitName = habitName,
-            description = description,
-            time = time,
-            activeDays = activeDays
-        )
     }
 
     // Generate a unique request code for each habit and day combination
@@ -217,5 +92,85 @@ class AndroidNotificationManager(private val context: Context) :
             .setAutoCancel(true)
 
         NotificationManagerCompat.from(context).notify(habitId.toInt(), builder.build())
+    }
+
+    /**
+     * Schedules a reminder for a habit for a specific day
+     * This is used for rescheduling notifications after they've been shown
+     *
+     * @param habitId Unique identifier for the habit
+     * @param habitName Name of the habit to display in notification
+     * @param description Description of the habit to display in notification
+     * @param time Time of day to show the notification
+     * @param dayOfWeek The specific day of week to schedule for
+     * @return Boolean indicating if scheduling was successful
+     */
+    override suspend fun scheduleHabitReminder(
+        habitId: Long,
+        habitName: String,
+        description: String,
+        time: LocalTime,
+        dayOfWeek: DayOfWeek
+    ): Boolean = withContext(Dispatchers.IO) {
+        return@withContext runCatching {
+            // First cancel any existing reminders
+            cancelHabitReminder(habitId)
+
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+            // Create intent with the habit information
+            val intent = Intent(context, HabitReminderReceiver::class.java).apply {
+                putExtra("HABIT_ID", habitId)
+                putExtra("HABIT_NAME", habitName)
+                putExtra("HABIT_DESCRIPTION", description)
+                putExtra("DAY_OF_WEEK", dayOfWeek.ordinal)
+            }
+
+            val requestCode = generateRequestCodeForHabit(habitId, dayOfWeek)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+
+            // Set up the alarm time for next week
+            val calendar = Calendar.getInstance().apply {
+                set(Calendar.HOUR_OF_DAY, time.hour)
+                set(Calendar.MINUTE, time.minute)
+                set(Calendar.SECOND, 0)
+
+                // Adjust to the correct day of week
+                val calendarDayOfWeek = when (dayOfWeek) {
+                    DayOfWeek.MONDAY -> Calendar.MONDAY
+                    DayOfWeek.TUESDAY -> Calendar.TUESDAY
+                    DayOfWeek.WEDNESDAY -> Calendar.WEDNESDAY
+                    DayOfWeek.THURSDAY -> Calendar.THURSDAY
+                    DayOfWeek.FRIDAY -> Calendar.FRIDAY
+                    DayOfWeek.SATURDAY -> Calendar.SATURDAY
+                    DayOfWeek.SUNDAY -> Calendar.SUNDAY
+                }
+
+                // Add 7 days to schedule for next week (same day)
+                // First get to the right day of week
+                while (get(Calendar.DAY_OF_WEEK) != calendarDayOfWeek) {
+                    add(Calendar.DAY_OF_MONTH, 1)
+                }
+                // Then add 7 days to get to next week
+                add(Calendar.DAY_OF_MONTH, 7)
+            }
+
+            // Schedule the alarm
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                calendar.timeInMillis,
+                pendingIntent
+            )
+
+            true
+        }.getOrElse {
+            it.printStackTrace()
+            false
+        }
     }
 } 

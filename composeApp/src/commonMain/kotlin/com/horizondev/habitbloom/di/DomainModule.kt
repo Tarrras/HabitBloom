@@ -14,7 +14,8 @@ val domainModule = module {
             profileRemoteDataSource = get(),
             localDataSource = get(),
             storageService = get(),
-            notificationManager = get()
+            notificationManager = get(),
+            permissionsManager = get()
         )
     }
     singleOf(::AuthRepository)

@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.habits.domain
 
 import com.horizondev.habitbloom.core.notifications.NotificationManager
+import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
@@ -38,7 +39,8 @@ class HabitsRepository(
     private val profileRemoteDataSource: ProfileRemoteDataSource,
     private val localDataSource: HabitsLocalDataSource,
     private val storageService: SupabaseStorageService,
-    private val notificationManager: NotificationManager
+    private val notificationManager: NotificationManager,
+    private val permissionsManager: PermissionsManager
 ) : KoinComponent {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
@@ -389,8 +391,8 @@ class HabitsRepository(
     ): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             try {
-                if (!notificationManager.areNotificationsPermitted()) {
-                    val permissionGranted = notificationManager.requestNotificationPermission()
+                if (!permissionsManager.hasNotificationPermission()) {
+                    val permissionGranted = permissionsManager.requestNotificationPermission()
                     if (!permissionGranted) {
                         return@withContext Result.failure(Exception("Notification permission denied"))
                     }
@@ -461,4 +463,44 @@ class HabitsRepository(
             }
         }
     }
+
+    /**
+     * Gets basic habit details for notification purposes
+     *
+     * @param habitId The ID of the user habit to get details for
+     * @return Basic habit details or null if not found
+     */
+    suspend fun getUserHabitDetails(habitId: Long): HabitNotificationDetails? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val userHabit = localDataSource.getUserHabitInfo(habitId) ?: return@withContext null
+                val originId = localDataSource.getHabitOriginId(habitId)
+                val habitInfo = remoteHabits.value.find { it.id == originId }
+
+                HabitNotificationDetails(
+                    id = habitId,
+                    name = habitInfo?.name ?: "Habit Reminder",
+                    description = habitInfo?.description ?: "Time for your habit!",
+                    activeDays = userHabit.daysOfWeek,
+                    reminderEnabled = userHabit.reminderEnabled,
+                    reminderTime = userHabit.reminderTime
+                )
+            } catch (e: Exception) {
+                Napier.e("Error getting habit details", e, tag = TAG)
+                null
+            }
+        }
+    }
+
+    /**
+     * Data class with minimal habit details needed for notifications
+     */
+    data class HabitNotificationDetails(
+        val id: Long,
+        val name: String,
+        val description: String,
+        val activeDays: List<DayOfWeek>,
+        val reminderEnabled: Boolean,
+        val reminderTime: LocalTime?
+    )
 }
