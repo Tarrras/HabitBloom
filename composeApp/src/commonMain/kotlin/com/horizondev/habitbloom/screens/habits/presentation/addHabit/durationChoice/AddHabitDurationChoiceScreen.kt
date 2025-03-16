@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +30,7 @@ import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOpt
 import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
+import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
 import habitbloom.composeapp.generated.resources.Res
@@ -311,7 +311,7 @@ private fun ReminderSettingsCard(
                     modifier = Modifier.weight(1f)
                 )
 
-                Switch(
+                BloomSwitch(
                     checked = reminderEnabled,
                     onCheckedChange = onReminderEnabledChanged
                 )
