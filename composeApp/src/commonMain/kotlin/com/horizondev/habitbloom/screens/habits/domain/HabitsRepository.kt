@@ -1,6 +1,6 @@
 package com.horizondev.habitbloom.screens.habits.domain
 
-import com.horizondev.habitbloom.core.notifications.NotificationManager
+import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
@@ -40,7 +40,7 @@ class HabitsRepository(
     private val profileRemoteDataSource: ProfileRemoteDataSource,
     private val localDataSource: HabitsLocalDataSource,
     private val storageService: SupabaseStorageService,
-    private val notificationManager: NotificationManager,
+    private val notificationManager: NotificationScheduler,
     private val permissionsManager: PermissionsManager
 ) : KoinComponent {
     private val TAG = "HabitsRepository"

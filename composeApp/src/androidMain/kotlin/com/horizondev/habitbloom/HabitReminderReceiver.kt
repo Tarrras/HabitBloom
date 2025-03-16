@@ -22,6 +22,7 @@ class HabitReminderReceiver : BroadcastReceiver(), KoinComponent {
     private val notificationManager: AndroidNotificationManager by inject()
     private val notificationScheduler: NotificationScheduler by inject()
     private val habitsRepository: HabitsRepository by inject()
+
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     override fun onReceive(context: Context, intent: Intent) {
@@ -34,7 +35,7 @@ class HabitReminderReceiver : BroadcastReceiver(), KoinComponent {
         val dayOfWeekOrdinal = intent.getIntExtra("DAY_OF_WEEK", -1)
 
         // Show the current notification
-        notificationManager.showNotification(habitId, habitName, habitDescription)
+        notificationManager.showNotification(habitId.toInt(), habitName, habitDescription)
 
         // Schedule the next occurrence if we have enough information
         if (habitId >= 0) {
@@ -52,7 +53,7 @@ class HabitReminderReceiver : BroadcastReceiver(), KoinComponent {
                                 fromDate = getCurrentDate().plusDays(1)
                             ).minOfOrNull { it }?.let { nextDateOfHabit ->
                                 // Schedule the next notification for this specific date
-                                notificationScheduler.scheduleSpecificDayNotification(
+                                notificationScheduler.scheduleHabitReminder(
                                     habitId = habitId,
                                     habitName = habitDetails.name,
                                     description = habitDetails.description,

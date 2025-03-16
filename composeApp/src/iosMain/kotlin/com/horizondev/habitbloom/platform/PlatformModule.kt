@@ -1,7 +1,9 @@
 package com.horizondev.habitbloom.platform
 
+import com.horizondev.habitbloom.core.notifications.IOSNotificationDelegate
 import com.horizondev.habitbloom.core.notifications.IOSNotificationManager
-import com.horizondev.habitbloom.core.notifications.NotificationManager
+import com.horizondev.habitbloom.core.notifications.IOSNotificationScheduler
+import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import dev.icerock.moko.permissions.ios.PermissionsController
 import org.koin.core.module.Module
 import org.koin.dsl.bind
@@ -11,9 +13,11 @@ actual val platformModule: Module = module {
     single { DatabaseDriverFactory() }
     single { IOSImagePicker() } bind ImagePicker::class
 
+    single { IOSNotificationDelegate(get(), get()) }
+    single { IOSNotificationManager(get()) }
     single {
-        IOSNotificationManager()
-    } bind NotificationManager::class
+        IOSNotificationScheduler(get())
+    } bind NotificationScheduler::class
 
     single { PermissionsController() }
 

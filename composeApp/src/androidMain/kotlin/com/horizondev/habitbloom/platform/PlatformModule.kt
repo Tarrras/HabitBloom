@@ -1,7 +1,7 @@
 package com.horizondev.habitbloom.platform
 
 import com.horizondev.habitbloom.core.notifications.AndroidNotificationManager
-import com.horizondev.habitbloom.core.notifications.NotificationManager
+import com.horizondev.habitbloom.core.notifications.AndroidNotificationScheduler
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import dev.icerock.moko.permissions.PermissionsController
 import org.koin.android.ext.koin.androidApplication
@@ -14,12 +14,10 @@ actual val platformModule: Module = module {
     single { DatabaseDriverFactory(context = get()) }
     single { AndroidImagePicker(context = get()) } bind ImagePicker::class
 
-    single {
-        AndroidNotificationManager(context = androidContext())
-    } bind NotificationManager::class
+    single { AndroidNotificationManager(context = androidContext()) }
 
     single {
-        AndroidNotificationManager(context = androidContext())
+        AndroidNotificationScheduler(context = androidContext())
     } bind NotificationScheduler::class
 
     single { PermissionsController(androidApplication()) }
