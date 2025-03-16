@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.platform
 
 import com.horizondev.habitbloom.core.notifications.AndroidNotificationManager
 import com.horizondev.habitbloom.core.notifications.NotificationManager
+import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import dev.icerock.moko.permissions.PermissionsController
 import org.koin.android.ext.koin.androidApplication
 import org.koin.android.ext.koin.androidContext
@@ -16,6 +17,10 @@ actual val platformModule: Module = module {
     single {
         AndroidNotificationManager(context = androidContext())
     } bind NotificationManager::class
+
+    single {
+        AndroidNotificationManager(context = androidContext())
+    } bind NotificationScheduler::class
 
     single { PermissionsController(androidApplication()) }
 }

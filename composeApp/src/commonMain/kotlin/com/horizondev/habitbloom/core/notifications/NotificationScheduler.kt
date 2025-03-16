@@ -4,13 +4,13 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
 /**
- * Interface for platform-specific notification management
- * This interface provides methods for scheduling and managing habit reminders
- * across different platforms (Android, iOS).
+ * Interface for scheduling specific day notifications
+ * Used to break circular dependency between manager and delegate
  */
-interface NotificationManager {
+interface NotificationScheduler {
     /**
-     * Schedule a reminder for a habit for a specific date
+     * Schedules a notification for a specific date
+     *
      * @param habitId Unique identifier for the habit
      * @param habitName Name of the habit to display in notification
      * @param description Description of the habit to display in notification
@@ -18,17 +18,11 @@ interface NotificationManager {
      * @param date The specific date to schedule for
      * @return Boolean indicating if scheduling was successful
      */
-    suspend fun scheduleHabitReminder(
+    suspend fun scheduleSpecificDayNotification(
         habitId: Long,
         habitName: String,
         description: String,
         time: LocalTime,
         date: LocalDate
     ): Boolean
-
-    /**
-     * Cancel all reminders for a specific habit
-     * @param habitId Unique identifier for the habit
-     */
-    suspend fun cancelHabitReminder(habitId: Long)
 } 

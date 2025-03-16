@@ -19,17 +19,11 @@ data class UserHabit(
  * Convert a time string in "HH:MM" format to LocalTime or null if format is invalid
  */
 fun String?.toLocalTimeOrNull(): LocalTime? {
-    if (this == null || this.isBlank()) return null
+    if (this.isNullOrBlank()) return null
 
-    return try {
-        val (hours, minutes) = this.split(":")
-            .map { it.trim().toInt() }
-            .take(2)
-
-        LocalTime(hours, minutes)
-    } catch (e: Exception) {
-        null
-    }
+    return runCatching {
+        LocalTime.parse(this, format = LocalTime.Formats.ISO)
+    }.getOrNull()
 }
 
 /**
@@ -38,5 +32,5 @@ fun String?.toLocalTimeOrNull(): LocalTime? {
 fun LocalTime?.toTimeString(): String? {
     if (this == null) return null
 
-    return "${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}"
+    return this.toString()
 }

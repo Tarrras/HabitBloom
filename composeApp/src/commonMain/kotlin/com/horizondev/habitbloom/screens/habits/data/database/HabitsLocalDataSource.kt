@@ -4,6 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import com.horizondev.habitbloom.database.HabitBloomDatabase
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
+import com.horizondev.habitbloom.screens.habits.domain.models.toTimeString
 import com.horizondev.habitbloom.utils.calculateStartOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.mapToString
@@ -19,6 +20,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.plus
 
 class HabitsLocalDataSource(
@@ -141,12 +143,12 @@ class HabitsLocalDataSource(
     suspend fun updateHabitReminder(
         habitId: Long,
         enabled: Boolean,
-        reminderTime: String?
+        reminderTime: LocalTime?
     ) = withContext(Dispatchers.IO) {
         userHabitsQueries.updateHabitReminder(
             id = habitId,
             reminderEnabled = if (enabled) 1L else 0L,
-            reminderTime = reminderTime
+            reminderTime = reminderTime?.toTimeString()
         )
     }
 
@@ -185,7 +187,7 @@ class HabitsLocalDataSource(
                 daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
                 timeOfDay = userHabit.timeOfDay.ordinal.toLong(),
                 reminderEnabled = if (userHabit.reminderEnabled) 1L else 0L,
-                reminderTime = userHabit.reminderTime?.let { "${it.hour}:${it.minute}" }
+                reminderTime = userHabit.reminderTime?.toTimeString()
             )
             val lastInsertRowId = userHabitsQueries
                 .selectUserHabitByRemoteId(userHabit.habitId)

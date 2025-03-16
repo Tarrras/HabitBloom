@@ -68,12 +68,9 @@ class AddHabitSummaryViewModel(
 
                         // Schedule reminder if enabled
                         if (currentState.reminderEnabled && currentState.reminderTime != null) {
-                            repository.scheduleReminder(
+                            repository.scheduleReminderForHabit(
                                 habitId = habitId,
-                                habitName = info.name,
-                                description = info.description,
-                                time = currentState.reminderTime,
-                                activeDays = currentState.days
+                                reminderTime = currentState.reminderTime
                             )
                         }
 

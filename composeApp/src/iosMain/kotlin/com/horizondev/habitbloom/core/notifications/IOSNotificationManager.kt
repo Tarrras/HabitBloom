@@ -1,7 +1,11 @@
 package com.horizondev.habitbloom.core.notifications
 
+import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import platform.Foundation.NSDateComponents
 import platform.UserNotifications.UNCalendarNotificationTrigger
 import platform.UserNotifications.UNMutableNotificationContent
@@ -11,13 +15,23 @@ import platform.UserNotifications.UNUserNotificationCenter
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class IOSNotificationManager : NotificationManager {
+class IOSNotificationManager : NotificationManager, KoinComponent {
 
     companion object {
         private const val CATEGORY_ID = "habit_reminders"
     }
 
     private val notificationCenter = UNUserNotificationCenter.currentNotificationCenter()
+    private val habitsRepository: HabitsRepository by inject()
+
+    // Remove direct instantiation and leave it to be set later
+    private var delegate: IOSNotificationDelegate? = null
+
+    init {
+        // Create and set the delegate, passing this instance as the scheduler
+        delegate = IOSNotificationDelegate(this as NotificationScheduler, habitsRepository)
+        notificationCenter.delegate = delegate
+    }
 
     /**
      * Removes notification identifiers for a habit ID.
@@ -45,7 +59,7 @@ class IOSNotificationManager : NotificationManager {
         habitName: String,
         description: String,
         time: LocalTime,
-        dayOfWeek: DayOfWeek
+        date: LocalDate
     ): Boolean = suspendCoroutine { continuation ->
         runCatching {
             // First cancel existing notifications (using the non-suspending helper method)
@@ -61,7 +75,7 @@ class IOSNotificationManager : NotificationManager {
                 setUserInfo(
                     mapOf(
                         "habitId" to habitId,
-                        "dayOfWeek" to dayOfWeek.ordinal
+                        "dayOfWeek" to date.dayOfWeek.ordinal
                     )
                 )
             }
@@ -70,9 +84,10 @@ class IOSNotificationManager : NotificationManager {
             val dateComponents = NSDateComponents().apply {
                 setHour(time.hour.toLong())
                 setMinute(time.minute.toLong())
+                setDay(date.dayOfMonth.toLong())
 
-                // Convert Kotlin DayOfWeek to iOS weekday (1 = Sunday, 2 = Monday, etc.)
-                val iosWeekday = when (dayOfWeek) {
+                /*// Convert Kotlin DayOfWeek to iOS weekday (1 = Sunday, 2 = Monday, etc.)
+                val iosWeekday = when (date.dayOfWeek) {
                     DayOfWeek.MONDAY -> 2
                     DayOfWeek.TUESDAY -> 3
                     DayOfWeek.WEDNESDAY -> 4
@@ -81,7 +96,7 @@ class IOSNotificationManager : NotificationManager {
                     DayOfWeek.SATURDAY -> 7
                     DayOfWeek.SUNDAY -> 1
                 }
-                setWeekday(iosWeekday.toLong())
+                setWeekday(iosWeekday.toLong())*/
             }
 
             // Create a calendar trigger
@@ -91,7 +106,7 @@ class IOSNotificationManager : NotificationManager {
             )
 
             // Generate a unique identifier for this notification
-            val identifier = generateNotificationIdentifier(habitId, dayOfWeek)
+            val identifier = generateNotificationIdentifier(habitId, date.dayOfWeek)
 
             // Create notification request
             val request = UNNotificationRequest.requestWithIdentifier(

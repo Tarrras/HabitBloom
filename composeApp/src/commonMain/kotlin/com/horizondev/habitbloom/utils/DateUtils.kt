@@ -20,6 +20,8 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.LocalTime
 import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -42,6 +44,12 @@ fun getCurrentDate(): LocalDate {
 
     // Get the current date in the system's default time zone
     return Clock.System.todayIn(timeZone)
+}
+
+fun getCurrentDateTime(): LocalDateTime {
+    val currentMoment = Clock.System.now()
+    val timeZone = TimeZone.currentSystemDefault()
+    return currentMoment.toLocalDateTime(timeZone)
 }
 
 fun getTimeOfDay(): TimeOfDay {
@@ -146,4 +154,18 @@ fun String.toCommonDate() = LocalDate.parse(this)
 
 fun LocalDate.isOnTheSameWeekWithAnotherDay(anotherDay: LocalDate): Boolean {
     return this.calculateStartOfWeek() == anotherDay.calculateStartOfWeek()
+}
+
+fun getNearestDateForNotification(
+    dates: List<LocalDate>,
+    notificationTime: LocalTime
+): LocalDate? {
+    val currentTime = getCurrentDateTime()
+    val isTodayDatePresent = dates.any { it == currentTime.date }
+
+    return when {
+        isTodayDatePresent.not() -> dates.firstOrNull()
+        currentTime.time > notificationTime -> dates.getOrNull(1) //Next date
+        else -> dates.firstOrNull()
+    }
 }

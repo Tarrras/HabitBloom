@@ -12,11 +12,11 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
-import com.horizondev.habitbloom.screens.habits.domain.models.toTimeString
 import com.horizondev.habitbloom.screens.profile.data.ProfileRemoteDataSource
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.calculateCompletedRepeats
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getNearestDateForNotification
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
@@ -269,6 +270,18 @@ class HabitsRepository(
         localDataSource.deleteUserHabit(userHabitId)
     }
 
+    suspend fun getFutureDaysForHabit(
+        userHabitId: Long,
+        fromDate: LocalDate = getCurrentDate()
+    ): List<LocalDate> {
+        return withContext(Dispatchers.IO) {
+            localDataSource.getAllUserHabitRecordsForHabitId(userHabitId).first()
+                .map { it.date }
+                .filter { it >= fromDate }
+                .sortedBy { it }
+        }
+    }
+
     /**
      * Clears all past records for a specific habit up to the current date.
      * Current and future records are preserved.
@@ -373,24 +386,14 @@ class HabitsRepository(
     }
 
     /**
-     * Schedules a reminder for a habit using the platform-specific NotificationManager
-     *
-     * @param habitId The ID of the habit to set a reminder for
-     * @param habitName The name of the habit to display in the notification
-     * @param description The description of the habit
-     * @param time The time at which to show the notification
-     * @param activeDays The days on which the notification should be shown
-     * @return Result containing success (true) or failure with error
+     * Schedules a reminder for a specific habit
      */
-    suspend fun scheduleReminder(
+    suspend fun scheduleReminderForHabit(
         habitId: Long,
-        habitName: String,
-        description: String,
-        time: LocalTime,
-        activeDays: List<DayOfWeek>
+        reminderTime: LocalTime
     ): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            try {
+            runCatching {
                 if (!permissionsManager.hasNotificationPermission()) {
                     val permissionGranted = permissionsManager.requestNotificationPermission()
                     if (!permissionGranted) {
@@ -398,18 +401,30 @@ class HabitsRepository(
                     }
                 }
 
-                val success = notificationManager.scheduleHabitReminder(
-                    habitId = habitId,
-                    habitName = habitName,
-                    description = description,
-                    time = time,
-                    activeDays = activeDays
+                val habitInfo = getUserHabitWithAllRecordsFlow(habitId).first()
+                    ?: return@withContext Result.failure(Exception("Invalid habitId"))
+
+                val habitDates = getFutureDaysForHabit(habitId)
+                val nearestDate = getNearestDateForNotification(
+                    dates = habitDates,
+                    notificationTime = reminderTime
                 )
 
-                Result.success(success)
-            } catch (e: Exception) {
-                Napier.e("Error scheduling reminder", e, tag = TAG)
-                Result.failure(e)
+                if (nearestDate == null) {
+                    return@withContext Result.failure(Exception("No future available dates for such habit notification"))
+                }
+
+                val success = notificationManager.scheduleHabitReminder(
+                    habitId = habitId,
+                    habitName = habitInfo.name,
+                    description = habitInfo.description,
+                    time = reminderTime,
+                    date = nearestDate
+                )
+
+                success
+            }.onFailure {
+                Napier.e("Error scheduling reminder", it, tag = TAG)
             }
         }
     }
@@ -428,38 +443,26 @@ class HabitsRepository(
         reminderTime: LocalTime?
     ): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            try {
+            runCatching {
                 localDataSource.updateHabitReminder(
                     habitId = habitId,
                     enabled = enabled,
-                    reminderTime = reminderTime?.toTimeString()
+                    reminderTime = reminderTime
                 )
 
-                val userHabit = localDataSource.getUserHabitInfo(habitId)
-                    ?: return@withContext Result.failure(Exception("Habit not found"))
+                when {
+                    enabled && reminderTime != null -> {
+                        scheduleReminderForHabit(habitId, reminderTime).getOrThrow()
+                    }
 
-                // If reminder is enabled and we have a time, update the notification
-                if (enabled && reminderTime != null) {
-                    val habitInfo = localDataSource.getHabitOriginId(habitId).let { originId ->
-                        remoteHabits.value.find { it.id == originId }
-                    } ?: return@withContext Result.failure(Exception("Habit info not found"))
-
-                    notificationManager.updateHabitReminder(
-                        habitId = habitId,
-                        habitName = habitInfo.name,
-                        description = habitInfo.description,
-                        time = reminderTime,
-                        activeDays = userHabit.daysOfWeek
-                    )
-                } else if (!enabled) {
-                    // If reminder is disabled, cancel any existing notifications
-                    notificationManager.cancelHabitReminder(habitId)
+                    else -> {
+                        notificationManager.cancelHabitReminder(habitId)
+                        true
+                    }
                 }
 
-                Result.success(true)
-            } catch (e: Exception) {
-                Napier.e("Error updating habit reminder", e, tag = TAG)
-                Result.failure(e)
+            }.onFailure {
+                Napier.e("Error updating habit reminder", it, tag = TAG)
             }
         }
     }
