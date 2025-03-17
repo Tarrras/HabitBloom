@@ -91,6 +91,7 @@
     <string name="save">Save</string>
     <string name="delete">Delete</string>
     <string name="create">Create</string>
+    <string name="add">Add</string>
 
     <string name="title">Title</string>
     <string name="description">Description</string>
@@ -183,6 +184,8 @@
     <string name="clear_history_question">Clear habit history?</string>
     <string name="clear_history_description">This will remove all past records for this habit. Today\'s and future records will be preserved. This action cannot be undone.</string>
     <string name="clear">Clear</string>
+    <string name="history_cleared_past_records_deleted">History cleared: %1$s past records deleted</string>
+    <string name="failed_to_clear_history">Failed to clear history</string>
 
     <string name="delete_custom_habit_menu">Delete Custom Habit</string>
     <string name="delete_custom_habit_question">Delete Custom Habit?</string>
@@ -194,8 +197,12 @@
     <!-- Reminder strings -->
     <string name="reminder_settings">Reminder Settings</string>
     <string name="enable_reminder">Enable Reminder</string>
+    <string name="reminder_disabled">Reminder disabled</string>
+    <string name="no_reminder_set">No reminder set</string>
     <string name="select_reminder_time">Select Reminder Time</string>
     <string name="reminder_set_for">Reminder set for %1$s</string>
     <string name="notification_permission_denied">Notification permission denied. Reminders cannot be enabled.</string>
     <string name="notifications_required">Notifications permission is required for reminders. Please grant permission in app settings.</string>
+    <string name="failed_to_update_reminder_settings">Failed to update reminder settings</string>
+
 </resources>

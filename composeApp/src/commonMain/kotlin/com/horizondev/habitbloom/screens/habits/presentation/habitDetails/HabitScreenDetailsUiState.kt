@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.habits.presentation.habitDetails
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalTime
 
 data class HabitScreenDetailsUiState(
     val habitInfo: UserHabitFullInfo? = null,
@@ -14,6 +15,9 @@ data class HabitScreenDetailsUiState(
     val isLoading: Boolean = true,
     val showDeleteDialog: Boolean = false,
     val showClearHistoryDialog: Boolean = false,
+    val showReminderDialog: Boolean = false,
+    val reminderEnabled: Boolean = false,
+    val reminderTime: LocalTime = LocalTime(8, 0), // Default to 8:00 AM
     val progressUiState: UserHabitProgressUiState? = null
 )
 
@@ -36,6 +40,13 @@ sealed interface HabitScreenDetailsUiEvent {
     data object RequestClearHistory : HabitScreenDetailsUiEvent
     data object ClearHistory : HabitScreenDetailsUiEvent
     data object DismissClearHistory : HabitScreenDetailsUiEvent
+
+    // Reminder events
+    data object ShowReminderDialog : HabitScreenDetailsUiEvent
+    data object DismissReminderDialog : HabitScreenDetailsUiEvent
+    data class ReminderTimeChanged(val time: LocalTime) : HabitScreenDetailsUiEvent
+    data class ReminderEnabledChanged(val enabled: Boolean) : HabitScreenDetailsUiEvent
+    data object SaveReminderSettings : HabitScreenDetailsUiEvent
 
     data class DurationChanged(val duration: Int) : HabitScreenDetailsUiEvent
     data class DayStateChanged(

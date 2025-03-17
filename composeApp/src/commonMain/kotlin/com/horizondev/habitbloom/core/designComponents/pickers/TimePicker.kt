@@ -99,7 +99,6 @@ fun TimePicker(
  * @param use24HourFormat Whether to use 24-hour format (true) or 12-hour format with AM/PM (false)
  * @return A formatted time string
  */
-@Composable
 fun formatTime(time: LocalTime, use24HourFormat: Boolean): String {
     return if (use24HourFormat) {
         "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"

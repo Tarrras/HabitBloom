@@ -228,7 +228,9 @@ class HabitsRepository(
                 completedRepeats = calculateCompletedRepeats(
                     dayOfCreation = userHabitInfo.startDate,
                     records = localHabitRecords
-                )
+                ),
+                reminderTime = userHabitInfo.reminderTime,
+                reminderEnabled = userHabitInfo.reminderEnabled
             )
         }.flowOn(Dispatchers.IO)
     }

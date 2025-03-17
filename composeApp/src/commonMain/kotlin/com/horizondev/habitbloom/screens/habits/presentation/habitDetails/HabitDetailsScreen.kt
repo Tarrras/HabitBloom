@@ -7,6 +7,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,9 +16,13 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -49,7 +54,10 @@ import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
+import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
+import com.horizondev.habitbloom.core.designComponents.pickers.formatTime
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
+import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.utils.collectAsEffect
@@ -63,6 +71,7 @@ import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.add
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.clear
 import habitbloom.composeapp.generated.resources.clear_history_description
@@ -72,15 +81,21 @@ import habitbloom.composeapp.generated.resources.delete
 import habitbloom.composeapp.generated.resources.delete_habit_description
 import habitbloom.composeapp.generated.resources.delete_habit_question
 import habitbloom.composeapp.generated.resources.edit
+import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.habit_active_days
 import habitbloom.composeapp.generated.resources.habit_repeats
 import habitbloom.composeapp.generated.resources.habit_schedule
 import habitbloom.composeapp.generated.resources.ic_warning_filled
+import habitbloom.composeapp.generated.resources.no_reminder_set
+import habitbloom.composeapp.generated.resources.reminder_set_for
+import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.repeats
 import habitbloom.composeapp.generated.resources.save
+import habitbloom.composeapp.generated.resources.select_reminder_time
 import habitbloom.composeapp.generated.resources.selected_repeats
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -226,6 +241,19 @@ fun HabitDetailsScreenContent(
                             habitInfo = uiState.habitInfo
                         )
 
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        ReminderSettingsCard(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            reminderEnabled = uiState.reminderEnabled,
+                            reminderTime = uiState.reminderTime,
+                            onShowReminderDialog = {
+                                handleUiEvent(HabitScreenDetailsUiEvent.ShowReminderDialog)
+                            }
+                        )
+
                         Spacer(modifier = Modifier.height(32.dp))
                         Spacer(modifier = Modifier.navigationBarsPadding())
                     }
@@ -264,6 +292,24 @@ fun HabitDetailsScreenContent(
         },
         onConfirm = {
             handleUiEvent(HabitScreenDetailsUiEvent.ClearHistory)
+        }
+    )
+
+    ReminderDialog(
+        showDialog = uiState.showReminderDialog,
+        reminderEnabled = uiState.reminderEnabled,
+        reminderTime = uiState.reminderTime,
+        onDismiss = {
+            handleUiEvent(HabitScreenDetailsUiEvent.DismissReminderDialog)
+        },
+        onReminderEnabledChanged = { enabled ->
+            handleUiEvent(HabitScreenDetailsUiEvent.ReminderEnabledChanged(enabled))
+        },
+        onReminderTimeChanged = { time ->
+            handleUiEvent(HabitScreenDetailsUiEvent.ReminderTimeChanged(time))
+        },
+        onSave = {
+            handleUiEvent(HabitScreenDetailsUiEvent.SaveReminderSettings)
         }
     )
 }
@@ -664,6 +710,169 @@ fun ClearHistoryDialog(
                     color = BloomTheme.colors.error
                 )
             )
+        }
+    }
+}
+
+@Composable
+private fun ReminderSettingsCard(
+    modifier: Modifier = Modifier,
+    reminderEnabled: Boolean,
+    reminderTime: LocalTime,
+    onShowReminderDialog: () -> Unit
+) {
+    BloomSurface(modifier = modifier) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Header with title and icon
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.reminder_settings),
+                    style = BloomTheme.typography.heading,
+                    color = BloomTheme.colors.textColor.primary,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Icon(
+                    imageVector = if (reminderEnabled) Icons.Default.Notifications else Icons.Default.Notifications,
+                    contentDescription = "Reminder status",
+                    tint = if (reminderEnabled) BloomTheme.colors.primary else BloomTheme.colors.textColor.secondary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Reminder status
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (reminderEnabled) {
+                    Text(
+                        text = stringResource(
+                            Res.string.reminder_set_for, formatTime(
+                                reminderTime,
+                                use24HourFormat = true
+                            )
+                        ),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.primary,
+                        modifier = Modifier.weight(1f)
+                    )
+                } else {
+                    Text(
+                        text = stringResource(
+                            Res.string.no_reminder_set
+                        ),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                BloomSmallActionButton(
+                    text = if (reminderEnabled) stringResource(Res.string.edit)
+                    else stringResource(Res.string.add),
+                    onClick = onShowReminderDialog
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ReminderDialog(
+    showDialog: Boolean,
+    reminderEnabled: Boolean,
+    reminderTime: LocalTime,
+    onDismiss: () -> Unit,
+    onReminderEnabledChanged: (Boolean) -> Unit,
+    onReminderTimeChanged: (LocalTime) -> Unit,
+    onSave: () -> Unit
+) {
+    BloomAlertDialog(
+        isShown = showDialog,
+        onDismiss = onDismiss
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(Res.string.reminder_settings),
+                style = BloomTheme.typography.subheading,
+                color = BloomTheme.colors.textColor.primary,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Enable/disable reminder switch
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.enable_reminder),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary,
+                    modifier = Modifier.weight(1f)
+                )
+
+                BloomSwitch(
+                    checked = reminderEnabled,
+                    onCheckedChange = onReminderEnabledChanged
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Time picker (only enabled if reminders are enabled)
+            if (reminderEnabled) {
+                Text(
+                    text = stringResource(Res.string.select_reminder_time),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                TimePicker(
+                    time = reminderTime,
+                    onTimeSelected = onReminderTimeChanged
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Action buttons
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                BloomPrimaryOutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(Res.string.cancel),
+                    onClick = onDismiss
+                )
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                BloomPrimaryFilledButton(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(Res.string.save),
+                    onClick = onSave
+                )
+            }
         }
     }
 }

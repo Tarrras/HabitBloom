@@ -16,7 +16,10 @@ fun BloomSwitch(
     thumbContent: (@Composable () -> Unit)? = null,
     enabled: Boolean = true,
     colors: SwitchColors = SwitchDefaults.colors(
-        checkedTrackColor = BloomTheme.colors.primary
+        checkedThumbColor = BloomTheme.colors.primary,
+        checkedTrackColor = BloomTheme.colors.primary.copy(alpha = 0.5f),
+        uncheckedThumbColor = BloomTheme.colors.textColor.secondary,
+        uncheckedTrackColor = BloomTheme.colors.textColor.secondary.copy(alpha = 0.2f)
     ),
     interactionSource: MutableInteractionSource? = null,
 ) {
