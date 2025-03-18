@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -145,6 +150,7 @@ fun ColumnScope.StatisticScreenColumnContent(
     WeeklyCompletedHabitsChartCard(
         modifier = Modifier.fillMaxWidth(),
         uiState = uiState,
+        onEvent = handleUiEvent
     )
 
     Spacer(modifier = Modifier.height(54.dp))
@@ -282,17 +288,69 @@ fun GeneralCompletedHabitsChartCard(
 fun WeeklyCompletedHabitsChartCard(
     modifier: Modifier = Modifier,
     uiState: StatisticUiState,
+    onEvent: (StatisticUiEvent) -> Unit = {}
 ) {
     val pieChartValues = uiState.completedHabitsThisWeek
     val yAxisMaxValue = pieChartValues.values.maxOrNull() ?: 1
 
     BloomSurface(modifier = modifier) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Text(
-                text = stringResource(Res.string.completed_weekly_habits_statistic),
-                style = BloomTheme.typography.title,
-                color = BloomTheme.colors.textColor.primary,
-            )
+            // Title row with navigation controls
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.completed_weekly_habits_statistic),
+                    style = BloomTheme.typography.title,
+                    color = BloomTheme.colors.textColor.primary,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            // Only show navigation controls when we have weekly data
+            if (uiState.selectedTimeUnit == TimeUnit.WEEK) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    // Previous week button
+                    IconButton(
+                        onClick = { onEvent(StatisticUiEvent.PreviousWeek) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                            contentDescription = "Previous week",
+                            tint = BloomTheme.colors.textColor.primary
+                        )
+                    }
+
+                    // Display selected week range if we have one
+                    if (uiState.selectedWeekLabel.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = uiState.selectedWeekLabel,
+                            style = BloomTheme.typography.subheading,
+                            color = BloomTheme.colors.textColor.primary,
+                        )
+                    }
+
+                    // Next week button (only enabled if not at current week)
+                    IconButton(
+                        onClick = { onEvent(StatisticUiEvent.NextWeek) },
+                        enabled = uiState.selectedWeekOffset < 0
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                            contentDescription = "Next week",
+                            tint = if (uiState.selectedWeekOffset < 0)
+                                BloomTheme.colors.textColor.primary
+                            else BloomTheme.colors.textColor.secondary
+                        )
+                    }
+                }
+            }
+            
             Spacer(modifier = Modifier.height(12.dp))
 
             KoalaPlotTheme(

@@ -11,8 +11,10 @@ data class StatisticUiState(
     val isLoading: Boolean = false,
     val userHasAnyCompleted: Boolean = true,
     val selectedTimeUnit: TimeUnit = TimeUnit.WEEK,
+    val selectedWeekOffset: Int = 0, // 0 represents current week, -1 previous week, etc.
     val completeHabitsByTimeOfDay: Map<TimeOfDay, Int> = emptyMap(),
-    val completedHabitsThisWeek: Map<DayOfWeek, Int> = emptyMap()
+    val completedHabitsThisWeek: Map<DayOfWeek, Int> = emptyMap(),
+    val selectedWeekLabel: String = "" // To display the current selected week period
 )
 
 /**
@@ -24,6 +26,11 @@ sealed class StatisticUiEvent {
      */
     data class OpenHabitDetails(val habitId: Long) : StatisticUiEvent()
     data class SelectTimeUnit(val timeUnit: TimeUnit) : StatisticUiEvent()
+
+    // Week navigation events
+    data object PreviousWeek : StatisticUiEvent()
+    data object NextWeek : StatisticUiEvent()
+    data object CurrentWeek : StatisticUiEvent() // Reset to current week
 }
 
 /**
