@@ -25,7 +25,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
@@ -37,7 +41,7 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.statistic.components.NoCompletedHabitsPlaceholder
 import com.horizondev.habitbloom.utils.collectAsEffect
-import com.horizondev.habitbloom.utils.getChartColor
+import com.horizondev.habitbloom.utils.getChartBorder
 import com.horizondev.habitbloom.utils.getShortTitle
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
@@ -46,18 +50,20 @@ import habitbloom.composeapp.generated.resources.completed_n_times
 import habitbloom.composeapp.generated.resources.completed_weekly_habits_statistic
 import habitbloom.composeapp.generated.resources.habit_statistic
 import habitbloom.composeapp.generated.resources.no_completed_habits_in_this_unit_title
-import io.github.koalaplot.core.line.LinePlot
+import io.github.koalaplot.core.bar.DefaultVerticalBar
+import io.github.koalaplot.core.bar.DefaultVerticalBarPlotEntry
+import io.github.koalaplot.core.bar.DefaultVerticalBarPosition
+import io.github.koalaplot.core.bar.VerticalBarPlot
 import io.github.koalaplot.core.pie.DefaultSlice
 import io.github.koalaplot.core.pie.PieChart
 import io.github.koalaplot.core.style.KoalaPlotTheme
-import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
-import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberIntLinearAxisModel
 import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
+import kotlin.math.roundToInt
 
 /**
  * Statistics screen composable that displays habit statistics.
@@ -151,10 +157,10 @@ fun GeneralCompletedHabitsChartCard(
     uiState: StatisticUiState,
     handleUiEvent: (StatisticUiEvent) -> Unit
 ) {
-    val pieChartValues = remember(uiState.completeHabitsByTimeOfDay) {
-        uiState.completeHabitsByTimeOfDay.values.map { it.toFloat() }
+    val pieChartData = remember(uiState.completeHabitsByTimeOfDay) {
+        uiState.completeHabitsByTimeOfDay.filter { it.value > 0 }
     }
-
+    val pieChartValues = pieChartData.values.map { it.toFloat() }
 
     BloomSurface(modifier = modifier) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -167,8 +173,8 @@ fun GeneralCompletedHabitsChartCard(
 
             TimeUnitOptionPicker(
                 modifier = Modifier.fillMaxWidth(),
-                options = TimeUnit.entries,
                 selectedOption = uiState.selectedTimeUnit,
+                options = TimeUnit.entries,
                 onOptionSelected = {
                     handleUiEvent(StatisticUiEvent.SelectTimeUnit(it))
                 }
@@ -180,17 +186,37 @@ fun GeneralCompletedHabitsChartCard(
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                     values = pieChartValues,
                     slice = { index ->
-                        val color = when (index) {
-                            TimeOfDay.Morning.ordinal -> TimeOfDay.Morning
-                            TimeOfDay.Afternoon.ordinal -> TimeOfDay.Afternoon
-                            else -> TimeOfDay.Evening
-                        }.getChartColor()
+                        val color = pieChartData.entries.elementAt(index).key.getChartBorder()
 
-                        DefaultSlice(color = color)
+                        DefaultSlice(color = color, gap = 2f)
                     },
                     maxPieDiameter = 250.dp,
                     minPieDiameter = 250.dp,
-                    labelConnector = {}
+                    labelConnector = {},
+                    holeSize = 0.75f,
+                    holeContent = {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.align(Alignment.Center)
+                            ) {
+                                Text(
+                                    style = BloomTheme.typography.body,
+                                    color = BloomTheme.colors.textColor.secondary,
+                                    text = "Total habits done",
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    style = BloomTheme.typography.title,
+                                    color = BloomTheme.colors.textColor.primary,
+                                    text = pieChartValues.sum().roundToInt().toString()
+                                )
+                            }
+                        }
+                    }
                 )
             } else {
                 Box(modifier = Modifier.height(250.dp).fillMaxWidth()) {
@@ -220,9 +246,9 @@ fun GeneralCompletedHabitsChartCard(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(32.dp)
                                 .background(
-                                    color = timeOfDay.getChartColor(),
+                                    color = timeOfDay.getChartBorder(),
                                     shape = CircleShape
                                 )
                         )
@@ -234,7 +260,13 @@ fun GeneralCompletedHabitsChartCard(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = stringResource(Res.string.completed_n_times, completed),
+                            text = buildAnnotatedString {
+                                append(stringResource(Res.string.completed_n_times))
+                                append(" ")
+                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                    append(completed.toString())
+                                }
+                            },
                             style = BloomTheme.typography.small,
                             color = BloomTheme.colors.textColor.primary
                         )
@@ -252,7 +284,7 @@ fun WeeklyCompletedHabitsChartCard(
     uiState: StatisticUiState,
 ) {
     val pieChartValues = uiState.completedHabitsThisWeek
-    val yAxisMaxValue = pieChartValues.values.maxOrNull()?.takeIf { it > 10 } ?: 10
+    val yAxisMaxValue = pieChartValues.values.maxOrNull() ?: 1
 
     BloomSurface(modifier = modifier) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -266,7 +298,8 @@ fun WeeklyCompletedHabitsChartCard(
             KoalaPlotTheme(
                 axis = KoalaPlotTheme.axis.copy(
                     color = Color.Black,
-                    minorGridlineStyle = null
+                    minorGridlineStyle = null,
+                    majorGridlineStyle = null
                 )
             ) {
                 XYGraph(
@@ -275,13 +308,25 @@ fun WeeklyCompletedHabitsChartCard(
                         categories = DayOfWeek.entries.map { it.getShortTitle() }
                     ),
                     yAxisModel = rememberIntLinearAxisModel(
-                        range = 0..yAxisMaxValue,
+                        range = 0..yAxisMaxValue + 1,
                         allowZooming = false,
                         allowPanning = false
                     ),
-                    panZoomEnabled = false
                 ) {
-                    LinePlot(
+                    VerticalBarPlot(
+                        data = pieChartValues.map { (key, value) ->
+                            DefaultVerticalBarPlotEntry(
+                                key.getShortTitle(), DefaultVerticalBarPosition(
+                                    yMax = value,
+                                    yMin = 0
+                                )
+                            )
+                        },
+                        bar = {
+                            DefaultVerticalBar(SolidColor(BloomTheme.colors.primary))
+                        }
+                    )
+                    /*LinePlot(
                         data = pieChartValues.map { (key, value) ->
                             Point(key.getShortTitle(), value)
                         },
@@ -289,7 +334,7 @@ fun WeeklyCompletedHabitsChartCard(
                             SolidColor(BloomTheme.colors.primary),
                             strokeWidth = 2.dp
                         )
-                    )
+                    )*/
                 }
             }
         }

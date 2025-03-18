@@ -1,14 +1,8 @@
 package com.horizondev.habitbloom.core.designComponents.pickers
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.core.designComponents.switcher.BloomTabSwitcher
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.month
 import habitbloom.composeapp.generated.resources.week
@@ -21,24 +15,14 @@ fun TimeUnitOptionPicker(
     selectedOption: TimeUnit,
     options: List<TimeUnit> = TimeUnit.entries,
     onOptionSelected: (TimeUnit) -> Unit,
-    shapeSize: Dp = 36.dp,
-    backgroundColor: Color = BloomTheme.colors.background,
 ) {
-    SingleOptionPicker(
+    BloomTabSwitcher(
         modifier = modifier,
-        options = options,
-        selectedOption = selectedOption,
-        onOptionSelected = onOptionSelected,
-        shapeSize = shapeSize,
-        backgroundColor = backgroundColor
+        items = options,
+        selectedItem = selectedOption,
+        onItemSelected = onOptionSelected,
     ) { option ->
-        Text(
-            textAlign = TextAlign.Center,
-            text = option.getTitle(),
-            color = if (option == selectedOption) BloomTheme.colors.textColor.white
-            else BloomTheme.colors.textColor.primary,
-            modifier = Modifier.align(Alignment.Center)
-        )
+        option.getTitle()
     }
 }
 

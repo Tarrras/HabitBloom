@@ -140,7 +140,8 @@
     <string name="habit_statistic">Habit Statistic</string>
     <string name="completed_habit_statistic">Completed Habit Statistic</string>
     <string name="completed_weekly_habits_statistic">Completed Weekly Habit Statistic</string>
-    <string name="completed_n_times">Completed: %1$d</string>
+    <string name="completed_n_times">Completed:</string>
+    <string name="total_habits_done">Total habits done</string>
 
     <string name="habit_details">Habit details</string>
     <string name="habit_category">Habit category</string>
