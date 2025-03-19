@@ -142,6 +142,11 @@
     <string name="completed_weekly_habits_statistic">Completed Weekly Habit Statistic</string>
     <string name="completed_n_times">Completed:</string>
     <string name="total_habits_done">Total habits done</string>
+    <string name="previous">Previous</string>
+    <string name="current_week">Current Week</string>
+    <string name="scheduled">Scheduled</string>
+    <string name="completed">Completed</string>
+    <string name="weekly_completion_rate">Weekly completion rate</string>
 
     <string name="habit_details">Habit details</string>
     <string name="habit_category">Habit category</string>
