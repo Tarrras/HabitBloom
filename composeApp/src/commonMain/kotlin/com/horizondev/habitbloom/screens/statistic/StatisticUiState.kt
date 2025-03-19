@@ -14,6 +14,7 @@ data class StatisticUiState(
     val selectedWeekOffset: Int = 0, // 0 represents current week, -1 previous week, etc.
     val completeHabitsByTimeOfDay: Map<TimeOfDay, Int> = emptyMap(),
     val completedHabitsThisWeek: Map<DayOfWeek, Int> = emptyMap(),
+    val allScheduledHabitsThisWeek: Map<DayOfWeek, Int> = emptyMap(), // New field for all scheduled habits
     val selectedWeekLabel: String = "" // To display the current selected week period
 )
 

@@ -97,7 +97,7 @@ class StatisticViewModel(
         )
 
         val weeklyStatisticResult = handleWeeklyHabitStatistic(
-            completedHabits = completedHabits,
+            habitRecords = habitRecords,
             weekOffset = selectedWeekOffset
         )
 
@@ -106,7 +106,8 @@ class StatisticViewModel(
                 isLoading = false,
                 completeHabitsByTimeOfDay = completeHabitsByTimeOfDay,
                 completedHabitsThisWeek = weeklyStatisticResult.first,
-                selectedWeekLabel = weeklyStatisticResult.second,
+                allScheduledHabitsThisWeek = weeklyStatisticResult.second,
+                selectedWeekLabel = weeklyStatisticResult.third,
                 userHasAnyCompleted = completedHabits.isNotEmpty()
             )
         }
@@ -148,14 +149,14 @@ class StatisticViewModel(
     /**
      * Calculate habit statistics for a specific week.
      *
-     * @param completedHabits List of completed habits
+     * @param habitRecords List of habits
      * @param weekOffset Offset from current week (0 = current week, -1 = previous week, etc.)
-     * @return Pair of (map of day to completed count, formatted date range string)
+     * @return Triple of (completed habits map, all scheduled habits map, formatted date range string)
      */
     private fun handleWeeklyHabitStatistic(
-        completedHabits: List<UserHabitRecordFullInfo>,
+        habitRecords: List<UserHabitRecordFullInfo>,
         weekOffset: Int = 0
-    ): Pair<Map<DayOfWeek, Int>, String> {
+    ): Triple<Map<DayOfWeek, Int>, Map<DayOfWeek, Int>, String> {
         val currentDate = getCurrentDate()
         val startOfCurrentWeek = currentDate.calculateStartOfWeek()
 
@@ -166,20 +167,31 @@ class StatisticViewModel(
         // Create a formatted string to display the date range
         val weekLabel = formatDateRange(startOfTargetWeek, endOfTargetWeek)
 
-        val completedHabitsFiltered = completedHabits
+        // Filter habits for this week
+        val habitFilteredForGivenWeek = habitRecords
             .asSequence()
             .filter {
                 it.date in startOfTargetWeek..endOfTargetWeek
-            }.sortedBy {
-                it.date
             }
+        val completedHabitFilteredForGivenWeek = habitFilteredForGivenWeek.filter { it.isCompleted }
 
-        val weekDaysWithCompletedHabits = DayOfWeek.entries.associateWith { day ->
+        // Create a map of days to habits
+        val weekDaysWithAllScheduledHabits = DayOfWeek.entries.associateWith { day ->
             val date = startOfTargetWeek.plusDays(day.ordinal.toLong())
-            completedHabitsFiltered.count { it.date == date }
+            habitFilteredForGivenWeek.count { it.date == date }
         }
 
-        return Pair(weekDaysWithCompletedHabits, weekLabel)
+        // Create a map of days to completed habits
+        val weekDaysWithCompletedHabits = DayOfWeek.entries.associateWith { day ->
+            val date = startOfTargetWeek.plusDays(day.ordinal.toLong())
+            completedHabitFilteredForGivenWeek.count { it.date == date }
+        }
+
+        return Triple(
+            weekDaysWithCompletedHabits,
+            weekDaysWithAllScheduledHabits,
+            weekLabel
+        )
     }
 
     /**

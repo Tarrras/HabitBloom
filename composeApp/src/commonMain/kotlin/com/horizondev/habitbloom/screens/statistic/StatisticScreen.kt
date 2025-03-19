@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -290,8 +291,13 @@ fun WeeklyCompletedHabitsChartCard(
     uiState: StatisticUiState,
     onEvent: (StatisticUiEvent) -> Unit = {}
 ) {
-    val pieChartValues = uiState.completedHabitsThisWeek
-    val yAxisMaxValue = pieChartValues.values.maxOrNull() ?: 1
+    val completedHabits = uiState.completedHabitsThisWeek
+    val allScheduledHabits = uiState.allScheduledHabitsThisWeek
+
+    // Calculate the maximum value for the Y-axis (allowing some space at the top)
+    val maxCompletedValue = completedHabits.values.maxOrNull() ?: 0
+    val maxScheduledValue = allScheduledHabits.values.maxOrNull() ?: 0
+    val yAxisMaxValue = maxOf(maxCompletedValue, maxScheduledValue) + 1
 
     BloomSurface(modifier = modifier) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
@@ -327,7 +333,6 @@ fun WeeklyCompletedHabitsChartCard(
 
                     // Display selected week range if we have one
                     if (uiState.selectedWeekLabel.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = uiState.selectedWeekLabel,
                             style = BloomTheme.typography.subheading,
@@ -366,13 +371,29 @@ fun WeeklyCompletedHabitsChartCard(
                         categories = DayOfWeek.entries.map { it.getShortTitle() }
                     ),
                     yAxisModel = rememberIntLinearAxisModel(
-                        range = 0..yAxisMaxValue + 1,
+                        range = 0..yAxisMaxValue,
                         allowZooming = false,
                         allowPanning = false
                     ),
                 ) {
+                    // All scheduled habits (lighter bars in the background)
                     VerticalBarPlot(
-                        data = pieChartValues.map { (key, value) ->
+                        data = allScheduledHabits.map { (key, value) ->
+                            DefaultVerticalBarPlotEntry(
+                                key.getShortTitle(), DefaultVerticalBarPosition(
+                                    yMax = value,
+                                    yMin = 0
+                                )
+                            )
+                        },
+                        bar = {
+                            DefaultVerticalBar(SolidColor(BloomTheme.colors.primary.copy(alpha = 0.3f)))
+                        }
+                    )
+
+                    // Completed habits (darker bars in the foreground)
+                    VerticalBarPlot(
+                        data = completedHabits.map { (key, value) ->
                             DefaultVerticalBarPlotEntry(
                                 key.getShortTitle(), DefaultVerticalBarPosition(
                                     yMax = value,
@@ -384,15 +405,56 @@ fun WeeklyCompletedHabitsChartCard(
                             DefaultVerticalBar(SolidColor(BloomTheme.colors.primary))
                         }
                     )
-                    /*LinePlot(
-                        data = pieChartValues.map { (key, value) ->
-                            Point(key.getShortTitle(), value)
-                        },
-                        lineStyle = LineStyle(
-                            SolidColor(BloomTheme.colors.primary),
-                            strokeWidth = 2.dp
-                        )
-                    )*/
+                }
+            }
+
+            // Add legend to explain the bars
+            Spacer(modifier = Modifier.height(16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Legend item for scheduled habits
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(
+                                color = BloomTheme.colors.primary.copy(alpha = 0.3f),
+                                shape = CircleShape
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Scheduled Habits",
+                        style = BloomTheme.typography.small,
+                        color = BloomTheme.colors.textColor.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(24.dp))
+
+                // Legend item for completed habits
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .background(
+                                color = BloomTheme.colors.primary,
+                                shape = CircleShape
+                            )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = "Completed Habits",
+                        style = BloomTheme.typography.small,
+                        color = BloomTheme.colors.textColor.primary
+                    )
                 }
             }
         }
