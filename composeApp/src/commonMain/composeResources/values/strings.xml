@@ -140,13 +140,20 @@
     <string name="habit_statistic">Habit Statistic</string>
     <string name="completed_habit_statistic">Completed Habit Statistic</string>
     <string name="completed_weekly_habits_statistic">Completed Weekly Habit Statistic</string>
+    <string name="completed_monthly_habits_statistic">Completed Monthly Habit Statistic</string>
+    <string name="completed_yearly_habits_statistic">Completed Yearly Habit Statistic</string>
     <string name="completed_n_times">Completed:</string>
     <string name="total_habits_done">Total habits done</string>
     <string name="previous">Previous</string>
     <string name="current_week">Current Week</string>
+    <string name="current_month">Current Month</string>
+    <string name="current_year">Current Year</string>
     <string name="scheduled">Scheduled</string>
     <string name="completed">Completed</string>
     <string name="weekly_completion_rate">Weekly completion rate</string>
+    <string name="monthly_completion_rate">Monthly completion rate</string>
+    <string name="yearly_completion_rate">Yearly completion rate</string>
+    <string name="no_data_available">No data available</string>
 
     <string name="habit_details">Habit details</string>
     <string name="habit_category">Habit category</string>

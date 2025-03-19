@@ -52,20 +52,27 @@ import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.statistic.components.NoCompletedHabitsPlaceholder
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getChartBorder
-import com.horizondev.habitbloom.utils.getShortTitle
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.completed
 import habitbloom.composeapp.generated.resources.completed_habit_statistic
+import habitbloom.composeapp.generated.resources.completed_monthly_habits_statistic
 import habitbloom.composeapp.generated.resources.completed_n_times
 import habitbloom.composeapp.generated.resources.completed_weekly_habits_statistic
+import habitbloom.composeapp.generated.resources.completed_yearly_habits_statistic
+import habitbloom.composeapp.generated.resources.current_month
 import habitbloom.composeapp.generated.resources.current_week
+import habitbloom.composeapp.generated.resources.current_year
 import habitbloom.composeapp.generated.resources.habit_statistic
+import habitbloom.composeapp.generated.resources.monthly_completion_rate
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.no_completed_habits_in_this_unit_title
+import habitbloom.composeapp.generated.resources.no_data_available
+import habitbloom.composeapp.generated.resources.no_habits_found
 import habitbloom.composeapp.generated.resources.previous
 import habitbloom.composeapp.generated.resources.scheduled
 import habitbloom.composeapp.generated.resources.weekly_completion_rate
+import habitbloom.composeapp.generated.resources.yearly_completion_rate
 import io.github.koalaplot.core.bar.DefaultVerticalBar
 import io.github.koalaplot.core.bar.DefaultVerticalBarPlotEntry
 import io.github.koalaplot.core.bar.DefaultVerticalBarPosition
@@ -77,7 +84,6 @@ import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
 import io.github.koalaplot.core.xygraph.CategoryAxisModel
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberIntLinearAxisModel
-import kotlinx.datetime.DayOfWeek
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.roundToInt
 
@@ -158,7 +164,7 @@ fun ColumnScope.StatisticScreenColumnContent(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    WeeklyCompletedHabitsChartCard(
+    HabitStatisticsChartCard(
         modifier = Modifier.fillMaxWidth(),
         uiState = uiState,
         onEvent = handleUiEvent
@@ -296,17 +302,31 @@ fun GeneralCompletedHabitsChartCard(
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-fun WeeklyCompletedHabitsChartCard(
+fun HabitStatisticsChartCard(
     modifier: Modifier = Modifier,
     uiState: StatisticUiState,
     onEvent: (StatisticUiEvent) -> Unit = {}
 ) {
-    val completedHabits = uiState.completedHabitsThisWeek
-    val allScheduledHabits = uiState.allScheduledHabitsThisWeek
+    // Set up data based on time unit
+    val timeUnit = uiState.selectedTimeUnit
+    val chartTitle = when (timeUnit) {
+        TimeUnit.WEEK -> stringResource(Res.string.completed_weekly_habits_statistic)
+        TimeUnit.MONTH -> stringResource(Res.string.completed_monthly_habits_statistic)
+        TimeUnit.YEAR -> stringResource(Res.string.completed_yearly_habits_statistic)
+    }
 
-    // Calculate the maximum value for the Y-axis (allowing some space at the top)
-    val maxCompletedValue = completedHabits.values.maxOrNull() ?: 0
-    val maxScheduledValue = allScheduledHabits.values.maxOrNull() ?: 0
+    // Get period label from consolidated field
+    val periodLabel = uiState.selectedPeriodLabel
+
+    // Get the formatted chart data from the ViewModel
+    val chartData = uiState.formattedChartData
+    val categories = chartData.getCategories()
+    val completedData = chartData.getCompletedData()
+    val scheduledData = chartData.getScheduledData()
+
+    // Calculate the maximum value for the Y-axis
+    val maxCompletedValue = completedData.values.maxOrNull() ?: 0
+    val maxScheduledValue = scheduledData.values.maxOrNull() ?: 0
     val yAxisMaxValue = maxOf(maxCompletedValue, maxScheduledValue) + 2
 
     // Define colors with better visual hierarchy
@@ -326,16 +346,16 @@ fun WeeklyCompletedHabitsChartCard(
         ) {
             // Title
             Text(
-                text = stringResource(Res.string.completed_weekly_habits_statistic),
+                text = chartTitle,
                 style = BloomTheme.typography.title,
                 color = BloomTheme.colors.textColor.primary,
             )
 
-            // Week date with improved contrast 
-            if (uiState.selectedWeekLabel.isNotEmpty()) {
+            // Period label with improved contrast 
+            if (periodLabel.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = uiState.selectedWeekLabel,
+                    text = periodLabel,
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium
@@ -343,115 +363,131 @@ fun WeeklyCompletedHabitsChartCard(
             }
 
             // Navigation controls with text labels
-            if (uiState.selectedTimeUnit == TimeUnit.WEEK) {
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                // Week navigation row
+            // Period navigation row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Previous period button with text (label changes based on timeUnit)
+                val previousLabel = when (timeUnit) {
+                    TimeUnit.WEEK -> stringResource(Res.string.previous)
+                    TimeUnit.MONTH -> stringResource(Res.string.previous)
+                    TimeUnit.YEAR -> stringResource(Res.string.previous)
+                }
+
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(
+                            color = BloomTheme.colors.background.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = BloomTheme.colors.disabled,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable { onEvent(StatisticUiEvent.PreviousPeriod) }
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
-                    // Previous week button with text
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                        contentDescription = previousLabel,
+                        tint = BloomTheme.colors.textColor.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text(
+                        text = previousLabel,
+                        style = BloomTheme.typography.small,
+                        color = BloomTheme.colors.textColor.primary
+                    )
+                }
+
+                // Current period button (centered) - only shown when needed
+                if (uiState.selectedPeriodOffset != 0) {
+                    val currentLabel = when (timeUnit) {
+                        TimeUnit.WEEK -> stringResource(Res.string.current_week)
+                        TimeUnit.MONTH -> stringResource(Res.string.current_month)
+                        TimeUnit.YEAR -> stringResource(Res.string.current_year)
+                    }
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .background(
-                                color = BloomTheme.colors.background.copy(alpha = 0.3f),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = BloomTheme.colors.disabled,
+                                color = BloomTheme.colors.primary.copy(alpha = 0.1f),
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .clip(RoundedCornerShape(12.dp))
-                            .clickable { onEvent(StatisticUiEvent.PreviousWeek) }
+                            .clickable { onEvent(StatisticUiEvent.CurrentPeriod) }
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Previous week",
-                            tint = BloomTheme.colors.textColor.primary,
+                            imageVector = Icons.Filled.Star,
+                            contentDescription = currentLabel,
+                            tint = BloomTheme.colors.primary,
                             modifier = Modifier.size(16.dp)
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(Res.string.previous),
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.textColor.primary
-                        )
-                    }
-
-                    // Current week button (centered) - only shown when needed
-                    if (uiState.selectedWeekOffset != 0) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .background(
-                                    color = BloomTheme.colors.primary.copy(alpha = 0.1f),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .clip(RoundedCornerShape(12.dp))
-                                .clickable { onEvent(StatisticUiEvent.CurrentWeek) }
-                                .padding(horizontal = 12.dp, vertical = 8.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Star,
-                                contentDescription = "Current week",
-                                tint = BloomTheme.colors.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(Res.string.current_week),
-                                style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.primary,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    } else {
-                        // Empty spacer when we're at current week
                         Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                    // Next week button with text (only enabled if not at current week)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .background(
-                                color = BloomTheme.colors.background.copy(alpha = 0.3f),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = BloomTheme.colors.disabled,
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable(enabled = uiState.selectedWeekOffset < 0) {
-                                onEvent(StatisticUiEvent.NextWeek)
-                            }
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.End
-                    ) {
                         Text(
-                            text = stringResource(Res.string.next),
+                            text = currentLabel,
                             style = BloomTheme.typography.small,
-                            color = if (uiState.selectedWeekOffset < 0)
-                                BloomTheme.colors.textColor.primary
-                            else BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = "Next week",
-                            tint = if (uiState.selectedWeekOffset < 0)
-                                BloomTheme.colors.textColor.primary
-                            else BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f),
-                            modifier = Modifier.size(16.dp)
+                            color = BloomTheme.colors.primary,
+                            fontWeight = FontWeight.Medium
                         )
                     }
+                } else {
+                    // Empty spacer when we're at current period
+                    Spacer(modifier = Modifier.width(8.dp))
+                }
+
+                // Next period button with text (label changes based on timeUnit)
+                val nextLabel = when (timeUnit) {
+                    TimeUnit.WEEK -> stringResource(Res.string.next)
+                    TimeUnit.MONTH -> stringResource(Res.string.next)
+                    TimeUnit.YEAR -> stringResource(Res.string.next)
+                }
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .background(
+                            color = BloomTheme.colors.background.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = BloomTheme.colors.disabled,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .clip(RoundedCornerShape(12.dp))
+                        .clickable(enabled = uiState.selectedPeriodOffset < 0) {
+                            onEvent(StatisticUiEvent.NextPeriod)
+                        }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = nextLabel,
+                        style = BloomTheme.typography.small,
+                        color = if (uiState.selectedPeriodOffset < 0)
+                            BloomTheme.colors.textColor.primary
+                        else BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                        contentDescription = nextLabel,
+                        tint = if (uiState.selectedPeriodOffset < 0)
+                            BloomTheme.colors.textColor.primary
+                        else BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f),
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
 
@@ -504,106 +540,155 @@ fun WeeklyCompletedHabitsChartCard(
                 }
             }
 
-            // Rest of the component remains unchanged
+            // Chart
             Spacer(modifier = Modifier.height(20.dp))
 
-            KoalaPlotTheme(
-                axis = KoalaPlotTheme.axis.copy(
-                    color = BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f),
-                    minorGridlineStyle = null,
-                    majorGridlineStyle = null
-                )
-            ) {
-                XYGraph(
+            if (categories.isNotEmpty()) {
+                KoalaPlotTheme(
+                    axis = KoalaPlotTheme.axis.copy(
+                        color = BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f),
+                        minorGridlineStyle = null,
+                        majorGridlineStyle = null
+                    )
+                ) {
+                    XYGraph(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(280.dp),
+                        xAxisModel = CategoryAxisModel(categories = categories),
+                        yAxisModel = rememberIntLinearAxisModel(
+                            range = 0..yAxisMaxValue,
+                            allowZooming = false,
+                            allowPanning = false
+                        ),
+                        xAxisTitle = {},
+                        xAxisLabels = { label: String ->
+                            Text(
+                                text = label,
+                                style = BloomTheme.typography.small,
+                                color = BloomTheme.colors.textColor.primary
+                            )
+                        },
+                        yAxisLabels = { number: Int ->
+                            Text(
+                                text = number.toString(),
+                                style = BloomTheme.typography.small,
+                                color = BloomTheme.colors.textColor.secondary
+                            )
+                        }
+                    ) {
+                        // If we have data to display for this time unit
+                        if (completedData.isNotEmpty() || scheduledData.isNotEmpty()) {
+                            // All scheduled habits (lighter bars in the background)
+                            if (scheduledData.isNotEmpty()) {
+                                VerticalBarPlot(
+                                    data = categories.mapIndexed { index, category ->
+                                        val value = scheduledData[category] ?: 0
+                                        DefaultVerticalBarPlotEntry(
+                                            category, DefaultVerticalBarPosition(
+                                                yMax = value,
+                                                yMin = 0
+                                            )
+                                        )
+                                    },
+                                    bar = {
+                                        DefaultVerticalBar(
+                                            brush = SolidColor(scheduledColor),
+                                            shape = RoundedCornerShape(
+                                                topStart = 4.dp,
+                                                topEnd = 4.dp
+                                            ),
+                                        )
+                                    },
+                                    barWidth = 0.6f
+                                )
+                            }
+
+                            // Completed habits (darker bars in the foreground)
+                            if (completedData.isNotEmpty()) {
+                                VerticalBarPlot(
+                                    data = categories.mapIndexed { index, category ->
+                                        val value = completedData[category] ?: 0
+                                        DefaultVerticalBarPlotEntry(
+                                            category, DefaultVerticalBarPosition(
+                                                yMax = value,
+                                                yMin = 0
+                                            )
+                                        )
+                                    },
+                                    bar = {
+                                        DefaultVerticalBar(
+                                            brush = SolidColor(completedColor),
+                                            shape = RoundedCornerShape(
+                                                topStart = 4.dp,
+                                                topEnd = 4.dp
+                                            ),
+                                        )
+                                    },
+                                    barWidth = 0.6f
+                                )
+                            }
+                        } else {
+                            // No data available message
+                            Box(
+                                modifier = Modifier.fillMaxSize(),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.no_habits_found),
+                                    style = BloomTheme.typography.body,
+                                    color = BloomTheme.colors.textColor.secondary,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                }
+
+                // Add completion rate summary at the bottom
+                Spacer(modifier = Modifier.height(16.dp))
+                val totalCompletedThisPeriod = completedData.values.sum()
+                val totalScheduledThisPeriod = scheduledData.values.sum()
+
+                if (totalScheduledThisPeriod > 0) {
+                    val completionRate =
+                        (totalCompletedThisPeriod.toFloat() / totalScheduledThisPeriod * 100).roundToInt()
+
+                    val completionText = when (timeUnit) {
+                        TimeUnit.WEEK -> stringResource(Res.string.weekly_completion_rate)
+                        TimeUnit.MONTH -> stringResource(Res.string.monthly_completion_rate)
+                        TimeUnit.YEAR -> stringResource(Res.string.yearly_completion_rate)
+                    }
+
+                    Text(
+                        text = buildAnnotatedString {
+                            append(completionText)
+                            append(": ")
+                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append("$completionRate%")
+                            }
+                        },
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            } else {
+                // Empty state when no categories are available
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(280.dp),
-                    xAxisModel = CategoryAxisModel(
-                        categories = DayOfWeek.entries.map { it.getShortTitle() }
-                    ),
-                    yAxisModel = rememberIntLinearAxisModel(
-                        range = 0..yAxisMaxValue,
-                        allowZooming = false,
-                        allowPanning = false
-                    ),
-                    xAxisTitle = {},
-                    xAxisLabels = { label: String ->
-                        Text(
-                            text = label,
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.textColor.primary
-                        )
-                    },
-                    yAxisLabels = { number: Int ->
-                        Text(
-                            text = number.toString(),
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.textColor.secondary
-                        )
-                    }
+                    contentAlignment = Alignment.Center
                 ) {
-                    // All scheduled habits (lighter bars in the background)
-                    VerticalBarPlot(
-                        data = allScheduledHabits.map { (key, value) ->
-                            DefaultVerticalBarPlotEntry(
-                                key.getShortTitle(), DefaultVerticalBarPosition(
-                                    yMax = value,
-                                    yMin = 0
-                                )
-                            )
-                        },
-                        bar = {
-                            DefaultVerticalBar(
-                                brush = SolidColor(scheduledColor),
-                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
-                            )
-                        },
-                        barWidth = 0.6f
-                    )
-
-                    // Completed habits (darker bars in the foreground)
-                    VerticalBarPlot(
-                        data = completedHabits.map { (key, value) ->
-                            DefaultVerticalBarPlotEntry(
-                                key.getShortTitle(), DefaultVerticalBarPosition(
-                                    yMax = value,
-                                    yMin = 0
-                                )
-                            )
-                        },
-                        bar = {
-                            DefaultVerticalBar(
-                                brush = SolidColor(completedColor),
-                                shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp),
-                            )
-                        },
-                        barWidth = 0.6f
+                    Text(
+                        text = stringResource(Res.string.no_data_available),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary,
+                        textAlign = TextAlign.Center
                     )
                 }
-            }
-
-            // Add completion rate summary at the bottom
-            Spacer(modifier = Modifier.height(16.dp))
-            val totalCompletedThisWeek = completedHabits.values.sum()
-            val totalScheduledThisWeek = allScheduledHabits.values.sum()
-
-            if (totalScheduledThisWeek > 0) {
-                val completionRate =
-                    (totalCompletedThisWeek.toFloat() / totalScheduledThisWeek * 100).roundToInt()
-
-                Text(
-                    text = buildAnnotatedString {
-                        append(stringResource(Res.string.weekly_completion_rate))
-                        append(": ")
-                        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append("$completionRate%")
-                        }
-                    },
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.primary,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
     }

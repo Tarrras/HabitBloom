@@ -180,16 +180,18 @@ class HabitsRepository(
         }
     }
 
-    fun getListOfAllUserHabitRecordsFlow(): Flow<List<UserHabitRecordFullInfo>> {
+    fun getListOfAllUserHabitRecordsFlow(
+        untilDate: LocalDate = getCurrentDate()
+    ): Flow<List<UserHabitRecordFullInfo>> {
         return combine(
             flow { emit(getAllHabits()) },
-            localDataSource.getAllUserHabitRecords(getCurrentDate())
+            localDataSource.getAllUserHabitRecords(untilDate)
         ) { allHabitsResult, localHabitRecords ->
             val allHabits = allHabitsResult.getOrThrow()
             mergeLocalHabitRecordsWithRemote(
                 detailedHabits = allHabits,
                 habitRecords = localHabitRecords,
-                untilDate = getCurrentDate()
+                untilDate = untilDate
             )
         }
     }

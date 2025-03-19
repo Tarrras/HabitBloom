@@ -133,6 +133,81 @@ fun LocalDate.plusDays(days: Long): LocalDate {
     return this.plus(days, DateTimeUnit.DAY)
 }
 
+/**
+ * Subtracts the specified number of months from this date.
+ */
+fun LocalDate.minusMonths(months: Long): LocalDate {
+    if (months == 0L) return this
+
+    // Calculate new year and month values
+    var newYear = year
+    var newMonth = month.ordinal + 1 - months.toInt()
+
+    // Adjust year if needed
+    while (newMonth <= 0) {
+        newYear--
+        newMonth += 12
+    }
+    while (newMonth > 12) {
+        newYear++
+        newMonth -= 12
+    }
+
+    // Get the right month enum
+    val newMonthEnum = Month(newMonth)
+
+    // Calculate the correct day value, accounting for shorter months
+    var newDay = dayOfMonth
+    val maxDaysInNewMonth = when (newMonthEnum) {
+        Month.FEBRUARY -> if (isLeapYear(newYear)) 29 else 28
+        Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> 30
+        else -> 31
+    }
+
+    if (newDay > maxDaysInNewMonth) {
+        newDay = maxDaysInNewMonth
+    }
+
+    return LocalDate(newYear, newMonthEnum, newDay)
+}
+
+/**
+ * Adds the specified number of months to this date.
+ */
+fun LocalDate.plusMonths(months: Long): LocalDate {
+    return minusMonths(-months)
+}
+
+/**
+ * Checks if the given year is a leap year.
+ */
+private fun isLeapYear(year: Int): Boolean {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)
+}
+
+/**
+ * Subtracts the specified number of years from this date.
+ */
+fun LocalDate.minusYears(years: Long): LocalDate {
+    if (years == 0L) return this
+
+    val newYear = year - years.toInt()
+
+    // Handle Feb 29 in leap years
+    if (month == Month.FEBRUARY && dayOfMonth == 29 && !isLeapYear(newYear)) {
+        return LocalDate(newYear, Month.FEBRUARY, 28)
+    }
+
+    return LocalDate(newYear, month, dayOfMonth)
+}
+
+/**
+ * Adds the specified number of years to this date.
+ */
+fun LocalDate.plusYears(years: Long): LocalDate {
+    return minusYears(-years)
+}
+
 @Composable
 fun Month.getTitle() = when (this) {
     Month.JANUARY -> stringResource(Res.string.month_january)

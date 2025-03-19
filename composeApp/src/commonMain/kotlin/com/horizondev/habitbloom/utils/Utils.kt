@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -164,6 +165,19 @@ fun DayOfWeek.getShortTitle(): String {
         DayOfWeek.SATURDAY -> stringResource(Res.string.saturday_short)
         DayOfWeek.SUNDAY -> stringResource(Res.string.sunday_short)
         else -> stringResource(Res.string.sunday_short)
+    }
+}
+
+suspend fun DayOfWeek.getShortTitleSuspend(): String {
+    return when (this) {
+        DayOfWeek.MONDAY -> getString(Res.string.monday_short)
+        DayOfWeek.TUESDAY -> getString(Res.string.tuesday_short)
+        DayOfWeek.WEDNESDAY -> getString(Res.string.wednesday_short)
+        DayOfWeek.THURSDAY -> getString(Res.string.thursday_short)
+        DayOfWeek.FRIDAY -> getString(Res.string.friday_short)
+        DayOfWeek.SATURDAY -> getString(Res.string.saturday_short)
+        DayOfWeek.SUNDAY -> getString(Res.string.sunday_short)
+        else -> getString(Res.string.sunday_short)
     }
 }
 
