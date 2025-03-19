@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.statistic
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -321,6 +322,7 @@ fun WeeklyCompletedHabitsChartCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp)
+                .animateContentSize()
         ) {
             // Title
             Text(
