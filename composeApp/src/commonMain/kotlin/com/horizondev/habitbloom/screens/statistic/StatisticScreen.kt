@@ -156,18 +156,10 @@ fun ColumnScope.StatisticScreenColumnContent(
     uiState: StatisticUiState,
     handleUiEvent: (StatisticUiEvent) -> Unit
 ) {
-    GeneralCompletedHabitsChartCard(
+    CombinedHabitStatisticsCard(
         modifier = Modifier.fillMaxWidth(),
         uiState = uiState,
         handleUiEvent = handleUiEvent
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    HabitStatisticsChartCard(
-        modifier = Modifier.fillMaxWidth(),
-        uiState = uiState,
-        onEvent = handleUiEvent
     )
 
     Spacer(modifier = Modifier.height(54.dp))
@@ -175,169 +167,12 @@ fun ColumnScope.StatisticScreenColumnContent(
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-fun GeneralCompletedHabitsChartCard(
+fun CombinedHabitStatisticsCard(
     modifier: Modifier = Modifier,
     uiState: StatisticUiState,
     handleUiEvent: (StatisticUiEvent) -> Unit
 ) {
-    val pieChartData = remember(uiState.completeHabitsByTimeOfDay) {
-        uiState.completeHabitsByTimeOfDay.filter { it.value > 0 }
-    }
-    val pieChartValues = pieChartData.values.map { it.toFloat() }
-
     BloomSurface(modifier = modifier) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Text(
-                text = stringResource(Res.string.completed_habit_statistic),
-                style = BloomTheme.typography.title,
-                color = BloomTheme.colors.textColor.primary,
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            TimeUnitOptionPicker(
-                modifier = Modifier.fillMaxWidth(),
-                selectedOption = uiState.selectedTimeUnit,
-                options = TimeUnit.entries,
-                onOptionSelected = {
-                    handleUiEvent(StatisticUiEvent.SelectTimeUnit(it))
-                }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (pieChartValues.sum() > 0) {
-                PieChart(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    values = pieChartValues,
-                    slice = { index ->
-                        val color = pieChartData.entries.elementAt(index).key.getChartBorder()
-
-                        DefaultSlice(color = color, gap = 2f)
-                    },
-                    maxPieDiameter = 250.dp,
-                    minPieDiameter = 250.dp,
-                    labelConnector = {},
-                    holeSize = 0.75f,
-                    holeContent = {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.align(Alignment.Center)
-                            ) {
-                                Text(
-                                    style = BloomTheme.typography.body,
-                                    color = BloomTheme.colors.textColor.secondary,
-                                    text = "Total habits done",
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    style = BloomTheme.typography.title,
-                                    color = BloomTheme.colors.textColor.primary,
-                                    text = pieChartValues.sum().roundToInt().toString()
-                                )
-                            }
-                        }
-                    }
-                )
-            } else {
-                Box(modifier = Modifier.height(250.dp).fillMaxWidth()) {
-                    Text(
-                        text = stringResource(
-                            Res.string.no_completed_habits_in_this_unit_title,
-                            uiState.selectedTimeUnit.getTitle().lowercase()
-                        ),
-                        style = BloomTheme.typography.heading,
-                        color = BloomTheme.colors.textColor.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().align(Alignment.Center)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                TimeOfDay.entries.forEach { timeOfDay ->
-                    val completed = uiState.completeHabitsByTimeOfDay[timeOfDay] ?: 0
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(32.dp)
-                                .background(
-                                    color = timeOfDay.getChartBorder(),
-                                    shape = CircleShape
-                                )
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = timeOfDay.getTitle(),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.primary
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = buildAnnotatedString {
-                                append(stringResource(Res.string.completed_n_times))
-                                append(" ")
-                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append(completed.toString())
-                                }
-                            },
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.textColor.primary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalKoalaPlotApi::class)
-@Composable
-fun HabitStatisticsChartCard(
-    modifier: Modifier = Modifier,
-    uiState: StatisticUiState,
-    onEvent: (StatisticUiEvent) -> Unit = {}
-) {
-    // Set up data based on time unit
-    val timeUnit = uiState.selectedTimeUnit
-    val chartTitle = when (timeUnit) {
-        TimeUnit.WEEK -> stringResource(Res.string.completed_weekly_habits_statistic)
-        TimeUnit.MONTH -> stringResource(Res.string.completed_monthly_habits_statistic)
-        TimeUnit.YEAR -> stringResource(Res.string.completed_yearly_habits_statistic)
-    }
-
-    // Get period label from consolidated field
-    val periodLabel = uiState.selectedPeriodLabel
-
-    // Get the formatted chart data from the ViewModel
-    val chartData = uiState.formattedChartData
-    val categories = chartData.getCategories()
-    val completedData = chartData.getCompletedData()
-    val scheduledData = chartData.getScheduledData()
-
-    // Calculate the maximum value for the Y-axis
-    val maxCompletedValue = completedData.values.maxOrNull() ?: 0
-    val maxScheduledValue = scheduledData.values.maxOrNull() ?: 0
-    val yAxisMaxValue = maxOf(maxCompletedValue, maxScheduledValue) + 2
-
-    // Define colors with better visual hierarchy
-    val scheduledColor = BloomTheme.colors.primary.copy(alpha = 0.2f)
-    val completedColor = BloomTheme.colors.primary
-
-    BloomSurface(
-        modifier = modifier,
-        tonalElevation = 2.dp,
-        shape = RoundedCornerShape(16.dp)
-    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -346,24 +181,38 @@ fun HabitStatisticsChartCard(
         ) {
             // Title
             Text(
-                text = chartTitle,
+                text = stringResource(Res.string.habit_statistic),
                 style = BloomTheme.typography.title,
                 color = BloomTheme.colors.textColor.primary,
             )
 
-            // Period label with improved contrast 
-            if (periodLabel.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Time unit picker
+            TimeUnitOptionPicker(
+                modifier = Modifier.fillMaxWidth(),
+                selectedOption = uiState.selectedTimeUnit,
+                options = TimeUnit.entries,
+                onOptionSelected = {
+                    handleUiEvent(StatisticUiEvent.SelectTimeUnit(it))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Period Navigation Controls
+            val timeUnit = uiState.selectedTimeUnit
+
+            // Period label 
+            if (uiState.selectedPeriodLabel.isNotEmpty()) {
                 Text(
-                    text = periodLabel,
+                    text = uiState.selectedPeriodLabel,
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium
                 )
+                Spacer(modifier = Modifier.height(12.dp))
             }
-
-            // Navigation controls with text labels
-            Spacer(modifier = Modifier.height(16.dp))
 
             // Period navigation row
             Row(
@@ -371,13 +220,9 @@ fun HabitStatisticsChartCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Previous period button with text (label changes based on timeUnit)
-                val previousLabel = when (timeUnit) {
-                    TimeUnit.WEEK -> stringResource(Res.string.previous)
-                    TimeUnit.MONTH -> stringResource(Res.string.previous)
-                    TimeUnit.YEAR -> stringResource(Res.string.previous)
-                }
-
+                // Previous period button with text
+                val previousLabel = stringResource(Res.string.previous)
+                
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -391,7 +236,7 @@ fun HabitStatisticsChartCard(
                             shape = RoundedCornerShape(12.dp)
                         )
                         .clip(RoundedCornerShape(12.dp))
-                        .clickable { onEvent(StatisticUiEvent.PreviousPeriod) }
+                        .clickable { handleUiEvent(StatisticUiEvent.PreviousPeriod) }
                         .padding(horizontal = 12.dp, vertical = 8.dp)
                 ) {
                     Icon(
@@ -424,7 +269,7 @@ fun HabitStatisticsChartCard(
                                 shape = RoundedCornerShape(12.dp)
                             )
                             .clip(RoundedCornerShape(12.dp))
-                            .clickable { onEvent(StatisticUiEvent.CurrentPeriod) }
+                            .clickable { handleUiEvent(StatisticUiEvent.CurrentPeriod) }
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Icon(
@@ -446,13 +291,9 @@ fun HabitStatisticsChartCard(
                     Spacer(modifier = Modifier.width(8.dp))
                 }
 
-                // Next period button with text (label changes based on timeUnit)
-                val nextLabel = when (timeUnit) {
-                    TimeUnit.WEEK -> stringResource(Res.string.next)
-                    TimeUnit.MONTH -> stringResource(Res.string.next)
-                    TimeUnit.YEAR -> stringResource(Res.string.next)
-                }
-
+                // Next period button with text
+                val nextLabel = stringResource(Res.string.next)
+                
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -467,7 +308,7 @@ fun HabitStatisticsChartCard(
                         )
                         .clip(RoundedCornerShape(12.dp))
                         .clickable(enabled = uiState.selectedPeriodOffset < 0) {
-                            onEvent(StatisticUiEvent.NextPeriod)
+                            handleUiEvent(StatisticUiEvent.NextPeriod)
                         }
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalArrangement = Arrangement.End
@@ -491,8 +332,160 @@ fun HabitStatisticsChartCard(
                 }
             }
 
-            // Legend 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // SECTION 1: Pie Chart of Habits by Time of Day
+            Text(
+                text = stringResource(Res.string.completed_habit_statistic),
+                style = BloomTheme.typography.subheading,
+                color = BloomTheme.colors.textColor.primary,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Pie Chart Section
+            val pieChartData = remember(uiState.completeHabitsByTimeOfDay) {
+                uiState.completeHabitsByTimeOfDay.filter { it.value > 0 }
+            }
+            val pieChartValues = pieChartData.values.map { it.toFloat() }
+
+            if (pieChartValues.sum() > 0) {
+                PieChart(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    values = pieChartValues,
+                    slice = { index ->
+                        val color = pieChartData.entries.elementAt(index).key.getChartBorder()
+                        DefaultSlice(color = color, gap = 2f)
+                    },
+                    maxPieDiameter = 220.dp,
+                    minPieDiameter = 220.dp,
+                    labelConnector = {},
+                    holeSize = 0.75f,
+                    holeContent = {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.align(Alignment.Center)
+                            ) {
+                                Text(
+                                    style = BloomTheme.typography.body,
+                                    color = BloomTheme.colors.textColor.secondary,
+                                    text = "Total habits done",
+                                    textAlign = TextAlign.Center
+                                )
+                                Text(
+                                    style = BloomTheme.typography.title,
+                                    color = BloomTheme.colors.textColor.primary,
+                                    text = pieChartValues.sum().roundToInt().toString()
+                                )
+                            }
+                        }
+                    }
+                )
+            } else {
+                Box(modifier = Modifier.height(220.dp).fillMaxWidth()) {
+                    Text(
+                        text = stringResource(
+                            Res.string.no_completed_habits_in_this_unit_title,
+                            uiState.selectedTimeUnit.getTitle().lowercase()
+                        ),
+                        style = BloomTheme.typography.heading,
+                        color = BloomTheme.colors.textColor.primary,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth().align(Alignment.Center)
+                    )
+                }
+            }
+
+            // Time of Day Legend
+            if (pieChartValues.sum() > 0) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceAround,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    TimeOfDay.entries.forEach { timeOfDay ->
+                        val completed = uiState.completeHabitsByTimeOfDay[timeOfDay] ?: 0
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .background(
+                                        color = timeOfDay.getChartBorder(),
+                                        shape = CircleShape
+                                    )
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = timeOfDay.getTitle(),
+                                style = BloomTheme.typography.small,
+                                color = BloomTheme.colors.textColor.primary
+                            )
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = buildAnnotatedString {
+                                    append(stringResource(Res.string.completed_n_times))
+                                    append(" ")
+                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                        append(completed.toString())
+                                    }
+                                },
+                                style = BloomTheme.typography.small,
+                                color = BloomTheme.colors.textColor.secondary
+                            )
+                        }
+                    }
+                }
+            }
+
+            // Divider
+            Spacer(modifier = Modifier.height(32.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(BloomTheme.colors.disabled.copy(alpha = 0.3f))
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // SECTION 2: Bar Chart of Habit Completion By Period
+            // Chart title based on time unit
+            val chartTitle = when (timeUnit) {
+                TimeUnit.WEEK -> stringResource(Res.string.completed_weekly_habits_statistic)
+                TimeUnit.MONTH -> stringResource(Res.string.completed_monthly_habits_statistic)
+                TimeUnit.YEAR -> stringResource(Res.string.completed_yearly_habits_statistic)
+            }
+
+            Text(
+                text = chartTitle,
+                style = BloomTheme.typography.subheading,
+                color = BloomTheme.colors.textColor.primary,
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Get the formatted chart data from the ViewModel
+            val chartData = uiState.formattedChartData
+            val categories = chartData.getCategories()
+            val completedData = chartData.getCompletedData()
+            val scheduledData = chartData.getScheduledData()
+
+            // Calculate the maximum value for the Y-axis
+            val maxCompletedValue = completedData.values.maxOrNull() ?: 0
+            val maxScheduledValue = scheduledData.values.maxOrNull() ?: 0
+            val yAxisMaxValue = maxOf(maxCompletedValue, maxScheduledValue) + 2
+
+            // Define colors with better visual hierarchy
+            val scheduledColor = BloomTheme.colors.primary.copy(alpha = 0.2f)
+            val completedColor = BloomTheme.colors.primary
+
+            // Bar Chart Legend
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
@@ -540,8 +533,8 @@ fun HabitStatisticsChartCard(
                 }
             }
 
-            // Chart
-            Spacer(modifier = Modifier.height(20.dp))
+            // Bar Chart
+            Spacer(modifier = Modifier.height(16.dp))
 
             if (categories.isNotEmpty()) {
                 KoalaPlotTheme(
