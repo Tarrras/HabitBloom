@@ -17,10 +17,8 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
@@ -59,7 +57,7 @@ class CalendarViewModel(
                 updateFilteredHabitsForSelectedDate()
             }
         }
-        
+
         loadCalendarData()
     }
 
@@ -195,90 +193,23 @@ class CalendarViewModel(
     }
 
     private fun calculateHabitStreaks(habitRecords: List<UserHabitRecordFullInfo>): Map<Long, HabitStreakInfo> {
-        val today = getCurrentDate()
-        val result = mutableMapOf<Long, HabitStreakInfo>()
+        return runCatching {
+            val result = mutableMapOf<Long, HabitStreakInfo>()
 
-        // Group records by habit ID
-        val habitGroups = habitRecords.groupBy { it.userHabitId }
+            // Group records by habit ID
+            val habitGroups = habitRecords.groupBy { it.userHabitId }
 
-        habitGroups.forEach { (habitId, records) ->
-            if (records.isEmpty()) return@forEach
+            habitGroups.forEach { (userHabitId, records) ->
+                if (records.isEmpty()) return@forEach
 
-            val habitName = records.firstOrNull()?.name ?: "Unknown Habit"
-
-            // Sort records by date (newest first)
-            val sortedRecords = records.sortedByDescending { it.date }
-
-            // Calculate current streak
-            var currentStreak = 0
-            var previousDate: LocalDate? = null
-
-            for (record in sortedRecords) {
-                if (!record.isCompleted) continue
-
-                // If this is the first completed habit we're examining
-                if (previousDate == null) {
-                    previousDate = record.date
-                    currentStreak = 1
-                    continue
-                }
-
-                // Check if this record is part of a consecutive streak
-                val expectedDate = previousDate.minus(1, DateTimeUnit.DAY)
-                if (record.date == expectedDate) {
-                    currentStreak++
-                    previousDate = record.date
-                } else {
-                    // The streak is broken
-                    break
-                }
+                result[userHabitId] = repository.calculateHabitStreak(
+                    userHabitId = userHabitId,
+                    habitRecords = habitRecords
+                )
             }
 
-            // Calculate longest streak (historical)
-            var longestStreak = 0
-            var currentLongestStreak = 0
-            var lastDate: LocalDate? = null
-
-            for (record in records.sortedBy { it.date }) {
-                if (!record.isCompleted) {
-                    // Reset current streak if we find an uncompleted habit
-                    currentLongestStreak = 0
-                    lastDate = null
-                    continue
-                }
-
-                if (lastDate == null) {
-                    // First completed habit in a potential streak
-                    currentLongestStreak = 1
-                    lastDate = record.date
-                } else {
-                    val expectedDate = lastDate.plus(1, DateTimeUnit.DAY)
-                    if (record.date == expectedDate) {
-                        // Streak continues
-                        currentLongestStreak++
-                    } else {
-                        // Streak breaks, start a new one
-                        currentLongestStreak = 1
-                    }
-
-                    lastDate = record.date
-                }
-
-                // Update longest streak if current is higher
-                if (currentLongestStreak > longestStreak) {
-                    longestStreak = currentLongestStreak
-                }
-            }
-
-            result[habitId] = HabitStreakInfo(
-                habitId = habitId,
-                habitName = habitName,
-                currentStreak = currentStreak,
-                longestStreak = longestStreak
-            )
-        }
-
-        return result
+            result
+        }.getOrNull()?.toMap() ?: emptyMap()
     }
 
     /**
@@ -321,7 +252,7 @@ class CalendarViewModel(
                 val habitsByDate = state.value.habitsByDate
                 val currentMonth = YearMonth(event.yearMonth.year, event.yearMonth.month)
                 val selectedTimeOfDayFilter = state.value.selectedTimeOfDayFilter
-                
+
                 val monthlyStats = calculateMonthlyStatistics(
                     habitsByDate,
                     currentMonth,
@@ -342,12 +273,22 @@ class CalendarViewModel(
 
             is CalendarUiEvent.ToggleHabitCompletion -> {
                 viewModelScope.launch {
-                    repository.updateHabitCompletion(
-                        habitRecordId = event.habitId,
-                        date = event.date,
-                        isCompleted = event.completed
-                    )
-                    // No need to manually reload data as the Flow will update automatically
+                    // Get current date
+                    val today =
+                        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
+                    // Only allow toggling completion for the current day
+                    if (event.date == today) {
+                        repository.updateHabitCompletion(
+                            habitRecordId = event.habitId,
+                            date = event.date,
+                            isCompleted = event.completed
+                        )
+                        // No need to manually reload data as the Flow will update automatically
+                    } else {
+                        // Optionally, you could emit a UI event to show an error message
+                        // or simply log that an invalid operation was attempted
+                    }
                 }
             }
 

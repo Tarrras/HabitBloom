@@ -84,8 +84,10 @@ import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.calendar_filter_all_habits
+import habitbloom.composeapp.generated.resources.calendar_future_date_message
 import habitbloom.composeapp.generated.resources.calendar_habit_detail_date
 import habitbloom.composeapp.generated.resources.calendar_no_habits
+import habitbloom.composeapp.generated.resources.calendar_past_date_message
 import habitbloom.composeapp.generated.resources.calendar_screen_title
 import habitbloom.composeapp.generated.resources.calendar_statistics_completed
 import habitbloom.composeapp.generated.resources.calendar_statistics_completion_rate
@@ -707,6 +709,7 @@ private fun DailyHabitDetailBottomSheet(
     val date = uiState.selectedDate
     val habits = uiState.habitsForSelectedDate
     val habitStreaks = uiState.habitsWithStreaks
+    val today = getCurrentDate() // Get current date for comparison
 
     Column(
         modifier = Modifier
@@ -748,6 +751,22 @@ private fun DailyHabitDetailBottomSheet(
             }
         }
 
+        // Show message for non-today dates
+        if (date != today) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = if (date < today) {
+                    stringResource(Res.string.calendar_past_date_message)
+                } else {
+                    stringResource(Res.string.calendar_future_date_message)
+                },
+                style = BloomTheme.typography.small,
+                color = BloomTheme.colors.disabled,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
 
         if (habits.isEmpty()) {
@@ -787,7 +806,8 @@ private fun DailyHabitDetailBottomSheet(
                             onHabitClicked = {
                                 onHabitClicked(habit.userHabitId)
                             },
-                            showStreakCelebration = habit.userHabitId == uiState.celebratingHabitId
+                            showStreakCelebration = habit.userHabitId == uiState.celebratingHabitId,
+                            isCurrentDay = date == today
                         )
 
                         HorizontalDivider(
@@ -814,7 +834,8 @@ private fun HabitItem(
     streakInfo: HabitStreakInfo?,
     onStatusChanged: (Boolean) -> Unit,
     onHabitClicked: () -> Unit,
-    showStreakCelebration: Boolean = false
+    showStreakCelebration: Boolean = false,
+    isCurrentDay: Boolean = false
 ) {
     // Celebration animation
     var isShowingConfetti by remember { mutableStateOf(false) }
@@ -835,14 +856,19 @@ private fun HabitItem(
                 .padding(vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Checkbox for completion status
+            // Checkbox for completion status - enabled only for current day
             Checkbox(
                 checked = habit.isCompleted,
-                onCheckedChange = { onStatusChanged(it) },
+                onCheckedChange = if (isCurrentDay) {
+                    onStatusChanged
+                } else {
+                    null
+                },
                 colors = androidx.compose.material3.CheckboxDefaults.colors(
-                    checkedColor = BloomTheme.colors.primary,
+                    checkedColor = if (isCurrentDay) BloomTheme.colors.primary else BloomTheme.colors.disabled,
                     uncheckedColor = BloomTheme.colors.disabled
-                )
+                ),
+                enabled = isCurrentDay
             )
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -857,16 +883,6 @@ private fun HabitItem(
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium
                 )
-
-                // Only show time of day if not grouped by time of day
-                /* Removed since we now group by time of day
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = habit.timeOfDay.name,
-                    style = BloomTheme.typography.small,
-                    color = BloomTheme.colors.textColor.secondary
-                )
-                */
 
                 // Streak info if available
                 if (streakInfo != null) {

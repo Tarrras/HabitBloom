@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.screens.habits.domain
 
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
+import com.horizondev.habitbloom.screens.calendar.HabitStreakInfo
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
@@ -30,9 +31,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import org.koin.core.component.KoinComponent
 
 class HabitsRepository(
@@ -497,6 +501,89 @@ class HabitsRepository(
                 null
             }
         }
+    }
+
+    fun calculateHabitStreak(
+        userHabitId: Long,
+        habitRecords: List<UserHabitRecordFullInfo>
+    ): HabitStreakInfo {
+        val today = getCurrentDate()
+        val records = habitRecords.filter { it.userHabitId == userHabitId }
+
+        val habitName = records.firstOrNull()?.name ?: "Unknown Habit"
+
+        // Sort records by date (newest first)
+        val sortedRecords = records
+            .sortedByDescending { it.date }
+            .filter { it.date <= today }
+
+        // Calculate current streak
+        var currentStreak = 0
+        var previousDate: LocalDate? = null
+
+        for (record in sortedRecords) {
+            if (!record.isCompleted) continue
+
+            // If this is the first completed habit we're examining
+            if (previousDate == null) {
+                previousDate = record.date
+                currentStreak = 1
+                continue
+            }
+
+            // Check if this record is part of a consecutive streak
+            val expectedDate = previousDate.minus(1, DateTimeUnit.DAY)
+            if (record.date == expectedDate) {
+                currentStreak++
+                previousDate = record.date
+            } else {
+                // The streak is broken
+                break
+            }
+        }
+
+        // Calculate longest streak (historical)
+        var longestStreak = 0
+        var currentLongestStreak = 0
+        var lastDate: LocalDate? = null
+
+        for (record in records.sortedBy { it.date }) {
+            if (!record.isCompleted) {
+                // Reset current streak if we find an uncompleted habit
+                currentLongestStreak = 0
+                lastDate = null
+                continue
+            }
+
+            if (lastDate == null) {
+                // First completed habit in a potential streak
+                currentLongestStreak = 1
+                lastDate = record.date
+            } else {
+                val expectedDate = lastDate.plus(1, DateTimeUnit.DAY)
+                if (record.date == expectedDate) {
+                    // Streak continues
+                    currentLongestStreak++
+                } else {
+                    // Streak breaks, start a new one
+                    currentLongestStreak = 1
+                }
+
+                lastDate = record.date
+            }
+
+            // Update longest streak if current is higher
+            if (currentLongestStreak > longestStreak) {
+                longestStreak = currentLongestStreak
+            }
+        }
+
+        return HabitStreakInfo(
+            userHabitId = userHabitId,
+            habitName = habitName,
+            currentStreak = currentStreak,
+            longestStreak = longestStreak
+        )
     }
 
     /**

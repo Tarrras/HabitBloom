@@ -50,7 +50,7 @@ data class MonthlyStatistics(
  * Holds streak information for a specific habit
  */
 data class HabitStreakInfo(
-    val habitId: Long,
+    val userHabitId: Long,
     val habitName: String,
     val currentStreak: Int = 0,
     val longestStreak: Int = 0
