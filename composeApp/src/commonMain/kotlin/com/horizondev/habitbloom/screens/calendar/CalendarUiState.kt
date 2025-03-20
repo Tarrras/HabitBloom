@@ -66,11 +66,6 @@ sealed class CalendarUiEvent {
     data class SelectDate(val date: LocalDate) : CalendarUiEvent()
 
     /**
-     * Event to open habit details.
-     */
-    data class OpenHabitDetails(val habitId: Long) : CalendarUiEvent()
-
-    /**
      * Event to change month.
      */
     data class ChangeMonth(val yearMonth: YearMonth) : CalendarUiEvent()
@@ -84,7 +79,7 @@ sealed class CalendarUiEvent {
      * Event to toggle habit completion status.
      */
     data class ToggleHabitCompletion(
-        val habitId: Long,
+        val habitRecordId: Long,
         val date: LocalDate,
         val completed: Boolean
     ) : CalendarUiEvent()

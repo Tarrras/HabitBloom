@@ -39,7 +39,7 @@ class CalendarViewModel(
 
     init {
         // Initialize with current date
-        val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+        val now = getCurrentDate()
         val currentMonth = YearMonth(now.year, now.monthNumber)
 
         updateState {
@@ -110,7 +110,7 @@ class CalendarViewModel(
         updateState {
             it.copy(
                 habitsByDate = habitsByDate,
-                habitsForSelectedDate = filteredHabits,
+                habitsForSelectedDate = filteredHabits.sortedBy { habit -> habit.timeOfDay.ordinal },
                 monthlyStats = monthlyStats,
                 habitsWithStreaks = habitsWithStreaks,
                 isLoading = false
@@ -142,7 +142,7 @@ class CalendarViewModel(
 
         updateState {
             it.copy(
-                habitsForSelectedDate = filteredHabits,
+                habitsForSelectedDate = filteredHabits.sortedBy { habit -> habit.timeOfDay.ordinal },
                 monthlyStats = monthlyStats
             )
         }
@@ -231,14 +231,10 @@ class CalendarViewModel(
                 updateState {
                     it.copy(
                         selectedDate = event.date,
-                        habitsForSelectedDate = filteredHabits,
+                        habitsForSelectedDate = filteredHabits.sortedBy { habit -> habit.timeOfDay.ordinal },
                         showBottomSheet = filteredHabits.isNotEmpty()
                     )
                 }
-            }
-
-            is CalendarUiEvent.OpenHabitDetails -> {
-                emitUiIntent(CalendarUiIntent.OpenHabitDetails(event.habitId))
             }
 
             is CalendarUiEvent.ChangeMonth -> {
@@ -274,13 +270,12 @@ class CalendarViewModel(
             is CalendarUiEvent.ToggleHabitCompletion -> {
                 viewModelScope.launch {
                     // Get current date
-                    val today =
-                        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                    val today = getCurrentDate()
 
                     // Only allow toggling completion for the current day
                     if (event.date == today) {
                         repository.updateHabitCompletion(
-                            habitRecordId = event.habitId,
+                            habitRecordId = event.habitRecordId,
                             date = event.date,
                             isCompleted = event.completed
                         )
@@ -319,7 +314,7 @@ class CalendarViewModel(
                 if (filteredHabits.isNotEmpty()) {
                     updateState {
                         it.copy(
-                            habitsForSelectedDate = filteredHabits,
+                            habitsForSelectedDate = filteredHabits.sortedBy { habit -> habit.timeOfDay.ordinal },
                             showBottomSheet = true
                         )
                     }

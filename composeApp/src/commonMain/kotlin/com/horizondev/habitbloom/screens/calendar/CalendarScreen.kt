@@ -35,9 +35,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -337,34 +335,20 @@ private fun CalendarScreenContent(
         ) {
             DailyHabitDetailBottomSheet(
                 uiState = uiState,
-                onHabitStatusChanged = { habitId, completed ->
+                onHabitStatusChanged = { habitRecordId, completed ->
                     handleUiEvent(
                         CalendarUiEvent.ToggleHabitCompletion(
-                            habitId = habitId,
+                            habitRecordId = habitRecordId,
                             date = uiState.selectedDate,
                             completed = completed
                         )
                     )
-
-                    // Show confetti if habit is completed
-                    if (completed) {
-                        coroutineScope.launch {
-                            handleUiEvent(CalendarUiEvent.ShowStreakCelebration(habitId))
-                        }
-                    }
                 },
                 onHabitClicked = { habitId ->
                     coroutineScope.launch {
                         sheetState.hide()
                     }.invokeOnCompletion {
                         handleUiEvent(CalendarUiEvent.CloseBottomSheet)
-                        handleUiEvent(CalendarUiEvent.OpenHabitDetails(habitId))
-                    }
-                },
-                isHalfExpanded = sheetState.currentValue == SheetValue.PartiallyExpanded,
-                onExpandSheet = {
-                    coroutineScope.launch {
-                        sheetState.expand()
                     }
                 }
             )
@@ -691,8 +675,6 @@ private fun DailyHabitDetailBottomSheet(
     uiState: CalendarUiState,
     onHabitStatusChanged: (Long, Boolean) -> Unit,
     onHabitClicked: (Long) -> Unit,
-    isHalfExpanded: Boolean = false,
-    onExpandSheet: () -> Unit
 ) {
     val date = uiState.selectedDate
     val habits = uiState.habitsForSelectedDate
@@ -726,17 +708,6 @@ private fun DailyHabitDetailBottomSheet(
                 style = BloomTheme.typography.subheading,
                 color = BloomTheme.colors.textColor.primary
             )
-
-            // If sheet is half-expanded, show expand button
-            if (isHalfExpanded) {
-                TextButton(onClick = onExpandSheet) {
-                    Text(
-                        text = "Show All",
-                        style = BloomTheme.typography.small,
-                        color = BloomTheme.colors.primary
-                    )
-                }
-            }
         }
 
         // Show message for non-today dates
@@ -789,7 +760,7 @@ private fun DailyHabitDetailBottomSheet(
                             habit = habit,
                             streakInfo = habitStreaks[habit.userHabitId],
                             onStatusChanged = { completed ->
-                                onHabitStatusChanged(habit.userHabitId, completed)
+                                onHabitStatusChanged(habit.id, completed)
                             },
                             onHabitClicked = {
                                 onHabitClicked(habit.userHabitId)
