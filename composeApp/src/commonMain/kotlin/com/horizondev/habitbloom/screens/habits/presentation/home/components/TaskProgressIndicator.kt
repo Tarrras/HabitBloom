@@ -28,18 +28,18 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HabitProgressIndicator(
-    dailyHabits: Int,
-    completedHabits: Int,
+    totalHabits: Int,
+    totalCompletedHabits: Int,
     radius: Dp = 20.dp,
     indicatorBackgroundColor: Color = BloomTheme.colors.disabled.copy(alpha = 0.25f),
     mainColor: Color = BloomTheme.colors.primary,
-    strokeWidth: Dp = 8.dp,
+    strokeHeight: Dp = 8.dp,
     animationDuration: Int = 800,
     animDelay: Int = 0,
 ) {
-    val percentage = remember(dailyHabits, completedHabits) {
+    val percentage = remember(totalHabits, totalCompletedHabits) {
         taskCompletionPercentage(
-            habitsCount = dailyHabits, completedHabits = completedHabits
+            habitsCount = totalHabits, completedHabits = totalCompletedHabits
         )
     }
 
@@ -67,13 +67,13 @@ fun HabitProgressIndicator(
             drawRoundRect(
                 color = indicatorBackgroundColor,
                 cornerRadius = CornerRadius(radius.toPx()),
-                size = Size(height = strokeWidth.toPx(), width = size.width)
+                size = Size(height = strokeHeight.toPx(), width = size.width)
             )
 
             drawRoundRect(
                 color = mainColor,
                 cornerRadius = CornerRadius(radius.toPx()),
-                size = Size(height = strokeWidth.toPx(), width = size.width * currentPercentage)
+                size = Size(height = strokeHeight.toPx(), width = size.width * currentPercentage)
             )
         }
 
@@ -81,8 +81,8 @@ fun HabitProgressIndicator(
         Text(
             text = stringResource(
                 Res.string.some_tasks_completed,
-                completedHabits,
-                dailyHabits
+                totalCompletedHabits,
+                totalHabits
             ),
             style = BloomTheme.typography.body,
             color = BloomTheme.colors.textColor.primary,

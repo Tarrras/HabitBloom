@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.minus
@@ -33,7 +34,9 @@ class CalendarViewModel(
     }
 
     private fun loadCalendarData() {
-        repository.getListOfAllUserHabitRecordsFlow()
+        repository.getListOfAllUserHabitRecordsFlow(
+            untilDate = getCurrentDate().plus(DatePeriod(years = 1))
+        )
             .distinctUntilChanged()
             .onEach { habitRecords ->
                 processHabitRecords(habitRecords)

@@ -29,7 +29,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -60,6 +59,7 @@ import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.screens.habits.presentation.home.components.HabitProgressIndicator
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -444,11 +444,10 @@ private fun MonthlyStatisticsCard(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                LinearProgressIndicator(
-                    progress = { stats.completionRate },
-                    modifier = Modifier.fillMaxWidth(),
-                    color = BloomTheme.colors.primary,
-                    trackColor = BloomTheme.colors.disabled
+                HabitProgressIndicator(
+                    totalHabits = stats.totalHabits,
+                    totalCompletedHabits = stats.completedHabits,
+                    strokeHeight = 4.dp
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
