@@ -30,7 +30,10 @@ data class CalendarUiState(
     val monthlyStats: MonthlyStatistics = MonthlyStatistics(),
 
     // Streak data
-    val habitsWithStreaks: Map<Long, HabitStreakInfo> = emptyMap()
+    val habitsWithStreaks: Map<Long, HabitStreakInfo> = emptyMap(),
+
+    // Celebrating habit
+    val celebratingHabitId: Long? = null
 )
 
 /**
@@ -90,6 +93,16 @@ sealed class CalendarUiEvent {
      * Event to close the bottom sheet.
      */
     data object CloseBottomSheet : CalendarUiEvent()
+
+    /**
+     * Event to jump to today.
+     */
+    object JumpToToday : CalendarUiEvent()
+
+    /**
+     * Event to show streak celebration.
+     */
+    data class ShowStreakCelebration(val habitId: Long) : CalendarUiEvent()
 }
 
 /**

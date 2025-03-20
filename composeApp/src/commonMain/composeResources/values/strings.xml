@@ -231,5 +231,5 @@
     <string name="calendar_no_habits">No habits scheduled for this day</string>
     <string name="calendar_streak_current">Current Streak</string>
     <string name="calendar_streak_longest">Longest Streak</string>
-
+    <string name="calendar_today_button">Jump to today</string>
 </resources>
