@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.habits.presentation.habitDetails
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -534,7 +535,7 @@ private fun UserHabitScheduleCard(
     BloomSurface(
         modifier = modifier
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxWidth().animateContentSize().padding(16.dp)) {
             Text(
                 text = stringResource(Res.string.habit_schedule),
                 style = BloomTheme.typography.heading,

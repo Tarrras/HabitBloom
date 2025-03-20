@@ -218,4 +218,18 @@
     <string name="notifications_required">Notifications permission is required for reminders. Please grant permission in app settings.</string>
     <string name="failed_to_update_reminder_settings">Failed to update reminder settings</string>
 
+    <!-- Calendar Screen -->
+    <string name="calendar_screen_title">Habit Calendar</string>
+    <string name="calendar_statistics_title">Monthly Statistics</string>
+    <string name="calendar_statistics_total">Total</string>
+    <string name="calendar_statistics_completed">Completed</string>
+    <string name="calendar_statistics_longest_streak">Longest Streak</string>
+    <string name="calendar_statistics_completion_rate">Completion Rate</string>
+    <string name="calendar_filter_button">Filter habits</string>
+    <string name="calendar_filter_all_habits">All Habits</string>
+    <string name="calendar_habit_detail_date">Habits on %1$s</string>
+    <string name="calendar_no_habits">No habits scheduled for this day</string>
+    <string name="calendar_streak_current">Current Streak</string>
+    <string name="calendar_streak_longest">Longest Streak</string>
+
 </resources>
