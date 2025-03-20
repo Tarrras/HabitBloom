@@ -35,9 +35,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -120,70 +118,19 @@ fun CalendarScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            Row(
+    if (uiState.isLoading) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            BloomLoadingAnimation(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = stringResource(Res.string.calendar_screen_title),
-                    style = BloomTheme.typography.title,
-                    color = BloomTheme.colors.textColor.primary
-                )
-            }
-        },
-        floatingActionButton = {
-            // Jump to today FAB
-            SmallFloatingActionButton(
-                onClick = {
-                    viewModel.handleUiEvent(CalendarUiEvent.JumpToToday)
-                },
-                containerColor = BloomTheme.colors.primary.copy(alpha = 0.9f),
-                shape = CircleShape
-            ) {
-                // Custom today indicator using simple shapes
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier.size(24.dp)
-                ) {
-                    // Calendar outline
-                    Box(
-                        modifier = Modifier
-                            .size(16.dp)
-                            .border(1.dp, Color.White, RoundedCornerShape(2.dp))
-                    )
-
-                    // Day number
-                    Text(
-                        text = getCurrentDate().dayOfMonth.toString(),
-                        color = Color.White,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-    ) { paddingValues ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                BloomLoadingAnimation(
-                    modifier = Modifier
-                        .size(200.dp)
-                        .align(Alignment.Center)
-                )
-            }
-        } else {
-            CalendarScreenContent(
-                uiState = uiState,
-                handleUiEvent = viewModel::handleUiEvent,
-                modifier = Modifier.padding(paddingValues)
+                    .size(200.dp)
+                    .align(Alignment.Center)
             )
         }
+    } else {
+        CalendarScreenContent(
+            uiState = uiState,
+            handleUiEvent = viewModel::handleUiEvent
+        )
     }
 }
 
@@ -195,7 +142,7 @@ private fun CalendarScreenContent(
     modifier: Modifier = Modifier
 ) {
     val sheetState = rememberModalBottomSheetState(
-        skipPartiallyExpanded = false,
+        skipPartiallyExpanded = true,
         confirmValueChange = { true }
     )
     val coroutineScope = rememberCoroutineScope()
@@ -212,6 +159,21 @@ private fun CalendarScreenContent(
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .statusBarsPadding()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = stringResource(Res.string.calendar_screen_title),
+                style = BloomTheme.typography.title,
+                color = BloomTheme.colors.textColor.primary
+            )
+        }
+
         // Time of day filter chips
         TimeOfDayFilterChips(
             selectedFilter = uiState.selectedTimeOfDayFilter,
@@ -341,6 +303,9 @@ private fun CalendarScreenContent(
                 handleUiEvent(CalendarUiEvent.ChangeMonth(yearMonth))
             }
         )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
     }
 
     // Bottom sheet for habit details
@@ -507,117 +472,140 @@ private fun ImprovedCalendarDay(
         )
     }
 
-    // Background color based on weekend
-    val backgroundColor = when {
-        isSelected -> BloomTheme.colors.primary.copy(alpha = 0.1f)
-        isWeekend -> BloomTheme.colors.disabled.copy(alpha = 0.1f)
-        else -> Color.Transparent
-    }
+    // Is day part of current month
+    val isOutOfMonth = calendarDay.position != com.kizitonwose.calendar.core.DayPosition.MonthDate
 
     Box(
         modifier = Modifier
             .aspectRatio(1f)
-            .background(backgroundColor, RoundedCornerShape(4.dp))
-            .clip(RoundedCornerShape(4.dp))
-            .clickable(enabled = hasHabits) { onDateClick() }
+            .padding(2.dp)
+            // Apply rounded corners based on whether it's today or selected
             .then(
-                if (isSelected) {
-                    Modifier.border(
-                        width = 2.dp,
-                        color = BloomTheme.colors.primary,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                } else if (isToday) {
-                    Modifier.border(
-                        width = 1.dp,
-                        color = BloomTheme.colors.primary,
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                } else {
-                    Modifier
+                when {
+                    isToday -> Modifier
+                        .clip(CircleShape)
+                        .background(BloomTheme.colors.primary)
+
+                    isSelected -> Modifier
+                        .border(
+                            width = 2.dp,
+                            color = BloomTheme.colors.primary,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .background(
+                            BloomTheme.colors.primary.copy(alpha = 0.1f),
+                            RoundedCornerShape(12.dp)
+                        )
+
+                    else -> Modifier
+                        .background(
+                            when {
+                                isWeekend -> BloomTheme.colors.disabled.copy(alpha = 0.1f)
+                                else -> Color.Transparent
+                            }
+                        )
                 }
             )
-            .padding(2.dp),
+            .clickable(enabled = hasHabits) { onDateClick() }
+            .padding(4.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Day number
-        Text(
-            text = calendarDay.date.dayOfMonth.toString(),
-            style = BloomTheme.typography.subheading.copy(
-                fontWeight = if (isSelected || isToday) {
-                    FontWeight.Bold
-                } else FontWeight.Normal
-            ),
-            color = when {
-                calendarDay.position != com.kizitonwose.calendar.core.DayPosition.MonthDate ->
-                    BloomTheme.colors.textColor.disabled
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Day number with appropriate styling
+            Text(
+                text = calendarDay.date.dayOfMonth.toString(),
+                style = BloomTheme.typography.body.copy(
+                    fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal
+                ),
+                color = when {
+                    isOutOfMonth -> BloomTheme.colors.textColor.disabled
+                    isToday -> Color.White
+                    isSelected -> BloomTheme.colors.primary
+                    else -> BloomTheme.colors.textColor.primary
+                }
+            )
 
-                isSelected -> BloomTheme.colors.primary
-                isToday -> BloomTheme.colors.primary
-                else -> BloomTheme.colors.textColor.primary
-            }
-        )
+            // Show habits indicators if there are any
+            if (hasHabits) {
+                Spacer(modifier = Modifier.height(4.dp))
 
-        // Multiple habit dots at the bottom
-        if (hasHabits) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 4.dp),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Group habits by completion status
+                // Group habits by status
                 val completedHabits = habits.filter { it.isCompleted }
                 val missedHabits = habits.filter { !it.isCompleted && date < currentDate }
                 val futureHabits = habits.filter { !it.isCompleted && date >= currentDate }
 
-                // Show dots for each habit category (max 3 dots per category)
-                val maxDotsPerCategory = 3
-                val showCompleted = completedHabits.isNotEmpty()
-                val showMissed = missedHabits.isNotEmpty()
-                val showFuture = futureHabits.isNotEmpty()
-
-                if (showCompleted) {
-                    HabitDot(
-                        color = BloomTheme.colors.success,
-                        count = completedHabits.size.coerceAtMost(maxDotsPerCategory)
-                    )
-                }
-
-                if (showMissed) {
-                    HabitDot(
-                        color = BloomTheme.colors.secondary,
-                        count = missedHabits.size.coerceAtMost(maxDotsPerCategory)
-                    )
-                }
-
-                if (showFuture) {
-                    HabitDot(
-                        color = BloomTheme.colors.tertiary,
-                        count = futureHabits.size.coerceAtMost(maxDotsPerCategory)
-                    )
-                }
+                HabitIndicators(
+                    completedCount = completedHabits.size,
+                    missedCount = missedHabits.size,
+                    futureCount = futureHabits.size
+                )
             }
         }
     }
 }
 
 @Composable
-private fun HabitDot(
-    color: Color,
-    count: Int = 1
+private fun HabitIndicators(
+    completedCount: Int,
+    missedCount: Int,
+    futureCount: Int
 ) {
     Row(
-        modifier = Modifier.padding(horizontal = 1.dp),
-        horizontalArrangement = Arrangement.spacedBy(1.dp)
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(vertical = 2.dp)
     ) {
-        repeat(count.coerceAtMost(3)) {
-            Box(
-                modifier = Modifier
-                    .size(4.dp)
-                    .background(color, CircleShape)
-            )
+        // Show completed indicators (green)
+        if (completedCount > 0) {
+            Row(horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+                repeat(minOf(completedCount, 3)) {
+                    Box(
+                        modifier = Modifier
+                            .size(4.dp)
+                            .background(BloomTheme.colors.success, CircleShape)
+                    )
+                }
+            }
+        }
+
+        // Add spacing between different indicator types
+        if (completedCount > 0 && (missedCount > 0 || futureCount > 0)) {
+            Spacer(modifier = Modifier.width(2.dp))
+        }
+
+        // Show missed indicators (red/orange)
+        if (missedCount > 0) {
+            Row(horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+                repeat(minOf(missedCount, 3)) {
+                    Box(
+                        modifier = Modifier
+                            .size(4.dp)
+                            .background(BloomTheme.colors.secondary, CircleShape)
+                    )
+                }
+            }
+        }
+
+        // Add spacing between different indicator types
+        if (missedCount > 0 && futureCount > 0) {
+            Spacer(modifier = Modifier.width(2.dp))
+        }
+
+        // Show future indicators (yellow/gray)
+        if (futureCount > 0) {
+            Row(horizontalArrangement = Arrangement.spacedBy(1.dp)) {
+                repeat(minOf(futureCount, 3)) {
+                    Box(
+                        modifier = Modifier
+                            .size(4.dp)
+                            .background(BloomTheme.colors.tertiary, CircleShape)
+                    )
+                }
+            }
         }
     }
 }
