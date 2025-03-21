@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.profile.presentation
 
+import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.common.settings.ThemeOption
 
 /**
@@ -7,10 +8,13 @@ import com.horizondev.habitbloom.common.settings.ThemeOption
  */
 data class SettingsUiState(
     val isLoading: Boolean = false,
-    val notificationsEnabled: Boolean = false,
+    val notificationState: NotificationState = NotificationState.NOT_DETERMINED,
     val themeMode: ThemeOption = ThemeOption.Device,
     val isThemeDialogVisible: Boolean = false
-)
+) {
+    val notificationsEnabled: Boolean
+        get() = notificationState.isEnabled()
+}
 
 /**
  * Events that can be triggered from the Settings screen.

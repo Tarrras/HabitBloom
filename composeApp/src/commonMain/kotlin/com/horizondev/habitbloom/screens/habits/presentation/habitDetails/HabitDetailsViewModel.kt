@@ -8,6 +8,7 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVis
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
+import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
 import com.horizondev.habitbloom.utils.getLongestCompletionStreak
@@ -26,13 +27,17 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.getString
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class HabitDetailsViewModel(
     private val repository: HabitsRepository,
     private val userHabitId: Long
 ) : BloomViewModel<HabitScreenDetailsUiState, HabitScreenDetailsUiIntent>(
     HabitScreenDetailsUiState()
-) {
+), KoinComponent {
+
+    private val enableNotificationsUseCase: EnableNotificationsForReminderUseCase by inject()
 
     private val habitDetailsFlow = repository.getUserHabitWithAllRecordsFlow(
         userHabitId = userHabitId
@@ -269,6 +274,11 @@ class HabitDetailsViewModel(
                     val habitId = currentState.habitInfo?.userHabitId ?: return@launch
                     val enabled = currentState.reminderEnabled
                     val time = if (enabled) currentState.reminderTime else null
+
+                    // If enabling reminder, try to enable notifications if needed
+                    if (enabled && !currentState.habitInfo.reminderEnabled) {
+                        enableNotificationsUseCase.execute()
+                    }
 
                     repository.updateHabitReminder(
                         habitId = habitId,

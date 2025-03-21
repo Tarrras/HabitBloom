@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.profile.presentation
 
 import androidx.lifecycle.viewModelScope
+import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.profile.domain.ProfileRepository
@@ -20,10 +21,18 @@ class SettingsViewModel(
 ), KoinComponent {
 
     init {
-        repository.getNotificationState().onEach { isEnabled ->
-            updateState { it.copy(notificationsEnabled = isEnabled) }
+        // Listen for notification state changes
+        repository.getNotificationStateFlow().onEach { state ->
+            updateState { it.copy(notificationState = state) }
         }.launchIn(viewModelScope)
 
+        // If notification state flow is not available, get the current state
+        viewModelScope.launch {
+            val currentState = repository.getNotificationStateEnum()
+            updateState { it.copy(notificationState = currentState) }
+        }
+
+        // Listen for theme changes
         themeUseCase.themeMode.onEach { mode ->
             updateState { it.copy(themeMode = mode) }
         }.launchIn(viewModelScope)
@@ -36,7 +45,9 @@ class SettingsViewModel(
         when (event) {
             is SettingsUiEvent.ToggleNotifications -> {
                 viewModelScope.launch {
-                    repository.updateNotificationState(event.enabled)
+                    val newState =
+                        if (event.enabled) NotificationState.ENABLED else NotificationState.DISABLED
+                    repository.updateNotificationState(newState)
                 }
             }
 

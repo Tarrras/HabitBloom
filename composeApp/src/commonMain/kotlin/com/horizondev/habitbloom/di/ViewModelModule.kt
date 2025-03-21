@@ -34,7 +34,13 @@ val viewModelModule: Module = module {
     viewModelOf(::AddHabitTimeOfDayViewModel)
     viewModelOf(::AddHabitChoiceViewModel)
     viewModelOf(::AddHabitDurationViewModel)
-    viewModelOf(::AddHabitSummaryViewModel)
+    factory { params ->
+        AddHabitSummaryViewModel(
+            repository = get(),
+            addHabitState = params.get(),
+            enableNotificationsUseCase = get()
+        )
+    }
     viewModelOf(::AddHabitSuccessViewModel)
     viewModelOf(::CreatePersonalHabitViewModel)
 }

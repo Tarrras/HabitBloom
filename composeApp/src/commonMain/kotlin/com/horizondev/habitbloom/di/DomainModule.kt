@@ -4,6 +4,7 @@ import com.horizondev.habitbloom.auth.domain.AuthRepository
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
+import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
 import com.horizondev.habitbloom.screens.profile.domain.ProfileRepository
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.Settings
@@ -13,19 +14,11 @@ import org.koin.dsl.module
 
 @OptIn(ExperimentalSettingsApi::class)
 val domainModule = module {
-    single {
-        HabitsRepository(
-            remoteDataSource = get(),
-            profileRemoteDataSource = get(),
-            localDataSource = get(),
-            storageService = get(),
-            notificationManager = get(),
-            permissionsManager = get()
-        )
-    }
+    singleOf(::HabitsRepository)
     single { Settings().makeObservable() }
     singleOf(::AuthRepository)
     singleOf(::ProfileRepository)
     singleOf(::ThemeUseCase)
+    singleOf(::EnableNotificationsForReminderUseCase)
     single { PermissionsManager(permissionsController = get()) }
 }

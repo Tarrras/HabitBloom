@@ -6,6 +6,7 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVis
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowState
 import io.github.aakira.napier.Napier
 
@@ -14,7 +15,8 @@ import io.github.aakira.napier.Napier
  */
 class AddHabitSummaryViewModel(
     private val repository: HabitsRepository,
-    private val addHabitState: AddHabitFlowState
+    private val addHabitState: AddHabitFlowState,
+    private val enableNotificationsUseCase: EnableNotificationsForReminderUseCase
 ) : BloomViewModel<AddHabitSummaryUiState, AddHabitSummaryUiIntent>(
     initialState = AddHabitSummaryUiState(
         timeOfDay = addHabitState.timeOfDay ?: TimeOfDay.Morning,
@@ -68,6 +70,9 @@ class AddHabitSummaryViewModel(
 
                         // Schedule reminder if enabled
                         if (currentState.reminderEnabled && currentState.reminderTime != null) {
+                            // Enable notifications if this is the first reminder
+                            enableNotificationsUseCase.execute()
+                            
                             repository.scheduleReminderForHabit(
                                 habitId = habitId,
                                 reminderTime = currentState.reminderTime
