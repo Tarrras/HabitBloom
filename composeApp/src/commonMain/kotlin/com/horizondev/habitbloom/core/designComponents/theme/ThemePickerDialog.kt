@@ -29,29 +29,31 @@ fun ThemePickerDialog(
         onDismiss = onDismissRequest,
         content = {
             Column(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
                     text = stringResource(Res.string.settings_appearance_theme),
-                    style = BloomTheme.typography.title
+                    style = BloomTheme.typography.title,
+                    color = BloomTheme.colors.textColor.primary
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+                Spacer(modifier = Modifier.height(24.dp))
+                
                 ThemePicker(
                     selectedTheme = currentTheme,
                     onThemeSelected = onThemeSelected
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
-
+                Spacer(modifier = Modifier.height(24.dp))
+                
                 TextButton(
                     onClick = onDismissRequest,
                     modifier = Modifier.align(Alignment.End)
                 ) {
                     Text(
                         text = stringResource(Res.string.close),
+                        style = BloomTheme.typography.button,
                         color = BloomTheme.colors.primary
                     )
                 }
