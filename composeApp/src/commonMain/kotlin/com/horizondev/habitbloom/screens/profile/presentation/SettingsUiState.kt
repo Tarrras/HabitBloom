@@ -3,26 +3,29 @@ package com.horizondev.habitbloom.screens.profile.presentation
 import com.horizondev.habitbloom.common.settings.ThemeOption
 
 /**
- * Represents the UI state for the Settings screen.
+ * UI state for the Settings screen.
  */
 data class SettingsUiState(
     val isLoading: Boolean = false,
-    val notificationsEnabled: Boolean = true,
-    val themeMode: ThemeOption = ThemeOption.Device
+    val notificationsEnabled: Boolean = false,
+    val themeMode: ThemeOption = ThemeOption.Device,
+    val isThemeDialogVisible: Boolean = false
 )
 
 /**
- * UI events that can be triggered from the Settings screen.
+ * Events that can be triggered from the Settings screen.
  */
-sealed class SettingsUiEvent {
-    data class ToggleNotifications(val enabled: Boolean) : SettingsUiEvent()
-    data class SetThemeMode(val mode: ThemeOption) : SettingsUiEvent()
-    data object Logout : SettingsUiEvent()
+sealed interface SettingsUiEvent {
+    data class ToggleNotifications(val enabled: Boolean) : SettingsUiEvent
+    data class SetThemeMode(val mode: ThemeOption) : SettingsUiEvent
+    data object Logout : SettingsUiEvent
+    data object OpenThemeDialog : SettingsUiEvent
+    data object CloseThemeDialog : SettingsUiEvent
 }
 
 /**
- * Intent actions that can be triggered by the ViewModel.
+ * Intents that can be emitted from the Settings screen.
  */
-sealed class SettingsUiIntent {
-    data object NavigateToLogin : SettingsUiIntent()
+sealed interface SettingsUiIntent {
+    data object NavigateToLogin : SettingsUiIntent
 } 

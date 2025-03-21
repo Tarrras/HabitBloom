@@ -18,6 +18,7 @@ import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.calculateCompletedRepeats
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getNearestDateForNotification
+import com.russhwolf.settings.ObservableSettings
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -45,7 +46,8 @@ class HabitsRepository(
     private val localDataSource: HabitsLocalDataSource,
     private val storageService: SupabaseStorageService,
     private val notificationManager: NotificationScheduler,
-    private val permissionsManager: PermissionsManager
+    private val permissionsManager: PermissionsManager,
+    private val settings: ObservableSettings
 ) : KoinComponent {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())

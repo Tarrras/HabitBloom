@@ -92,6 +92,7 @@
     <string name="delete">Delete</string>
     <string name="create">Create</string>
     <string name="add">Add</string>
+    <string name="close">Close</string>
 
     <string name="title">Title</string>
     <string name="description">Description</string>
@@ -241,4 +242,5 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_device">System</string>
+    <string name="settings_appearance_theme">App Theme</string>
 </resources>
