@@ -47,8 +47,8 @@ import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitD
 import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsScreen
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeScreen
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
-import com.horizondev.habitbloom.screens.profile.presentation.ProfileScreen
-import com.horizondev.habitbloom.screens.profile.presentation.ProfileViewModel
+import com.horizondev.habitbloom.screens.profile.presentation.SettingsScreen
+import com.horizondev.habitbloom.screens.profile.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticScreen
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -107,9 +107,9 @@ fun MainScreen() {
                     CalendarScreen(viewModel = viewModel)
                 }
 
-                composable<BottomNavItem.Profile> {
-                    val viewModel = koinViewModel<ProfileViewModel>()
-                    ProfileScreen(viewModel = viewModel)
+                composable<BottomNavItem.Settings> {
+                    val viewModel = koinViewModel<SettingsViewModel>()
+                    SettingsScreen(viewModel = viewModel)
                 }
 
                 composable<HabitDetailsDestination> { entry ->

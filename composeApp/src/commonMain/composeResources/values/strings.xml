@@ -234,4 +234,8 @@
     <string name="calendar_today_button">Jump to today</string>
     <string name="calendar_past_date_message">Habit completion cannot be changed for past dates</string>
     <string name="calendar_future_date_message">Habit completion cannot be set for future dates</string>
+
+
+    <!-- Settings -->
+    <string name="settings">Settings</string>
 </resources>

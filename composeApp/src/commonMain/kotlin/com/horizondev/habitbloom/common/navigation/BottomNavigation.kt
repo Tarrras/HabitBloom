@@ -10,8 +10,8 @@ import habitbloom.composeapp.generated.resources.ic_chart_proportion_filled
 import habitbloom.composeapp.generated.resources.ic_chart_proportion_outlined
 import habitbloom.composeapp.generated.resources.ic_home_filled
 import habitbloom.composeapp.generated.resources.ic_home_outlined
-import habitbloom.composeapp.generated.resources.ic_profile_filled
-import habitbloom.composeapp.generated.resources.ic_profile_outlined
+import habitbloom.composeapp.generated.resources.ic_setting_filled
+import habitbloom.composeapp.generated.resources.ic_setting_outlined
 import kotlinx.serialization.Serializable
 
 /**
@@ -38,10 +38,10 @@ sealed class BottomNavItem {
     data object Calendar : BottomNavItem()
 
     /**
-     * Profile tab.
+     * Settings tab.
      */
     @Serializable
-    data object Profile : BottomNavItem()
+    data object Settings : BottomNavItem()
 }
 
 /**
@@ -69,10 +69,10 @@ fun getBottomNavItems() = remember {
             filledIconRes = Res.drawable.ic_calendar_filled
         ),
         TopLevelRoute(
-            name = "Profile",
-            route = BottomNavItem.Profile,
-            outlinedIconRes = Res.drawable.ic_profile_outlined,
-            filledIconRes = Res.drawable.ic_profile_filled
+            name = "Settings",
+            route = BottomNavItem.Settings,
+            outlinedIconRes = Res.drawable.ic_setting_outlined,
+            filledIconRes = Res.drawable.ic_setting_filled
         )
     )
 }
