@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
@@ -16,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designComponents.theme.ThemePickerDialog
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
@@ -66,102 +67,110 @@ private fun SettingsScreenContent(
     uiState: SettingsUiState,
     handleUiEvent: (SettingsUiEvent) -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Text(
-                text = stringResource(Res.string.settings),
-                style = BloomTheme.typography.title
-            )
-
-            HorizontalDivider()
-
-            // Notifications section
-            Column {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = BloomTheme.colors.background
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Text(
-                    text = "Notifications",
-                    style = BloomTheme.typography.subheading
+                    text = stringResource(Res.string.settings),
+                    style = BloomTheme.typography.title,
+                    color = BloomTheme.colors.textColor.primary
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Enable notifications",
-                        style = BloomTheme.typography.body
-                    )
-                    BloomSwitch(
-                        checked = uiState.notificationsEnabled,
-                        onCheckedChange = { enabled ->
-                            handleUiEvent(SettingsUiEvent.ToggleNotifications(enabled))
-                        }
-                    )
-                }
-            }
 
-            HorizontalDivider()
+                HorizontalDivider(color = BloomTheme.colors.disabled.copy(alpha = 0.5f))
 
-            // Appearance section
-            Column {
-                Text(
-                    text = "Appearance",
-                    style = BloomTheme.typography.subheading
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { handleUiEvent(SettingsUiEvent.OpenThemeDialog) },
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = stringResource(Res.string.settings_appearance_theme),
-                        style = BloomTheme.typography.body
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                // Notifications section
+                SettingsSection(title = "Notifications") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
                         Text(
-                            text = when (uiState.themeMode) {
-                                ThemeOption.Light -> stringResource(Res.string.theme_light)
-                                ThemeOption.Dark -> stringResource(Res.string.theme_dark)
-                                ThemeOption.Device -> stringResource(Res.string.theme_device)
-                            },
-                            style = BloomTheme.typography.body
+                            text = "Enable notifications",
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.primary
                         )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = null,
-                            tint = BloomTheme.colors.primary
+                        BloomSwitch(
+                            checked = uiState.notificationsEnabled,
+                            onCheckedChange = { enabled ->
+                                handleUiEvent(SettingsUiEvent.ToggleNotifications(enabled))
+                            }
                         )
                     }
                 }
-            }
 
-            // Show loading indicator if needed
-            if (uiState.isLoading) {
-                BloomLoadingAnimation()
-            }
-        }
+                HorizontalDivider(color = BloomTheme.colors.disabled.copy(alpha = 0.5f))
 
-        // Show theme picker dialog when isThemeDialogVisible is true
-        if (uiState.isThemeDialogVisible) {
-            ThemePickerDialog(
-                currentTheme = uiState.themeMode,
-                onThemeSelected = { themeMode ->
-                    handleUiEvent(SettingsUiEvent.SetThemeMode(themeMode))
-                },
-                onDismissRequest = {
-                    handleUiEvent(SettingsUiEvent.CloseThemeDialog)
+                // Appearance section
+                SettingsSection(title = "Appearance") {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { handleUiEvent(SettingsUiEvent.OpenThemeDialog) },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.settings_appearance_theme),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.primary
+                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = when (uiState.themeMode) {
+                                    ThemeOption.Light -> stringResource(Res.string.theme_light)
+                                    ThemeOption.Dark -> stringResource(Res.string.theme_dark)
+                                    ThemeOption.Device -> stringResource(Res.string.theme_device)
+                                },
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.secondary
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                contentDescription = null,
+                                tint = BloomTheme.colors.primary
+                            )
+                        }
+                    }
                 }
-            )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                // Logout button
+                BloomPrimaryFilledButton(
+                    text = "Logout",
+                    onClick = { handleUiEvent(SettingsUiEvent.Logout) },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Show loading indicator if needed
+                if (uiState.isLoading) {
+                    BloomLoadingAnimation()
+                }
+            }
+
+            // Show theme picker dialog when isThemeDialogVisible is true
+            if (uiState.isThemeDialogVisible) {
+                ThemePickerDialog(
+                    currentTheme = uiState.themeMode,
+                    onThemeSelected = { themeMode ->
+                        handleUiEvent(SettingsUiEvent.SetThemeMode(themeMode))
+                    },
+                    onDismissRequest = {
+                        handleUiEvent(SettingsUiEvent.CloseThemeDialog)
+                    }
+                )
+            }
         }
     }
 }

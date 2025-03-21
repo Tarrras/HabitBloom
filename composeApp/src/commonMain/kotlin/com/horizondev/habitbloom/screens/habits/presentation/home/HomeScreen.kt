@@ -43,7 +43,6 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.good_afternoon
 import habitbloom.composeapp.generated.resources.good_evening
 import habitbloom.composeapp.generated.resources.good_morning
-import io.github.aakira.napier.Napier
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.stringResource
 
@@ -79,8 +78,6 @@ private fun HomeScreenContent(
 ) {
     // Get the current time of day (not selected)
     val currentTimeOfDay = remember { getTimeOfDay() }
-
-    Napier.d(tag = "IsLoading", message = "Is loading: ${uiState.isLoading}")
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(

@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
@@ -208,37 +209,37 @@ fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
 @Composable
 fun TimeOfDay.getChartBorder(): Color {
     return when (this) {
-        TimeOfDay.Morning -> Color(0xFFffc76e)
-        TimeOfDay.Afternoon -> Color(0xFF34d9ed)
-        TimeOfDay.Evening -> Color(0xFF9165f7)
+        TimeOfDay.Morning -> BloomTheme.colors.timeOfDay.morning.chartBorder
+        TimeOfDay.Afternoon -> BloomTheme.colors.timeOfDay.afternoon.chartBorder
+        TimeOfDay.Evening -> BloomTheme.colors.timeOfDay.evening.chartBorder
     }
 }
 
 @Composable
 fun TimeOfDay.getChartColor(): Color {
     return when (this) {
-        TimeOfDay.Morning -> Color(0xFFFFF3E0)
-        TimeOfDay.Afternoon -> Color(0xFFE1F1F3)
-        TimeOfDay.Evening -> Color(0xFFEAE2FD)
+        TimeOfDay.Morning -> BloomTheme.colors.timeOfDay.morning.chartBackground
+        TimeOfDay.Afternoon -> BloomTheme.colors.timeOfDay.afternoon.chartBackground
+        TimeOfDay.Evening -> BloomTheme.colors.timeOfDay.evening.chartBackground
     }
 }
-
 
 @Composable
 fun TimeOfDay.getBackgroundGradientColors(): List<Color> = when (this) {
     TimeOfDay.Morning -> listOf(
-        Color(0xFFFFF8E1),
-        Color(0xFFF1F8E9)
+        BloomTheme.colors.timeOfDay.morning.gradientStart,
+        BloomTheme.colors.timeOfDay.morning.gradientEnd
     )
-
     TimeOfDay.Afternoon -> listOf(
-        Color(0xFFE3F2FD),
-        Color(0xFFF1F8E9)
+        BloomTheme.colors.timeOfDay.afternoon.gradientStart,
+        BloomTheme.colors.timeOfDay.afternoon.gradientEnd
     )
 
-    TimeOfDay.Evening -> listOf(Color(0xFFF3E5F5), Color(0xFFE1F5FE))
+    TimeOfDay.Evening -> listOf(
+        BloomTheme.colors.timeOfDay.evening.gradientStart,
+        BloomTheme.colors.timeOfDay.evening.gradientEnd
+    )
 }
-
 
 @Composable
 fun Modifier.bloomGradientBackground(

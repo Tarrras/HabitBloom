@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
+import com.horizondev.habitbloom.core.ui.SystemUiColors
 import org.koin.compose.koinInject
 
 @Composable
@@ -17,11 +19,24 @@ fun BloomTheme(
     val themeUseCase: ThemeUseCase = koinInject()
     val themeMode by themeUseCase.themeMode.collectAsState(initial = ThemeOption.Device)
 
+    val isDarkTheme = when (themeMode) {
+        ThemeOption.Light -> false
+        ThemeOption.Dark -> true
+        ThemeOption.Device -> isSystemInDarkTheme()
+    }
+
     val extendedColors = when (themeMode) {
         ThemeOption.Light -> lightColorScheme
         ThemeOption.Dark -> darkColorScheme
-        ThemeOption.Device -> if (isSystemInDarkTheme()) lightColorScheme else lightColorScheme
+        ThemeOption.Device -> if (isDarkTheme) darkColorScheme else lightColorScheme
     }
+
+    // Apply system UI colors
+    SystemUiColors(
+        statusBarColor = Color.Transparent,
+        navigationBarColor = Color.Transparent,
+        isDarkTheme = isDarkTheme
+    )
 
     CompositionLocalProvider(
         LocalBloomColorScheme provides extendedColors,
