@@ -140,6 +140,10 @@ kotlin {
             implementation("dev.icerock.moko:permissions:0.19.1")
             implementation("dev.icerock.moko:permissions-notifications:0.19.1")
             implementation("dev.icerock.moko:permissions-compose:0.19.1")
+
+            implementation("com.russhwolf:multiplatform-settings:1.3.0")
+            implementation("com.russhwolf:multiplatform-settings-coroutines:1.3.0")
+            implementation("com.russhwolf:multiplatform-settings-make-observable:1.3.0")
         }
     }
 

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -20,7 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
+import com.horizondev.habitbloom.core.designComponents.theme.ThemePicker
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
@@ -59,58 +60,66 @@ private fun SettingsScreenContent(
     handleUiEvent: (SettingsUiEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp)
-    ) {
-        // Title
-        Text(
-            text = stringResource(Res.string.settings),
-            style = BloomTheme.typography.heading,
-            color = BloomTheme.colors.textColor.primary
-        )
-
-        // Notifications Section
-        SettingsSection(
-            title = "Notifications",
-            content = {
-                SettingsSwitch(
-                    title = "Enable Notifications",
-                    description = "Get reminders for your habits",
-                    checked = uiState.notificationsEnabled,
-                    onCheckedChange = { handleUiEvent(SettingsUiEvent.ToggleNotifications(it)) }
-                )
-            }
-        )
-
-        // Appearance Section
-        SettingsSection(
-            title = "Appearance",
-            content = {
-                SettingsSwitch(
-                    title = "Dark Mode",
-                    description = "Use dark theme",
-                    checked = uiState.darkModeEnabled,
-                    onCheckedChange = { handleUiEvent(SettingsUiEvent.ToggleDarkMode(it)) }
-                )
-            }
-        )
-
-        Spacer(modifier = Modifier.weight(1f))
-    }
-
-    if (uiState.isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            BloomLoadingAnimation(
-                modifier = Modifier.size(100.dp)
+            Text(
+                text = stringResource(Res.string.settings),
+                style = BloomTheme.typography.title
             )
+
+            // Notifications Section
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Notifications",
+                    style = BloomTheme.typography.body
+                )
+                BloomSwitch(
+                    checked = uiState.notificationsEnabled,
+                    onCheckedChange = { enabled ->
+                        handleUiEvent(SettingsUiEvent.ToggleNotifications(enabled))
+                    }
+                )
+            }
+
+            // Theme Section
+            Column {
+                Text(
+                    text = "Theme",
+                    style = BloomTheme.typography.body,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                ThemePicker(
+                    selectedTheme = uiState.themeMode,
+                    onThemeSelected = { mode ->
+                        handleUiEvent(SettingsUiEvent.SetThemeMode(mode))
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Logout Button
+            BloomPrimaryFilledButton(
+                text = "Logout",
+                onClick = {
+                    handleUiEvent(SettingsUiEvent.Logout)
+                }
+            )
+        }
+
+        if (uiState.isLoading) {
+            BloomLoadingAnimation()
         }
     }
 }
