@@ -39,7 +39,8 @@ fun BloomToolbar(
                     .size(24.dp)
                     .clickable {
                         callback()
-                    }
+                    },
+                tint = BloomTheme.colors.textColor.primary
             )
         }
 
@@ -51,6 +52,7 @@ fun BloomToolbar(
             Box(modifier = Modifier.align(Alignment.CenterEnd)) {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
+                    tint = BloomTheme.colors.textColor.primary,
                     contentDescription = "Menu",
                     modifier = Modifier
                         .size(24.dp)
