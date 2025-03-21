@@ -1,6 +1,6 @@
-package com.horizondev.habitbloom.screens.profile.data
+package com.horizondev.habitbloom.screens.settings.data
 
-import com.horizondev.habitbloom.screens.profile.data.model.UserProfileResponse
+import com.horizondev.habitbloom.screens.settings.data.model.UserProfileResponse
 import dev.gitlive.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO

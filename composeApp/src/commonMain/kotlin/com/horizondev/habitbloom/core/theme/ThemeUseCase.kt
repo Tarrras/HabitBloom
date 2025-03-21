@@ -1,7 +1,7 @@
 package com.horizondev.habitbloom.core.theme
 
 import com.horizondev.habitbloom.common.settings.ThemeOption
-import com.horizondev.habitbloom.screens.profile.domain.ProfileRepository
+import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
 import kotlinx.coroutines.flow.Flow
 
 class ThemeUseCase(

@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.profile.presentation
+package com.horizondev.habitbloom.screens.settings.presentation
 
 import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.common.settings.ThemeOption

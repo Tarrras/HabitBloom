@@ -35,7 +35,8 @@ fun CalendarTitle(
             modifier = Modifier.size(24.dp).clip(CircleShape).clickable {
                 goToPrevious()
             },
-            contentDescription = "previous_month"
+            contentDescription = "previous_month",
+            tint = BloomTheme.colors.textColor.primary
         )
         Text(
             modifier = Modifier.weight(1f),
@@ -49,7 +50,8 @@ fun CalendarTitle(
             modifier = Modifier.size(24.dp).clip(CircleShape).clickable {
                 goToNext()
             },
-            contentDescription = "next_month"
+            contentDescription = "next_month",
+            tint = BloomTheme.colors.textColor.primary
         )
     }
 }

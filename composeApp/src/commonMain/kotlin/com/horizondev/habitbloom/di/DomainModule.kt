@@ -5,7 +5,7 @@ import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
-import com.horizondev.habitbloom.screens.profile.domain.ProfileRepository
+import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
 import com.russhwolf.settings.ExperimentalSettingsApi
 import com.russhwolf.settings.Settings
 import com.russhwolf.settings.observable.makeObservable

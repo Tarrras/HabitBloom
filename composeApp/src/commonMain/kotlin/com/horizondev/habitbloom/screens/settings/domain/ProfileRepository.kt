@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.profile.domain
+package com.horizondev.habitbloom.screens.settings.domain
 
 import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.common.settings.SETTINGS_NOTIFICATIONS_KEY
@@ -6,8 +6,8 @@ import com.horizondev.habitbloom.common.settings.SETTINGS_NOTIFICATION_STATE_KEY
 import com.horizondev.habitbloom.common.settings.SETTINGS_THEME_KEY
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
-import com.horizondev.habitbloom.screens.profile.data.ProfileRemoteDataSource
-import com.horizondev.habitbloom.screens.profile.data.model.toDomainModel
+import com.horizondev.habitbloom.screens.settings.data.ProfileRemoteDataSource
+import com.horizondev.habitbloom.screens.settings.data.model.toDomainModel
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.coroutines.getBooleanFlow
 import com.russhwolf.settings.coroutines.getStringFlow

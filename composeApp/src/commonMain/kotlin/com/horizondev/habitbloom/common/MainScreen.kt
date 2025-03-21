@@ -47,8 +47,8 @@ import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitD
 import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsScreen
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeScreen
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
-import com.horizondev.habitbloom.screens.profile.presentation.SettingsScreen
-import com.horizondev.habitbloom.screens.profile.presentation.SettingsViewModel
+import com.horizondev.habitbloom.screens.settings.presentation.SettingsScreen
+import com.horizondev.habitbloom.screens.settings.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticScreen
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import org.jetbrains.compose.resources.painterResource

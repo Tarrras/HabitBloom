@@ -13,7 +13,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
-import com.horizondev.habitbloom.screens.profile.data.ProfileRemoteDataSource
+import com.horizondev.habitbloom.screens.settings.data.ProfileRemoteDataSource
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.calculateCompletedRepeats
 import com.horizondev.habitbloom.utils.getCurrentDate

@@ -32,9 +32,11 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -157,20 +159,16 @@ private fun CalendarScreenContent(
             .padding(horizontal = 16.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .statusBarsPadding()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = stringResource(Res.string.calendar_screen_title),
-                style = BloomTheme.typography.title,
-                color = BloomTheme.colors.textColor.primary
-            )
-        }
+        Spacer(modifier = Modifier.statusBarsPadding())
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = stringResource(Res.string.calendar_screen_title),
+            style = BloomTheme.typography.title,
+            color = BloomTheme.colors.textColor.primary
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Time of day filter chips
         TimeOfDayFilterChips(
@@ -313,6 +311,7 @@ private fun CalendarScreenContent(
                 handleUiEvent(CalendarUiEvent.CloseBottomSheet)
             },
             sheetState = sheetState,
+            containerColor = BloomTheme.colors.background,
             dragHandle = {
                 // Custom drag handle
                 Column(
@@ -612,13 +611,28 @@ private fun TimeOfDayFilterChips(
                 label = {
                     Text(
                         text = stringResource(Res.string.calendar_filter_all_habits),
-                        style = BloomTheme.typography.small
+                        style = BloomTheme.typography.small.copy(
+                            fontWeight = if (selectedFilter == null) FontWeight.Bold else FontWeight.Normal
+                        ),
+                        color = if (selectedFilter == null)
+                            BloomTheme.colors.textColor.white
+                        else
+                            BloomTheme.colors.textColor.primary
                     )
                 },
                 shape = RoundedCornerShape(16.dp),
                 border = BorderStroke(
                     width = 1.dp,
                     color = if (selectedFilter == null) BloomTheme.colors.primary else BloomTheme.colors.disabled
+                ),
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = if (selectedFilter == null)
+                        BloomTheme.colors.primary
+                    else
+                        Color.Transparent,
+                    selectedContainerColor = BloomTheme.colors.primary,
+                    labelColor = BloomTheme.colors.textColor.primary,
+                    selectedLabelColor = BloomTheme.colors.textColor.white
                 )
             )
         }
@@ -631,13 +645,28 @@ private fun TimeOfDayFilterChips(
                 label = {
                     Text(
                         text = timeOfDay.name,
-                        style = BloomTheme.typography.small
+                        style = BloomTheme.typography.small.copy(
+                            fontWeight = if (selectedFilter == timeOfDay) FontWeight.Bold else FontWeight.Normal
+                        ),
+                        color = if (selectedFilter == timeOfDay)
+                            BloomTheme.colors.textColor.white
+                        else
+                            BloomTheme.colors.textColor.primary
                     )
                 },
                 shape = RoundedCornerShape(16.dp),
                 border = BorderStroke(
                     width = 1.dp,
                     color = if (selectedFilter == timeOfDay) BloomTheme.colors.primary else BloomTheme.colors.disabled
+                ),
+                colors = FilterChipDefaults.filterChipColors(
+                    containerColor = if (selectedFilter == timeOfDay)
+                        BloomTheme.colors.primary
+                    else
+                        Color.Transparent,
+                    selectedContainerColor = BloomTheme.colors.primary,
+                    labelColor = BloomTheme.colors.textColor.primary,
+                    selectedLabelColor = BloomTheme.colors.textColor.white
                 )
             )
         }
@@ -681,106 +710,111 @@ private fun DailyHabitDetailBottomSheet(
     val habitStreaks = uiState.habitsWithStreaks
     val today = getCurrentDate() // Get current date for comparison
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+    Surface(
+        color = BloomTheme.colors.background,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        // Date header with formatted date
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            val formattedDate = remember(date) {
-                // Format date in a user-friendly way (e.g., "Monday, January 15")
-                val today = getCurrentDate()
-                when (date) {
-                    today -> "Today"
-                    today.minusDays(1) -> "Yesterday"
-                    today.plusDays(1) -> "Tomorrow"
-                    else -> date.formatToMmDdYy()
+            // Date header with formatted date
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                val formattedDate = remember(date) {
+                    // Format date in a user-friendly way (e.g., "Monday, January 15")
+                    val today = getCurrentDate()
+                    when (date) {
+                        today -> "Today"
+                        today.minusDays(1) -> "Yesterday"
+                        today.plusDays(1) -> "Tomorrow"
+                        else -> date.formatToMmDdYy()
+                    }
                 }
+
+                Text(
+                    text = stringResource(Res.string.calendar_habit_detail_date, formattedDate),
+                    style = BloomTheme.typography.subheading,
+                    color = BloomTheme.colors.textColor.primary
+                )
             }
 
-            Text(
-                text = stringResource(Res.string.calendar_habit_detail_date, formattedDate),
-                style = BloomTheme.typography.subheading,
-                color = BloomTheme.colors.textColor.primary
-            )
-        }
+            // Show message for non-today dates
+            if (date != today) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = if (date < today) {
+                        stringResource(Res.string.calendar_past_date_message)
+                    } else {
+                        stringResource(Res.string.calendar_future_date_message)
+                    },
+                    style = BloomTheme.typography.small,
+                    color = BloomTheme.colors.textColor.secondary,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+            }
 
-        // Show message for non-today dates
-        if (date != today) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (date < today) {
-                    stringResource(Res.string.calendar_past_date_message)
-                } else {
-                    stringResource(Res.string.calendar_future_date_message)
-                },
-                style = BloomTheme.typography.small,
-                color = BloomTheme.colors.disabled,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-        }
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(16.dp))
+            if (habits.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.calendar_no_habits),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(32.dp)
+                )
+            } else {
+                // Group habits by time of day
+                val habitsByTimeOfDay = habits.groupBy { it.timeOfDay }
 
-        if (habits.isEmpty()) {
-            Text(
-                text = stringResource(Res.string.calendar_no_habits),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.secondary,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp)
-            )
-        } else {
-            // Group habits by time of day
-            val habitsByTimeOfDay = habits.groupBy { it.timeOfDay }
+                LazyColumn {
+                    habitsByTimeOfDay.forEach { (timeOfDay, habitsForTimeOfDay) ->
+                        // Time of day header
+                        item {
+                            Text(
+                                text = timeOfDay.name,
+                                style = BloomTheme.typography.subheading,
+                                color = BloomTheme.colors.textColor.primary,
+                                modifier = Modifier.padding(vertical = 8.dp)
+                            )
+                        }
 
-            LazyColumn {
-                habitsByTimeOfDay.forEach { (timeOfDay, habitsForTimeOfDay) ->
-                    // Time of day header
+                        // Habits for this time of day
+                        items(habitsForTimeOfDay) { habit ->
+                            HabitItem(
+                                habit = habit,
+                                streakInfo = habitStreaks[habit.userHabitId],
+                                onStatusChanged = { completed ->
+                                    onHabitStatusChanged(habit.id, completed)
+                                },
+                                onHabitClicked = {
+                                    onHabitClicked(habit.userHabitId)
+                                },
+                                showStreakCelebration = habit.userHabitId == uiState.celebratingHabitId,
+                                isCurrentDay = date == today
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 8.dp),
+                                color = BloomTheme.colors.disabled.copy(alpha = 0.3f)
+                            )
+                        }
+                    }
+
+                    // Add some padding at the bottom
                     item {
-                        Text(
-                            text = timeOfDay.name,
-                            style = BloomTheme.typography.subheading,
-                            color = BloomTheme.colors.textColor.primary,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                        Spacer(modifier = Modifier.height(64.dp))
                     }
-
-                    // Habits for this time of day
-                    items(habitsForTimeOfDay) { habit ->
-                        HabitItem(
-                            habit = habit,
-                            streakInfo = habitStreaks[habit.userHabitId],
-                            onStatusChanged = { completed ->
-                                onHabitStatusChanged(habit.id, completed)
-                            },
-                            onHabitClicked = {
-                                onHabitClicked(habit.userHabitId)
-                            },
-                            showStreakCelebration = habit.userHabitId == uiState.celebratingHabitId,
-                            isCurrentDay = date == today
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            color = BloomTheme.colors.disabled.copy(alpha = 0.3f)
-                        )
-                    }
-                }
-
-                // Add some padding at the bottom
-                item {
-                    Spacer(modifier = Modifier.height(64.dp))
                 }
             }
         }
@@ -825,7 +859,8 @@ private fun HabitItem(
                 },
                 colors = androidx.compose.material3.CheckboxDefaults.colors(
                     checkedColor = if (isCurrentDay) BloomTheme.colors.primary else BloomTheme.colors.disabled,
-                    uncheckedColor = BloomTheme.colors.disabled
+                    uncheckedColor = BloomTheme.colors.disabled,
+                    checkmarkColor = BloomTheme.colors.textColor.white
                 ),
                 enabled = isCurrentDay
             )
@@ -859,7 +894,7 @@ private fun HabitItem(
                                 withStyle(
                                     SpanStyle(
                                         fontWeight = FontWeight.Bold,
-                                        color = if (currentStreak > 7) BloomTheme.colors.success else BloomTheme.colors.textColor.primary
+                                        color = if (currentStreak > 7) BloomTheme.colors.success else BloomTheme.colors.textColor.accent
                                     )
                                 ) {
                                     append(currentStreak.toString())
@@ -868,7 +903,8 @@ private fun HabitItem(
                                     if (currentStreak > 7) append(" 🔥")
                                 }
                             },
-                            style = BloomTheme.typography.small
+                            style = BloomTheme.typography.small,
+                            color = BloomTheme.colors.textColor.secondary
                         )
 
                         Spacer(modifier = Modifier.width(16.dp))
@@ -880,7 +916,7 @@ private fun HabitItem(
                                 withStyle(
                                     SpanStyle(
                                         fontWeight = FontWeight.Bold,
-                                        color = if (longestStreak > 14) BloomTheme.colors.success else BloomTheme.colors.textColor.primary
+                                        color = if (longestStreak > 14) BloomTheme.colors.success else BloomTheme.colors.textColor.accent
                                     )
                                 ) {
                                     append(longestStreak.toString())
@@ -889,7 +925,8 @@ private fun HabitItem(
                                     if (longestStreak > 14) append(" 🏆")
                                 }
                             },
-                            style = BloomTheme.typography.small
+                            style = BloomTheme.typography.small,
+                            color = BloomTheme.colors.textColor.secondary
                         )
                     }
                 }
@@ -903,7 +940,7 @@ private fun HabitItem(
                         color = if (habit.isCompleted) {
                             BloomTheme.colors.success
                         } else {
-                            BloomTheme.colors.secondary
+                            BloomTheme.colors.disabled.copy(alpha = 0.5f)
                         },
                         shape = CircleShape
                     )
@@ -913,15 +950,21 @@ private fun HabitItem(
         // Confetti celebration on streak milestone
         if (isShowingConfetti) {
             // Simple confetti animation (replace with a more sophisticated implementation if needed)
-            Text(
-                text = "🎉 Streak milestone! 🎊",
-                color = BloomTheme.colors.primary,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
+            Surface(
+                color = BloomTheme.colors.primary.copy(alpha = 0.2f),
+                shape = RoundedCornerShape(8.dp),
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(end = 8.dp, top = 4.dp)
-            )
+            ) {
+                Text(
+                    text = "🎉 Streak milestone! 🎊",
+                    color = BloomTheme.colors.primary,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                )
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ import com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary.Ad
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
-import com.horizondev.habitbloom.screens.profile.presentation.SettingsViewModel
+import com.horizondev.habitbloom.screens.settings.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf

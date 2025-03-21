@@ -1,10 +1,10 @@
-package com.horizondev.habitbloom.screens.profile.presentation
+package com.horizondev.habitbloom.screens.settings.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.profile.domain.ProfileRepository
+import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch

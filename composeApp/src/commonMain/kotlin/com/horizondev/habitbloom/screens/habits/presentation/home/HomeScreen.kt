@@ -24,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
@@ -139,7 +138,6 @@ private fun LazyListScope.greeting(timeOfDay: TimeOfDay) {
         Text(
             text = stringResource(greetingRes),
             style = BloomTheme.typography.title,
-            fontWeight = FontWeight.Medium,
             color = BloomTheme.colors.textColor.primary,
             textAlign = TextAlign.Start,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)

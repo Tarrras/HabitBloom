@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.profile.domain.model
+package com.horizondev.habitbloom.screens.settings.domain.model
 
 data class UserProfileInfo(
     val id: String,

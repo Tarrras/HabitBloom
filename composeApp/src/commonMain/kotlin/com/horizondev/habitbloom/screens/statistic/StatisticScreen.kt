@@ -41,12 +41,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.BloomLoader
+import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.pickers.TimeUnit
 import com.horizondev.habitbloom.core.designComponents.pickers.TimeUnitOptionPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.getTitle
-import com.horizondev.habitbloom.core.designComponents.text.ToolbarTitleText
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.statistic.components.NoCompletedHabitsPlaceholder
@@ -118,36 +117,31 @@ fun StatisticScreenContent(
     handleUiEvent: (StatisticUiEvent) -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            Spacer(Modifier.statusBarsPadding())
+        if (uiState.isLoading.not()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                Spacer(Modifier.statusBarsPadding())
 
-            ToolbarTitleText(
-                text = stringResource(Res.string.habit_statistic),
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            if (!uiState.userHasAnyCompleted) {
-                NoCompletedHabitsPlaceholder(
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Spacer(modifier = Modifier.height(24.dp))
-                StatisticScreenColumnContent(
-                    uiState = uiState,
-                    handleUiEvent = handleUiEvent
-                )
+                if (!uiState.userHasAnyCompleted) {
+                    NoCompletedHabitsPlaceholder(
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    StatisticScreenColumnContent(
+                        uiState = uiState,
+                        handleUiEvent = handleUiEvent
+                    )
+                }
             }
+        } else {
+            BloomLoadingAnimation(
+                modifier = Modifier.align(Alignment.Center).size(200.dp),
+            )
         }
-
-        BloomLoader(
-            modifier = Modifier.align(Alignment.Center),
-            isLoading = uiState.isLoading
-        )
     }
 }
 
@@ -222,7 +216,7 @@ fun CombinedHabitStatisticsCard(
             ) {
                 // Previous period button with text
                 val previousLabel = stringResource(Res.string.previous)
-                
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -293,7 +287,7 @@ fun CombinedHabitStatisticsCard(
 
                 // Next period button with text
                 val nextLabel = stringResource(Res.string.next)
-                
+
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier

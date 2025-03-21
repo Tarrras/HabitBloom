@@ -1,6 +1,6 @@
-package com.horizondev.habitbloom.screens.profile.data.model
+package com.horizondev.habitbloom.screens.settings.data.model
 
-import com.horizondev.habitbloom.screens.profile.domain.model.UserProfileInfo
+import com.horizondev.habitbloom.screens.settings.domain.model.UserProfileInfo
 
 data class UserProfileResponse(
     val id: String,

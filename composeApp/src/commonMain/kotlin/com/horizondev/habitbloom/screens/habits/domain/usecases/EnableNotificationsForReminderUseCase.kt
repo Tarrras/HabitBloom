@@ -1,6 +1,6 @@
 package com.horizondev.habitbloom.screens.habits.domain.usecases
 
-import com.horizondev.habitbloom.screens.profile.domain.ProfileRepository
+import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
