@@ -9,13 +9,14 @@ import kotlinx.datetime.LocalTime
 
 data class AddHabitDurationUiState(
     val activeDays: List<DayOfWeek> = emptyList(),
-    val startDate: String? = null,
+    val startDate: LocalDate? = null,
+    val formattedStartDate: String? = null,
     val weekStartOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
     val durationInDays: Int = 1,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0), // Default reminder time set to 8:00 AM
 ) {
-    val displayedStartDate: String? = startDate
+    val displayedStartDate: String? = formattedStartDate
     val nextButtonEnabled: Boolean = activeDays.isEmpty().not()
 }
 

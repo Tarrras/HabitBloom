@@ -7,9 +7,8 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVis
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
-import com.horizondev.habitbloom.utils.formatToMmDdYy
+import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocale
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
-import com.horizondev.habitbloom.utils.mmDdYyToDate
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.notification_permission_denied
 import habitbloom.composeapp.generated.resources.notifications_required
@@ -19,19 +18,17 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
 
 /**
  * ViewModel for the duration choice step in the Add Habit flow.
  */
-class AddHabitDurationViewModel : BloomViewModel<AddHabitDurationUiState, AddHabitDurationUiIntent>(
+class AddHabitDurationViewModel(
+    private val permissionsManager: PermissionsManager
+) : BloomViewModel<AddHabitDurationUiState, AddHabitDurationUiIntent>(
     initialState = AddHabitDurationUiState(
         activeDays = DayOfWeek.entries,
     )
-), KoinComponent {
-
-    private val permissionsManager: PermissionsManager by inject()
+) {
 
     init {
         // Setup derived state for start date
@@ -43,9 +40,15 @@ class AddHabitDurationViewModel : BloomViewModel<AddHabitDurationUiState, AddHab
                 daysList = activeDays,
                 startOption = startOption
             )
+            val firstDateFormatted = firstDay?.formatToMmDdYyWithLocale()
 
             if (firstDay != null) {
-                updateState { it.copy(startDate = firstDay.formatToMmDdYy()) }
+                updateState {
+                    it.copy(
+                        startDate = firstDay,
+                        formattedStartDate = firstDateFormatted
+                    )
+                }
             }
         }.launchIn(viewModelScope)
     }
@@ -157,8 +160,8 @@ class AddHabitDurationViewModel : BloomViewModel<AddHabitDurationUiState, AddHab
                         updateState { it.copy(reminderEnabled = false) }
                         return@launch
                     }
-                    
-                    val calculatedStartedDate = currentState.startDate.mmDdYyToDate()
+
+                    val calculatedStartedDate = currentState.startDate
                     emitUiIntent(
                         AddHabitDurationUiIntent.NavigateNext(
                             selectedDays = currentState.activeDays,

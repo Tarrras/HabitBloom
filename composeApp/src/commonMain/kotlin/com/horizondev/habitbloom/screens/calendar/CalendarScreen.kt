@@ -70,6 +70,7 @@ import com.horizondev.habitbloom.screens.habits.presentation.home.components.Hab
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.formatToMmDdYy
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getTitle
 import com.horizondev.habitbloom.utils.minusDays
 import com.horizondev.habitbloom.utils.plusDays
 import com.kizitonwose.calendar.compose.HorizontalCalendar
@@ -646,7 +647,7 @@ private fun TimeOfDayFilterChips(
                 onClick = { onFilterSelected(timeOfDay) },
                 label = {
                     Text(
-                        text = timeOfDay.name,
+                        text = timeOfDay.getTitle(),
                         style = BloomTheme.typography.small.copy(
                             fontWeight = if (selectedFilter == timeOfDay) FontWeight.Bold else FontWeight.Normal
                         ),
@@ -785,7 +786,7 @@ private fun DailyHabitDetailBottomSheet(
                         // Time of day header
                         item {
                             Text(
-                                text = timeOfDay.name,
+                                text = timeOfDay.getTitle(),
                                 style = BloomTheme.typography.subheading,
                                 color = BloomTheme.colors.textColor.primary,
                                 modifier = Modifier.padding(vertical = 8.dp)

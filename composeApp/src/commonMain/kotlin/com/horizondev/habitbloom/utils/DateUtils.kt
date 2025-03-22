@@ -5,17 +5,29 @@ import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOpt
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.month_april
+import habitbloom.composeapp.generated.resources.month_april_short
 import habitbloom.composeapp.generated.resources.month_august
+import habitbloom.composeapp.generated.resources.month_august_short
 import habitbloom.composeapp.generated.resources.month_december
+import habitbloom.composeapp.generated.resources.month_december_short
 import habitbloom.composeapp.generated.resources.month_february
+import habitbloom.composeapp.generated.resources.month_february_short
 import habitbloom.composeapp.generated.resources.month_january
+import habitbloom.composeapp.generated.resources.month_january_short
 import habitbloom.composeapp.generated.resources.month_july
+import habitbloom.composeapp.generated.resources.month_july_short
 import habitbloom.composeapp.generated.resources.month_june
+import habitbloom.composeapp.generated.resources.month_june_short
 import habitbloom.composeapp.generated.resources.month_march
+import habitbloom.composeapp.generated.resources.month_march_short
 import habitbloom.composeapp.generated.resources.month_may
+import habitbloom.composeapp.generated.resources.month_may_short
 import habitbloom.composeapp.generated.resources.month_november
+import habitbloom.composeapp.generated.resources.month_november_short
 import habitbloom.composeapp.generated.resources.month_october
+import habitbloom.composeapp.generated.resources.month_october_short
 import habitbloom.composeapp.generated.resources.month_september
+import habitbloom.composeapp.generated.resources.month_september_short
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -31,10 +43,13 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
+import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 
-private val customFormat = LocalDate.Format {
-    monthName(MonthNames.ENGLISH_ABBREVIATED); char(' '); dayOfMonth(); chars(", "); year()
+private fun customFormat(
+    monthNames: MonthNames = MonthNames.ENGLISH_ABBREVIATED
+) = LocalDate.Format {
+    monthName(monthNames); char(' '); dayOfMonth(); chars(", "); year()
 }
 
 
@@ -117,12 +132,17 @@ fun getFirstDateAfterStartDateOrNextWeek(
     }
 }
 
+suspend fun LocalDate.formatToMmDdYyWithLocale(): String {
+    val names = MonthNames(Month.entries.map { it.getShortTitleSuspend() })
+    return this.format(customFormat(monthNames = names))
+}
+
 fun LocalDate.formatToMmDdYy(): String {
-    return this.format(customFormat)
+    return this.format(customFormat())
 }
 
 fun String.mmDdYyToDate(): LocalDate {
-    return LocalDate.parse(this, customFormat)
+    return LocalDate.parse(this, customFormat())
 }
 
 fun LocalDate.minusDays(days: Long): LocalDate {
@@ -223,6 +243,39 @@ fun Month.getTitle() = when (this) {
     Month.NOVEMBER -> stringResource(Res.string.month_november)
     Month.DECEMBER -> stringResource(Res.string.month_december)
     else -> stringResource(Res.string.month_january)
+}
+
+@Composable
+fun Month.getShortTitle() = when (this) {
+    Month.JANUARY -> stringResource(Res.string.month_january_short)
+    Month.FEBRUARY -> stringResource(Res.string.month_february_short)
+    Month.MARCH -> stringResource(Res.string.month_march_short)
+    Month.APRIL -> stringResource(Res.string.month_april_short)
+    Month.MAY -> stringResource(Res.string.month_may_short)
+    Month.JUNE -> stringResource(Res.string.month_june_short)
+    Month.JULY -> stringResource(Res.string.month_july_short)
+    Month.AUGUST -> stringResource(Res.string.month_august_short)
+    Month.SEPTEMBER -> stringResource(Res.string.month_september_short)
+    Month.OCTOBER -> stringResource(Res.string.month_october_short)
+    Month.NOVEMBER -> stringResource(Res.string.month_november_short)
+    Month.DECEMBER -> stringResource(Res.string.month_december_short)
+    else -> stringResource(Res.string.month_january_short)
+}
+
+suspend fun Month.getShortTitleSuspend() = when (this) {
+    Month.JANUARY -> getString(Res.string.month_january_short)
+    Month.FEBRUARY -> getString(Res.string.month_february_short)
+    Month.MARCH -> getString(Res.string.month_march_short)
+    Month.APRIL -> getString(Res.string.month_april_short)
+    Month.MAY -> getString(Res.string.month_may_short)
+    Month.JUNE -> getString(Res.string.month_june_short)
+    Month.JULY -> getString(Res.string.month_july_short)
+    Month.AUGUST -> getString(Res.string.month_august_short)
+    Month.SEPTEMBER -> getString(Res.string.month_september_short)
+    Month.OCTOBER -> getString(Res.string.month_october_short)
+    Month.NOVEMBER -> getString(Res.string.month_november_short)
+    Month.DECEMBER -> getString(Res.string.month_december_short)
+    else -> getString(Res.string.month_january_short)
 }
 
 fun String.toCommonDate() = LocalDate.parse(this)

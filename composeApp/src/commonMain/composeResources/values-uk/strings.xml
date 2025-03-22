@@ -1,0 +1,274 @@
+<resources>
+    <string name="app_name">Habit Bloom</string>
+    <string name="morning">Ранок</string>
+    <string name="afternoon">День</string>
+    <string name="evening">Вечір</string>
+    <string name="good_morning">Доброго ранку!</string>
+    <string name="good_afternoon">Добрий день!</string>
+    <string name="good_evening">Добрий вечір!</string>
+    <string name="daily_summary">Денний підсумок</string>
+    <string name="some_tasks_completed">%1$s з %2$s звичок виконано</string>
+    <string name="100_percentage_task_done">Вітаємо! Ви виконали всі свої звички на сьогодні</string>
+    <string name="90_percentage_task_done">Так тримати! Ви майже завершили свої щоденні звички</string>
+    <string name="75_percentage_task_done">Вау! Ваші щоденні звички майже виконані</string>
+    <string name="50_percentage_task_done">Ви пройшли половину ваших щоденних звичок</string>
+    <string name="25_percentage_task_done">Ви майже дійшли до половини ваших щоденних звичок</string>
+    <string name="10_percentage_task_done">Ви виконали кілька звичок на сьогодні</string>
+    <string name="0_percentage_task_done">Ви не виконали жодної звички на сьогодні</string>
+    <string name="no_habits_today">Сьогодні немає звичок! Відпочиньте</string>
+    <string name="some_percentage_task_done">Ви виконали %1$s звичок на сьогодні</string>
+    <string name="add_morning_habit">Почніть день правильно! Додайте ранкову звичку, щоб розпочати свій розпорядок.</string>
+    <string name="add_afternoon_habit">Підвищіть свою продуктивність з денною звичкою.</string>
+    <string name="add_evening_habit">Завершіть свій день з розслаблюючою вечірньою звичкою.</string>
+    <string name="no_morning_habits">Сьогодні немає ранкових звичок</string>
+    <string name="no_afternoon_habits">Сьогодні немає денних звичок</string>
+    <string name="no_evening_habits">Сьогодні немає вечірніх звичок</string>
+
+    <string name="month_january">Січень</string>
+    <string name="month_february">Лютий</string>
+    <string name="month_march">Березень</string>
+    <string name="month_april">Квітень</string>
+    <string name="month_may">Травень</string>
+    <string name="month_june">Червень</string>
+    <string name="month_july">Липень</string>
+    <string name="month_august">Серпень</string>
+    <string name="month_september">Вересень</string>
+    <string name="month_october">Жовтень</string>
+    <string name="month_november">Листопад</string>
+    <string name="month_december">Грудень</string>
+
+    <string name="month_january_short">Січ</string>
+    <string name="month_february_short">Лют</string>
+    <string name="month_march_short">Бер</string>
+    <string name="month_april_short">Квіт</string>
+    <string name="month_may_short">Трав</string>
+    <string name="month_june_short">Чер</string>
+    <string name="month_july_short">Лип</string>
+    <string name="month_august_short">Серп</string>
+    <string name="month_september_short">Вер</string>
+    <string name="month_october_short">Жов</string>
+    <string name="month_november_short">Лис</string>
+    <string name="month_december_short">Груд</string>
+
+    <string name="add_new_habit">Додати нову звичку</string>
+    <string name="choose_category">Вибрати категорію</string>
+    <string name="choose_habit">Вибрати звичку</string>
+    <string name="choose_days">Вибрати дні</string>
+    <string name="choose_duration">Вибрати тривалість</string>
+    <string name="summary">Підсумок</string>
+    <string name="success">Успіх</string>
+
+    <string name="choose_habit_category">Виберіть категорію звички</string>
+    <string name="choose_habit_to_acquire">Виберіть звичку для формування</string>
+    <string name="or_create_your_own_habit">або створіть власну звичку</string>
+    <string name="choose_habit_days_and_duration">Виберіть дні та тривалість</string>
+    <string name="search_habit">Шукати звичку</string>
+    <string name="select_days_for_habit">Виберіть дні для звички</string>
+    <string name="repeats">Повторення</string>
+    <string name="select_repeats">Виберіть повторення</string>
+    <string name="start_date">Дата початку: %1$d</string>
+
+    <plurals name="days_plural">
+        <item quantity="one">%1$d День</item>
+        <item quantity="few">%1$d Дні</item>
+        <item quantity="many">%1$d Днів</item>
+        <item quantity="other">%1$d Днів</item>
+    </plurals>
+    <plurals name="selected_repeats">
+        <item quantity="one">Тривалість: %1$d повторення</item>
+        <item quantity="few">Тривалість: %1$d повторення</item>
+        <item quantity="many">Тривалість: %1$d повторень</item>
+        <item quantity="other">Тривалість: %1$d повторень</item>
+    </plurals>
+    <plurals name="completed_repeats">
+        <item quantity="one">Виконано повторень: %1$d повторення</item>
+        <item quantity="few">Виконано повторень: %1$d повторення</item>
+        <item quantity="many">Виконано повторень: %1$d повторень</item>
+        <item quantity="other">Виконано повторень: %1$d повторень</item>
+    </plurals>
+    <string name="completed_repeats_of">%1$d з %2$d повторень виконано!</string>
+
+    <string name="when_do_you_want_to_start">Коли ви хочете почати?</string>
+    <string name="this_week">Цього тижня</string>
+    <string name="next_week">Наступного тижня</string>
+
+    <string name="morning_habit_title">Ранкова звичка</string>
+    <string name="morning_habit_description">Почніть свій день з енергійних звичок, які задають позитивний тон. Ідеально для тренувань, медитації або здорового сніданку.</string>
+
+    <string name="midday_focus_title">Денний фокус</string>
+    <string name="midday_focus_description">Підвищуйте свою продуктивність за допомогою зосереджених дій, щоб зберегти свій імпульс. Чудово для робочих сесій, швидких тренувань або усвідомлених перерв.</string>
+
+    <string name="evening_reflection_title">Вечірня рефлексія</string>
+    <string name="evening_reflection_description">Розслабтеся за допомогою заспокійливих дій, які дають можливість обміркувати свій день. Ідеально для ведення щоденника, читання або розслаблюючої ванни.</string>
+
+    <string name="next">Далі</string>
+    <string name="cancel">Скасувати</string>
+    <string name="back">Назад</string>
+    <string name="complete">Завершити</string>
+    <string name="finish">Закінчити</string>
+    <string name="edit">Редагувати</string>
+    <string name="save">Зберегти</string>
+    <string name="delete">Видалити</string>
+    <string name="create">Створити</string>
+    <string name="add">Додати</string>
+    <string name="close">Закрити</string>
+
+    <string name="title">Заголовок</string>
+    <string name="description">Опис</string>
+
+    <string name="quick_action">Швидкі дії</string>
+    <string name="every_day">Щодня</string>
+    <string name="only_weekends">Тільки вихідні</string>
+    <string name="one_week">Один тиждень</string>
+    <string name="one_month">Один місяць</string>
+    <string name="three_months">Три місяці</string>
+
+    <string name="one_repeat">1 повторення (1 тиждень)</string>
+    <string name="four_repeats">4 повторення (≈1 місяць)</string>
+    <string name="twelve_repeats">12 повторень (≈3 місяці)</string>
+
+    <string name="do_you_want_add_this_habit">Бажаєте додати цю звичку?</string>
+
+    <string name="monday_short">Пн</string>
+    <string name="tuesday_short">Вт</string>
+    <string name="wednesday_short">Ср</string>
+    <string name="thursday_short">Чт</string>
+    <string name="friday_short">Пт</string>
+    <string name="saturday_short">Сб</string>
+    <string name="sunday_short">Нд</string>
+
+    <string name="week">Тиждень</string>
+    <string name="month">Місяць</string>
+    <string name="year">Рік</string>
+
+    <string name="today">Сьогодні</string>
+    <string name="yesterday">Вчора</string>
+    <string name="tomorrow">Завтра</string>
+
+    <string name="the_habit_cannot_start_on_past_days">Звичка не може початися в минулі дні. Виберіть інший день або перейдіть до "Наступного тижня".</string>
+
+    <string name="habit_added_success">Чудова робота! Вашу нову звичку додано!</string>
+    <string name="habit_added_description">Будьте послідовними, і ваші цілі досяжні!</string>
+
+    <string name="competed_morning_habits">Ви виконали всі свої ранкові звички!</string>
+    <string name="competed_afternoon_habits">Чудова робота! Всі денні звички виконані!</string>
+    <string name="competed_evening_habits">Ви завершили всі вечірні звички! Час відпочити!</string>
+
+    <plurals name="streak_days">
+        <item quantity="one">%1$d день безперервного виконання!</item>
+        <item quantity="few">%1$d дні безперервного виконання!</item>
+        <item quantity="many">%1$d днів безперервного виконання!</item>
+        <item quantity="other">%1$d днів безперервного виконання!</item>
+    </plurals>
+
+    <string name="no_completed_habits_title">Ви ще не виконали жодної звички!</string>
+    <string name="no_completed_habits_in_this_unit_title">Ви не виконали жодної звички цього %1$d!</string>
+    <string name="habit_statistic">Статистика звичок</string>
+    <string name="completed_habit_statistic">Статистика виконаних звичок</string>
+    <string name="completed_weekly_habits_statistic">Статистика виконаних тижневих звичок</string>
+    <string name="completed_monthly_habits_statistic">Статистика виконаних місячних звичок</string>
+    <string name="completed_yearly_habits_statistic">Статистика виконаних річних звичок</string>
+    <string name="completed_n_times">Виконано:</string>
+    <string name="total_habits_done">Всього виконано звичок</string>
+    <string name="previous">Попередній</string>
+    <string name="current_week">Поточний тиждень</string>
+    <string name="current_month">Поточний місяць</string>
+    <string name="current_year">Поточний рік</string>
+    <string name="scheduled">Заплановано</string>
+    <string name="completed">Виконано</string>
+    <string name="weekly_completion_rate">Тижнева частота виконання</string>
+    <string name="monthly_completion_rate">Місячна частота виконання</string>
+    <string name="yearly_completion_rate">Річна частота виконання</string>
+    <string name="no_data_available">Немає доступних даних</string>
+
+    <string name="habit_details">Деталі звички</string>
+    <string name="habit_category">Категорія звички</string>
+    <string name="habit_schedule">Розклад звички</string>
+    <string name="habit_duration">Тривалість звички</string>
+    <string name="habit_repeats">Повторення звички</string>
+    <string name="habit_records">Записи звички</string>
+    <string name="habit_active_days">Активні дні звички</string>
+
+    <string name="habit_day_state_completed">Виконано</string>
+    <string name="habit_day_state_missed">Пропущено</string>
+    <string name="habit_day_state_future">Потрібно виконати</string>
+
+    <string name="update_habit_error">Щось пішло не так! Спробуйте інші параметри або повторіть спробу пізніше</string>
+    <string name="update_habit_success">Звичку успішно оновлено!</string>
+    <string name="delete_habit">Видалити звичку</string>
+    <string name="delete_habit_question">Видалити звичку?</string>
+    <string name="delete_habit_description">Ви впевнені, що хочете видалити цю звичку? Це видалить весь прогрес, історію та нагадування.</string>
+
+    <string name="current_streak">Поточна серія</string>
+    <string name="best_streak">Найкраща серія</string>
+    <string name="total_done">Всього виконано</string>
+    <string name="overall_rate">Загальна частота</string>
+
+    <string name="create_personal_habit">Створити особисту звичку</string>
+    <string name="no_habits_found">Звичок не знайдено!</string>
+    <string name="add_your_own_personal_habit_to_start_tracking">Не знайдено звичок, які відповідають вашому пошуку. Створіть власну звичку, щоб персоналізувати ваш досвід відстеження звичок!</string>
+
+    <string name="enter_habit_title">Введіть назву звички</string>
+    <string name="enter_habit_description">Введіть опис звички</string>
+    <string name="habit_title">Назва звички</string>
+    <string name="habit_description">Опис звички</string>
+    <string name="create_habit_question">Створити звичку?</string>
+    <string name="create_habit_description">Ви впевнені, що хочете створити цю звичку? Ви зможете додати цю звичку до свого розкладу, редагувати або видалити її.</string>
+    <string name="save_habit_error">Щось пішло не так! Спробуйте ще раз або пізніше</string>
+    <string name="habit_created_success">Чудова робота! Вашу нову звичку створено!</string>
+    <string name="habit_created_description">Вашу нову звичку налаштовано та готово до відстеження. Послідовність – це ключ. Почнімо!</string>
+
+    <string name="tap_to_change_photo">Натисніть, щоб змінити фото</string>
+
+    <string name="clear_history_question">Очистити історію звички?</string>
+    <string name="clear_history_description">Це видалить усі минулі записи для цієї звички. Сьогоднішні та майбутні записи будуть збережені. Цю дію не можна скасувати.</string>
+    <string name="clear">Очистити</string>
+    <string name="history_cleared_past_records_deleted">Історію очищено: %1$s минулих записів видалено</string>
+    <string name="failed_to_clear_history">Не вдалося очистити історію</string>
+
+    <string name="delete_custom_habit_menu">Видалити власну звичку</string>
+    <string name="delete_custom_habit_question">Видалити власну звичку?</string>
+    <string name="delete_custom_habit_description">Ви впевнені, що хочете видалити цю власну звичку? Це назавжди видалить звичку з вашого списку доступних звичок.</string>
+    <string name="delete_custom_habit_success">Власну звичку успішно видалено</string>
+
+    <string name="loading_habit_details">Завантаження деталей звички...</string>
+
+    <!-- Reminder strings -->
+    <string name="reminder_settings">Налаштування нагадувань</string>
+    <string name="enable_reminder">Увімкнути нагадування</string>
+    <string name="reminder_disabled">Нагадування вимкнено</string>
+    <string name="no_reminder_set">Нагадування не встановлено</string>
+    <string name="select_reminder_time">Виберіть час нагадування</string>
+    <string name="reminder_set_for">Нагадування встановлено на %1$s</string>
+    <string name="notification_permission_denied">Дозвіл на сповіщення відхилено. Нагадування не можуть бути увімкнені.</string>
+    <string name="notifications_required">Для нагадувань потрібен дозвіл на сповіщення. Надайте дозвіл у налаштуваннях додатку.</string>
+    <string name="failed_to_update_reminder_settings">Не вдалося оновити налаштування нагадувань</string>
+
+    <!-- Calendar Screen -->
+    <string name="calendar_screen_title">Календар звичок</string>
+    <string name="calendar_statistics_title">Місячна статистика</string>
+    <string name="calendar_statistics_total">Всього</string>
+    <string name="calendar_statistics_completed">Виконано</string>
+    <string name="calendar_statistics_longest_streak">Найдовша серія</string>
+    <string name="calendar_statistics_completion_rate">Частота виконання</string>
+    <string name="calendar_filter_button">Фільтрувати звички</string>
+    <string name="calendar_filter_all_habits">Всі звички</string>
+    <string name="calendar_habit_detail_date">Звички на %1$s</string>
+    <string name="calendar_no_habits">Немає запланованих звичок на цей день</string>
+    <string name="calendar_streak_current">Поточна серія</string>
+    <string name="calendar_streak_longest">Найдовша серія</string>
+    <string name="calendar_today_button">Перейти до сьогодні</string>
+    <string name="calendar_past_date_message">Виконання звички не можна змінити для минулих дат</string>
+    <string name="calendar_future_date_message">Виконання звички не можна встановити для майбутніх дат</string>
+
+
+    <!-- Settings -->
+    <string name="settings">Налаштування</string>
+    <string name="theme_light">Світла</string>
+    <string name="theme_dark">Темна</string>
+    <string name="theme_device">Системна</string>
+    <string name="appearance">Зовнішній вигляд</string>
+    <string name="settings_appearance_theme">Тема додатку</string>
+    <string name="notifications">Сповіщення</string>
+    <string name="enable_notifications">Увімкнути сповіщення</string>
+</resources>
