@@ -58,7 +58,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.calendar.CalendarDayStatusColors
 import com.horizondev.habitbloom.core.designComponents.calendar.CalendarTitle
@@ -94,6 +93,9 @@ import habitbloom.composeapp.generated.resources.calendar_statistics_title
 import habitbloom.composeapp.generated.resources.calendar_statistics_total
 import habitbloom.composeapp.generated.resources.calendar_streak_current
 import habitbloom.composeapp.generated.resources.calendar_streak_longest
+import habitbloom.composeapp.generated.resources.today
+import habitbloom.composeapp.generated.resources.tomorrow
+import habitbloom.composeapp.generated.resources.yesterday
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -709,6 +711,9 @@ private fun DailyHabitDetailBottomSheet(
     val habits = uiState.habitsForSelectedDate
     val habitStreaks = uiState.habitsWithStreaks
     val today = getCurrentDate() // Get current date for comparison
+    val todayString = stringResource(Res.string.today)
+    val yesterdayString = stringResource(Res.string.yesterday)
+    val tomorrowString = stringResource(Res.string.tomorrow)
 
     Surface(
         color = BloomTheme.colors.background,
@@ -729,9 +734,9 @@ private fun DailyHabitDetailBottomSheet(
                     // Format date in a user-friendly way (e.g., "Monday, January 15")
                     val today = getCurrentDate()
                     when (date) {
-                        today -> "Today"
-                        today.minusDays(1) -> "Yesterday"
-                        today.plusDays(1) -> "Tomorrow"
+                        today -> todayString
+                        today.minusDays(1) -> yesterdayString
+                        today.plusDays(1) -> tomorrowString
                         else -> date.formatToMmDdYy()
                     }
                 }
@@ -945,26 +950,6 @@ private fun HabitItem(
                         shape = CircleShape
                     )
             )
-        }
-
-        // Confetti celebration on streak milestone
-        if (isShowingConfetti) {
-            // Simple confetti animation (replace with a more sophisticated implementation if needed)
-            Surface(
-                color = BloomTheme.colors.primary.copy(alpha = 0.2f),
-                shape = RoundedCornerShape(8.dp),
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(end = 8.dp, top = 4.dp)
-            ) {
-                Text(
-                    text = "🎉 Streak milestone! 🎊",
-                    color = BloomTheme.colors.primary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
         }
     }
 }

@@ -70,6 +70,7 @@ import habitbloom.composeapp.generated.resources.no_data_available
 import habitbloom.composeapp.generated.resources.no_habits_found
 import habitbloom.composeapp.generated.resources.previous
 import habitbloom.composeapp.generated.resources.scheduled
+import habitbloom.composeapp.generated.resources.total_habits_done
 import habitbloom.composeapp.generated.resources.weekly_completion_rate
 import habitbloom.composeapp.generated.resources.yearly_completion_rate
 import io.github.koalaplot.core.bar.DefaultVerticalBar
@@ -197,7 +198,7 @@ fun CombinedHabitStatisticsCard(
             // Period Navigation Controls
             val timeUnit = uiState.selectedTimeUnit
 
-            // Period label 
+            // Period label
             if (uiState.selectedPeriodLabel.isNotEmpty()) {
                 Text(
                     text = uiState.selectedPeriodLabel,
@@ -367,7 +368,7 @@ fun CombinedHabitStatisticsCard(
                                 Text(
                                     style = BloomTheme.typography.body,
                                     color = BloomTheme.colors.textColor.secondary,
-                                    text = "Total habits done",
+                                    text = stringResource(Res.string.total_habits_done),
                                     textAlign = TextAlign.Center
                                 )
                                 Text(

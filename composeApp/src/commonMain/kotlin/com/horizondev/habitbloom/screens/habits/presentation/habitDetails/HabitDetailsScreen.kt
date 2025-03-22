@@ -34,7 +34,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -62,7 +61,6 @@ import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.utils.collectAsEffect
-import com.horizondev.habitbloom.utils.getBackgroundGradientColors
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
@@ -172,10 +170,7 @@ fun HabitDetailsScreenContent(
     ) { paddingValues ->
         Box(
             modifier = Modifier.fillMaxSize().background(
-                brush = Brush.verticalGradient(
-                    colors = uiState.habitInfo?.timeOfDay?.getBackgroundGradientColors()
-                        ?: listOf(BloomTheme.colors.background, BloomTheme.colors.background)
-                )
+                color = BloomTheme.colors.background
             )
         ) {
             if (uiState.habitInfo != null) {

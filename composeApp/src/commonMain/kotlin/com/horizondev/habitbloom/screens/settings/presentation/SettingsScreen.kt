@@ -31,6 +31,9 @@ import com.horizondev.habitbloom.core.designComponents.theme.ThemePickerDialog
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.collectAsEffect
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.appearance
+import habitbloom.composeapp.generated.resources.enable_notifications
+import habitbloom.composeapp.generated.resources.notifications
 import habitbloom.composeapp.generated.resources.settings
 import habitbloom.composeapp.generated.resources.settings_appearance_theme
 import habitbloom.composeapp.generated.resources.theme_dark
@@ -88,14 +91,14 @@ private fun SettingsScreenContent(
                 HorizontalDivider(color = BloomTheme.colors.disabled.copy(alpha = 0.5f))
 
                 // Notifications section
-                SettingsSection(title = "Notifications") {
+                SettingsSection(title = stringResource(Res.string.notifications)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Enable notifications",
+                            text = stringResource(Res.string.enable_notifications),
                             style = BloomTheme.typography.body,
                             color = BloomTheme.colors.textColor.primary
                         )
@@ -111,7 +114,7 @@ private fun SettingsScreenContent(
                 HorizontalDivider(color = BloomTheme.colors.disabled.copy(alpha = 0.5f))
 
                 // Appearance section
-                SettingsSection(title = "Appearance") {
+                SettingsSection(title = stringResource(Res.string.appearance)) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
