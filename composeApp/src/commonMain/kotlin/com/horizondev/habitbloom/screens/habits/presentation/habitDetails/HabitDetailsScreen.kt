@@ -331,13 +331,6 @@ private fun UserHabitFullInfoCard(
                 size = 96.dp
             )
 
-            //name is on toolbar
-            /*          Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = habitInfo.name,
-                            style = BloomTheme.typography.heading,
-                            color = BloomTheme.colors.textColor.primary,
-                        )*/
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
@@ -345,16 +338,6 @@ private fun UserHabitFullInfoCard(
                 style = BloomTheme.typography.body,
                 color = BloomTheme.colors.textColor.primary,
             )
-
-            if (habitInfo.shortInfo.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = habitInfo.shortInfo,
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.primary,
-                )
-            }
         }
     }
 }

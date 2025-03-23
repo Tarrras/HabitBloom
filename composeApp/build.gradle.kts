@@ -199,6 +199,20 @@ android {
     dependencies {
         debugImplementation(compose.uiTooling)
     }
+
+    androidResources {
+        generateLocaleConfig = true
+    }
+
+    defaultConfig {
+        resourceConfigurations.addAll(listOf("en", "uk"))
+    }
+
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 sqldelight {

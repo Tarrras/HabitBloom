@@ -6,7 +6,6 @@ import com.horizondev.habitbloom.screens.calendar.HabitStreakInfo
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
-import com.horizondev.habitbloom.screens.habits.data.remote.toDomainModel
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
@@ -69,7 +68,6 @@ class HabitsRepository(
             Napier.d("Fetching network habits...", tag = TAG)
             val userId = profileRemoteDataSource.getUser().getOrNull()?.id
             remoteDataSource.getHabits(userId)
-                .mapCatching { data -> data.map { habit -> habit.toDomainModel() } }
         }
     }
 
@@ -223,7 +221,6 @@ class HabitsRepository(
                 description = habitDetailedInfo.description,
                 iconUrl = habitDetailedInfo.iconUrl,
                 name = habitDetailedInfo.name,
-                shortInfo = habitDetailedInfo.shortInfo,
                 timeOfDay = habitDetailedInfo.timeOfDay,
                 daysStreak = localDataSource.getHabitDayStreak(
                     userHabitId = userHabitId,
@@ -264,7 +261,6 @@ class HabitsRepository(
                 description = habitDetailedInfo.description,
                 iconUrl = habitDetailedInfo.iconUrl,
                 name = habitDetailedInfo.name,
-                shortInfo = habitDetailedInfo.shortInfo,
                 timeOfDay = habitDetailedInfo.timeOfDay,
                 daysStreak = localDataSource.getHabitDayStreak(
                     userHabitId = userHabitId,

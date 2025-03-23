@@ -5,6 +5,37 @@ import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class HabitLocalizationResponse(
+    val name: String,
+    val description: String
+)
+
+@Serializable
+data class OfficialHabitInfoResponse(
+    val id: String?,
+    val iconUrl: String,
+    val timeOfDay: TimeOfDayResponse,
+    val localizations: Map<String, HabitLocalizationResponse>
+)
+
+fun OfficialHabitInfoResponse.toDomainModel(
+    locale: String
+): HabitInfo? {
+    val localization = localizations[locale] ?: localizations["en"]
+
+    if (localization == null) return null
+
+    return HabitInfo(
+        id = id.orEmpty(),
+        description = localization.description,
+        iconUrl = iconUrl,
+        name = localization.name,
+        timeOfDay = timeOfDay.toDomainModel(),
+        isCustomHabit = false
+    )
+}
+
+@Serializable
 data class HabitInfoResponse(
     val id: String? = null,
     val description: String,
@@ -27,7 +58,6 @@ fun HabitInfoResponse.toDomainModel() = HabitInfo(
     description = description,
     iconUrl = iconUrl,
     name = name,
-    shortInfo = shortInfo,
     timeOfDay = timeOfDay.toDomainModel(),
     isCustomHabit = userId != null || id?.startsWith("user_") == true
 )

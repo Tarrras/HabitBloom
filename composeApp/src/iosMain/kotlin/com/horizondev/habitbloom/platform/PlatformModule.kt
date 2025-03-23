@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.platform
 
+import com.horizondev.habitbloom.common.locale.AppLocaleManager
 import com.horizondev.habitbloom.core.notifications.IOSNotificationDelegate
 import com.horizondev.habitbloom.core.notifications.IOSNotificationManager
 import com.horizondev.habitbloom.core.notifications.IOSNotificationScheduler
@@ -20,5 +21,5 @@ actual val platformModule: Module = module {
     } bind NotificationScheduler::class
 
     single { PermissionsController() }
-
+    single { IosAppLocaleManager() } bind AppLocaleManager::class
 }
