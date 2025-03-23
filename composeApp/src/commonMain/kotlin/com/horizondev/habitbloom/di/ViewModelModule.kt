@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.di
 
 import CreatePersonalHabitViewModel
+import com.horizondev.habitbloom.app.AppViewModel
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationViewModel
@@ -20,6 +21,8 @@ import org.koin.dsl.module
  * Koin module for ViewModels.
  */
 val viewModelModule: Module = module {
+    viewModelOf(::AppViewModel)
+
     // Tab Screens ViewModels
     viewModelOf(::HomeViewModel)
     viewModelOf(::StatisticViewModel)

@@ -53,20 +53,60 @@ class HabitsRepository(
 
     suspend fun initData(): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            //remoteDataSource.pushHabitsToFirestore()
-            // Initialize Supabase storage bucket
-            storageService.initializeBucket()
+            try {
+                // Initialize Supabase storage bucket
+                storageService.initializeBucket()
 
-            getAllHabits().onSuccess { habits ->
-                remoteHabits.update { habits }
-            }.map { true }
+                // Wait for the user to be authenticated first
+                val authResult = profileRemoteDataSource.isUserAuthenticated().getOrNull() ?: false
+
+                if (!authResult) {
+                    // If not authenticated, wait for authentication to complete
+                    Napier.d("User not authenticated, authenticating...", tag = TAG)
+                    val authSuccess =
+                        profileRemoteDataSource.authenticateUser().getOrNull() ?: false
+
+                    if (!authSuccess) {
+                        Napier.e("Failed to authenticate user", tag = TAG)
+                        return@withContext Result.failure(Exception("Authentication failed"))
+                    }
+                }
+
+                // Now that we're authenticated, fetch habits
+                Napier.d("User authenticated, fetching habits...", tag = TAG)
+
+                getAllHabits().onSuccess { habits ->
+                    remoteHabits.update { habits }
+                }.map { true }
+            } catch (e: Exception) {
+                Napier.e("Error in initData", e, tag = TAG)
+                Result.failure(e)
+            }
         }
     }
 
     private suspend fun getAllHabits(): Result<List<HabitInfo>> {
         return withContext(Dispatchers.IO) {
             Napier.d("Fetching network habits...", tag = TAG)
-            val userId = profileRemoteDataSource.getUser().getOrNull()?.id
+
+            // Get user ID, with retry mechanism if needed
+            val userId = runCatching {
+                val user = profileRemoteDataSource.getUser().getOrNull()
+
+                if (user == null) {
+                    // If no user found, try one more authentication attempt
+                    profileRemoteDataSource.authenticateUser()
+                    profileRemoteDataSource.getUser().getOrNull()?.id
+                } else {
+                    user.id
+                }
+            }.getOrNull()
+
+            if (userId == null) {
+                Napier.e("Failed to get user ID for habits", tag = TAG)
+                return@withContext Result.failure(Exception("User ID is null"))
+            }
+            
             remoteDataSource.getHabits(userId)
         }
     }
