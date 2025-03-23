@@ -772,6 +772,8 @@ private fun ReminderSettingsCard(
                     )
                 }
 
+                Spacer(modifier = Modifier.width(8.dp))
+
                 BloomSmallActionButton(
                     text = if (reminderEnabled) stringResource(Res.string.edit)
                     else stringResource(Res.string.add),

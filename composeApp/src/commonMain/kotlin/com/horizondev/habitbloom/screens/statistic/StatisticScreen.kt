@@ -55,15 +55,13 @@ import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.completed
 import habitbloom.composeapp.generated.resources.completed_habit_statistic
-import habitbloom.composeapp.generated.resources.completed_monthly_habits_statistic
 import habitbloom.composeapp.generated.resources.completed_n_times
-import habitbloom.composeapp.generated.resources.completed_weekly_habits_statistic
-import habitbloom.composeapp.generated.resources.completed_yearly_habits_statistic
 import habitbloom.composeapp.generated.resources.current_month
 import habitbloom.composeapp.generated.resources.current_week
 import habitbloom.composeapp.generated.resources.current_year
 import habitbloom.composeapp.generated.resources.habit_statistic
 import habitbloom.composeapp.generated.resources.monthly_completion_rate
+import habitbloom.composeapp.generated.resources.monthly_habit_tracking
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.no_completed_habits_in_this_unit_title
 import habitbloom.composeapp.generated.resources.no_data_available
@@ -72,7 +70,9 @@ import habitbloom.composeapp.generated.resources.previous
 import habitbloom.composeapp.generated.resources.scheduled
 import habitbloom.composeapp.generated.resources.total_habits_done
 import habitbloom.composeapp.generated.resources.weekly_completion_rate
+import habitbloom.composeapp.generated.resources.weekly_habit_tracking
 import habitbloom.composeapp.generated.resources.yearly_completion_rate
+import habitbloom.composeapp.generated.resources.yearly_habit_tracking
 import io.github.koalaplot.core.bar.DefaultVerticalBar
 import io.github.koalaplot.core.bar.DefaultVerticalBarPlotEntry
 import io.github.koalaplot.core.bar.DefaultVerticalBarPosition
@@ -366,6 +366,7 @@ fun CombinedHabitStatisticsCard(
                                 modifier = Modifier.align(Alignment.Center)
                             ) {
                                 Text(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
                                     style = BloomTheme.typography.body,
                                     color = BloomTheme.colors.textColor.secondary,
                                     text = stringResource(Res.string.total_habits_done),
@@ -452,9 +453,9 @@ fun CombinedHabitStatisticsCard(
             // SECTION 2: Bar Chart of Habit Completion By Period
             // Chart title based on time unit
             val chartTitle = when (timeUnit) {
-                TimeUnit.WEEK -> stringResource(Res.string.completed_weekly_habits_statistic)
-                TimeUnit.MONTH -> stringResource(Res.string.completed_monthly_habits_statistic)
-                TimeUnit.YEAR -> stringResource(Res.string.completed_yearly_habits_statistic)
+                TimeUnit.WEEK -> stringResource(Res.string.weekly_habit_tracking)
+                TimeUnit.MONTH -> stringResource(Res.string.monthly_habit_tracking)
+                TimeUnit.YEAR -> stringResource(Res.string.yearly_habit_tracking)
             }
 
             Text(

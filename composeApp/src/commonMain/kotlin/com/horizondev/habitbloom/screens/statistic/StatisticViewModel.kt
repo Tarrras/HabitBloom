@@ -8,7 +8,9 @@ import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.utils.calculateStartOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getEndOfMonth
 import com.horizondev.habitbloom.utils.getShortTitleSuspend
+import com.horizondev.habitbloom.utils.getTitleSuspend
 import com.horizondev.habitbloom.utils.minusDays
 import com.horizondev.habitbloom.utils.minusMonths
 import com.horizondev.habitbloom.utils.minusYears
@@ -35,40 +37,6 @@ class StatisticViewModel(
 ) : BloomViewModel<StatisticUiState, StatisticUiIntent>(
     StatisticUiState(isLoading = true)
 ) {
-    init {
-        // Initialize the period labels on creation
-        initializePeriodLabels()
-    }
-
-    private fun initializePeriodLabels() {
-        val currentDate = getCurrentDate()
-        val periodLabel = when (state.value.selectedTimeUnit) {
-            TimeUnit.WEEK -> {
-                // Set up week label
-                val startOfWeek = currentDate.calculateStartOfWeek()
-                val endOfWeek = startOfWeek.plusDays(6)
-                formatDateRange(startOfWeek, endOfWeek)
-            }
-
-            TimeUnit.MONTH -> {
-                // Set up month label
-                "${
-                    currentDate.month.name.lowercase().replaceFirstChar { it.uppercase() }
-                } ${currentDate.year}"
-            }
-
-            TimeUnit.YEAR -> {
-                // Set up year label
-                currentDate.year.toString()
-            }
-        }
-
-        updateState {
-            it.copy(
-                selectedPeriodLabel = periodLabel
-            )
-        }
-    }
 
     private val filteredHabitFlow = combine(
         state.map { it.selectedTimeUnit }.distinctUntilChanged(),
@@ -141,7 +109,7 @@ class StatisticViewModel(
     /**
      * Updates the appropriate period label based on the selected time unit and period offset
      */
-    private fun updatePeriodLabel() {
+    private fun updatePeriodLabel() = viewModelScope.launch {
         val currentState = state.value
         val currentDate = getCurrentDate()
         val periodOffset = currentState.selectedPeriodOffset
@@ -157,7 +125,8 @@ class StatisticViewModel(
             TimeUnit.MONTH -> {
                 val targetMonth = currentDate.minusMonths(-periodOffset.toLong())
                 "${
-                    targetMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
+                    targetMonth.month.getTitleSuspend().lowercase()
+                        .replaceFirstChar { it.uppercase() }
                 } ${targetMonth.year}"
             }
 
@@ -216,9 +185,7 @@ class StatisticViewModel(
                 )
 
                 // Prepare formatted chart data for monthly view
-                val categories = monthlyResult.first.keys.toList().ifEmpty {
-                    (1..5).map { "Week $it" }
-                }
+                val categories = monthlyResult.first.keys.toList()
                 val formattedChartData = ChartData.MonthData(
                     monthlyCategories = categories,
                     monthlyCompletedData = monthlyResult.first,
@@ -240,10 +207,7 @@ class StatisticViewModel(
                 )
 
                 // Prepare formatted chart data for yearly view
-                val monthCategories = listOf(
-                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-                )
+                val monthCategories = Month.entries.map { it.getShortTitleSuspend() }
                 val formattedChartData = ChartData.YearData(
                     yearlyCategories = monthCategories,
                     yearlyCompletedData = yearlyResult.first,
@@ -290,17 +254,10 @@ class StatisticViewModel(
             }
 
             TimeUnit.MONTH -> {
-                // Calculate the start of the target month
+                // Calculate the target month
                 val targetMonth = currentDate.minusMonths(-periodOffset.toLong())
                 startDate = LocalDate(targetMonth.year, targetMonth.month, 1)
-
-                // Calculate the end of the target month (simplified)
-                val daysInMonth = when (targetMonth.month) {
-                    Month.FEBRUARY -> if (isLeapYear(targetMonth.year)) 29 else 28
-                    Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> 30
-                    else -> 31
-                }
-                endDate = LocalDate(targetMonth.year, targetMonth.month, daysInMonth)
+                endDate = startDate.getEndOfMonth()
             }
 
             TimeUnit.YEAR -> {
@@ -338,7 +295,7 @@ class StatisticViewModel(
      * @param weekOffset Offset from current week (0 = current week, -1 = previous week, etc.)
      * @return Triple of (completed habits map, all scheduled habits map, formatted date range string)
      */
-    private fun handleWeeklyHabitStatistic(
+    private suspend fun handleWeeklyHabitStatistic(
         habitRecords: List<UserHabitRecordFullInfo>,
         weekOffset: Int = 0
     ): Triple<Map<DayOfWeek, Int>, Map<DayOfWeek, Int>, String> {
@@ -386,67 +343,42 @@ class StatisticViewModel(
      * @param monthOffset Offset from current month (0 = current month, -1 = previous month, etc.)
      * @return Triple of (completed habits map, all scheduled habits map, formatted month string)
      */
-    private fun handleMonthlyHabitStatistic(
+    private suspend fun handleMonthlyHabitStatistic(
         habitRecords: List<UserHabitRecordFullInfo>,
         monthOffset: Int = 0
     ): Triple<Map<String, Int>, Map<String, Int>, String> {
         val currentDate = getCurrentDate()
-
-        // Calculate the target month
-        val targetMonth = currentDate.minusMonths(-monthOffset.toLong())
-        val monthLabel = "${
-            targetMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
-        } ${targetMonth.year}"
+        val targetMonthDate = currentDate.minusMonths(-monthOffset.toLong())
 
         // Calculate the start and end of the target month
-        val startOfMonth = LocalDate(targetMonth.year, targetMonth.month, 1)
-        val daysInMonth = when (targetMonth.month) {
-            Month.FEBRUARY -> if (isLeapYear(targetMonth.year)) 29 else 28
-            Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> 30
-            else -> 31
-        }
-        val endOfMonth = LocalDate(targetMonth.year, targetMonth.month, daysInMonth)
+        val startOfMonth = LocalDate(targetMonthDate.year, targetMonthDate.month, 1)
+        val endOfMonth = targetMonthDate.getEndOfMonth()
+
+        val monthName = targetMonthDate.month.getTitleSuspend()
 
         // Filter habits for this month
         val habitsFilteredForGivenMonth = habitRecords
-            .asSequence()
             .filter { it.date in startOfMonth..endOfMonth }
 
         val completedHabitsFilteredForGivenMonth =
             habitsFilteredForGivenMonth.filter { it.isCompleted }
 
-        // Group by week of month (1-indexed)
-        val weeklyCompletedHabits = mutableMapOf<String, Int>()
-        val weeklyScheduledHabits = mutableMapOf<String, Int>()
+        // Create day-based maps instead of week-based
+        val monthlyCompletedHabits = mutableMapOf<String, Int>()
+        val monthlyScheduledHabits = mutableMapOf<String, Int>()
 
-        // Initialize the maps with zeros for all weeks
-        for (week in 1..5) {
-            weeklyCompletedHabits["Week $week"] = 0
-            weeklyScheduledHabits["Week $week"] = 0
-        }
+        // Count scheduled habits for this month
+        val scheduledCount = habitsFilteredForGivenMonth.count()
+        monthlyScheduledHabits[monthName] = scheduledCount
 
-        // Process each day of the month
-        for (day in 1..daysInMonth) {
-            val date = LocalDate(targetMonth.year, targetMonth.month, day)
-            // Calculate which week of the month this is (1-indexed)
-            val weekOfMonth = ((day - 1) / 7) + 1
-            val weekLabel = "Week $weekOfMonth"
-
-            // Count scheduled habits for this day
-            val scheduledCount = habitsFilteredForGivenMonth.count { it.date == date }
-            weeklyScheduledHabits[weekLabel] =
-                (weeklyScheduledHabits[weekLabel] ?: 0) + scheduledCount
-
-            // Count completed habits for this day
-            val completedCount = completedHabitsFilteredForGivenMonth.count { it.date == date }
-            weeklyCompletedHabits[weekLabel] =
-                (weeklyCompletedHabits[weekLabel] ?: 0) + completedCount
-        }
+        // Count completed habits for this month
+        val completedCount = completedHabitsFilteredForGivenMonth.count()
+        monthlyCompletedHabits[monthName] = completedCount
 
         return Triple(
-            weeklyCompletedHabits,
-            weeklyScheduledHabits,
-            monthLabel
+            monthlyCompletedHabits,
+            monthlyScheduledHabits,
+            monthName
         )
     }
 
@@ -457,7 +389,7 @@ class StatisticViewModel(
      * @param yearOffset Offset from current year (0 = current year, -1 = previous year, etc.)
      * @return Triple of (completed habits map, all scheduled habits map, formatted year string)
      */
-    private fun handleYearlyHabitStatistic(
+    private suspend fun handleYearlyHabitStatistic(
         habitRecords: List<UserHabitRecordFullInfo>,
         yearOffset: Int = 0
     ): Triple<Map<String, Int>, Map<String, Int>, String> {
@@ -484,10 +416,7 @@ class StatisticViewModel(
         val monthlyScheduledHabits = mutableMapOf<String, Int>()
 
         // Initialize the maps with zeros for all months
-        val monthAbbreviations = listOf(
-            "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-            "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-        )
+        val monthAbbreviations = Month.entries.map { it.getShortTitleSuspend() }
 
         for (monthAbbr in monthAbbreviations) {
             monthlyCompletedHabits[monthAbbr] = 0
@@ -532,9 +461,9 @@ class StatisticViewModel(
     /**
      * Format a date range into a human-readable string.
      */
-    private fun formatDateRange(start: LocalDate, end: LocalDate): String {
+    private suspend fun formatDateRange(start: LocalDate, end: LocalDate): String {
         return "${
-            start.month.name.lowercase()
+            start.month.getTitleSuspend().lowercase()
                 .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         } ${start.dayOfMonth} - ${end.dayOfMonth}, ${start.year}"
     }

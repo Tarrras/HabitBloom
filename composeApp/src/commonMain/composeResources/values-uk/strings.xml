@@ -40,15 +40,15 @@
     <string name="month_january_short">Січ</string>
     <string name="month_february_short">Лют</string>
     <string name="month_march_short">Бер</string>
-    <string name="month_april_short">Квіт</string>
-    <string name="month_may_short">Трав</string>
+    <string name="month_april_short">Кві</string>
+    <string name="month_may_short">Тра</string>
     <string name="month_june_short">Чер</string>
     <string name="month_july_short">Лип</string>
-    <string name="month_august_short">Серп</string>
+    <string name="month_august_short">Сер</string>
     <string name="month_september_short">Вер</string>
     <string name="month_october_short">Жов</string>
     <string name="month_november_short">Лис</string>
-    <string name="month_december_short">Груд</string>
+    <string name="month_december_short">Гру</string>
 
     <string name="add_new_habit">Додати нову звичку</string>
     <string name="choose_category">Вибрати категорію</string>
@@ -271,4 +271,9 @@
     <string name="settings_appearance_theme">Тема додатку</string>
     <string name="notifications">Сповіщення</string>
     <string name="enable_notifications">Увімкнути сповіщення</string>
+
+    <string name="weekly_habit_tracking">Тижневе відстеження звичок</string>
+    <string name="monthly_habit_tracking">Місячне відстеження звичок</string>
+    <string name="quarterly_habit_tracking">Квартальне відстеження звичок</string>
+    <string name="yearly_habit_tracking">Річне відстеження звичок</string>
 </resources>

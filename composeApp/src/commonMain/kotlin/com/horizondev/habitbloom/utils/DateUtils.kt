@@ -245,6 +245,23 @@ fun Month.getTitle() = when (this) {
     else -> stringResource(Res.string.month_january)
 }
 
+suspend fun Month.getTitleSuspend() = when (this) {
+    Month.JANUARY -> getString(Res.string.month_january)
+    Month.FEBRUARY -> getString(Res.string.month_february)
+    Month.MARCH -> getString(Res.string.month_march)
+    Month.APRIL -> getString(Res.string.month_april)
+    Month.MAY -> getString(Res.string.month_may)
+    Month.JUNE -> getString(Res.string.month_june)
+    Month.JULY -> getString(Res.string.month_july)
+    Month.AUGUST -> getString(Res.string.month_august)
+    Month.SEPTEMBER -> getString(Res.string.month_september)
+    Month.OCTOBER -> getString(Res.string.month_october)
+    Month.NOVEMBER -> getString(Res.string.month_november)
+    Month.DECEMBER -> getString(Res.string.month_december)
+    else -> getString(Res.string.month_january)
+}
+
+
 @Composable
 fun Month.getShortTitle() = when (this) {
     Month.JANUARY -> stringResource(Res.string.month_january_short)
@@ -295,5 +312,18 @@ fun getNearestDateForNotification(
         isTodayDatePresent.not() -> dates.firstOrNull()
         currentTime.time > notificationTime -> dates.getOrNull(1) //Next date
         else -> dates.firstOrNull()
+    }
+}
+
+fun LocalDate.getEndOfMonth(): LocalDate {
+    return when (this.month) {
+        Month.FEBRUARY -> LocalDate(this.year, this.month, if (isLeapYear(this.year)) 29 else 28)
+        Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> LocalDate(
+            this.year,
+            this.month,
+            30
+        )
+
+        else -> LocalDate(this.year, this.month, 31)
     }
 }
