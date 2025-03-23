@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.calculateStartOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getShortTitle
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -140,7 +141,7 @@ private fun RowScope.DateItem(
 
             // Day name (e.g., "SAT")
             Text(
-                text = date.dayOfWeek.name.take(3),
+                text = date.dayOfWeek.getShortTitle().take(3),
                 style = BloomTheme.typography.small,
                 color = textColor,
                 textAlign = TextAlign.Center
