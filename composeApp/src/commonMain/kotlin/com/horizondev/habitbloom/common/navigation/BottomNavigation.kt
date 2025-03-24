@@ -8,6 +8,8 @@ import habitbloom.composeapp.generated.resources.ic_calendar_filled
 import habitbloom.composeapp.generated.resources.ic_calendar_outlined
 import habitbloom.composeapp.generated.resources.ic_chart_proportion_filled
 import habitbloom.composeapp.generated.resources.ic_chart_proportion_outlined
+import habitbloom.composeapp.generated.resources.ic_garden_filled
+import habitbloom.composeapp.generated.resources.ic_garden_outlined
 import habitbloom.composeapp.generated.resources.ic_home_filled
 import habitbloom.composeapp.generated.resources.ic_home_outlined
 import habitbloom.composeapp.generated.resources.ic_setting_filled
@@ -30,6 +32,9 @@ sealed class BottomNavItem {
      */
     @Serializable
     data object Statistics : BottomNavItem()
+
+    @Serializable
+    data object Garden : BottomNavItem()
 
     /**
      * Calendar tab.
@@ -73,6 +78,12 @@ fun getBottomNavItems() = remember {
             route = BottomNavItem.Settings,
             outlinedIconRes = Res.drawable.ic_setting_outlined,
             filledIconRes = Res.drawable.ic_setting_filled
+        ),
+        TopLevelRoute(
+            name = "Garden",
+            route = BottomNavItem.Garden,
+            outlinedIconRes = Res.drawable.ic_garden_outlined,
+            filledIconRes = Res.drawable.ic_garden_filled
         )
     )
 }

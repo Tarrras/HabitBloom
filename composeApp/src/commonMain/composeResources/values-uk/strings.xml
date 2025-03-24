@@ -276,4 +276,6 @@
     <string name="monthly_habit_tracking">Місячне відстеження звичок</string>
     <string name="quarterly_habit_tracking">Квартальне відстеження звичок</string>
     <string name="yearly_habit_tracking">Річне відстеження звичок</string>
+
+    <string name="your_habit_garden">Ваш Сад Звичок</string>
 </resources>

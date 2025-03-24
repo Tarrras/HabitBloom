@@ -39,6 +39,8 @@ import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
 import com.horizondev.habitbloom.screens.calendar.CalendarScreen
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
+import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenScreen
+import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowGlobalNavEntryPoint
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.addHabitFlowGraph
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
@@ -110,6 +112,16 @@ fun MainScreen() {
                 composable<BottomNavItem.Settings> {
                     val viewModel = koinViewModel<SettingsViewModel>()
                     SettingsScreen(viewModel = viewModel)
+                }
+
+                composable<BottomNavItem.Garden> {
+                    val viewModel = koinViewModel<HabitGardenViewModel>()
+                    HabitGardenScreen(
+                        viewModel = viewModel,
+                        onNavigateToHabitDetails = { habitId ->
+                            navController.navigate(HabitDetailsDestination(habitId))
+                        }
+                    )
                 }
 
                 composable<HabitDetailsDestination> { entry ->
