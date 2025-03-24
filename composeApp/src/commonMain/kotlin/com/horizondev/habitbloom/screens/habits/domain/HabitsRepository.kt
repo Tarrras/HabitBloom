@@ -220,7 +220,11 @@ class HabitsRepository(
                 title = title,
                 description = description,
                 icon = iconUrl
-            )
+            ).onSuccess {
+                getAllHabits().onSuccess { habits ->
+                    remoteHabits.update { habits }
+                }.map { true }
+            }
         }
     }
 

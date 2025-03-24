@@ -1,14 +1,10 @@
 package com.horizondev.habitbloom.screens.garden.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -19,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.domain.BloomingStage
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
@@ -36,16 +33,11 @@ fun HabitFlowerCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    BloomCard(
         modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(0.8f)
-            .clickable { onClick() },
-        shape = RoundedCornerShape(16.dp),
+            .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = BloomTheme.colors.surface
-        )
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier
@@ -59,9 +51,6 @@ fun HabitFlowerCell(
             }
 
             Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
                 // Show a larger image for later stages
