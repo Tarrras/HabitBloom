@@ -278,4 +278,14 @@
     <string name="yearly_habit_tracking">Річне відстеження звичок</string>
 
     <string name="your_habit_garden">Ваш Сад Звичок</string>
+
+    <string name="habit_flower">Квітка Звички</string>
+    <string name="water_today_habit">💧 Полити Сьогоднішню Звичку</string>
+    <string name="watered_today">Полито Сьогодні</string>
+    <string name="current_stage">Поточна стадія:</string>
+    <string name="progress_to_next_stage">Прогрес до наступної стадії:</string>
+    <string name="more_completions_to_grow">Ще %d %s до зростання</string>
+    <string name="days_in_row">%d %s поспіль</string>
+    <string name="last_seven_days">Останні 7 Днів</string>
+    <string name="congratulations_full_bloom">Вітаємо! Ваша квітка повністю розквітла!</string>
 </resources>

@@ -17,7 +17,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.garden.domain.BloomingStage
+import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import org.jetbrains.compose.resources.painterResource
 
@@ -47,7 +48,8 @@ fun HabitFlowerCell(
         ) {
             // Flower image based on the blooming stage
             val flowerResource = remember(habitFlower.bloomingStage) {
-                habitFlower.bloomingStage.getEveningFlowerResource()
+                FlowerType.fromTimeOfDay(habitFlower.timeOfDay)
+                    .getFlowerResource(habitFlower.bloomingStage)
             }
 
             Box(
@@ -55,12 +57,11 @@ fun HabitFlowerCell(
             ) {
                 // Show a larger image for later stages
                 val size = when (habitFlower.bloomingStage) {
-                    BloomingStage.SEED -> 60.dp
-                    BloomingStage.SPROUT -> 65.dp
-                    BloomingStage.PLANT -> 70.dp
-                    BloomingStage.BUD -> 80.dp
-                    BloomingStage.SMALL_FLOWER -> 90.dp
-                    BloomingStage.LARGE_FLOWER -> 95.dp
+                    FlowerGrowthStage.SEED -> 60.dp
+                    FlowerGrowthStage.SPROUT -> 65.dp
+                    FlowerGrowthStage.BUSH -> 70.dp
+                    FlowerGrowthStage.BUD -> 80.dp
+                    FlowerGrowthStage.BLOOM -> 90.dp
                 }
 
                 Icon(

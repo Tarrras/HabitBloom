@@ -270,4 +270,15 @@
     <string name="yearly_habit_tracking">Yearly Habit Tracking</string>
 
     <string name="your_habit_garden">Your Habit Garden</string>
+
+    <string name="habit_flower">Habit Flower</string>
+    <string name="water_today_habit">💧 Water Today's Habit</string>
+    <string name="watered_today">Watered Today</string>
+    <string name="current_stage">Current Stage:</string>
+    <string name="progress_to_next_stage">Progress to next stage:</string>
+    <string name="more_completions_to_grow">%d more %s to grow</string>
+    <string name="days_in_row">%d %s in a row</string>
+    <string name="last_seven_days">Last 7 Days</string>
+    <string name="edit_habit">Edit Habit</string>
+    <string name="congratulations_full_bloom">Congratulations! Your flower has reached full bloom!</string>
 </resources>

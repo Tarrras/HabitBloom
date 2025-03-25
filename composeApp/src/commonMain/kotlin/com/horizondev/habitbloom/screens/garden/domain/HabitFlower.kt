@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.garden.domain
 
+import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 
 /**
@@ -18,5 +19,5 @@ data class HabitFlower(
     val iconUrl: String,
     val streak: Int,
     val timeOfDay: TimeOfDay,
-    val bloomingStage: BloomingStage
+    val bloomingStage: FlowerGrowthStage
 ) 

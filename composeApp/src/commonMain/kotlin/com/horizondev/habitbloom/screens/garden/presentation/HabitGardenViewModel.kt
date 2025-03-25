@@ -2,7 +2,7 @@ package com.horizondev.habitbloom.screens.garden.presentation
 
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.garden.domain.BloomingStage
+import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
@@ -110,7 +110,7 @@ class HabitGardenViewModel(
 
                 // Calculate the bloom stage based on streak
                 val streak = habitInfo.daysStreak
-                val bloomingStage = BloomingStage.fromStreak(streak)
+                val bloomingStage = FlowerGrowthStage.fromStreak(streak)
 
                 HabitFlower(
                     habitId = habitId,

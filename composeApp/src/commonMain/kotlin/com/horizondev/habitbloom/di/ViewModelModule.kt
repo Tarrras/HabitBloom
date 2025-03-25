@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.di
 import CreatePersonalHabitViewModel
 import com.horizondev.habitbloom.app.AppViewModel
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
+import com.horizondev.habitbloom.screens.flowerdetail.presentation.HabitFlowerDetailViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationViewModel
@@ -15,6 +16,7 @@ import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
 import com.horizondev.habitbloom.screens.settings.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import org.koin.core.module.Module
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -48,4 +50,5 @@ val viewModelModule: Module = module {
     viewModelOf(::AddHabitSuccessViewModel)
     viewModelOf(::CreatePersonalHabitViewModel)
     viewModelOf(::HabitGardenViewModel)
+    viewModel { params -> HabitFlowerDetailViewModel(habitId = params.get(), repository = get()) }
 }

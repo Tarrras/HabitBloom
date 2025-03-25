@@ -31,6 +31,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.your_habit_garden
 import org.jetbrains.compose.resources.stringResource
+import org.koin.compose.koinInject
 
 /**
  * Main screen component for the Habit Garden.
@@ -38,8 +39,8 @@ import org.jetbrains.compose.resources.stringResource
  */
 @Composable
 fun HabitGardenScreen(
-    onNavigateToHabitDetails: (Long) -> Unit,
-    viewModel: HabitGardenViewModel
+    onNavigateToHabitFlower: (Long) -> Unit,
+    viewModel: HabitGardenViewModel = koinInject()
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -49,8 +50,7 @@ fun HabitGardenScreen(
             viewModel.handleUiEvent(HabitGardenUiEvent.SelectTimeOfDay(timeOfDay))
         },
         onHabitClick = { habitId ->
-            viewModel.handleUiEvent(HabitGardenUiEvent.OpenHabitDetails(habitId))
-            onNavigateToHabitDetails(habitId)
+            onNavigateToHabitFlower(habitId)
         },
         onRefresh = {
             viewModel.handleUiEvent(HabitGardenUiEvent.RefreshGarden)

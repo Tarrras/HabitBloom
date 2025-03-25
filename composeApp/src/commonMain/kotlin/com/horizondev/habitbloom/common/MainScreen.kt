@@ -39,8 +39,9 @@ import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
 import com.horizondev.habitbloom.screens.calendar.CalendarScreen
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
+import com.horizondev.habitbloom.screens.flowerdetail.FlowerDetailsDestination
+import com.horizondev.habitbloom.screens.flowerdetail.presentation.HabitFlowerDetailScreen
 import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenScreen
-import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowGlobalNavEntryPoint
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.addHabitFlowGraph
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
@@ -94,9 +95,12 @@ fun MainScreen() {
             ) {
                 composable<BottomNavItem.Home> {
                     val viewModel = koinViewModel<HomeViewModel>()
-                    HomeScreen(viewModel = viewModel, navigateToHabitDetails = { userHabitId ->
-                        navController.navigate(HabitDetailsDestination(userHabitId))
-                    })
+                    HomeScreen(
+                        viewModel = viewModel,
+                        navigateToHabitDetails = { userHabitId ->
+                            navController.navigate(HabitDetailsDestination(userHabitId))
+                        }
+                    )
                 }
 
                 composable<BottomNavItem.Statistics> {
@@ -115,11 +119,9 @@ fun MainScreen() {
                 }
 
                 composable<BottomNavItem.Garden> {
-                    val viewModel = koinViewModel<HabitGardenViewModel>()
                     HabitGardenScreen(
-                        viewModel = viewModel,
-                        onNavigateToHabitDetails = { habitId ->
-                            navController.navigate(HabitDetailsDestination(habitId))
+                        onNavigateToHabitFlower = { habitId ->
+                            navController.navigate(FlowerDetailsDestination(habitId))
                         }
                     )
                 }
@@ -130,6 +132,19 @@ fun MainScreen() {
                     HabitDetailsScreen(userHabitId = data.habitId, popBackStack = {
                         navController.popBackStack()
                     })
+                }
+
+                composable<FlowerDetailsDestination> { entry ->
+                    val data = entry.toRoute<FlowerDetailsDestination>()
+
+                    HabitFlowerDetailScreen(
+                        habitId = data.habitId,
+                        onNavigateBack = { navController.popBackStack() },
+                        onNavigateToEditHabit = { habitId ->
+                            // Navigate to edit habit screen when implemented
+                            navController.navigate(HabitDetailsDestination(habitId))
+                        }
+                    )
                 }
 
                 addHabitFlowGraph(

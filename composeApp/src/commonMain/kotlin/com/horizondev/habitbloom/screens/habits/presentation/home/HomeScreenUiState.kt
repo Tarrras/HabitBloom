@@ -26,6 +26,6 @@ sealed interface HomeScreenUiEvent {
     ) : HomeScreenUiEvent
 }
 
-sealed interface HomeScreenUiIntent {
-    data class OpenHabitDetails(val userHabitId: Long) : HomeScreenUiIntent
+sealed class HomeScreenUiIntent {
+    data class OpenHabitDetails(val userHabitId: Long) : HomeScreenUiIntent()
 }
