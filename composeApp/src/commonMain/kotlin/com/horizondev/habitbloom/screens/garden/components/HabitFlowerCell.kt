@@ -22,8 +22,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerType
+import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect

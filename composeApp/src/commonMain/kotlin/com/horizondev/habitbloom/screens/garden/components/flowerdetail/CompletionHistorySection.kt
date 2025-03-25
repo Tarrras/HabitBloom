@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.components
+package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -21,7 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.flowerdetail.domain.HabitFlowerDetail
+import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_cancel
 import habitbloom.composeapp.generated.resources.ic_check_circle

@@ -16,6 +16,12 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,7 +57,8 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
-    navigateToHabitDetails: (Long) -> Unit
+    navigateToHabitDetails: (Long) -> Unit,
+    navigateToAddHabit: () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -60,6 +67,10 @@ fun HomeScreen(
         when (uiIntent) {
             is HomeScreenUiIntent.OpenHabitDetails -> {
                 navigateToHabitDetails(uiIntent.userHabitId)
+            }
+
+            HomeScreenUiIntent.OpenAddNewHabit -> {
+                navigateToAddHabit()
             }
         }
     }
@@ -121,6 +132,28 @@ private fun HomeScreenContent(
         if (uiState.isLoading) {
             BloomLoadingAnimation(
                 modifier = Modifier.align(Alignment.Center).size(150.dp),
+            )
+        }
+
+        FloatingActionButton(
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 24.dp, end = 24.dp)
+                .size(48.dp),
+            containerColor = BloomTheme.colors.primary,
+            onClick = {
+                handleUiEvent(HomeScreenUiEvent.AddNewHabit)
+            },
+            elevation = FloatingActionButtonDefaults.elevation(
+                defaultElevation = 0.dp,
+            ),
+            shape = CircleShape,
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = "Add Habit",
+                tint = BloomTheme.colors.surface,
+                modifier = Modifier.size(24.dp),
             )
         }
     }

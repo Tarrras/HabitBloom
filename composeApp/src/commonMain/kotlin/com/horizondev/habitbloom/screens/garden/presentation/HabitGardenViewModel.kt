@@ -3,7 +3,7 @@ package com.horizondev.habitbloom.screens.garden.presentation
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
@@ -145,13 +145,17 @@ class HabitGardenViewModel(
                 selectedTimeOfDayFlow.value = event.timeOfDay
             }
 
-            is HabitGardenUiEvent.OpenHabitDetails -> {
-                emitUiIntent(HabitGardenUiIntent.OpenHabitDetails(event.habitId))
+            is HabitGardenUiEvent.OpenFlowerDetails -> {
+                emitUiIntent(HabitGardenUiIntent.OpenFlowerDetails(event.habitId))
             }
 
             is HabitGardenUiEvent.RefreshGarden -> {
                 updateState { it.copy(isLoading = true) }
                 initializeData()
+            }
+
+            HabitGardenUiEvent.BackPressed -> {
+                emitUiIntent(HabitGardenUiIntent.NavigateBack)
             }
         }
     }

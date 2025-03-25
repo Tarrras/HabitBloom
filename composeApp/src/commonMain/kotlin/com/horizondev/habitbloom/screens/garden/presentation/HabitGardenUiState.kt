@@ -25,14 +25,19 @@ sealed class HabitGardenUiEvent {
     data class SelectTimeOfDay(val timeOfDay: TimeOfDay) : HabitGardenUiEvent()
 
     /**
-     * Event to open habit details.
+     * Event to open flower details.
      */
-    data class OpenHabitDetails(val habitId: Long) : HabitGardenUiEvent()
+    data class OpenFlowerDetails(val habitId: Long) : HabitGardenUiEvent()
 
     /**
      * Event to refresh garden data.
      */
     data object RefreshGarden : HabitGardenUiEvent()
+
+    /**
+     * Event to go back.
+     */
+    data object BackPressed : HabitGardenUiEvent()
 }
 
 /**
@@ -42,5 +47,10 @@ sealed class HabitGardenUiIntent {
     /**
      * Intent to navigate to habit details.
      */
-    data class OpenHabitDetails(val habitId: Long) : HabitGardenUiIntent()
+    data class OpenFlowerDetails(val habitId: Long) : HabitGardenUiIntent()
+
+    /**
+     * Intent to navigate back.
+     */
+    data object NavigateBack : HabitGardenUiIntent()
 } 

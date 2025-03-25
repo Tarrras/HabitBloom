@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.presentation
+package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -32,11 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.flowerdetail.components.CompletionHistorySection
-import com.horizondev.habitbloom.screens.flowerdetail.components.FlowerVisualization
-import com.horizondev.habitbloom.screens.flowerdetail.components.HabitDetailSection
-import com.horizondev.habitbloom.screens.flowerdetail.components.HabitInfoSection
-import com.horizondev.habitbloom.screens.flowerdetail.components.WaterHabitButton
+import com.horizondev.habitbloom.screens.garden.components.flowerdetail.CompletionHistorySection
+import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerVisualization
+import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitDetailSection
+import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitInfoSection
+import com.horizondev.habitbloom.screens.garden.components.flowerdetail.WaterHabitButton
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 

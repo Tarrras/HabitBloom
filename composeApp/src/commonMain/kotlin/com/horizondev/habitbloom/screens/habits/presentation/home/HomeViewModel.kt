@@ -155,6 +155,10 @@ class HomeViewModel(
                     isCompleted = event.isCompleted
                 )
             }
+
+            HomeScreenUiEvent.AddNewHabit -> {
+                emitUiIntent(HomeScreenUiIntent.OpenAddNewHabit)
+            }
         }
     }
 

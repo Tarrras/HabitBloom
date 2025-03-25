@@ -112,6 +112,7 @@
     <string name="create">Створити</string>
     <string name="add">Додати</string>
     <string name="close">Закрити</string>
+    <string name="retry">Повторити</string>
 
     <string name="title">Заголовок</string>
     <string name="description">Опис</string>
@@ -277,15 +278,16 @@
     <string name="quarterly_habit_tracking">Квартальне відстеження звичок</string>
     <string name="yearly_habit_tracking">Річне відстеження звичок</string>
 
-    <string name="your_habit_garden">Ваш Сад Звичок</string>
-
-    <string name="habit_flower">Квітка Звички</string>
-    <string name="water_today_habit">💧 Полити Сьогоднішню Звичку</string>
-    <string name="watered_today">Полито Сьогодні</string>
+    <string name="your_habit_garden">Твій сад звичок</string>
+    <string name="no_habits_for_time_of_day_in_garden">Немає звичок для показу в %1$d час.\nДодайте звички, щоб побачити, як росте ваш сад!</string>
+    <string name="habit_flower">Квітка звички</string>
+    <string name="water_today_habit">💧 Полити сьогоднішню звичку</string>
+    <string name="watered_today">Полито сьогодні</string>
     <string name="current_stage">Поточна стадія:</string>
     <string name="progress_to_next_stage">Прогрес до наступної стадії:</string>
     <string name="more_completions_to_grow">Ще %d %s до зростання</string>
     <string name="days_in_row">%d %s поспіль</string>
-    <string name="last_seven_days">Останні 7 Днів</string>
+    <string name="last_seven_days">Останні 7 днів</string>
+    <string name="edit_habit">Редагувати звичку</string>
     <string name="congratulations_full_bloom">Вітаємо! Ваша квітка повністю розквітла!</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.domain
+package com.horizondev.habitbloom.screens.garden.domain
 
 /**
  * Enum defining the different growth stages of a habit flower.

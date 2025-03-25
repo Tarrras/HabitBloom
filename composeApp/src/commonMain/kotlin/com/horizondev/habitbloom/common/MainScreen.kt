@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -39,9 +37,8 @@ import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
 import com.horizondev.habitbloom.screens.calendar.CalendarScreen
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
-import com.horizondev.habitbloom.screens.flowerdetail.FlowerDetailsDestination
-import com.horizondev.habitbloom.screens.flowerdetail.presentation.HabitFlowerDetailScreen
-import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenScreen
+import com.horizondev.habitbloom.screens.garden.GardenFlowGlobalNavEntryPoint
+import com.horizondev.habitbloom.screens.garden.gardenNestedFlowGraph
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowGlobalNavEntryPoint
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.addHabitFlowGraph
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.CreatePersonalHabitFlowRoute
@@ -54,6 +51,8 @@ import com.horizondev.habitbloom.screens.settings.presentation.SettingsScreen
 import com.horizondev.habitbloom.screens.settings.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticScreen
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.flower_garden_round_icon
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -99,6 +98,9 @@ fun MainScreen() {
                         viewModel = viewModel,
                         navigateToHabitDetails = { userHabitId ->
                             navController.navigate(HabitDetailsDestination(userHabitId))
+                        },
+                        navigateToAddHabit = {
+                            navController.navigate(AddHabitFlowGlobalNavEntryPoint)
                         }
                     )
                 }
@@ -118,14 +120,6 @@ fun MainScreen() {
                     SettingsScreen(viewModel = viewModel)
                 }
 
-                composable<BottomNavItem.Garden> {
-                    HabitGardenScreen(
-                        onNavigateToHabitFlower = { habitId ->
-                            navController.navigate(FlowerDetailsDestination(habitId))
-                        }
-                    )
-                }
-
                 composable<HabitDetailsDestination> { entry ->
                     val data = entry.toRoute<HabitDetailsDestination>()
 
@@ -134,24 +128,15 @@ fun MainScreen() {
                     })
                 }
 
-                composable<FlowerDetailsDestination> { entry ->
-                    val data = entry.toRoute<FlowerDetailsDestination>()
-
-                    HabitFlowerDetailScreen(
-                        habitId = data.habitId,
-                        onNavigateBack = { navController.popBackStack() },
-                        onNavigateToEditHabit = { habitId ->
-                            // Navigate to edit habit screen when implemented
-                            navController.navigate(HabitDetailsDestination(habitId))
-                        }
-                    )
-                }
-
                 addHabitFlowGraph(
                     navController = navController,
                     onNavigateToCreateCustomHabit = { timeOfDay ->
                         navController.navigate(CreatePersonalHabitFlowRoute.CreateHabit(timeOfDay))
                     }
+                )
+
+                gardenNestedFlowGraph(
+                    navController = navController
                 )
 
                 createPersonalHabitFlowGraph(
@@ -166,7 +151,7 @@ fun MainScreen() {
                     modifier = Modifier.size(48.dp).offset(y = 42.dp),
                     containerColor = BloomTheme.colors.primary,
                     onClick = {
-                        navController.navigate(AddHabitFlowGlobalNavEntryPoint)
+                        navController.navigate(GardenFlowGlobalNavEntryPoint)
                     },
                     elevation = FloatingActionButtonDefaults.elevation(
                         defaultElevation = 0.dp,
@@ -174,10 +159,10 @@ fun MainScreen() {
                     shape = CircleShape,
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Add,
+                        painter = painterResource(Res.drawable.flower_garden_round_icon),
                         contentDescription = "Add Habit",
                         tint = BloomTheme.colors.surface,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier.size(32.dp),
                     )
                 }
             }

@@ -3,8 +3,8 @@ package com.horizondev.habitbloom.di
 import CreatePersonalHabitViewModel
 import com.horizondev.habitbloom.app.AppViewModel
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
-import com.horizondev.habitbloom.screens.flowerdetail.presentation.HabitFlowerDetailViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
+import com.horizondev.habitbloom.screens.garden.presentation.flowerdetail.HabitFlowerDetailViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceViewModel

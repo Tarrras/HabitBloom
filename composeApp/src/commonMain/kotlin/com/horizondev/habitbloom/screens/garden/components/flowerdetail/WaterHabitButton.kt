@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.components
+package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween

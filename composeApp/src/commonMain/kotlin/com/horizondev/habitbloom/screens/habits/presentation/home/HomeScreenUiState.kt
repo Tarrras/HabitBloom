@@ -24,8 +24,11 @@ sealed interface HomeScreenUiEvent {
         val id: Long,
         val isCompleted: Boolean
     ) : HomeScreenUiEvent
+
+    data object AddNewHabit : HomeScreenUiEvent
 }
 
 sealed class HomeScreenUiIntent {
     data class OpenHabitDetails(val userHabitId: Long) : HomeScreenUiIntent()
+    data object OpenAddNewHabit : HomeScreenUiIntent()
 }

@@ -1,6 +1,6 @@
-package com.horizondev.habitbloom.screens.flowerdetail.presentation
+package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
-import com.horizondev.habitbloom.screens.flowerdetail.domain.HabitFlowerDetail
+import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 
 /**
  * UI state for the Habit Flower Detail screen.

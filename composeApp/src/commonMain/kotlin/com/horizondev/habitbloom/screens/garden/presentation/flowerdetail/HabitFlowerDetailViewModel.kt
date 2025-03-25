@@ -1,10 +1,10 @@
-package com.horizondev.habitbloom.screens.flowerdetail.presentation
+package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerType
-import com.horizondev.habitbloom.screens.flowerdetail.domain.HabitFlowerDetail
+import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerType
+import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.minusDays

@@ -2,10 +2,13 @@ package com.horizondev.habitbloom.screens.garden.presentation
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,12 +16,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,19 +37,22 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.switcher.TimeOfDaySwitcher
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.components.HabitFlowerCell
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.getTitle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.garden_background_evening
 import habitbloom.composeapp.generated.resources.garden_background_morning
+import habitbloom.composeapp.generated.resources.no_habits_for_time_of_day_in_garden
+import habitbloom.composeapp.generated.resources.retry
 import habitbloom.composeapp.generated.resources.your_habit_garden
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import org.koin.compose.koinInject
 
 /**
  * Main screen component for the Habit Garden.
@@ -50,22 +60,27 @@ import org.koin.compose.koinInject
  */
 @Composable
 fun HabitGardenScreen(
+    viewModel: HabitGardenViewModel,
     onNavigateToHabitFlower: (Long) -> Unit,
-    viewModel: HabitGardenViewModel = koinInject()
+    onNavigateBack: () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
+    viewModel.uiIntents.collectAsEffect { uiIntent ->
+        when (uiIntent) {
+            HabitGardenUiIntent.NavigateBack -> {
+                onNavigateBack()
+            }
+
+            is HabitGardenUiIntent.OpenFlowerDetails -> {
+                onNavigateToHabitFlower(uiIntent.habitId)
+            }
+        }
+    }
+
     HabitGardenContent(
         uiState = uiState,
-        onTimeOfDaySelected = { timeOfDay ->
-            viewModel.handleUiEvent(HabitGardenUiEvent.SelectTimeOfDay(timeOfDay))
-        },
-        onHabitClick = { habitId ->
-            onNavigateToHabitFlower(habitId)
-        },
-        onRefresh = {
-            viewModel.handleUiEvent(HabitGardenUiEvent.RefreshGarden)
-        }
+        handleUiEvent = viewModel::handleUiEvent
     )
 }
 
@@ -75,9 +90,7 @@ fun HabitGardenScreen(
 @Composable
 private fun HabitGardenContent(
     uiState: HabitGardenUiState,
-    onTimeOfDaySelected: (TimeOfDay) -> Unit,
-    onHabitClick: (Long) -> Unit,
-    onRefresh: () -> Unit
+    handleUiEvent: (HabitGardenUiEvent) -> Unit
 ) {
     val hazeState = remember { HazeState() }
 
@@ -112,18 +125,41 @@ private fun HabitGardenContent(
         ) {
             Spacer(modifier = Modifier.statusBarsPadding())
 
-            Text(
-                text = stringResource(Res.string.your_habit_garden),
-                style = BloomTheme.typography.title,
-                color = BloomTheme.colors.textColor.primary
-            )
+            Spacer(modifier = Modifier.height(18.dp))
+
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                    contentDescription = "back",
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = ripple(bounded = false)
+                        ) {
+                            handleUiEvent(HabitGardenUiEvent.BackPressed)
+                        },
+                    tint = BloomTheme.colors.textColor.primary
+                )
+
+                Spacer(modifier = Modifier.width(18.dp))
+
+                Text(
+                    text = stringResource(Res.string.your_habit_garden),
+                    style = BloomTheme.typography.title,
+                    color = BloomTheme.colors.textColor.primary
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             // Time of day switcher
             TimeOfDaySwitcher(
                 selectedTimeOfDay = uiState.selectedTimeOfDay,
-                onTimeOfDaySelected = onTimeOfDaySelected,
+                onTimeOfDaySelected = { timeOfDay ->
+                    handleUiEvent(HabitGardenUiEvent.SelectTimeOfDay(timeOfDay))
+                },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -166,11 +202,10 @@ private fun HabitGardenContent(
 
                             Spacer(modifier = Modifier.height(24.dp))
 
-                            Button(
-                                onClick = onRefresh
-                            ) {
-                                Text("Retry")
-                            }
+                            BloomPrimaryOutlinedButton(
+                                onClick = { handleUiEvent(HabitGardenUiEvent.RefreshGarden) },
+                                text = stringResource(Res.string.retry)
+                            )
                         }
                     }
                 }
@@ -185,7 +220,10 @@ private fun HabitGardenContent(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "No habits to display for ${uiState.selectedTimeOfDay.name.lowercase()} time.\nAdd some habits to see your garden grow!",
+                            text = stringResource(
+                                Res.string.no_habits_for_time_of_day_in_garden,
+                                uiState.selectedTimeOfDay.getTitle().lowercase()
+                            ),
                             style = BloomTheme.typography.body,
                             color = BloomTheme.colors.textColor.secondary,
                             textAlign = TextAlign.Center,
@@ -208,7 +246,13 @@ private fun HabitGardenContent(
                         ) { habitFlower ->
                             HabitFlowerCell(
                                 habitFlower = habitFlower,
-                                onClick = { onHabitClick(habitFlower.habitId) },
+                                onClick = {
+                                    handleUiEvent(
+                                        HabitGardenUiEvent.OpenFlowerDetails(
+                                            habitId = habitFlower.habitId
+                                        )
+                                    )
+                                },
                                 modifier = Modifier.padding(8.dp),
                                 hazeState = hazeState
                             )

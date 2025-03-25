@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.domain
+package com.horizondev.habitbloom.screens.garden.domain
 
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res

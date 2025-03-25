@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail
+package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
 import com.horizondev.habitbloom.core.navigation.NavTarget
 import kotlinx.serialization.Serializable

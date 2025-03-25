@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.components
+package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerType
+import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_water_drop
 import org.jetbrains.compose.resources.ExperimentalResourceApi

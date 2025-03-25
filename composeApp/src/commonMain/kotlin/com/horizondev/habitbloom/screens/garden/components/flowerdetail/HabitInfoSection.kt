@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.components
+package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.afternoon_habits_image

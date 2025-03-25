@@ -1,4 +1,4 @@
-package com.horizondev.habitbloom.screens.flowerdetail.components
+package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
