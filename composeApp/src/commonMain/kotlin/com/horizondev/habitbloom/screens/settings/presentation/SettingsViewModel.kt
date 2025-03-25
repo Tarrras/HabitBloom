@@ -33,7 +33,7 @@ class SettingsViewModel(
         }
 
         // Listen for theme changes
-        themeUseCase.themeMode.onEach { mode ->
+        themeUseCase.themeModeFlow.onEach { mode ->
             updateState { it.copy(themeMode = mode) }
         }.launchIn(viewModelScope)
     }

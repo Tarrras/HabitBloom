@@ -17,7 +17,7 @@ fun BloomTheme(
     content: @Composable () -> Unit
 ) {
     val themeUseCase: ThemeUseCase = koinInject()
-    val themeMode by themeUseCase.themeMode.collectAsState(initial = ThemeOption.Device)
+    val themeMode by themeUseCase.themeModeFlow.collectAsState(initial = ThemeOption.Device)
 
     val isDarkTheme = when (themeMode) {
         ThemeOption.Light -> false

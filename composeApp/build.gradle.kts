@@ -103,8 +103,6 @@ kotlin {
             implementation(libs.coroutines.extensions)
             implementation(libs.primitive.adapters)
 
-            api(libs.multiplatformSettings.noArg)
-            api(libs.multiplatformSettings.coroutines)
 
             api(libs.napier)
 
@@ -137,13 +135,18 @@ kotlin {
             implementation(libs.lifecycle.common)
 
             // Add moko-permissions
-            implementation("dev.icerock.moko:permissions:0.19.1")
-            implementation("dev.icerock.moko:permissions-notifications:0.19.1")
-            implementation("dev.icerock.moko:permissions-compose:0.19.1")
+            implementation(libs.permissions)
+            implementation(libs.permissions.notifications)
+            implementation(libs.permissions.compose)
 
-            implementation("com.russhwolf:multiplatform-settings:1.3.0")
-            implementation("com.russhwolf:multiplatform-settings-coroutines:1.3.0")
-            implementation("com.russhwolf:multiplatform-settings-make-observable:1.3.0")
+            implementation(libs.multiplatform.settings)
+            implementation(libs.multiplatform.settings.coroutines)
+            implementation(libs.multiplatform.settings.make.observable)
+            api(libs.multiplatformSettings.noArg)
+
+            implementation(libs.haze)
+            implementation(libs.haze.materials)
+
         }
     }
 

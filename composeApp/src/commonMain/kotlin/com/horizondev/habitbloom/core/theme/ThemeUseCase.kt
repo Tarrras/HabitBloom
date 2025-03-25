@@ -10,8 +10,9 @@ class ThemeUseCase(
     /**
      * Provides a flow of the current theme mode.
      */
-    val themeMode: Flow<ThemeOption> = repository.getThemeState()
+    val themeModeFlow: Flow<ThemeOption> = repository.getThemeStateFlow()
 
+    fun getThemeMode() = repository.getThemeState()
 
     /**
      * Updates the theme mode.

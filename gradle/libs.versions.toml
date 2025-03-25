@@ -2,9 +2,13 @@
 androidDriver = "2.0.0"
 calendarComposeMultiplatform = "2.6.0-beta01"
 coilCompose = "3.1.0"
+haze = "1.5.2"
 kamelImage = "0.9.5"
 lifecycleCommon = "2.8.4"
+multiplatformSettingsCoroutines = "1.3.0"
+multiplatformSettingsVersion = "1.3.0"
 navigationCompose = "2.9.0-alpha14"
+permissions = "0.19.1"
 sqlDelight = "2.0.0"
 firebaseBom = "33.2.0"
 supabaseBom = "3.1.2"
@@ -46,6 +50,8 @@ coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
 core = { module = "androidx.core:core", version.ref = "core" }
 coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "androidDriver" }
+haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
+haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
 kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamelImage" }
 koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koalaplotCore" }
@@ -60,14 +66,19 @@ kotlinX-serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serializat
 lifecycle-common = { module = "org.jetbrains.androidx.lifecycle:lifecycle-common", version.ref = "lifecycleCommon" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleCommon" }
 material3-window-size-multiplatform = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "material3WindowSizeClassMultiplatform" }
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettingsVersion" }
+multiplatform-settings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettingsCoroutines" }
+multiplatform-settings-make-observable = { module = "com.russhwolf:multiplatform-settings-make-observable", version.ref = "multiplatformSettingsCoroutines" }
 native-driver = { module = "app.cash.sqldelight:native-driver", version.ref = "androidDriver" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
+permissions = { module = "dev.icerock.moko:permissions", version.ref = "permissions" }
+permissions-compose = { module = "dev.icerock.moko:permissions-compose", version.ref = "permissions" }
+permissions-notifications = { module = "dev.icerock.moko:permissions-notifications", version.ref = "permissions" }
 primitive-adapters = { module = "app.cash.sqldelight:primitive-adapters", version.ref = "androidDriver" }
 sqlDelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqlDelight" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier" }
 kotlinX-dateTime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinxDateTime" }
 multiplatformSettings-noArg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
-multiplatformSettings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettings" }
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }

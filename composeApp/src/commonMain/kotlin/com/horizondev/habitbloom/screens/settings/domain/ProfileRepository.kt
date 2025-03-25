@@ -117,9 +117,13 @@ class ProfileRepository(
         return currentState.isEnabled()
     }
 
-    fun getThemeState() = settings
+    fun getThemeStateFlow() = settings
         .getStringFlow(SETTINGS_THEME_KEY, ThemeOption.Device.toString())
         .map { ThemeOption.valueOf(it) }
+
+    fun getThemeState() = settings
+        .getString(SETTINGS_THEME_KEY, ThemeOption.Device.toString())
+        .let { ThemeOption.valueOf(it) }
 
     fun updateThemeState(
         option: ThemeOption

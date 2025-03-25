@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.garden.presentation
 
 import androidx.lifecycle.viewModelScope
+import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.flowerdetail.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
@@ -21,11 +22,13 @@ import kotlinx.coroutines.flow.onStart
  * Manages the UI state for displaying habits with their flower stages.
  */
 class HabitGardenViewModel(
-    private val repository: HabitsRepository
+    private val repository: HabitsRepository,
+    themeUseCase: ThemeUseCase
 ) : BloomViewModel<HabitGardenUiState, HabitGardenUiIntent>(
     HabitGardenUiState(
         selectedTimeOfDay = getTimeOfDay(),
-        isLoading = true
+        isLoading = true,
+        themeOption = themeUseCase.getThemeMode()
     )
 ) {
     private val TAG = "HabitGardenViewModel"
