@@ -1,7 +1,6 @@
 package com.horizondev.habitbloom.screens.garden.domain
 
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 
@@ -19,7 +18,6 @@ data class HabitFlowerDetail(
     val longestStreak: Int,
     val startDate: LocalDate,
     val repeats: Int,
-    val repeatDays: List<DayOfWeek>,
     val reminderTime: LocalTime?,
     val lastSevenDaysCompletions: List<DailyCompletion>,
     val isCompletedToday: Boolean,

@@ -42,8 +42,8 @@ fun NavGraphBuilder.gardenNestedFlowGraph(
                 onNavigateBack = {
                     navController.popBackStack()
                 },
-                onNavigateToEditHabit = {
-                    navController.navigate(HabitDetailsDestination)
+                onNavigateToHabitDetails = { habitId ->
+                    navController.navigate(HabitDetailsDestination(habitId))
                 }
             )
         }

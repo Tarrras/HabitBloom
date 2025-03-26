@@ -8,14 +8,12 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
-import com.horizondev.habitbloom.utils.minusDays
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.daysUntil
 
 /**
  * ViewModel for the Habit Flower Detail screen.
@@ -50,25 +48,18 @@ class HabitFlowerDetailViewModel(
                 // Get current date for calculations
                 val today = getCurrentDate()
 
-                // Calculate which records are within the last 7 days
-                val lastSevenDaysRecords = habitInfo.records
-                    .filter { record ->
-                        val recordDate = record.date
-                        val daysBetween = recordDate.daysUntil(today)
-                        daysBetween <= 6 // 0 to 6 days ago (including today)
+                // Reverse to get chronological order (oldest first)
+                val lastSevenScheduledDays = habitInfo.records
+                    .filter { it.date <= today }
+                    .sortedByDescending { it.date }
+                    .take(7)
+                    .map { record ->
+                        HabitFlowerDetail.DailyCompletion(
+                            date = record.date,
+                            isCompleted = record.isCompleted
+                        )
                     }
-                    .sortedBy { it.date }
-
-                // Map to daily completion records for the last 7 days
-                val lastSevenDays = (0..6).map { daysAgo ->
-                    val targetDate = today.minusDays(daysAgo.toLong())
-                    val record = lastSevenDaysRecords.firstOrNull { it.date == targetDate }
-
-                    HabitFlowerDetail.DailyCompletion(
-                        date = targetDate,
-                        isCompleted = record?.isCompleted ?: false
-                    )
-                }.reversed() // Most recent last
+                    .reversed()
 
                 // Determine flower growth stage based on current streak
                 val growthStage = FlowerGrowthStage.fromStreak(habitInfo.daysStreak)
@@ -94,9 +85,8 @@ class HabitFlowerDetailViewModel(
                     longestStreak = 0, //todo add later
                     startDate = habitInfo.startDate,
                     repeats = habitInfo.repeats,
-                    repeatDays = habitInfo.days,
                     reminderTime = habitInfo.reminderTime,
-                    lastSevenDaysCompletions = lastSevenDays,
+                    lastSevenDaysCompletions = lastSevenScheduledDays,
                     isCompletedToday = isCompletedToday,
                     flowerGrowthStage = growthStage,
                     flowerType = flowerType,
@@ -133,8 +123,8 @@ class HabitFlowerDetailViewModel(
                 waterHabit()
             }
 
-            is HabitFlowerDetailUiEvent.NavigateToEditHabit -> {
-                emitUiIntent(HabitFlowerDetailUiIntent.NavigateToEditHabit(event.habitId))
+            is HabitFlowerDetailUiEvent.NavigateToHabitDetails -> {
+                emitUiIntent(HabitFlowerDetailUiIntent.NavigateToHabitDetails(event.habitId))
             }
 
             is HabitFlowerDetailUiEvent.NavigateBack -> {

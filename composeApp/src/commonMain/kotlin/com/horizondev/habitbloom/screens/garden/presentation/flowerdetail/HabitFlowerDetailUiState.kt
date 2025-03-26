@@ -29,14 +29,14 @@ sealed class HabitFlowerDetailUiIntent {
     /**
      * Navigate back to the previous screen
      */
-    object NavigateBack : HabitFlowerDetailUiIntent()
+    data object NavigateBack : HabitFlowerDetailUiIntent()
 
     /**
-     * Navigate to the edit habit screen
+     * Navigate to the habit details screen
      *
      * @property habitId The ID of the habit to edit
      */
-    data class NavigateToEditHabit(val habitId: Long) : HabitFlowerDetailUiIntent()
+    data class NavigateToHabitDetails(val habitId: Long) : HabitFlowerDetailUiIntent()
 
     /**
      * Show a snackbar message
@@ -54,17 +54,17 @@ sealed class HabitFlowerDetailUiEvent {
     /**
      * Water (complete) today's habit
      */
-    object WaterTodaysHabit : HabitFlowerDetailUiEvent()
+    data object WaterTodaysHabit : HabitFlowerDetailUiEvent()
 
     /**
      * Navigate to the edit habit screen
      *
      * @property habitId The ID of the habit to edit
      */
-    data class NavigateToEditHabit(val habitId: Long) : HabitFlowerDetailUiEvent()
+    data class NavigateToHabitDetails(val habitId: Long) : HabitFlowerDetailUiEvent()
 
     /**
      * Navigate back to the previous screen
      */
-    object NavigateBack : HabitFlowerDetailUiEvent()
+    data object NavigateBack : HabitFlowerDetailUiEvent()
 } 

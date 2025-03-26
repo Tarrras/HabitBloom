@@ -57,13 +57,13 @@ import org.koin.core.parameter.parametersOf
  *
  * @param habitId The ID of the habit to display
  * @param onNavigateBack Callback when the back button is pressed
- * @param onNavigateToEditHabit Callback when the edit habit button is pressed
+ * @param onNavigateToHabitDetails Callback when the edit habit button is pressed
  */
 @Composable
 fun HabitFlowerDetailScreen(
     habitId: Long,
     onNavigateBack: () -> Unit,
-    onNavigateToEditHabit: (Long) -> Unit,
+    onNavigateToHabitDetails: (Long) -> Unit,
 ) {
     val viewModel = koinViewModel<HabitFlowerDetailViewModel> {
         parametersOf(habitId)
@@ -79,8 +79,8 @@ fun HabitFlowerDetailScreen(
                     onNavigateBack()
                 }
 
-                is HabitFlowerDetailUiIntent.NavigateToEditHabit -> {
-                    onNavigateToEditHabit(intent.habitId)
+                is HabitFlowerDetailUiIntent.NavigateToHabitDetails -> {
+                    onNavigateToHabitDetails(intent.habitId)
                 }
 
                 is HabitFlowerDetailUiIntent.ShowSnackbar -> {
@@ -241,11 +241,10 @@ fun HabitFlowerDetailScreenContent(
                             HabitDetailSection(
                                 description = habitFlowerDetail.description,
                                 startDate = habitFlowerDetail.startDate,
-                                repeatDays = habitFlowerDetail.repeatDays,
                                 reminderTime = habitFlowerDetail.reminderTime,
-                                onEditClick = {
+                                onCheckFullHabitInfoClick = {
                                     handleUiEvent(
-                                        HabitFlowerDetailUiEvent.NavigateToEditHabit(
+                                        HabitFlowerDetailUiEvent.NavigateToHabitDetails(
                                             habitFlowerDetail.habitId
                                         )
                                     )

@@ -282,6 +282,7 @@
     <string name="days_in_row">%1$d %2$s in a row</string>
     <string name="last_seven_days">Last 7 Days</string>
     <string name="edit_habit">Edit Habit</string>
+    <string name="check_full_habit_info">Check full habit info</string>
     <string name="congratulations_full_bloom">Congratulations! Your flower has reached full bloom!</string>
 
     <!-- Flower Growth Stages -->

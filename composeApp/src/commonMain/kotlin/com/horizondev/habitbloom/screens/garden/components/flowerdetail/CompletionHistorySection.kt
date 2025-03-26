@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
+import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getShortTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.completed_on_date
@@ -74,7 +75,7 @@ fun CompletionHistorySection(
                     DayCompletionItem(
                         date = dailyCompletion.date,
                         isCompleted = dailyCompletion.isCompleted,
-                        isLastItem = index == completions.lastIndex,
+                        isToday = dailyCompletion.date == getCurrentDate(),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -95,7 +96,7 @@ fun CompletionHistorySection(
 private fun DayCompletionItem(
     date: LocalDate,
     isCompleted: Boolean,
-    isLastItem: Boolean,
+    isToday: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -105,7 +106,7 @@ private fun DayCompletionItem(
         Text(
             text = date.dayOfWeek.getShortTitle(),
             style = BloomTheme.typography.small.copy(
-                fontWeight = if (isLastItem) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
             ),
             color = BloomTheme.colors.textColor.secondary,
             textAlign = TextAlign.Center
@@ -160,7 +161,7 @@ private fun DayCompletionItem(
         Text(
             text = date.dayOfMonth.toString(),
             style = BloomTheme.typography.small.copy(
-                fontWeight = if (isLastItem) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
             ),
             color = BloomTheme.colors.textColor.primary,
             textAlign = TextAlign.Center

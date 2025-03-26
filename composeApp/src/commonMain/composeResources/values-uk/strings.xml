@@ -290,6 +290,7 @@
     <string name="days_in_row">%1$d %2$s поспіль</string>
     <string name="last_seven_days">Останні 7 днів</string>
     <string name="edit_habit">Редагувати звичку</string>
+    <string name="check_full_habit_info">Переглянути повну інформацію звички</string>
     <string name="congratulations_full_bloom">Вітаємо! Ваша квітка повністю розквітла!</string>
 
     <!-- Flower Growth Stages -->
