@@ -28,9 +28,10 @@ import habitbloom.composeapp.generated.resources.current_completion_streak
 import habitbloom.composeapp.generated.resources.current_streak
 import habitbloom.composeapp.generated.resources.days_plural
 import habitbloom.composeapp.generated.resources.habit_records
+import habitbloom.composeapp.generated.resources.ic_overall_rate
+import habitbloom.composeapp.generated.resources.ic_total_successfully_completed
 import habitbloom.composeapp.generated.resources.overall_rate
 import habitbloom.composeapp.generated.resources.total_done
-import habitbloom.composeapp.generated.resources.total_successfully_completed
 import io.github.koalaplot.core.util.toString
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -93,7 +94,7 @@ fun UserHabitProgressCard(
                 ) {
                     UserHabitProgressCell(
                         modifier = Modifier.weight(1f),
-                        icon = painterResource(Res.drawable.total_successfully_completed),
+                        icon = painterResource(Res.drawable.ic_total_successfully_completed),
                         title = pluralStringResource(
                             Res.plurals.days_plural,
                             uiState.totalDone,
@@ -104,7 +105,7 @@ fun UserHabitProgressCard(
                     VerticalDivider(modifier = Modifier.fillMaxHeight())
                     UserHabitProgressCell(
                         modifier = Modifier.weight(1f),
-                        icon = painterResource(Res.drawable.overall_rate),
+                        icon = painterResource(Res.drawable.ic_overall_rate),
                         title = "${uiState.overallRate.toString(0)} %",
                         subtitle = stringResource(Res.string.overall_rate)
                     )

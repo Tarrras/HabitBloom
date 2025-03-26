@@ -1,25 +1,29 @@
 package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,16 +31,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.CompletionHistorySection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerVisualization
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitDetailSection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitInfoSection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.WaterHabitButton
+import com.horizondev.habitbloom.utils.getGardenBackgroundRes
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeSource
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -47,7 +56,6 @@ import org.koin.core.parameter.parametersOf
  * @param onNavigateBack Callback when the back button is pressed
  * @param onNavigateToEditHabit Callback when the edit habit button is pressed
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HabitFlowerDetailScreen(
     habitId: Long,
@@ -73,131 +81,177 @@ fun HabitFlowerDetailScreen(
                 }
 
                 is HabitFlowerDetailUiIntent.ShowSnackbar -> {
-                    snackbarHostState.showSnackbar(intent.message)
+                    snackbarHostState.showSnackbar(intent.visuals)
                 }
             }
         }
     }
 
+    HabitFlowerDetailScreenContent(
+        uiState = uiState,
+        snackbarHostState = snackbarHostState,
+        handleUiEvent = viewModel::handleUiEvent
+    )
+}
+
+@Composable
+fun HabitFlowerDetailScreenContent(
+    uiState: HabitFlowerDetailUiState,
+    snackbarHostState: SnackbarHostState,
+    handleUiEvent: (HabitFlowerDetailUiEvent) -> Unit
+) {
+    val hazeState = remember { HazeState() }
+    val isSystemInDarkTheme = isSystemInDarkTheme()
+    val backgroundImage = remember(uiState.themeOption) {
+        uiState.themeOption.getGardenBackgroundRes(isSystemInDarkTheme)
+    }
+
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = "Habit Flower",
-                        style = BloomTheme.typography.title,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = { viewModel.handleUiEvent(HabitFlowerDetailUiEvent.NavigateBack) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = BloomTheme.colors.background,
-                    titleContentColor = BloomTheme.colors.textColor.primary,
-                    navigationIconContentColor = BloomTheme.colors.textColor.primary
-                )
+        snackbarHost = {
+            BloomSnackbarHost(
+                modifier = Modifier.fillMaxSize().statusBarsPadding(),
+                snackBarState = snackbarHostState
             )
         }
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .background(BloomTheme.colors.background)
+            modifier = Modifier.fillMaxSize()
         ) {
-            when {
-                uiState.isLoading -> {
-                    // Loading state
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        BloomLoadingAnimation(
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
+            Image(
+                modifier = Modifier
+                    .hazeSource(state = hazeState)
+                    .fillMaxSize(),
+                painter = painterResource(backgroundImage),
+                contentScale = ContentScale.Crop,
+                contentDescription = "background"
+            )
 
-                uiState.errorMessage != null -> {
-                    // Error state
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = uiState.errorMessage!!,
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.error,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Spacer(modifier = Modifier.statusBarsPadding())
 
-                uiState.habitFlowerDetail != null -> {
-                    // Habit flower detail content
-                    val habitFlowerDetail = uiState.habitFlowerDetail!!
+                Spacer(modifier = Modifier.height(18.dp))
 
-                    Column(
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
+                        contentDescription = "back",
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(bottom = 16.dp)
-                    ) {
-                        // Flower visualization
-                        FlowerVisualization(
-                            flowerType = habitFlowerDetail.flowerType,
-                            growthStage = habitFlowerDetail.flowerGrowthStage,
-                            showWateringAnimation = uiState.showWateringAnimation
-                        )
+                            .size(24.dp)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = ripple(bounded = false)
+                            ) {
+                                handleUiEvent(HabitFlowerDetailUiEvent.NavigateBack)
+                            },
+                        tint = BloomTheme.colors.textColor.primary
+                    )
 
-                        // Habit info section
-                        HabitInfoSection(
-                            habitName = habitFlowerDetail.name,
-                            timeOfDay = habitFlowerDetail.timeOfDay,
-                            growthStage = habitFlowerDetail.flowerGrowthStage,
-                            currentStreak = habitFlowerDetail.currentStreak,
-                            streaksToNextStage = habitFlowerDetail.streaksToNextStage
-                        )
+                    Spacer(modifier = Modifier.width(18.dp))
 
-                        // Water habit button
-                        WaterHabitButton(
-                            isCompleted = habitFlowerDetail.isCompletedToday,
-                            isLoading = uiState.showWateringAnimation,
-                            onClick = {
-                                viewModel.handleUiEvent(HabitFlowerDetailUiEvent.WaterTodaysHabit)
-                            }
-                        )
+                    Text(
+                        text = "Habit flower details", //todo add to translation
+                        style = BloomTheme.typography.title,
+                        color = BloomTheme.colors.textColor.primary
+                    )
+                }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                        // 7-day completion history
-                        CompletionHistorySection(
-                            completions = habitFlowerDetail.lastSevenDaysCompletions
-                        )
+                when {
+                    uiState.isLoading -> {
+                        // Loading state
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            BloomLoadingAnimation(
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
 
-                        // Habit details section
-                        HabitDetailSection(
-                            description = habitFlowerDetail.description,
-                            startDate = habitFlowerDetail.startDate,
-                            repeatDays = habitFlowerDetail.repeatDays,
-                            reminderTime = habitFlowerDetail.reminderTime,
-                            onEditClick = {
-                                viewModel.handleUiEvent(
-                                    HabitFlowerDetailUiEvent.NavigateToEditHabit(habitFlowerDetail.habitId)
-                                )
-                            }
-                        )
+                    uiState.errorMessage != null -> {
+                        // Error state
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = uiState.errorMessage,
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.error,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        }
+                    }
+
+                    uiState.habitFlowerDetail != null -> {
+                        // Habit flower detail content
+                        val habitFlowerDetail = uiState.habitFlowerDetail
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(bottom = 16.dp)
+                        ) {
+                            // Flower visualization
+                            FlowerVisualization(
+                                flowerType = habitFlowerDetail.flowerType,
+                                growthStage = habitFlowerDetail.flowerGrowthStage,
+                                showWateringAnimation = uiState.showWateringAnimation
+                            )
+
+                            // Habit info section
+                            HabitInfoSection(
+                                habitName = habitFlowerDetail.name,
+                                timeOfDay = habitFlowerDetail.timeOfDay,
+                                growthStage = habitFlowerDetail.flowerGrowthStage,
+                                currentStreak = habitFlowerDetail.currentStreak,
+                                streaksToNextStage = habitFlowerDetail.streaksToNextStage
+                            )
+
+                            // Water habit button
+                            WaterHabitButton(
+                                isCompleted = habitFlowerDetail.isCompletedToday,
+                                isLoading = uiState.showWateringAnimation,
+                                onClick = {
+                                    handleUiEvent(HabitFlowerDetailUiEvent.WaterTodaysHabit)
+                                }
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            // 7-day completion history
+                            CompletionHistorySection(
+                                completions = habitFlowerDetail.lastSevenDaysCompletions
+                            )
+
+                            // Habit details section
+                            HabitDetailSection(
+                                description = habitFlowerDetail.description,
+                                startDate = habitFlowerDetail.startDate,
+                                repeatDays = habitFlowerDetail.repeatDays,
+                                reminderTime = habitFlowerDetail.reminderTime,
+                                onEditClick = {
+                                    handleUiEvent(
+                                        HabitFlowerDetailUiEvent.NavigateToEditHabit(
+                                            habitFlowerDetail.habitId
+                                        )
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }
         }
     }
-} 
+}

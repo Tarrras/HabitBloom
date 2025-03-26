@@ -1,5 +1,7 @@
 package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
+import com.horizondev.habitbloom.common.settings.ThemeOption
+import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 
 /**
@@ -9,12 +11,14 @@ import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
  * @property habitFlowerDetail The habit flower detail data to display
  * @property errorMessage Error message to display if loading fails
  * @property showWateringAnimation Whether to show the watering animation
+ * @property themeOption App's theme
  */
 data class HabitFlowerDetailUiState(
     val isLoading: Boolean = false,
     val habitFlowerDetail: HabitFlowerDetail? = null,
     val errorMessage: String? = null,
-    val showWateringAnimation: Boolean = false
+    val showWateringAnimation: Boolean = false,
+    val themeOption: ThemeOption
 )
 
 /**
@@ -37,9 +41,9 @@ sealed class HabitFlowerDetailUiIntent {
     /**
      * Show a snackbar message
      *
-     * @property message The message to display
+     * @property visuals The message to display
      */
-    data class ShowSnackbar(val message: String) : HabitFlowerDetailUiIntent()
+    data class ShowSnackbar(val visuals: BloomSnackbarVisuals) : HabitFlowerDetailUiIntent()
 }
 
 /**

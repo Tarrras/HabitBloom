@@ -35,19 +35,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.switcher.TimeOfDaySwitcher
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.components.HabitFlowerCell
 import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.getGardenBackgroundRes
 import com.horizondev.habitbloom.utils.getTitle
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.garden_background_evening
-import habitbloom.composeapp.generated.resources.garden_background_morning
 import habitbloom.composeapp.generated.resources.no_habits_for_time_of_day_in_garden
 import habitbloom.composeapp.generated.resources.retry
 import habitbloom.composeapp.generated.resources.your_habit_garden
@@ -96,15 +94,7 @@ private fun HabitGardenContent(
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
     val backgroundImage = remember(uiState.themeOption) {
-        when (uiState.themeOption) {
-            ThemeOption.Device -> {
-                if (isSystemInDarkTheme) Res.drawable.garden_background_evening
-                else Res.drawable.garden_background_morning
-            }
-
-            ThemeOption.Dark -> Res.drawable.garden_background_evening
-            ThemeOption.Light -> Res.drawable.garden_background_morning
-        }
+        uiState.themeOption.getGardenBackgroundRes(isSystemInDarkTheme)
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

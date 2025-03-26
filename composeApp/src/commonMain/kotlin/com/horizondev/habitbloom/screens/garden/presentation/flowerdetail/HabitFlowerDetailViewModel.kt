@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
 import androidx.lifecycle.viewModelScope
+import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
@@ -22,9 +23,13 @@ import kotlinx.datetime.daysUntil
  */
 class HabitFlowerDetailViewModel(
     private val habitId: Long,
-    private val repository: HabitsRepository
+    private val repository: HabitsRepository,
+    private val themeUseCase: ThemeUseCase
 ) : BloomViewModel<HabitFlowerDetailUiState, HabitFlowerDetailUiIntent>(
-    HabitFlowerDetailUiState(isLoading = true)
+    HabitFlowerDetailUiState(
+        isLoading = true,
+        themeOption = themeUseCase.getThemeMode()
+    )
 ) {
     private val TAG = "HabitFlowerDetailVM"
 
@@ -147,7 +152,8 @@ class HabitFlowerDetailViewModel(
 
         // If already completed today, don't do anything
         if (habitFlowerDetail.isCompletedToday) {
-            emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("You've already watered this habit today"))
+            //todo show snackbar with bloom visuals
+            //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("You've already watered this habit today"))
             return
         }
 
@@ -167,10 +173,12 @@ class HabitFlowerDetailViewModel(
                 delay(1500)
 
                 // Show success message
-                emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Habit watered successfully!"))
+                //todo show snackbar with bloom visuals
+                //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Habit watered successfully!"))
             } catch (e: Exception) {
                 Napier.e("Error watering habit", e, tag = TAG)
-                emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Failed to water habit"))
+                //todo show snackbar with bloom visuals
+                //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Failed to water habit"))
             } finally {
                 // Hide watering animation
                 updateState { it.copy(showWateringAnimation = false) }

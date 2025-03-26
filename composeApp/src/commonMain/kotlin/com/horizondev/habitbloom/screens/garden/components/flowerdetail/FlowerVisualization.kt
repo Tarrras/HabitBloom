@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,14 +21,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.ic_water_drop
+import habitbloom.composeapp.generated.resources.ic_solid_water_drop
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 
@@ -85,10 +85,13 @@ fun FlowerVisualization(
 
                     // Water drops animation
                     if (showWateringAnimation) {
-                        WaterDropsAnimation()
+                        WaterDropsAnimation(
+                            Modifier.align(Alignment.TopCenter).padding(top = 48.dp)
+                        )
                     }
                 }
             }
+
         }
     }
 }
@@ -98,7 +101,9 @@ fun FlowerVisualization(
  */
 @OptIn(ExperimentalResourceApi::class)
 @Composable
-private fun WaterDropsAnimation() {
+private fun WaterDropsAnimation(
+    modifier: Modifier
+) {
     val infiniteTransition = rememberInfiniteTransition()
 
     // Animation for drop 1
@@ -159,43 +164,43 @@ private fun WaterDropsAnimation() {
     )
 
     Box(
-        modifier = Modifier.size(180.dp),
+        modifier = modifier,
         contentAlignment = Alignment.Center
     ) {
         // Drop 1
-        Image(
-            painter = painterResource(Res.drawable.ic_water_drop),
+        Icon(
+            painter = painterResource(Res.drawable.ic_solid_water_drop),
             contentDescription = null,
             modifier = Modifier
                 .size(48.dp)
                 .padding(start = 20.dp, top = 40.dp)
                 .alpha(drop1Alpha)
                 .scale(drop1Scale),
-            colorFilter = ColorFilter.tint(Color(0xFF4FC3F7))
+            tint = Color(0xFF1ca3ec)
         )
 
         // Drop 2
-        Image(
-            painter = painterResource(Res.drawable.ic_water_drop),
+        Icon(
+            painter = painterResource(Res.drawable.ic_solid_water_drop),
             contentDescription = null,
             modifier = Modifier
-                .size(32.dp)
+                .size(48.dp)
                 .padding(end = 30.dp, top = 20.dp)
                 .alpha(drop2Alpha)
                 .scale(drop2Scale),
-            colorFilter = ColorFilter.tint(Color(0xFF29B6F6))
+            tint = Color(0xFF1ca3ec)
         )
 
         // Drop 3
-        Image(
-            painter = painterResource(Res.drawable.ic_water_drop),
+        Icon(
+            painter = painterResource(Res.drawable.ic_solid_water_drop),
             contentDescription = null,
             modifier = Modifier
-                .size(40.dp)
+                .size(48.dp)
                 .padding(start = 30.dp, bottom = 30.dp)
                 .alpha(drop3Alpha)
                 .scale(drop3Scale),
-            colorFilter = ColorFilter.tint(Color(0xFF03A9F4))
+            tint = Color(0xFF1ca3ec)
         )
     }
 } 

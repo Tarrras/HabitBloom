@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
@@ -21,6 +22,8 @@ import habitbloom.composeapp.generated.resources._90_percentage_task_done
 import habitbloom.composeapp.generated.resources.afternoon
 import habitbloom.composeapp.generated.resources.evening
 import habitbloom.composeapp.generated.resources.friday_short
+import habitbloom.composeapp.generated.resources.garden_background_evening
+import habitbloom.composeapp.generated.resources.garden_background_morning
 import habitbloom.composeapp.generated.resources.monday_short
 import habitbloom.composeapp.generated.resources.morning
 import habitbloom.composeapp.generated.resources.no_habits_today
@@ -36,6 +39,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
 import kotlin.coroutines.CoroutineContext
@@ -230,6 +234,7 @@ fun TimeOfDay.getBackgroundGradientColors(): List<Color> = when (this) {
         BloomTheme.colors.timeOfDay.morning.gradientStart,
         BloomTheme.colors.timeOfDay.morning.gradientEnd
     )
+
     TimeOfDay.Afternoon -> listOf(
         BloomTheme.colors.timeOfDay.afternoon.gradientStart,
         BloomTheme.colors.timeOfDay.afternoon.gradientEnd
@@ -247,3 +252,17 @@ fun Modifier.bloomGradientBackground(
 ): Modifier = Modifier.background(
     brush = Brush.verticalGradient(colors = timeOfDay.getBackgroundGradientColors())
 )
+
+fun ThemeOption.getGardenBackgroundRes(
+    isSystemInDarkTheme: Boolean
+): DrawableResource {
+    return when (this) {
+        ThemeOption.Device -> {
+            if (isSystemInDarkTheme) Res.drawable.garden_background_evening
+            else Res.drawable.garden_background_morning
+        }
+
+        ThemeOption.Dark -> Res.drawable.garden_background_evening
+        ThemeOption.Light -> Res.drawable.garden_background_morning
+    }
+}

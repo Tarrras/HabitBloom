@@ -16,7 +16,6 @@ import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
 import com.horizondev.habitbloom.screens.settings.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import org.koin.core.module.Module
-import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -40,15 +39,11 @@ val viewModelModule: Module = module {
     viewModelOf(::AddHabitTimeOfDayViewModel)
     viewModelOf(::AddHabitChoiceViewModel)
     viewModelOf(::AddHabitDurationViewModel)
-    factory { params ->
-        AddHabitSummaryViewModel(
-            repository = get(),
-            addHabitState = params.get(),
-            enableNotificationsUseCase = get()
-        )
-    }
+    viewModelOf(::AddHabitSummaryViewModel)
     viewModelOf(::AddHabitSuccessViewModel)
     viewModelOf(::CreatePersonalHabitViewModel)
+
+    // Garden flow ViewModels
     viewModelOf(::HabitGardenViewModel)
-    viewModel { params -> HabitFlowerDetailViewModel(habitId = params.get(), repository = get()) }
+    viewModelOf(::HabitFlowerDetailViewModel)
 }
