@@ -23,8 +23,11 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_water_drop
+import habitbloom.composeapp.generated.resources.water_today_habit
+import habitbloom.composeapp.generated.resources.watered_today
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Button component for watering (completing) today's habit.
@@ -49,9 +52,9 @@ fun WaterHabitButton(
     }
 
     val buttonText = if (isCompleted) {
-        "Watered Today"
+        stringResource(Res.string.watered_today)
     } else {
-        "💧 Water Today's Habit"
+        stringResource(Res.string.water_today_habit)
     }
 
     Spacer(modifier = Modifier.height(8.dp))

@@ -273,13 +273,53 @@
     <string name="your_habit_garden">Your Habit Garden</string>
     <string name="no_habits_for_time_of_day_in_garden">No habits to display for %1$d time.\nAdd some habits to see your garden grow!</string>
     <string name="habit_flower">Habit Flower</string>
+    <string name="habit_flower_details">Habit flower details</string>
     <string name="water_today_habit">💧 Water Today's Habit</string>
     <string name="watered_today">Watered Today</string>
     <string name="current_stage">Current Stage:</string>
     <string name="progress_to_next_stage">Progress to next stage:</string>
-    <string name="more_completions_to_grow">%d more %s to grow</string>
-    <string name="days_in_row">%d %s in a row</string>
+    <string name="more_completions_to_grow">%1$d more %2$s to grow</string>
+    <string name="days_in_row">%1$d %2$s in a row</string>
     <string name="last_seven_days">Last 7 Days</string>
     <string name="edit_habit">Edit Habit</string>
     <string name="congratulations_full_bloom">Congratulations! Your flower has reached full bloom!</string>
+
+    <!-- Flower Growth Stages -->
+    <string name="flower_stage_seed">Seed</string>
+    <string name="flower_stage_sprout">Sprout</string>
+    <string name="flower_stage_bush">Bush</string>
+    <string name="flower_stage_bud">Bud</string>
+    <string name="flower_stage_bloom">Bloom</string>
+    <string name="completion">completion</string>
+    <string name="completions">completions</string>
+    <string name="day">day</string>
+    <string name="days">days</string>
+
+    <!-- Habit Detail Section -->
+    <string name="habit_detail_section_title">Habit Details</string>
+    <string name="description_label">Description:</string>
+    <string name="repeat_schedule_label">Repeat Schedule:</string>
+    <string name="every_day_label">Every day</string>
+    <string name="reminder_time_label">Reminder Time:</string>
+    <string name="date_created_label">Date Created:</string>
+    <string name="completed_on_date">Completed on %1$s</string>
+    <string name="not_completed_on_date">Not completed on %1$s</string>
+
+    <!-- Month names for date formatting -->
+    <string name="month_full_january">January</string>
+    <string name="month_full_february">February</string>
+    <string name="month_full_march">March</string>
+    <string name="month_full_april">April</string>
+    <string name="month_full_may">May</string>
+    <string name="month_full_june">June</string>
+    <string name="month_full_july">July</string>
+    <string name="month_full_august">August</string>
+    <string name="month_full_september">September</string>
+    <string name="month_full_october">October</string>
+    <string name="month_full_november">November</string>
+    <string name="month_full_december">December</string>
+    <string name="formatted_date">%1$s %2$d, %3$d</string>
+    <string name="formatted_time">%1$d:%2$s %3$s</string>
+    <string name="am_label">AM</string>
+    <string name="pm_label">PM</string>
 </resources>

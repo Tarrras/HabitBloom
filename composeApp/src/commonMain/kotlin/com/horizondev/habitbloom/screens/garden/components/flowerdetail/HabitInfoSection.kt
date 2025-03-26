@@ -1,20 +1,18 @@
 package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
@@ -22,10 +20,25 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.afternoon_habits_image
+import habitbloom.composeapp.generated.resources.completion
+import habitbloom.composeapp.generated.resources.completions
+import habitbloom.composeapp.generated.resources.congratulations_full_bloom
+import habitbloom.composeapp.generated.resources.current_stage
+import habitbloom.composeapp.generated.resources.current_streak
+import habitbloom.composeapp.generated.resources.day
+import habitbloom.composeapp.generated.resources.days
+import habitbloom.composeapp.generated.resources.days_in_row
 import habitbloom.composeapp.generated.resources.evening_habits_image
+import habitbloom.composeapp.generated.resources.flower_stage_bloom
+import habitbloom.composeapp.generated.resources.flower_stage_bud
+import habitbloom.composeapp.generated.resources.flower_stage_bush
+import habitbloom.composeapp.generated.resources.flower_stage_seed
+import habitbloom.composeapp.generated.resources.flower_stage_sprout
+import habitbloom.composeapp.generated.resources.more_completions_to_grow
 import habitbloom.composeapp.generated.resources.morning_habits_image
+import habitbloom.composeapp.generated.resources.progress_to_next_stage
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Component to display habit information section.
@@ -70,22 +83,6 @@ fun HabitInfoSection(
                     TimeOfDay.Evening -> Res.drawable.evening_habits_image
                 }
 
-                val timeOfDayColor = when (timeOfDay) {
-                    TimeOfDay.Morning -> Color(0xFFFFC107)
-                    TimeOfDay.Afternoon -> Color(0xFFFF9800)
-                    TimeOfDay.Evening -> Color(0xFF673AB7)
-                }
-
-                Image(
-                    painter = painterResource(timeOfDayIcon),
-                    contentDescription = "$timeOfDay time",
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(48.dp)
-                )
-
-                Spacer(modifier = Modifier.width(12.dp))
-
                 // Habit name
                 Text(
                     text = habitName,
@@ -103,13 +100,21 @@ fun HabitInfoSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Current Stage: ",
+                    text = stringResource(Res.string.current_stage),
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.secondary
                 )
 
+                Spacer(modifier = Modifier.width(4.dp))
+
                 Text(
-                    text = "growthStage.stageName", //todo add later
+                    text = when (growthStage) {
+                        FlowerGrowthStage.SEED -> stringResource(Res.string.flower_stage_seed)
+                        FlowerGrowthStage.SPROUT -> stringResource(Res.string.flower_stage_sprout)
+                        FlowerGrowthStage.BUSH -> stringResource(Res.string.flower_stage_bush)
+                        FlowerGrowthStage.BUD -> stringResource(Res.string.flower_stage_bud)
+                        FlowerGrowthStage.BLOOM -> stringResource(Res.string.flower_stage_bloom)
+                    },
                     style = BloomTheme.typography.subheading,
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium
@@ -124,13 +129,18 @@ fun HabitInfoSection(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Current Streak: ",
+                    text = stringResource(Res.string.current_streak) + ": ",
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.secondary
                 )
 
+                val daysText = if (currentStreak == 1)
+                    stringResource(Res.string.day)
+                else
+                    stringResource(Res.string.days)
+                
                 Text(
-                    text = "$currentStreak ${if (currentStreak == 1) "day" else "days"} in a row",
+                    text = stringResource(Res.string.days_in_row, currentStreak, daysText),
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.primary,
                     fontWeight = FontWeight.Medium
@@ -146,21 +156,33 @@ fun HabitInfoSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Progress to next stage: ",
+                        text = stringResource(Res.string.progress_to_next_stage),
                         style = BloomTheme.typography.body,
                         color = BloomTheme.colors.textColor.secondary
                     )
 
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    val completionsText = if (streaksToNextStage == 1)
+                        stringResource(Res.string.completion)
+                    else
+                        stringResource(Res.string.completions)
+                    
                     Text(
-                        text = "$streaksToNextStage more ${if (streaksToNextStage == 1) "completion" else "completions"} to grow",
+                        text = stringResource(
+                            Res.string.more_completions_to_grow,
+                            streaksToNextStage,
+                            completionsText
+                        ),
                         style = BloomTheme.typography.body,
                         color = BloomTheme.colors.textColor.primary,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
                     )
                 }
             } else {
                 Text(
-                    text = "Congratulations! Your flower has reached full bloom!",
+                    text = stringResource(Res.string.congratulations_full_bloom),
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.success,
                     fontWeight = FontWeight.Medium

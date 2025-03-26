@@ -281,13 +281,53 @@
     <string name="your_habit_garden">Твій сад звичок</string>
     <string name="no_habits_for_time_of_day_in_garden">Немає звичок для показу в %1$d час.\nДодайте звички, щоб побачити, як росте ваш сад!</string>
     <string name="habit_flower">Квітка звички</string>
+    <string name="habit_flower_details">Деталі квітки звички</string>
     <string name="water_today_habit">💧 Полити сьогоднішню звичку</string>
     <string name="watered_today">Полито сьогодні</string>
     <string name="current_stage">Поточна стадія:</string>
     <string name="progress_to_next_stage">Прогрес до наступної стадії:</string>
-    <string name="more_completions_to_grow">Ще %d %s до зростання</string>
-    <string name="days_in_row">%d %s поспіль</string>
+    <string name="more_completions_to_grow">Ще %1$d %2$s до зростання</string>
+    <string name="days_in_row">%1$d %2$s поспіль</string>
     <string name="last_seven_days">Останні 7 днів</string>
     <string name="edit_habit">Редагувати звичку</string>
     <string name="congratulations_full_bloom">Вітаємо! Ваша квітка повністю розквітла!</string>
+
+    <!-- Flower Growth Stages -->
+    <string name="flower_stage_seed">Насіння</string>
+    <string name="flower_stage_sprout">Паросток</string>
+    <string name="flower_stage_bush">Кущ</string>
+    <string name="flower_stage_bud">Бутон</string>
+    <string name="flower_stage_bloom">Квітка</string>
+    <string name="completion">виконання</string>
+    <string name="completions">виконань</string>
+    <string name="day">день</string>
+    <string name="days">днів</string>
+
+    <!-- Habit Detail Section -->
+    <string name="habit_detail_section_title">Деталі звички</string>
+    <string name="description_label">Опис:</string>
+    <string name="repeat_schedule_label">Розклад повторень:</string>
+    <string name="every_day_label">Щодня</string>
+    <string name="reminder_time_label">Час нагадування:</string>
+    <string name="date_created_label">Дата створення:</string>
+    <string name="completed_on_date">Виконано %1$s</string>
+    <string name="not_completed_on_date">Не виконано %1$s</string>
+
+    <!-- Month names for date formatting -->
+    <string name="month_full_january">Січень</string>
+    <string name="month_full_february">Лютий</string>
+    <string name="month_full_march">Березень</string>
+    <string name="month_full_april">Квітень</string>
+    <string name="month_full_may">Травень</string>
+    <string name="month_full_june">Червень</string>
+    <string name="month_full_july">Липень</string>
+    <string name="month_full_august">Серпень</string>
+    <string name="month_full_september">Вересень</string>
+    <string name="month_full_october">Жовтень</string>
+    <string name="month_full_november">Листопад</string>
+    <string name="month_full_december">Грудень</string>
+    <string name="formatted_date">%1$s %2$d, %3$d</string>
+    <string name="formatted_time">%1$d:%2$s %3$s</string>
+    <string name="am_label">AM</string>
+    <string name="pm_label">PM</string>
 </resources>

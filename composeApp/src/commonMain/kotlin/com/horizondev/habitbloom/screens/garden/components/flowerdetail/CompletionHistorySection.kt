@@ -22,12 +22,17 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
+import com.horizondev.habitbloom.utils.getShortTitle
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.completed_on_date
 import habitbloom.composeapp.generated.resources.ic_cancel
 import habitbloom.composeapp.generated.resources.ic_check_circle
+import habitbloom.composeapp.generated.resources.last_seven_days
+import habitbloom.composeapp.generated.resources.not_completed_on_date
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * Component to display the 7-day completion history of a habit.
@@ -53,7 +58,7 @@ fun CompletionHistorySection(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Last 7 Days",
+                text = stringResource(Res.string.last_seven_days),
                 style = BloomTheme.typography.heading,
                 color = BloomTheme.colors.textColor.primary,
                 fontWeight = FontWeight.Medium
@@ -95,11 +100,8 @@ private fun DayCompletionItem(
         modifier = modifier.padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Day of the week (abbreviated)
-        val dayOfWeek = date.dayOfWeek.name.take(3).lowercase()
-            .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
         Text(
-            text = dayOfWeek,
+            text = date.dayOfWeek.getShortTitle(),
             style = BloomTheme.typography.small,
             color = BloomTheme.colors.textColor.secondary,
             textAlign = TextAlign.Center
@@ -127,9 +129,9 @@ private fun DayCompletionItem(
         }
 
         val contentDescription = if (isCompleted) {
-            "Completed on $date"
+            stringResource(Res.string.completed_on_date, date.toString())
         } else {
-            "Not completed on $date"
+            stringResource(Res.string.not_completed_on_date, date.toString())
         }
 
         Column(

@@ -45,7 +45,10 @@ import com.horizondev.habitbloom.screens.garden.components.flowerdetail.WaterHab
 import com.horizondev.habitbloom.utils.getGardenBackgroundRes
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.habit_flower_details
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
@@ -155,7 +158,7 @@ fun HabitFlowerDetailScreenContent(
                     Spacer(modifier = Modifier.width(18.dp))
 
                     Text(
-                        text = "Habit flower details", //todo add to translation
+                        text = stringResource(Res.string.habit_flower_details),
                         style = BloomTheme.typography.title,
                         color = BloomTheme.colors.textColor.primary
                     )
