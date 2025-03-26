@@ -70,10 +70,11 @@ fun CompletionHistorySection(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                completions.forEach { completion ->
+                completions.forEachIndexed { index, dailyCompletion ->
                     DayCompletionItem(
-                        date = completion.date,
-                        isCompleted = completion.isCompleted,
+                        date = dailyCompletion.date,
+                        isCompleted = dailyCompletion.isCompleted,
+                        isLastItem = index == completions.lastIndex,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -94,6 +95,7 @@ fun CompletionHistorySection(
 private fun DayCompletionItem(
     date: LocalDate,
     isCompleted: Boolean,
+    isLastItem: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -102,7 +104,9 @@ private fun DayCompletionItem(
     ) {
         Text(
             text = date.dayOfWeek.getShortTitle(),
-            style = BloomTheme.typography.small,
+            style = BloomTheme.typography.small.copy(
+                fontWeight = if (isLastItem) FontWeight.Bold else FontWeight.Normal
+            ),
             color = BloomTheme.colors.textColor.secondary,
             textAlign = TextAlign.Center
         )
@@ -155,7 +159,9 @@ private fun DayCompletionItem(
         // Day of month
         Text(
             text = date.dayOfMonth.toString(),
-            style = BloomTheme.typography.small,
+            style = BloomTheme.typography.small.copy(
+                fontWeight = if (isLastItem) FontWeight.Bold else FontWeight.Normal
+            ),
             color = BloomTheme.colors.textColor.primary,
             textAlign = TextAlign.Center
         )
