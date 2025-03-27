@@ -1,9 +1,6 @@
 package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
-import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
-import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
-import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
@@ -11,18 +8,12 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
-import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.already_watered_habit_today
-import habitbloom.composeapp.generated.resources.failed_to_water_habit
-import habitbloom.composeapp.generated.resources.habit_watered_successfully
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
-import org.jetbrains.compose.resources.getString
 
 /**
  * ViewModel for the Habit Flower Detail screen.
@@ -145,66 +136,43 @@ class HabitFlowerDetailViewModel(
     /**
      * Completes (waters) the habit for today.
      */
-    private fun waterHabit() = viewModelScope.launch {
+    private fun waterHabit() {
         val currentState = state.value
-        val habitFlowerDetail = currentState.habitFlowerDetail ?: return@launch
+        val habitFlowerDetail = currentState.habitFlowerDetail ?: return
 
         // If already completed today, don't do anything
         if (habitFlowerDetail.isCompletedToday) {
-            emitUiIntent(
-                HabitFlowerDetailUiIntent.ShowSnackbar(
-                    BloomSnackbarVisuals(
-                        message = getString(Res.string.already_watered_habit_today),
-                        state = BloomSnackbarState.Warning,
-                        withDismissAction = true,
-                        duration = SnackbarDuration.Short
-                    )
-                )
-            )
+            //todo show snackbar with bloom visuals
+            //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("You've already watered this habit today"))
+            return
         }
 
         // Show watering animation
         updateState { it.copy(showWateringAnimation = true) }
 
-        runCatching {
-            // Update habit completion status
-            repository.updateHabitCompletionByHabitId(
-                habitId = habitId,
-                date = getCurrentDate(),
-                isCompleted = true
-            )
-
-            // Keep animation visible for a moment
-            delay(1500)
-
-            // Show success message
-            emitUiIntent(
-                HabitFlowerDetailUiIntent.ShowSnackbar(
-                    BloomSnackbarVisuals(
-                        message = getString(Res.string.habit_watered_successfully),
-                        state = BloomSnackbarState.Success,
-                        withDismissAction = true,
-                        duration = SnackbarDuration.Short
-                    )
+        launch {
+            try {
+                // Update habit completion status
+                repository.updateHabitCompletionByHabitId(
+                    habitId = habitId,
+                    date = getCurrentDate(),
+                    isCompleted = true
                 )
-            )
-        }.onFailure { e ->
-            Napier.e("Error watering habit", e, tag = TAG)
 
-            // Show error message
-            emitUiIntent(
-                HabitFlowerDetailUiIntent.ShowSnackbar(
-                    BloomSnackbarVisuals(
-                        message = getString(Res.string.failed_to_water_habit),
-                        state = BloomSnackbarState.Error,
-                        withDismissAction = true,
-                        duration = SnackbarDuration.Short
-                    )
-                )
-            )
+                // Keep animation visible for a moment
+                delay(1500)
+
+                // Show success message
+                //todo show snackbar with bloom visuals
+                //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Habit watered successfully!"))
+            } catch (e: Exception) {
+                Napier.e("Error watering habit", e, tag = TAG)
+                //todo show snackbar with bloom visuals
+                //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Failed to water habit"))
+            } finally {
+                // Hide watering animation
+                updateState { it.copy(showWateringAnimation = false) }
+            }
         }
-
-        // Hide watering animation regardless of success or failure
-        updateState { it.copy(showWateringAnimation = false) }
     }
 } 

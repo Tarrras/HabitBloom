@@ -291,14 +291,14 @@
     <string name="last_seven_days">Останні 7 днів</string>
     <string name="edit_habit">Редагувати звичку</string>
     <string name="check_full_habit_info">Переглянути повну інформацію звички</string>
-    <string name="congratulations_full_bloom">Вітаємо! Ваша квітка повністю розквітла!</string>
+    <string name="congratulations_full_bloom">Вітаємо! Ваша квітка у повному цвітінні!</string>
 
     <!-- Flower Growth Stages -->
     <string name="flower_stage_seed">Насіння</string>
     <string name="flower_stage_sprout">Паросток</string>
     <string name="flower_stage_bush">Кущ</string>
     <string name="flower_stage_bud">Бутон</string>
-    <string name="flower_stage_bloom">Квітка</string>
+    <string name="flower_stage_bloom">Цвітіння</string>
     <string name="completion">виконання</string>
     <string name="completions">виконань</string>
     <string name="day">день</string>
@@ -332,8 +332,11 @@
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>
 
-    <!-- Flower watering messages -->
     <string name="already_watered_habit_today">Ви вже полили цю звичку сьогодні</string>
     <string name="habit_watered_successfully">Звичка успішно полита!</string>
     <string name="failed_to_water_habit">Не вдалося полити звичку</string>
+    <string name="show_bloom_progress">Показати прогрес цвітіння</string>
+    <string name="full_growth_path">Повний шлях росту</string>
+    <string name="stage_progress_info">Етап %1$d з %2$d: %3$s</string>
+    <string name="days_to_next_stage">%1$d днів до наступного етапу</string>
 </resources>

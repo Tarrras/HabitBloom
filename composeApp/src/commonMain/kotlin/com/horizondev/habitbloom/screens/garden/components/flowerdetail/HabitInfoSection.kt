@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.getTitle
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.afternoon_habits_image
@@ -29,11 +30,6 @@ import habitbloom.composeapp.generated.resources.day
 import habitbloom.composeapp.generated.resources.days
 import habitbloom.composeapp.generated.resources.days_in_row
 import habitbloom.composeapp.generated.resources.evening_habits_image
-import habitbloom.composeapp.generated.resources.flower_stage_bloom
-import habitbloom.composeapp.generated.resources.flower_stage_bud
-import habitbloom.composeapp.generated.resources.flower_stage_bush
-import habitbloom.composeapp.generated.resources.flower_stage_seed
-import habitbloom.composeapp.generated.resources.flower_stage_sprout
 import habitbloom.composeapp.generated.resources.more_completions_to_grow
 import habitbloom.composeapp.generated.resources.morning_habits_image
 import habitbloom.composeapp.generated.resources.progress_to_next_stage
@@ -108,13 +104,7 @@ fun HabitInfoSection(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = when (growthStage) {
-                        FlowerGrowthStage.SEED -> stringResource(Res.string.flower_stage_seed)
-                        FlowerGrowthStage.SPROUT -> stringResource(Res.string.flower_stage_sprout)
-                        FlowerGrowthStage.BUSH -> stringResource(Res.string.flower_stage_bush)
-                        FlowerGrowthStage.BUD -> stringResource(Res.string.flower_stage_bud)
-                        FlowerGrowthStage.BLOOM -> stringResource(Res.string.flower_stage_bloom)
-                    },
+                    text = growthStage.getTitle(),
                     style = BloomTheme.typography.subheading,
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium

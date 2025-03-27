@@ -28,7 +28,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -47,6 +49,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeSource
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.habit_flower_details
+import habitbloom.composeapp.generated.resources.show_bloom_progress
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -236,6 +239,45 @@ fun HabitFlowerDetailScreenContent(
                             CompletionHistorySection(
                                 completions = habitFlowerDetail.lastSevenDaysCompletions
                             )
+
+                            // Show Bloom Progress button
+                            var showGrowthPathBottomSheet by remember { mutableStateOf(false) }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.show_bloom_progress),
+                                    style = BloomTheme.typography.body,
+                                    color = BloomTheme.colors.primary,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = ripple(
+                                                color = BloomTheme.colors.primary.copy(
+                                                    alpha = 0.1f
+                                                )
+                                            )
+                                        ) {
+                                            showGrowthPathBottomSheet = true
+                                        }
+                                        .padding(vertical = 12.dp)
+                                )
+                            }
+
+                            if (showGrowthPathBottomSheet) {
+                                HabitGrowthPathBottomSheet(
+                                    currentStage = habitFlowerDetail.flowerGrowthStage,
+                                    streaksToNextStage = habitFlowerDetail.streaksToNextStage,
+                                    currentStreak = habitFlowerDetail.currentStreak,
+                                    onDismissRequest = { showGrowthPathBottomSheet = false },
+                                    flowerType = habitFlowerDetail.flowerType
+                                )
+                            }
 
                             // Habit details section
                             HabitDetailSection(

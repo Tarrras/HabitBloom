@@ -283,7 +283,7 @@
     <string name="last_seven_days">Last 7 Days</string>
     <string name="edit_habit">Edit Habit</string>
     <string name="check_full_habit_info">Check full habit info</string>
-    <string name="congratulations_full_bloom">Congratulations! Your flower has reached full bloom!</string>
+    <string name="congratulations_full_bloom">Congratulations! Your flower is in full bloom!</string>
 
     <!-- Flower Growth Stages -->
     <string name="flower_stage_seed">Seed</string>
@@ -324,8 +324,10 @@
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>
 
-    <!-- Flower watering messages -->
-    <string name="already_watered_habit_today">You've already watered this habit today</string>
     <string name="habit_watered_successfully">Habit watered successfully!</string>
     <string name="failed_to_water_habit">Failed to water habit</string>
+    <string name="show_bloom_progress">Show Bloom Progress</string>
+    <string name="full_growth_path">Full Growth Path</string>
+    <string name="stage_progress_info">Stage %1$d of %2$d: %3$s</string>
+    <string name="days_to_next_stage">%1$d days to next stage</string>
 </resources>
