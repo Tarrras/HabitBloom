@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.CompletionHistorySection
@@ -111,6 +112,9 @@ fun HabitFlowerDetailScreenContent(
     val backgroundImage = remember(uiState.themeOption) {
         uiState.themeOption.getGardenBackgroundRes(isSystemInDarkTheme)
     }
+
+    // Show Bloom Progress button
+    var showGrowthPathBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         snackbarHost = {
@@ -215,6 +219,15 @@ fun HabitFlowerDetailScreenContent(
                                 showWateringAnimation = uiState.showWateringAnimation
                             )
 
+                            // Water habit button
+                            WaterHabitButton(
+                                isCompleted = habitFlowerDetail.isCompletedToday,
+                                isLoading = uiState.showWateringAnimation,
+                                onClick = {
+                                    handleUiEvent(HabitFlowerDetailUiEvent.WaterTodaysHabit)
+                                }
+                            )
+
                             // Habit info section
                             HabitInfoSection(
                                 habitName = habitFlowerDetail.name,
@@ -224,12 +237,16 @@ fun HabitFlowerDetailScreenContent(
                                 streaksToNextStage = habitFlowerDetail.streaksToNextStage
                             )
 
-                            // Water habit button
-                            WaterHabitButton(
-                                isCompleted = habitFlowerDetail.isCompletedToday,
-                                isLoading = uiState.showWateringAnimation,
+                            Spacer(modifier = Modifier.height(8.dp))
+
+
+                            BloomPrimaryFilledButton(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                text = stringResource(Res.string.show_bloom_progress),
                                 onClick = {
-                                    handleUiEvent(HabitFlowerDetailUiEvent.WaterTodaysHabit)
+                                    showGrowthPathBottomSheet = true
                                 }
                             )
 
@@ -240,34 +257,7 @@ fun HabitFlowerDetailScreenContent(
                                 completions = habitFlowerDetail.lastSevenDaysCompletions
                             )
 
-                            // Show Bloom Progress button
-                            var showGrowthPathBottomSheet by remember { mutableStateOf(false) }
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.show_bloom_progress),
-                                    style = BloomTheme.typography.body,
-                                    color = BloomTheme.colors.primary,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable(
-                                            interactionSource = remember { MutableInteractionSource() },
-                                            indication = ripple(
-                                                color = BloomTheme.colors.primary.copy(
-                                                    alpha = 0.1f
-                                                )
-                                            )
-                                        ) {
-                                            showGrowthPathBottomSheet = true
-                                        }
-                                        .padding(vertical = 12.dp)
-                                )
-                            }
+                            Spacer(modifier = Modifier.height(8.dp))
 
                             if (showGrowthPathBottomSheet) {
                                 HabitGrowthPathBottomSheet(

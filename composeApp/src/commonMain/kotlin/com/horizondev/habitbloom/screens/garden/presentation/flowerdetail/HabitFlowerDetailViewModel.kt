@@ -85,7 +85,7 @@ class HabitFlowerDetailViewModel(
                     longestStreak = 0, //todo add later
                     startDate = habitInfo.startDate,
                     repeats = habitInfo.repeats,
-                    reminderTime = habitInfo.reminderTime,
+                    reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
                     lastSevenDaysCompletions = lastSevenScheduledDays,
                     isCompletedToday = isCompletedToday,
                     flowerGrowthStage = growthStage,
