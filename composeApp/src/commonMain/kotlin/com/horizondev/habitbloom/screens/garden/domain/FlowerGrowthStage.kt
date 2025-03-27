@@ -1,5 +1,8 @@
 package com.horizondev.habitbloom.screens.garden.domain
 
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+
 /**
  * Enum defining the different growth stages of a habit flower.
  * Each stage corresponds to a specific streak range.
@@ -71,4 +74,14 @@ enum class FlowerGrowthStage(
             return nextStage.streakThreshold - currentStreak
         }
     }
-} 
+}
+
+fun FlowerGrowthStage.iconWidth(): Dp {
+    return when (this) {
+        FlowerGrowthStage.SEED -> 60.dp
+        FlowerGrowthStage.SPROUT -> 70.dp
+        FlowerGrowthStage.BUSH -> 80.dp
+        FlowerGrowthStage.BUD -> 90.dp
+        FlowerGrowthStage.BLOOM -> 95.dp
+    }
+}

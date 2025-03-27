@@ -171,9 +171,25 @@ class HabitsRepository(
         }.map { true }
     }
 
-    suspend fun updateHabitCompletion(habitRecordId: Long, date: LocalDate, isCompleted: Boolean) {
-        localDataSource.updateHabitCompletion(
+    suspend fun updateHabitCompletionByRecordId(
+        habitRecordId: Long,
+        date: LocalDate,
+        isCompleted: Boolean
+    ) {
+        localDataSource.updateHabitCompletionByRecordId(
             habitRecordId = habitRecordId,
+            date = date,
+            isCompleted = isCompleted
+        )
+    }
+
+    suspend fun updateHabitCompletionByHabitId(
+        habitId: Long,
+        date: LocalDate,
+        isCompleted: Boolean
+    ) {
+        localDataSource.updateHabitCompletionByHabitId(
+            habitId = habitId,
             date = date,
             isCompleted = isCompleted
         )

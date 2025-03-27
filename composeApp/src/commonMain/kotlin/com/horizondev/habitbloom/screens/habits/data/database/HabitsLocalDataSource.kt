@@ -29,12 +29,36 @@ class HabitsLocalDataSource(
     private val userHabitRecordsQueries: UserHabitRecordsEntityQueries
 ) {
 
-    suspend fun updateHabitCompletion(habitRecordId: Long, date: LocalDate, isCompleted: Boolean) {
+    suspend fun updateHabitCompletionByRecordId(
+        habitRecordId: Long,
+        date: LocalDate,
+        isCompleted: Boolean
+    ) {
         withContext(Dispatchers.IO) {
             userHabitRecordsQueries.updateUserHabitRecordCompletion(
                 isCompleted = if (isCompleted) 1L else 2L,
                 date = date.toString(),
                 id = habitRecordId
+            )
+        }
+    }
+
+    suspend fun updateHabitCompletionByHabitId(
+        habitId: Long,
+        date: LocalDate,
+        isCompleted: Boolean
+    ) {
+        withContext(Dispatchers.IO) {
+            val recordByDate =
+                userHabitRecordsQueries.selectUserHabitRecordsEntityByDate(date.toString())
+                    .executeAsList()
+                    .find { it.userHabitId == habitId }
+                    ?.id ?: return@withContext
+
+            userHabitRecordsQueries.updateUserHabitRecordCompletion(
+                isCompleted = if (isCompleted) 1L else 2L,
+                date = date.toString(),
+                id = recordByDate
             )
         }
     }

@@ -323,4 +323,9 @@
     <string name="formatted_time">%1$d:%2$s %3$s</string>
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>
+
+    <!-- Flower watering messages -->
+    <string name="already_watered_habit_today">You've already watered this habit today</string>
+    <string name="habit_watered_successfully">Habit watered successfully!</string>
+    <string name="failed_to_water_habit">Failed to water habit</string>
 </resources>

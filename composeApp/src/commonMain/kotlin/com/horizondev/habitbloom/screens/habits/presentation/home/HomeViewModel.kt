@@ -171,7 +171,7 @@ class HomeViewModel(
     private fun updateHabitCompletionStatus(habitRecordId: Long, isCompleted: Boolean) {
         launch {
             try {
-                repository.updateHabitCompletion(
+                repository.updateHabitCompletionByRecordId(
                     habitRecordId = habitRecordId,
                     date = selectedDateFlow.value,
                     isCompleted = isCompleted

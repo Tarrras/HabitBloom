@@ -331,4 +331,9 @@
     <string name="formatted_time">%1$d:%2$s %3$s</string>
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>
+
+    <!-- Flower watering messages -->
+    <string name="already_watered_habit_today">Ви вже полили цю звичку сьогодні</string>
+    <string name="habit_watered_successfully">Звичка успішно полита!</string>
+    <string name="failed_to_water_habit">Не вдалося полити звичку</string>
 </resources>

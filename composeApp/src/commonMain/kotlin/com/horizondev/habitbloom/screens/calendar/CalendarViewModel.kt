@@ -274,7 +274,7 @@ class CalendarViewModel(
 
                     // Only allow toggling completion for the current day
                     if (event.date == today) {
-                        repository.updateHabitCompletion(
+                        repository.updateHabitCompletionByRecordId(
                             habitRecordId = event.habitRecordId,
                             date = event.date,
                             isCompleted = event.completed

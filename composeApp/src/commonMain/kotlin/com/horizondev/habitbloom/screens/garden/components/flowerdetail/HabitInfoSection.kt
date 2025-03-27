@@ -141,7 +141,7 @@ fun HabitInfoSection(
                 
                 Text(
                     text = stringResource(Res.string.days_in_row, currentStreak, daysText),
-                    style = BloomTheme.typography.body,
+                    style = BloomTheme.typography.subheading,
                     color = BloomTheme.colors.primary,
                     fontWeight = FontWeight.Medium
                 )
@@ -174,7 +174,7 @@ fun HabitInfoSection(
                             streaksToNextStage,
                             completionsText
                         ),
-                        style = BloomTheme.typography.body,
+                        style = BloomTheme.typography.subheading,
                         color = BloomTheme.colors.textColor.primary,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center

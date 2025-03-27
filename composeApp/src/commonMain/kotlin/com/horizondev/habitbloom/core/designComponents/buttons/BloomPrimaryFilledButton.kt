@@ -8,6 +8,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 
@@ -35,7 +36,8 @@ fun BloomPrimaryFilledButton(
         Text(
             text = text,
             style = BloomTheme.typography.button,
-            color = BloomTheme.colors.textColor.white
+            color = BloomTheme.colors.textColor.white,
+            textAlign = TextAlign.Center
         )
     }
 }
