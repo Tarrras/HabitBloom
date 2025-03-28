@@ -339,4 +339,17 @@
     <string name="full_growth_path">Повний шлях росту</string>
     <string name="stage_progress_info">Етап %1$d з %2$d: %3$s</string>
     <string name="days_to_next_stage">%1$d днів до наступного етапу</string>
+    <string name="growth_system_explanation">Ваша звичка розквітає з підтримкою щоденних серій. Послідовність - ключ до успіху! Кожен етап росту відкривається на основі тривалості вашої серії.</string>
+    <string name="growth_stages_explained">Пояснення етапів росту</string>
+    <string name="current_streak_info">Поточна серія: %1$d днів</string>
+    <string name="stage_threshold_started">Початок на %1$d днів</string>
+    <string name="stage_threshold_next">Наступний на %1$d днів</string>
+    <string name="bloom_stage_congrats_extended">Ви досягли фінального етапу з серією %1$d+ днів! Продовжуйте, щоб підтримувати прекрасне цвітіння.</string>
+
+    <!-- Growth stage descriptions -->
+    <string name="stage_description_seed">Тільки початок (0-2 дні)</string>
+    <string name="stage_description_sprout">Формування звички (3-6 днів)</string>
+    <string name="stage_description_bush">Набираємо темп (7-13 днів)</string>
+    <string name="stage_description_bud">Формування стійкої звички (14-29 днів)</string>
+    <string name="stage_description_bloom">Звичка повністю сформована! (30+ днів)</string>
 </resources>

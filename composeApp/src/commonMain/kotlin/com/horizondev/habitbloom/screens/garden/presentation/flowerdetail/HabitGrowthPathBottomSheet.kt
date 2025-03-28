@@ -13,8 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -22,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
@@ -35,10 +41,21 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.getTitle
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.congratulations_full_bloom
+import habitbloom.composeapp.generated.resources.bloom_stage_congrats_extended
+import habitbloom.composeapp.generated.resources.current_streak_info
 import habitbloom.composeapp.generated.resources.days_to_next_stage
 import habitbloom.composeapp.generated.resources.full_growth_path
+import habitbloom.composeapp.generated.resources.growth_stages_explained
+import habitbloom.composeapp.generated.resources.growth_system_explanation
+import habitbloom.composeapp.generated.resources.stage_description_bloom
+import habitbloom.composeapp.generated.resources.stage_description_bud
+import habitbloom.composeapp.generated.resources.stage_description_bush
+import habitbloom.composeapp.generated.resources.stage_description_seed
+import habitbloom.composeapp.generated.resources.stage_description_sprout
 import habitbloom.composeapp.generated.resources.stage_progress_info
+import habitbloom.composeapp.generated.resources.stage_threshold_next
+import habitbloom.composeapp.generated.resources.stage_threshold_started
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -86,7 +103,8 @@ fun HabitGrowthPathBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
+                .padding(horizontal = 24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Title
@@ -94,13 +112,44 @@ fun HabitGrowthPathBottomSheet(
                 text = stringResource(Res.string.full_growth_path),
                 style = BloomTheme.typography.heading,
                 color = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.padding(bottom = 24.dp)
+                modifier = Modifier.padding(bottom = 16.dp)
             )
+
+            // New: Growth System Explanation
+            BloomCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                onClick = {}
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = null,
+                        tint = BloomTheme.colors.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
+                    Text(
+                        text = stringResource(Res.string.growth_system_explanation),
+                        style = BloomTheme.typography.small,
+                        color = BloomTheme.colors.textColor.primary
+                    )
+                }
+            }
 
             // Current stage info card
             BloomCard(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(bottom = 24.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
                 onClick = {}
             ) {
                 Column(
@@ -121,6 +170,16 @@ fun HabitGrowthPathBottomSheet(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
+                    // Display current streak info
+                    Text(
+                        text = stringResource(Res.string.current_streak_info, currentStreak),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.primary,
+                        fontWeight = FontWeight.Normal
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     // Progress bar to next stage
                     if (currentStage != FlowerGrowthStage.BLOOM) {
                         Column(modifier = Modifier.fillMaxWidth()) {
@@ -131,30 +190,113 @@ fun HabitGrowthPathBottomSheet(
 
                             Spacer(modifier = Modifier.height(8.dp))
 
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        Res.string.stage_threshold_started,
+                                        currentStage.streakThreshold
+                                    ),
+                                    style = BloomTheme.typography.small,
+                                    color = BloomTheme.colors.textColor.secondary
+                                )
+
+                                Text(
+                                    text = stringResource(
+                                        Res.string.stage_threshold_next,
+                                        allStages[currentStageIndex + 1].streakThreshold
+                                    ),
+                                    style = BloomTheme.typography.small,
+                                    color = BloomTheme.colors.textColor.secondary
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
                             Text(
                                 text = stringResource(
                                     Res.string.days_to_next_stage,
                                     streaksToNextStage
                                 ),
                                 style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.textColor.secondary,
+                                color = BloomTheme.colors.textColor.accent,
+                                fontWeight = FontWeight.Medium,
                                 textAlign = TextAlign.End,
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
                     } else {
                         Text(
-                            text = stringResource(Res.string.congratulations_full_bloom),
+                            text = stringResource(
+                                Res.string.bloom_stage_congrats_extended,
+                                currentStage.streakThreshold
+                            ),
                             style = BloomTheme.typography.small,
                             color = BloomTheme.colors.success,
                             fontWeight = FontWeight.Medium
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "You've reached the final stage with a ${currentStage.streakThreshold}+ day streak! Keep going to maintain your beautiful bloom.",
+                            style = BloomTheme.typography.small,
+                            color = BloomTheme.colors.textColor.secondary,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
             }
 
+            // Stage information legend
+            BloomCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                onClick = {}
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.growth_stages_explained),
+                        style = BloomTheme.typography.subheading,
+                        fontWeight = FontWeight.Medium,
+                        color = BloomTheme.colors.textColor.primary,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    StageExplanationItem(
+                        stage = FlowerGrowthStage.SEED,
+                        descriptionResId = Res.string.stage_description_seed
+                    )
+
+                    StageExplanationItem(
+                        stage = FlowerGrowthStage.SPROUT,
+                        descriptionResId = Res.string.stage_description_sprout
+                    )
+
+                    StageExplanationItem(
+                        stage = FlowerGrowthStage.BUSH,
+                        descriptionResId = Res.string.stage_description_bush
+                    )
+
+                    StageExplanationItem(
+                        stage = FlowerGrowthStage.BUD,
+                        descriptionResId = Res.string.stage_description_bud
+                    )
+
+                    StageExplanationItem(
+                        stage = FlowerGrowthStage.BLOOM,
+                        descriptionResId = Res.string.stage_description_bloom
+                    )
+                }
+            }
+
             // Growth stages visualization
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             GrowthStagesPath(
                 allStages = allStages,
@@ -166,6 +308,49 @@ fun HabitGrowthPathBottomSheet(
             // Bottom padding
             Spacer(modifier = Modifier.height(48.dp))
         }
+    }
+}
+
+@Composable
+private fun StageExplanationItem(
+    stage: FlowerGrowthStage,
+    descriptionResId: StringResource
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(
+                    when (stage) {
+                        FlowerGrowthStage.SEED -> BloomTheme.colors.primary.copy(alpha = 0.7f)
+                        FlowerGrowthStage.SPROUT -> BloomTheme.colors.primary.copy(alpha = 0.8f)
+                        FlowerGrowthStage.BUSH -> BloomTheme.colors.primary.copy(alpha = 0.9f)
+                        FlowerGrowthStage.BUD -> BloomTheme.colors.primary.copy(alpha = 0.95f)
+                        FlowerGrowthStage.BLOOM -> BloomTheme.colors.primary
+                    }
+                )
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = "${stage.getTitle()}: ",
+            style = BloomTheme.typography.small,
+            fontWeight = FontWeight.Medium,
+            color = BloomTheme.colors.textColor.primary
+        )
+
+        Text(
+            text = stringResource(descriptionResId),
+            style = BloomTheme.typography.small,
+            color = BloomTheme.colors.textColor.secondary
+        )
     }
 }
 

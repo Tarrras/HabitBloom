@@ -259,16 +259,6 @@ fun HabitFlowerDetailScreenContent(
 
                             Spacer(modifier = Modifier.height(8.dp))
 
-                            if (showGrowthPathBottomSheet) {
-                                HabitGrowthPathBottomSheet(
-                                    currentStage = habitFlowerDetail.flowerGrowthStage,
-                                    streaksToNextStage = habitFlowerDetail.streaksToNextStage,
-                                    currentStreak = habitFlowerDetail.currentStreak,
-                                    onDismissRequest = { showGrowthPathBottomSheet = false },
-                                    flowerType = habitFlowerDetail.flowerType
-                                )
-                            }
-
                             // Habit details section
                             HabitDetailSection(
                                 description = habitFlowerDetail.description,
@@ -281,6 +271,17 @@ fun HabitFlowerDetailScreenContent(
                                         )
                                     )
                                 }
+                            )
+                        }
+
+
+                        if (showGrowthPathBottomSheet) {
+                            HabitGrowthPathBottomSheet(
+                                currentStage = habitFlowerDetail.flowerGrowthStage,
+                                streaksToNextStage = habitFlowerDetail.streaksToNextStage,
+                                currentStreak = habitFlowerDetail.currentStreak,
+                                onDismissRequest = { showGrowthPathBottomSheet = false },
+                                flowerType = habitFlowerDetail.flowerType
                             )
                         }
                     }
