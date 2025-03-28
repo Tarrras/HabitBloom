@@ -23,8 +23,21 @@ data class HabitFlowerDetail(
     val isCompletedToday: Boolean,
     val flowerGrowthStage: FlowerGrowthStage,
     val flowerType: FlowerType,
-    val streaksToNextStage: Int
+    val streaksToNextStage: Int,
+    val flowerHealth: FlowerHealth = FlowerHealth()
 ) {
+    /**
+     * Calculate if the flower is in a wilting state (showing visual signs of declining health).
+     */
+    val isWilting: Boolean
+        get() = flowerHealth.isWilting
+
+    /**
+     * Calculate if the flower is in a critical health state (close to regression).
+     */
+    val isCriticalHealth: Boolean
+        get() = flowerHealth.isCritical
+        
     /**
      * Model for daily completion status tracking.
      */

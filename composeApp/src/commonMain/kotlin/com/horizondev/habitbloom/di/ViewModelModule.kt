@@ -45,5 +45,13 @@ val viewModelModule: Module = module {
 
     // Garden flow ViewModels
     viewModelOf(::HabitGardenViewModel)
-    viewModelOf(::HabitFlowerDetailViewModel)
+
+    // Custom factory for HabitFlowerDetailViewModel with habitId parameter
+    factory { (habitId: Long) ->
+        HabitFlowerDetailViewModel(
+            habitId = habitId,
+            repository = get(),
+            themeUseCase = get()
+        )
+    }
 }

@@ -216,7 +216,8 @@ fun HabitFlowerDetailScreenContent(
                             FlowerVisualization(
                                 flowerType = habitFlowerDetail.flowerType,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
-                                showWateringAnimation = uiState.showWateringAnimation
+                                showWateringAnimation = uiState.showWateringAnimation,
+                                flowerHealth = habitFlowerDetail.flowerHealth
                             )
 
                             // Water habit button

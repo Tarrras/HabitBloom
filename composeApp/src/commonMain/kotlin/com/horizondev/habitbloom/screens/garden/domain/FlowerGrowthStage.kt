@@ -59,6 +59,31 @@ enum class FlowerGrowthStage(
         }
 
         /**
+         * Determines the flower growth stage considering both streak and health.
+         *
+         * @param streak The current habit streak
+         * @param health The flower's health status
+         * @return The appropriate flower growth stage accounting for health
+         */
+        fun fromStreakAndHealth(streak: Int, health: FlowerHealth): FlowerGrowthStage {
+            // First determine the stage based on streak alone
+            val idealStage = fromStreak(streak)
+
+            // If health indicates regression is needed, drop by one stage
+            if (health.shouldRegress()) {
+                val currentIndex = idealStage.ordinal
+                // Ensure we don't go below SEED stage
+                return if (currentIndex > 0) {
+                    entries.toTypedArray()[currentIndex - 1]
+                } else {
+                    SEED
+                }
+            }
+
+            return idealStage
+        }
+
+        /**
          * Calculates how many more streak days are needed to reach the next stage.
          *
          * @param currentStreak The current habit streak

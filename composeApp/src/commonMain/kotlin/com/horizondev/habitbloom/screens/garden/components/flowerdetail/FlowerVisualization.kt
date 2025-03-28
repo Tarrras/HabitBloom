@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -15,16 +16,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ColorMatrix
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
+import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_solid_water_drop
@@ -38,13 +46,15 @@ import org.jetbrains.compose.resources.painterResource
  * @param growthStage The current growth stage of the flower
  * @param showWateringAnimation Whether to show water drop animation
  * @param modifier Modifier for styling
+ * @param flowerHealth The health status of the flower
  */
 @Composable
 fun FlowerVisualization(
     flowerType: FlowerType,
     growthStage: FlowerGrowthStage,
     showWateringAnimation: Boolean = false,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    flowerHealth: FlowerHealth = FlowerHealth()
 ) {
     BloomCard(
         modifier = modifier
@@ -53,9 +63,7 @@ fun FlowerVisualization(
         onClick = {}
     ) {
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 32.dp),
+            modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -71,16 +79,59 @@ fun FlowerVisualization(
                     FlowerGrowthStage.BLOOM -> 150.dp
                 }
 
+                // Calculate health-based visual effects
+                val saturation = if (flowerHealth.isWilting) {
+                    // Desaturate based on health (0.7 to 1.0 based on health)
+                    0.7f + (flowerHealth.value * 0.3f)
+                } else {
+                    1.0f // Full saturation when healthy
+                }
+
+                // Create color matrix for health-based visual effect
+                val colorMatrix = ColorMatrix().apply {
+                    setToSaturation(saturation)
+                }
+
+                // Apply wilting animation if health is critical
+                val rotationAngle = remember { Animatable(0f) }
+
+                LaunchedEffect(flowerHealth.isCritical) {
+                    if (flowerHealth.isCritical) {
+                        rotationAngle.animateTo(
+                            targetValue = 2f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(2000),
+                                repeatMode = RepeatMode.Reverse
+                            )
+                        )
+                    } else {
+                        // Reset rotation if not critical
+                        rotationAngle.snapTo(0f)
+                    }
+                }
+
                 Box(
                     modifier = Modifier.height(180.dp),
                     contentAlignment = Alignment.BottomCenter
                 ) {
-                    // The flower
+                    // The flower with health effects
                     Image(
                         painter = painterResource(flowerResource),
                         contentDescription = "Flower at $growthStage stage",
-                        modifier = Modifier.size(flowerSize),
-                        contentScale = ContentScale.Fit
+                        modifier = Modifier
+                            .size(flowerSize)
+                            .graphicsLayer {
+                                if (flowerHealth.isCritical) {
+                                    rotationZ = rotationAngle.value
+                                }
+                            }
+                            .alpha(if (flowerHealth.isWilting) 0.9f else 1f),
+                        contentScale = ContentScale.Fit,
+                        colorFilter = if (flowerHealth.isWilting) {
+                            ColorFilter.colorMatrix(colorMatrix)
+                        } else {
+                            null
+                        }
                     )
 
                     // Water drops animation
@@ -89,9 +140,22 @@ fun FlowerVisualization(
                             Modifier.align(Alignment.TopCenter).padding(top = 48.dp)
                         )
                     }
+
+                    // Critical health indicator
+                    if (flowerHealth.isCritical && !showWateringAnimation) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_solid_water_drop),
+                            contentDescription = "Needs urgent watering",
+                            tint = BloomTheme.colors.error,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .align(Alignment.TopEnd)
+                                .padding(top = 8.dp, end = 8.dp)
+                                .alpha(0.9f)
+                        )
+                    }
                 }
             }
-
         }
     }
 }

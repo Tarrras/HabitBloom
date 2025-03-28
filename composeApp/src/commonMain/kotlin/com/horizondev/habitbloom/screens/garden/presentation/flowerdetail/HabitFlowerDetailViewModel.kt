@@ -11,8 +11,8 @@ import com.horizondev.habitbloom.utils.getCurrentDate
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 /**
@@ -39,60 +39,67 @@ class HabitFlowerDetailViewModel(
      * Loads habit details and transforms them into flower detail model.
      */
     private fun loadHabitFlowerDetails() {
-        repository.getUserHabitWithAllRecordsFlow(habitId)
-            .map { habitInfo ->
-                if (habitInfo == null) {
-                    throw IllegalStateException("Habit not found")
-                }
+        // Combine habit data with flower health data
+        val habitDataFlow = repository.getUserHabitWithAllRecordsFlow(habitId)
+        val healthDataFlow = repository.observeFlowerHealth(habitId)
 
-                // Get current date for calculations
-                val today = getCurrentDate()
-
-                // Reverse to get chronological order (oldest first)
-                val lastSevenScheduledDays = habitInfo.records
-                    .filter { it.date <= today }
-                    .sortedByDescending { it.date }
-                    .take(7)
-                    .map { record ->
-                        HabitFlowerDetail.DailyCompletion(
-                            date = record.date,
-                            isCompleted = record.isCompleted
-                        )
-                    }
-                    .reversed()
-
-                // Determine flower growth stage based on current streak
-                val growthStage = FlowerGrowthStage.fromStreak(habitInfo.daysStreak)
-
-                // Determine flower type based on time of day
-                val flowerType = FlowerType.fromTimeOfDay(habitInfo.timeOfDay)
-
-                // Calculate streaks needed to reach next stage
-                val streaksToNextStage = FlowerGrowthStage.streakToNextStage(habitInfo.daysStreak)
-
-                // Check if habit is completed today
-                val isCompletedToday = habitInfo.records
-                    .any { it.date == today && it.isCompleted }
-
-                // Create the flower detail model
-                HabitFlowerDetail(
-                    habitId = habitInfo.userHabitId,
-                    name = habitInfo.name,
-                    description = habitInfo.description,
-                    iconUrl = habitInfo.iconUrl,
-                    timeOfDay = habitInfo.timeOfDay,
-                    currentStreak = habitInfo.daysStreak,
-                    longestStreak = 0, //todo add later
-                    startDate = habitInfo.startDate,
-                    repeats = habitInfo.repeats,
-                    reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
-                    lastSevenDaysCompletions = lastSevenScheduledDays,
-                    isCompletedToday = isCompletedToday,
-                    flowerGrowthStage = growthStage,
-                    flowerType = flowerType,
-                    streaksToNextStage = streaksToNextStage
-                )
+        combine(habitDataFlow, healthDataFlow) { habitInfo, flowerHealth ->
+            if (habitInfo == null) {
+                throw IllegalStateException("Habit not found")
             }
+
+            // Get current date for calculations
+            val today = getCurrentDate()
+
+            // Reverse to get chronological order (oldest first)
+            val lastSevenScheduledDays = habitInfo.records
+                .filter { it.date <= today }
+                .sortedByDescending { it.date }
+                .take(7)
+                .map { record ->
+                    HabitFlowerDetail.DailyCompletion(
+                        date = record.date,
+                        isCompleted = record.isCompleted
+                    )
+                }
+                .reversed()
+
+            // Consider both streak and health for the growth stage
+            val growthStage = FlowerGrowthStage.fromStreakAndHealth(
+                streak = habitInfo.daysStreak,
+                health = flowerHealth
+            )
+
+            // Determine flower type based on time of day
+            val flowerType = FlowerType.fromTimeOfDay(habitInfo.timeOfDay)
+
+            // Calculate streaks needed to reach next stage
+            val streaksToNextStage = FlowerGrowthStage.streakToNextStage(habitInfo.daysStreak)
+
+            // Check if habit is completed today
+            val isCompletedToday = habitInfo.records
+                .any { it.date == today && it.isCompleted }
+
+            // Create the flower detail model
+            HabitFlowerDetail(
+                habitId = habitInfo.userHabitId,
+                name = habitInfo.name,
+                description = habitInfo.description,
+                iconUrl = habitInfo.iconUrl,
+                timeOfDay = habitInfo.timeOfDay,
+                currentStreak = habitInfo.daysStreak,
+                longestStreak = 0, //todo add later
+                startDate = habitInfo.startDate,
+                repeats = habitInfo.repeats,
+                reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
+                lastSevenDaysCompletions = lastSevenScheduledDays,
+                isCompletedToday = isCompletedToday,
+                flowerGrowthStage = growthStage,
+                flowerType = flowerType,
+                streaksToNextStage = streaksToNextStage,
+                flowerHealth = flowerHealth
+            )
+        }
             .onEach { habitFlowerDetail ->
                 updateState { currentState ->
                     currentState.copy(
@@ -152,12 +159,13 @@ class HabitFlowerDetailViewModel(
 
         launch {
             try {
-                // Update habit completion status
+                // Update habit completion status through repository
                 repository.updateHabitCompletionByHabitId(
                     habitId = habitId,
                     date = getCurrentDate(),
                     isCompleted = true
                 )
+                // Note: The repository now takes care of updating flower health
 
                 // Keep animation visible for a moment
                 delay(1500)

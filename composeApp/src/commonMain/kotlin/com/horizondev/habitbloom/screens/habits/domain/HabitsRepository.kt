@@ -3,6 +3,8 @@ package com.horizondev.habitbloom.screens.habits.domain
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.screens.calendar.HabitStreakInfo
+import com.horizondev.habitbloom.screens.garden.data.FlowerHealthDataSource
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
@@ -46,7 +48,8 @@ class HabitsRepository(
     private val storageService: SupabaseStorageService,
     private val notificationManager: NotificationScheduler,
     private val permissionsManager: PermissionsManager,
-    private val settings: ObservableSettings
+    private val settings: ObservableSettings,
+    private val flowerHealthDataSource: FlowerHealthDataSource
 ) : KoinComponent {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
@@ -176,11 +179,21 @@ class HabitsRepository(
         date: LocalDate,
         isCompleted: Boolean
     ) {
+        // Get the user habit ID for this record
+        val record = localDataSource.getAllUserHabitRecordsForHabitId(habitRecordId).first().first()
+        // Update the record completion status
         localDataSource.updateHabitCompletionByRecordId(
             habitRecordId = habitRecordId,
             date = date,
             isCompleted = isCompleted
         )
+
+        // Update flower health based on completion status
+        if (isCompleted) {
+            flowerHealthDataSource.updateHealthForCompletedHabit(record.userHabitId)
+        } else {
+            flowerHealthDataSource.updateHealthForMissedHabit(record.userHabitId)
+        }
     }
 
     suspend fun updateHabitCompletionByHabitId(
@@ -188,11 +201,19 @@ class HabitsRepository(
         date: LocalDate,
         isCompleted: Boolean
     ) {
+        // Update the record completion status
         localDataSource.updateHabitCompletionByHabitId(
             habitId = habitId,
             date = date,
             isCompleted = isCompleted
         )
+
+        // Update flower health based on completion status
+        if (isCompleted) {
+            flowerHealthDataSource.updateHealthForCompletedHabit(habitId)
+        } else {
+            flowerHealthDataSource.updateHealthForMissedHabit(habitId)
+        }
     }
 
     suspend fun createPersonalHabit(
@@ -655,4 +676,24 @@ class HabitsRepository(
         val reminderEnabled: Boolean,
         val reminderTime: LocalTime?
     )
+
+    /**
+     * Gets the current flower health for a habit.
+     *
+     * @param habitId The ID of the habit
+     * @return The flower health status
+     */
+    suspend fun getFlowerHealth(habitId: Long): FlowerHealth {
+        return flowerHealthDataSource.getFlowerHealth(habitId)
+    }
+
+    /**
+     * Observes flower health for a habit as a Flow.
+     *
+     * @param habitId The ID of the habit
+     * @return Flow of FlowerHealth updates
+     */
+    fun observeFlowerHealth(habitId: Long): Flow<FlowerHealth> {
+        return flowerHealthDataSource.observeFlowerHealth(habitId)
+    }
 }

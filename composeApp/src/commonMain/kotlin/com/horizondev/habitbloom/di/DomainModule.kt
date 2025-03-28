@@ -14,7 +14,19 @@ import org.koin.dsl.module
 
 @OptIn(ExperimentalSettingsApi::class)
 val domainModule = module {
-    singleOf(::HabitsRepository)
+    single {
+        HabitsRepository(
+            remoteDataSource = get(),
+            profileRemoteDataSource = get(),
+            localDataSource = get(),
+            storageService = get(),
+            notificationManager = get(),
+            permissionsManager = get(),
+            settings = get(),
+            flowerHealthDataSource = get()
+        )
+    }
+    
     single { Settings().makeObservable() }
     singleOf(::AuthRepository)
     singleOf(::ProfileRepository)
