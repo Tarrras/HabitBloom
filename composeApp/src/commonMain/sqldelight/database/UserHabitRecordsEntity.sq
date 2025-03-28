@@ -26,6 +26,11 @@ selectUserHabitRecordsEntityByUserHabitId:
 SELECT * FROM UserHabitRecordsEntity
 WHERE userHabitId = ?;
 
+-- Select habit records for a specific user habit record
+selectUserHabitRecordsEntityByUserHabitRecordId:
+SELECT * FROM UserHabitRecordsEntity
+WHERE id = ?;
+
 -- Update habit record completion status
 updateUserHabitRecordCompletion:
 UPDATE UserHabitRecordsEntity

@@ -301,6 +301,22 @@ class HabitsLocalDataSource(
             }
     }
 
+    suspend fun getHabitRecordByRecordId(habitRecordId: Long): UserHabitRecord? {
+        return withContext(Dispatchers.IO) {
+            userHabitRecordsQueries
+                .selectUserHabitRecordsEntityByUserHabitRecordId(habitRecordId)
+                .executeAsOneOrNull()
+                ?.let { item ->
+                    UserHabitRecord(
+                        id = item.id,
+                        userHabitId = item.userHabitId,
+                        date = LocalDate.parse(item.date),
+                        isCompleted = item.isCompleted == 1L
+                    )
+                }
+        }
+    }
+
     fun getAllUserHabitRecords(untilDate: LocalDate): Flow<List<UserHabitRecord>> {
         return userHabitRecordsQueries
             .selectAllUserHabitRecords()

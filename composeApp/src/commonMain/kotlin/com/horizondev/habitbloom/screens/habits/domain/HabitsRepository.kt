@@ -109,7 +109,7 @@ class HabitsRepository(
                 Napier.e("Failed to get user ID for habits", tag = TAG)
                 return@withContext Result.failure(Exception("User ID is null"))
             }
-            
+
             remoteDataSource.getHabits(userId)
         }
     }
@@ -180,7 +180,8 @@ class HabitsRepository(
         isCompleted: Boolean
     ) {
         // Get the user habit ID for this record
-        val record = localDataSource.getAllUserHabitRecordsForHabitId(habitRecordId).first().first()
+        val record = localDataSource.getHabitRecordByRecordId(habitRecordId) ?: return
+
         // Update the record completion status
         localDataSource.updateHabitCompletionByRecordId(
             habitRecordId = habitRecordId,
