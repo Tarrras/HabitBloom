@@ -13,7 +13,7 @@ fun App() {
         val viewModel = koinViewModel<AppViewModel>()
 
         LaunchedEffect(Unit) {
-            viewModel.initUser()
+            viewModel.initApp()
         }
 
         BloomTheme {

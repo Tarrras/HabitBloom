@@ -11,6 +11,15 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
+
+/**
+ * Data structure to hold flower health along with its last updated date.
+ */
+data class FlowerHealthRecord(
+    val flowerHealth: FlowerHealth,
+    val lastUpdatedDate: LocalDate?
+)
 
 /**
  * Data source for managing flower health information in the database.
@@ -40,6 +49,23 @@ class FlowerHealthDataSource(
 
         return@withContext entity.toFlowerHealth()
     }
+
+    /**
+     * Gets the flower health along with the last time it was updated.
+     *
+     * @param userHabitId The habit ID
+     * @return FlowerHealthRecord containing the health and last update date, or null if not found
+     */
+    suspend fun getFlowerHealthWithLastUpdatedDate(userHabitId: Long): FlowerHealthRecord? =
+        withContext(Dispatchers.IO) {
+            val entity = flowerHealthQueries.selectFlowerHealthByUserHabitId(userHabitId)
+                .executeAsOneOrNull() ?: return@withContext null
+
+            return@withContext FlowerHealthRecord(
+                flowerHealth = entity.toFlowerHealth(),
+                lastUpdatedDate = runCatching { LocalDate.parse(entity.lastUpdatedDate) }.getOrNull()
+            )
+        }
 
     /**
      * Observes the flower health for a specific habit as a Flow.
@@ -83,20 +109,40 @@ class FlowerHealthDataSource(
         }
 
     /**
+     * Directly updates the flower health with a pre-computed value.
+     * This is useful when batch processing missed days.
+     *
+     * @param userHabitId The habit ID
+     * @param health The new flower health
+     * @param updateDate The date to mark as the last update date
+     */
+    suspend fun updateFlowerHealth(
+        userHabitId: Long,
+        health: FlowerHealth,
+        updateDate: LocalDate = getCurrentDate()
+    ) = withContext(Dispatchers.IO) {
+        insertOrUpdateFlowerHealth(userHabitId, health, updateDate)
+    }
+
+    /**
      * Inserts or updates flower health in the database.
      *
      * @param userHabitId The habit ID
      * @param health The flower health to save
+     * @param updateDate The date to mark as the last update date
      */
-    private suspend fun insertOrUpdateFlowerHealth(userHabitId: Long, health: FlowerHealth) =
-        withContext(Dispatchers.IO) {
-            flowerHealthQueries.insertOrReplaceFlowerHealth(
-                userHabitId = userHabitId,
-                healthValue = health.value.toDouble(),
-                consecutiveMissedDays = health.consecutiveMissedDays.toLong(),
-                lastUpdatedDate = getCurrentDate().toString()
-            )
-        }
+    private suspend fun insertOrUpdateFlowerHealth(
+        userHabitId: Long,
+        health: FlowerHealth,
+        updateDate: LocalDate = getCurrentDate()
+    ) = withContext(Dispatchers.IO) {
+        flowerHealthQueries.insertOrReplaceFlowerHealth(
+            userHabitId = userHabitId,
+            healthValue = health.value.toDouble(),
+            consecutiveMissedDays = health.consecutiveMissedDays.toLong(),
+            lastUpdatedDate = updateDate.toString()
+        )
+    }
 
     /**
      * Deletes the flower health record for a specific habit.

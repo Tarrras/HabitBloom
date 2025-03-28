@@ -696,4 +696,127 @@ class HabitsRepository(
     fun observeFlowerHealth(habitId: Long): Flow<FlowerHealth> {
         return flowerHealthDataSource.observeFlowerHealth(habitId)
     }
+
+    /**
+     * Updates flower health for all habits that haven't been updated today.
+     * This should be called when the app starts to account for days when the user didn't open the app.
+     */
+    suspend fun updateFlowerHealthForMissedDays() {
+        withContext(Dispatchers.IO) {
+            try {
+                val today = getCurrentDate()
+                val allUserHabits = localDataSource.getAllUserHabits()
+
+                // Process each habit
+                allUserHabits.forEach { userHabit ->
+                    // Get the last time this habit's health was updated
+                    val healthRecord =
+                        flowerHealthDataSource.getFlowerHealthWithLastUpdatedDate(userHabit.id)
+                    val lastUpdatedDate = healthRecord?.lastUpdatedDate
+
+                    if (lastUpdatedDate != null && lastUpdatedDate < today) {
+                        // Calculate days between last update and today
+                        val daysBetween = calculateDaysBetween(lastUpdatedDate, today)
+
+                        if (daysBetween > 0) {
+                            Napier.d(
+                                "Updating health for habit ${userHabit.id} - ${daysBetween} days missed",
+                                tag = TAG
+                            )
+
+                            // Check if the habit was completed on each of those missed days
+                            val missedDates =
+                                generateDateRange(lastUpdatedDate.plus(1, DateTimeUnit.DAY), today)
+
+                            // Apply penalties for each genuinely missed day (when the habit should have been done)
+                            var currentHealth = healthRecord.flowerHealth
+
+                            missedDates.forEach { date ->
+                                // Check if the habit was scheduled for this date (based on daysOfWeek)
+                                if (isHabitScheduledForDate(userHabit, date)) {
+                                    // Check if it was actually completed
+                                    val wasCompleted =
+                                        localDataSource.wasHabitCompletedOnDate(userHabit.id, date)
+
+                                    if (!wasCompleted) {
+                                        // Apply missed penalty for this day
+                                        currentHealth = currentHealth.habitMissed()
+                                    } else {
+                                        // It was completed, so update the health positively
+                                        currentHealth = currentHealth.habitCompleted()
+                                    }
+                                }
+                            }
+
+                            // Update the flower health with accumulated penalties/rewards
+                            flowerHealthDataSource.updateFlowerHealth(
+                                userHabit.id,
+                                currentHealth,
+                                today
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Napier.e("Error updating flower health for missed days", e, tag = TAG)
+            }
+        }
+    }
+
+    /**
+     * Checks if a habit is scheduled to be performed on a specific date.
+     *
+     * @param userHabit The user habit to check
+     * @param date The date to check
+     * @return true if the habit is scheduled for this date, false otherwise
+     */
+    private fun isHabitScheduledForDate(userHabit: UserHabit, date: LocalDate): Boolean {
+        // Check if the date falls within the habit's duration
+        if (date < userHabit.startDate) {
+            return false
+        }
+
+        val daysSinceStart = calculateDaysBetween(userHabit.startDate, date)
+        if (userHabit.repeats > 0 && daysSinceStart >= userHabit.repeats) {
+            return false  // Beyond the end date of the habit
+        }
+
+        // Check if the day of week matches
+        val dayOfWeek = date.dayOfWeek
+        return userHabit.daysOfWeek.contains(dayOfWeek)
+    }
+
+    /**
+     * Calculates the number of days between two dates, inclusive.
+     */
+    private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
+        if (endDate < startDate) return 0
+
+        var days = 0
+        var currentDate = startDate
+
+        while (currentDate <= endDate) {
+            days++
+            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
+        }
+
+        return days
+    }
+
+    /**
+     * Generates a range of dates from start to end, inclusive.
+     */
+    private fun generateDateRange(startDate: LocalDate, endDate: LocalDate): List<LocalDate> {
+        if (endDate < startDate) return emptyList()
+
+        val dates = mutableListOf<LocalDate>()
+        var currentDate = startDate
+
+        while (currentDate <= endDate) {
+            dates.add(currentDate)
+            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
+        }
+
+        return dates
+    }
 }

@@ -364,4 +364,34 @@ class HabitsLocalDataSource(
             recordsToDelete
         }
     }
+
+    /**
+     * Retrieves all user habits.
+     *
+     * @return List of all user habits
+     */
+    suspend fun getAllUserHabits(): List<UserHabit> = withContext(Dispatchers.IO) {
+        userHabitsQueries.selectAllUserHabitsEntity()
+            .executeAsList()
+            .map { it.toDomainModel() }
+    }
+
+    /**
+     * Checks if a habit was completed on a specific date.
+     *
+     * @param userHabitId The ID of the habit to check
+     * @param date The date to check for completion
+     * @return true if the habit was completed on the specified date, false otherwise
+     */
+    suspend fun wasHabitCompletedOnDate(userHabitId: Long, date: LocalDate): Boolean =
+        withContext(Dispatchers.IO) {
+            // Query the record for this habit and date
+            val record = userHabitRecordsQueries
+                .selectUserHabitRecordsEntityByUserHabitId(userHabitId)
+                .executeAsList()
+                .find { it.date == date.toString() }
+
+            // Check if the record exists and is marked as completed
+            record?.isCompleted == 1L
+        }
 }
