@@ -37,8 +37,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
@@ -191,19 +193,34 @@ fun List<DayOfWeek>.mapToString() = this.toSet()
     .joinToString(",") { it.name }
 
 fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
+    if (isEmpty()) return 0
+
+    // Sort records by date to ensure chronological order
     val sortedRecords = this.sortedBy { it.date }
 
-    var currentStreak = 0
     var maxStreak = 0
-
+    var currentStreak = 0
+    var lastDate: LocalDate? = null
+    
     for (record in sortedRecords) {
         if (record.isCompleted) {
-            currentStreak += 1
-            if (currentStreak > maxStreak) {
-                maxStreak = currentStreak
+            if (lastDate == null) {
+                // Starting a new streak
+                currentStreak = 1
+            } else if (record.date == lastDate.plus(1, DateTimeUnit.DAY)) {
+                // Continuing streak
+                currentStreak++
+            } else {
+                // Gap in dates, start a new streak
+                currentStreak = 1
             }
+
+            maxStreak = maxOf(maxStreak, currentStreak)
+            lastDate = record.date
         } else {
+            // Break in streak
             currentStreak = 0
+            lastDate = null
         }
     }
 

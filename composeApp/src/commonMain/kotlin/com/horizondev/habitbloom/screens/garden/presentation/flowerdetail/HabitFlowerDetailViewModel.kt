@@ -8,6 +8,7 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getLongestCompletionStreak
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
@@ -88,7 +89,7 @@ class HabitFlowerDetailViewModel(
                 iconUrl = habitInfo.iconUrl,
                 timeOfDay = habitInfo.timeOfDay,
                 currentStreak = habitInfo.daysStreak,
-                longestStreak = 0, //todo add later
+                longestStreak = habitInfo.records.getLongestCompletionStreak(),
                 startDate = habitInfo.startDate,
                 repeats = habitInfo.repeats,
                 reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },

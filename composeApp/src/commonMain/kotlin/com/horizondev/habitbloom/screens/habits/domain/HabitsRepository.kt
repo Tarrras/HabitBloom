@@ -298,16 +298,18 @@ class HabitsRepository(
                 it.id == originId
             } ?: return@combine null
 
+            val currentStreak = localDataSource.getHabitDayStreak(
+                userHabitId = userHabitId,
+                byDate = getCurrentDate()
+            )
+
             UserHabitFullInfo(
                 userHabitId = userHabitId,
                 description = habitDetailedInfo.description,
                 iconUrl = habitDetailedInfo.iconUrl,
                 name = habitDetailedInfo.name,
                 timeOfDay = habitDetailedInfo.timeOfDay,
-                daysStreak = localDataSource.getHabitDayStreak(
-                    userHabitId = userHabitId,
-                    byDate = getCurrentDate()
-                ),
+                daysStreak = currentStreak,
                 records = localHabitRecords,
                 startDate = userHabitInfo.startDate,
                 days = userHabitInfo.daysOfWeek,

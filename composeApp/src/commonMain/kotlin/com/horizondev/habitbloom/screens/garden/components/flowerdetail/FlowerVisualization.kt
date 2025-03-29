@@ -69,9 +69,10 @@ fun FlowerVisualization(
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // The flower based on growth stage
-                val flowerResource = flowerType.getFlowerResource(growthStage)
-                val flowerSize = when (growthStage) {
+                // The flower based on growth stage and health status
+                val displayedGrowthStage = determineDisplayGrowthStage(growthStage, flowerHealth)
+                val flowerResource = flowerType.getFlowerResource(displayedGrowthStage)
+                val flowerSize = when (displayedGrowthStage) {
                     FlowerGrowthStage.SEED -> 60.dp
                     FlowerGrowthStage.SPROUT -> 80.dp
                     FlowerGrowthStage.BUSH -> 100.dp
@@ -117,7 +118,7 @@ fun FlowerVisualization(
                     // The flower with health effects
                     Image(
                         painter = painterResource(flowerResource),
-                        contentDescription = "Flower at $growthStage stage",
+                        contentDescription = "Flower at $displayedGrowthStage stage",
                         modifier = Modifier
                             .size(flowerSize)
                             .graphicsLayer {
@@ -267,4 +268,33 @@ private fun WaterDropsAnimation(
             tint = Color(0xFF1ca3ec)
         )
     }
+}
+
+/**
+ * Determines the growth stage to display based on the actual growth stage and flower health.
+ * When health is critical, the flower will be displayed at a lower growth stage.
+ * When health is wilting but not critical, visual effects will be applied but stage remains.
+ *
+ * @param actualGrowthStage The current or maximum growth stage based on streak
+ * @param flowerHealth The health status of the flower
+ * @return The growth stage to display visually
+ */
+private fun determineDisplayGrowthStage(
+    actualGrowthStage: FlowerGrowthStage,
+    flowerHealth: FlowerHealth
+): FlowerGrowthStage {
+    // When health is critical (below 0.3), reduce the stage by 1
+    if (flowerHealth.isCritical) {
+        val currentIndex = actualGrowthStage.ordinal
+        // Ensure we don't go below SEED stage
+        return if (currentIndex > 0) {
+            FlowerGrowthStage.entries[currentIndex - 1]
+        } else {
+            FlowerGrowthStage.SEED
+        }
+    }
+
+    // If health is wilting (below 0.7) but not critical, keep the same stage
+    // Visual effects (desaturation and alpha) will be applied by other code
+    return actualGrowthStage
 } 
