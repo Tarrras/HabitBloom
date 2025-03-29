@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -41,12 +42,20 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.getTitle
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.bloom_stage_congrats_extended
+import habitbloom.composeapp.generated.resources.bloom_stage_continued
 import habitbloom.composeapp.generated.resources.current_streak_info
 import habitbloom.composeapp.generated.resources.days_to_next_stage
+import habitbloom.composeapp.generated.resources.flower_health_system
 import habitbloom.composeapp.generated.resources.full_growth_path
 import habitbloom.composeapp.generated.resources.growth_stages_explained
 import habitbloom.composeapp.generated.resources.growth_system_explanation
+import habitbloom.composeapp.generated.resources.health_description
+import habitbloom.composeapp.generated.resources.health_rule_consecutive_misses
+import habitbloom.composeapp.generated.resources.health_rule_missing_days
+import habitbloom.composeapp.generated.resources.health_rule_recovery
+import habitbloom.composeapp.generated.resources.health_status_critical
+import habitbloom.composeapp.generated.resources.health_status_healthy
+import habitbloom.composeapp.generated.resources.health_status_wilting
 import habitbloom.composeapp.generated.resources.stage_description_bloom
 import habitbloom.composeapp.generated.resources.stage_description_bud
 import habitbloom.composeapp.generated.resources.stage_description_bush
@@ -230,18 +239,9 @@ fun HabitGrowthPathBottomSheet(
                     } else {
                         Text(
                             text = stringResource(
-                                Res.string.bloom_stage_congrats_extended,
+                                Res.string.bloom_stage_continued,
                                 currentStage.streakThreshold
                             ),
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.success,
-                            fontWeight = FontWeight.Medium
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        Text(
-                            text = "You've reached the final stage with a ${currentStage.streakThreshold}+ day streak! Keep going to maintain your beautiful bloom.",
                             style = BloomTheme.typography.small,
                             color = BloomTheme.colors.textColor.secondary,
                             textAlign = TextAlign.Center
@@ -304,6 +304,118 @@ fun HabitGrowthPathBottomSheet(
                 flowerType = flowerType,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Health system explanation
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    text = stringResource(Res.string.flower_health_system),
+                    style = BloomTheme.typography.title,
+                    color = BloomTheme.colors.textColor.primary
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = stringResource(Res.string.health_description),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Health levels explanation
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Health legend boxes
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(BloomTheme.colors.success, RoundedCornerShape(8.dp))
+                        )
+                        Text(
+                            text = stringResource(Res.string.health_status_healthy),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.secondary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(BloomTheme.colors.secondary, RoundedCornerShape(8.dp))
+                        )
+                        Text(
+                            text = stringResource(Res.string.health_status_wilting),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.secondary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .background(BloomTheme.colors.error, RoundedCornerShape(8.dp))
+                        )
+                        Text(
+                            text = stringResource(Res.string.health_status_critical),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.secondary,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Health system rules
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.health_rule_missing_days),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = stringResource(Res.string.health_rule_consecutive_misses),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Text(
+                        text = stringResource(Res.string.health_rule_recovery),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Bottom padding
             Spacer(modifier = Modifier.height(48.dp))

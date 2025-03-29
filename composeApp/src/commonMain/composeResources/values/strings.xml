@@ -338,9 +338,22 @@
     <string name="bloom_stage_congrats_extended">You\'ve reached the final stage with a %1$d+ day streak! Keep going to maintain your beautiful bloom.</string>
 
     <!-- Growth stage descriptions -->
-    <string name="stage_description_seed">Just beginning (0-2 days)</string>
-    <string name="stage_description_sprout">Establishing the habit (3-6 days)</string>
-    <string name="stage_description_bush">Building momentum (7-13 days)</string>
-    <string name="stage_description_bud">Forming a solid routine (14-29 days)</string>
-    <string name="stage_description_bloom">Habit fully formed! (30+ days)</string>
+    <string name="growth_stage_seed_desc">Firmly planted in soil and beginning its journey. Keep going!</string>
+    <string name="growth_stage_sprout_desc">Small green shoots emerging from the soil. Progress is visible!</string>
+    <string name="growth_stage_bush_desc">Developing leaves and gaining strength. Keep up the good work!</string>
+    <string name="growth_stage_bud_desc">A bud forms, promising a beautiful bloom. Almost there!</string>
+    <string name="growth_stage_bloom_desc">Full bloom achieved! Your consistent habit has created something beautiful.</string>
+
+    <!-- Flower Health -->
+    <string name="flower_health">Flower Health</string>
+    <string name="health_status_healthy">Healthy</string>
+    <string name="health_status_wilting">Wilting</string>
+    <string name="health_status_critical">Critical</string>
+    <string name="health_missed_days">Missed Days</string>
+    <string name="health_description">Your flower's vitality reflects your habit consistency. Missing days causes wilting, while regular maintenance keeps it healthy.</string>
+    <string name="flower_health_system">Flower Health System</string>
+    <string name="health_rule_missing_days">• Missing 1-2 days reduces flower health but doesn't affect growth stage</string>
+    <string name="health_rule_consecutive_misses">• Missing 3+ consecutive days with critical health will cause regression</string>
+    <string name="health_rule_recovery">• Completing your habit restores health gradually</string>
+    <string name="bloom_stage_continued">You've reached the final stage with a %1$d+ day streak! Keep going to maintain your beautiful bloom.</string>
 </resources>

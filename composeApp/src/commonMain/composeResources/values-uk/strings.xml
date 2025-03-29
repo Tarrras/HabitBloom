@@ -352,4 +352,17 @@
     <string name="stage_description_bush">Набираємо темп (7-13 днів)</string>
     <string name="stage_description_bud">Формування стійкої звички (14-29 днів)</string>
     <string name="stage_description_bloom">Звичка повністю сформована! (30+ днів)</string>
+
+    <!-- Flower Health -->
+    <string name="flower_health">Здоров'я квітки</string>
+    <string name="health_status_healthy">Здорова</string>
+    <string name="health_status_wilting">В'яне</string>
+    <string name="health_status_critical">Критичний стан</string>
+    <string name="health_missed_days">Пропущені дні</string>
+    <string name="health_description">Життєва сила вашої квітки відображає постійність звички. Пропуск днів викликає в'янення, а регулярний догляд зберігає її здоровою.</string>
+    <string name="flower_health_system">Система здоров'я квітки</string>
+    <string name="health_rule_missing_days">• Пропуск 1-2 днів знижує здоров'я квітки, але не впливає на стадію росту</string>
+    <string name="health_rule_consecutive_misses">• Пропуск 3+ днів поспіль із критичним здоров'ям призведе до регресу</string>
+    <string name="health_rule_recovery">• Виконання звички поступово відновлює здоров'я</string>
+    <string name="bloom_stage_continued">Ви досягли фінальної стадії з серією у %1$d+ днів! Продовжуйте, щоб підтримувати прекрасне цвітіння.</string>
 </resources>

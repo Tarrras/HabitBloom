@@ -721,7 +721,7 @@ class HabitsRepository(
 
                         if (daysBetween > 0) {
                             Napier.d(
-                                "Updating health for habit ${userHabit.id} - ${daysBetween} days missed",
+                                "Updating health for habit ${userHabit.id} - $daysBetween days missed",
                                 tag = TAG
                             )
 
@@ -739,12 +739,12 @@ class HabitsRepository(
                                     val wasCompleted =
                                         localDataSource.wasHabitCompletedOnDate(userHabit.id, date)
 
-                                    if (!wasCompleted) {
+                                    currentHealth = if (!wasCompleted) {
                                         // Apply missed penalty for this day
-                                        currentHealth = currentHealth.habitMissed()
+                                        currentHealth.habitMissed()
                                     } else {
                                         // It was completed, so update the health positively
-                                        currentHealth = currentHealth.habitCompleted()
+                                        currentHealth.habitCompleted()
                                     }
                                 }
                             }

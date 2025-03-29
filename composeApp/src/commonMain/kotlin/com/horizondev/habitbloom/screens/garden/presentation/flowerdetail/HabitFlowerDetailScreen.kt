@@ -41,6 +41,7 @@ import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFille
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.CompletionHistorySection
+import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerHealthBar
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerVisualization
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitDetailSection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitInfoSection
@@ -238,8 +239,15 @@ fun HabitFlowerDetailScreenContent(
                                 streaksToNextStage = habitFlowerDetail.streaksToNextStage
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
+                            // Flower health bar
+                            FlowerHealthBar(
+                                flowerHealth = habitFlowerDetail.flowerHealth,
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                            )
+
+                            Spacer(modifier = Modifier.height(16.dp))
 
                             BloomPrimaryFilledButton(
                                 modifier = Modifier
