@@ -681,13 +681,13 @@ class HabitsRepository(
     )
 
     /**
-     * Gets the current flower health for a habit.
+     * Gets the current flower health for a habit directly (non-reactive).
      *
      * @param habitId The ID of the habit
-     * @return The flower health status
+     * @return The current FlowerHealth
      */
-    suspend fun getFlowerHealth(habitId: Long): FlowerHealth {
-        return flowerHealthDataSource.getFlowerHealth(habitId)
+    suspend fun getFlowerHealth(habitId: Long): FlowerHealth = withContext(Dispatchers.IO) {
+        flowerHealthDataSource.getFlowerHealth(habitId)
     }
 
     /**
@@ -822,4 +822,104 @@ class HabitsRepository(
 
         return dates
     }
+
+    /**
+     * Gets all user habit records directly (non-reactive).
+     *
+     * @return List of all user habit records
+     */
+    suspend fun getListOfAllUserHabitRecords(): List<UserHabitRecordFullInfo> =
+        withContext(Dispatchers.IO) {
+            // Get basic record data from local source
+            val localRecords = localDataSource.getAllUserHabitRecordsWithInfo()
+
+            // Get remote habit data (should be cached)
+            val detailedHabits = remoteHabits.value
+
+            // Merge local and remote data
+            localRecords.mapNotNull { record ->
+                // Get the remote habit ID for this record
+                val originHabitId =
+                    localDataSource.getHabitOriginId(record.userHabitId) ?: return@mapNotNull null
+
+                // Find the detailed habit info
+                val habitDetailedInfo =
+                    detailedHabits.find { it.id == originHabitId } ?: return@mapNotNull null
+
+                // Calculate current streak
+                val streakDays = localDataSource.getHabitDayStreak(
+                    userHabitId = record.userHabitId,
+                    byDate = getCurrentDate()
+                )
+
+                // Create the full record with merged data
+                UserHabitRecordFullInfo(
+                    id = record.id,
+                    userHabitId = record.userHabitId,
+                    date = record.date,
+                    isCompleted = record.isCompleted,
+                    name = habitDetailedInfo.name,
+                    description = habitDetailedInfo.description,
+                    iconUrl = habitDetailedInfo.iconUrl,
+                    timeOfDay = habitDetailedInfo.timeOfDay,
+                    daysStreak = streakDays
+                )
+            }
+    }
+
+    /**
+     * Gets all user habit records for a specific time of day (non-reactive).
+     *
+     * @param timeOfDay The time of day to filter by
+     * @return List of habit records for the specified time of day
+     */
+    suspend fun getHabitRecordsByTimeOfDay(timeOfDay: TimeOfDay): List<UserHabitRecordFullInfo> =
+        withContext(Dispatchers.IO) {
+            // Get all habit records
+            val records = localDataSource.getAllUserHabitRecords(getCurrentDate()).first()
+
+            // Get all remote habit info (should be cached in remoteHabits)
+            val detailedHabits = remoteHabits.value
+
+            // Filter and merge with remote data
+            val resultList = mutableListOf<UserHabitRecordFullInfo>()
+
+            // Group records by habit ID
+            val recordsByHabitId = records.groupBy { it.userHabitId }
+
+            // Process each habit
+            recordsByHabitId.forEach { (userHabitId, habitRecords) ->
+                // Get remote habit ID
+                val originHabitId = localDataSource.getHabitOriginId(userHabitId) ?: return@forEach
+
+                // Find detailed habit info
+                val habitDetailedInfo =
+                    detailedHabits.find { it.id == originHabitId } ?: return@forEach
+
+                // Filter by time of day
+                if (habitDetailedInfo.timeOfDay != timeOfDay) return@forEach
+
+                // Calculate streak
+                val streakDays = localDataSource.getHabitDayStreak(userHabitId, getCurrentDate())
+
+                // Create record objects
+                habitRecords.forEach { record ->
+                    resultList.add(
+                        UserHabitRecordFullInfo(
+                            id = record.id,
+                            userHabitId = record.userHabitId,
+                            date = record.date,
+                            isCompleted = record.isCompleted,
+                            name = habitDetailedInfo.name,
+                            description = habitDetailedInfo.description,
+                            iconUrl = habitDetailedInfo.iconUrl,
+                            timeOfDay = habitDetailedInfo.timeOfDay,
+                            daysStreak = streakDays
+                        )
+                    )
+                }
+            }
+
+            resultList
+        }
 }

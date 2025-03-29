@@ -410,4 +410,28 @@ class HabitsLocalDataSource(
             // Check if the record exists and is marked as completed
             record?.isCompleted == 1L
         }
+
+    /**
+     * Gets all user habit records with their local data in a non-reactive way.
+     *
+     * Note: This doesn't include remote habit details (name, description, etc.)
+     * which need to be merged at the repository level with data from remoteHabits.
+     *
+     * @return List of all user habit records with basic information
+     */
+    suspend fun getAllUserHabitRecordsWithInfo(): List<UserHabitRecord> =
+        withContext(Dispatchers.IO) {
+            // Get all habit records
+            userHabitRecordsQueries
+                .selectAllUserHabitRecords()
+                .executeAsList()
+                .map { record ->
+                    UserHabitRecord(
+                        id = record.id,
+                        userHabitId = record.userHabitId,
+                        date = LocalDate.parse(record.date),
+                        isCompleted = record.isCompleted == 1L
+                    )
+                }
+        }
 }

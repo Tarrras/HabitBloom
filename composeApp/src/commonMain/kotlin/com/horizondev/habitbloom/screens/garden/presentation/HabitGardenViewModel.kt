@@ -12,13 +12,10 @@ import com.horizondev.habitbloom.utils.getTimeOfDay
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
@@ -71,7 +68,7 @@ class HabitGardenViewModel(
     }
 
     /**
-     * Set up the main flow to observe habits and transform them into flowers
+     * Set up the main flow to observe habits
      */
     private fun observeHabitData() {
         selectedTimeOfDayFlow
@@ -106,53 +103,52 @@ class HabitGardenViewModel(
      * @param timeOfDay The time of day to filter by
      * @return Flow of habit flowers
      */
-    private fun loadGardenData(timeOfDay: TimeOfDay) = repository.getListOfAllUserHabitRecordsFlow()
-        .onStart { updateState { it.copy(isLoading = true) } }
-        .flatMapLatest { habitRecords ->
-            // Group records by habit ID to get the latest record for each habit
-            val habitGroups = habitRecords.groupBy { it.userHabitId }
+    private fun loadGardenData(timeOfDay: TimeOfDay) = flow {
+        // Get only the habit records for this time of day
+        val habitRecords = repository.getHabitRecordsByTimeOfDay(timeOfDay)
 
-            // We'll collect all the flowables for each habit flower
-            val habitFlowerFlows = habitGroups.map { (habitId, records) ->
-                // Get habit info from the first record (since they all have the same habit info)
-                val habitInfo = records.firstOrNull() ?: return@map flowOf<HabitFlower?>(null)
+        // Group records by habit ID
+        val habitGroups = habitRecords.groupBy { it.userHabitId }
 
-                // Get health flowable for this habit
-                val healthFlow = repository.observeFlowerHealth(habitId)
+        // Process each unique habit (we don't need to process every record)
+        val habitFlowers = habitGroups.keys.mapNotNull { habitId ->
+            // Get all records for this habit
+            val records = habitGroups[habitId] ?: return@mapNotNull null
 
-                // Combine habit info with health
-                healthFlow.map { health ->
-                    // Calculate the bloom stage based on streak
-                    val streak = habitInfo.daysStreak
-                    val bloomingStage = FlowerGrowthStage.fromStreak(streak)
+            // Get habit info from the first record
+            val habitInfo = records.firstOrNull() ?: return@mapNotNull null
 
-                    // Get all records for this habit and calculate longest streak from completion history
-                    val habitRecords = records.sortedBy { it.date }
-                    val longestStreak = calculateLongestStreak(habitRecords)
-                    val maxStage = FlowerGrowthStage.fromStreak(longestStreak)
+            // Get health in a single call
+            val health = repository.getFlowerHealth(habitId)
 
-                    HabitFlower(
-                        habitId = habitId,
-                        name = habitInfo.name,
-                        iconUrl = habitInfo.iconUrl,
-                        streak = streak,
-                        timeOfDay = habitInfo.timeOfDay,
-                        bloomingStage = bloomingStage,
-                        maxStage = maxStage,
-                        health = health
-                    )
-                }
-            }
+            // Calculate the bloom stage based on streak
+            val streak = habitInfo.daysStreak
+            val bloomingStage = FlowerGrowthStage.fromStreak(streak)
 
-            // Combine all flowables into a single flow of list
-            combine(habitFlowerFlows) { flowers ->
-                flowers.filterNotNull().filter { it.timeOfDay == timeOfDay }
-            }
+            // Calculate the longest streak from records
+            val sortedRecords = records.sortedBy { it.date }
+            val longestStreak = calculateLongestStreak(sortedRecords)
+            val maxStage = FlowerGrowthStage.fromStreak(longestStreak)
+
+            // Create the flower object
+            HabitFlower(
+                habitId = habitId,
+                name = habitInfo.name,
+                iconUrl = habitInfo.iconUrl,
+                streak = streak,
+                timeOfDay = habitInfo.timeOfDay,
+                bloomingStage = bloomingStage,
+                maxStage = maxStage,
+                health = health
+            )
         }
-        .catch { error ->
-            Napier.e("Error processing garden data", error, tag = TAG)
-            emit(emptyList())
-        }
+
+        // Emit the list of flowers
+        emit(habitFlowers)
+    }.catch { error ->
+        Napier.e("Error processing garden data", error, tag = TAG)
+        emit(emptyList())
+    }
 
     /**
      * Calculates the maximum streak achieved from a list of habit records
