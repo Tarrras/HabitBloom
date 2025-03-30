@@ -27,4 +27,10 @@ WHERE userHabitId = ?;
 -- Delete flower health for a specific habit
 deleteFlowerHealthByUserHabitId:
 DELETE FROM FlowerHealthEntity
+WHERE userHabitId = ?;
+
+-- Update only the last updated date for a flower health record
+updateFlowerHealthLastUpdatedDate:
+UPDATE FlowerHealthEntity
+SET lastUpdatedDate = ?
 WHERE userHabitId = ?; 

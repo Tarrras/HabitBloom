@@ -125,6 +125,31 @@ class FlowerHealthDataSource(
     }
 
     /**
+     * Updates only the last updated date for a flower health record without changing the health values.
+     *
+     * @param userHabitId The habit ID
+     * @param updateDate The date to mark as the last update date (defaults to current date)
+     */
+    suspend fun updateLastUpdatedDate(
+        userHabitId: Long,
+        updateDate: LocalDate = getCurrentDate()
+    ) = withContext(Dispatchers.IO) {
+        val entity =
+            flowerHealthQueries.selectFlowerHealthByUserHabitId(userHabitId).executeAsOneOrNull()
+
+        if (entity != null) {
+            // Update only the date field, preserving existing health values
+            flowerHealthQueries.updateFlowerHealthLastUpdatedDate(
+                lastUpdatedDate = updateDate.toString(),
+                userHabitId = userHabitId
+            )
+        } else {
+            // If no record exists, create one with default health values
+            insertOrUpdateFlowerHealth(userHabitId, FlowerHealth(), updateDate)
+        }
+    }
+
+    /**
      * Inserts or updates flower health in the database.
      *
      * @param userHabitId The habit ID

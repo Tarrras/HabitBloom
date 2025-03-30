@@ -434,4 +434,34 @@ class HabitsLocalDataSource(
                     )
                 }
         }
+
+    /**
+     * Gets all user habit records for a specific habit within a date range.
+     *
+     * @param userHabitId The ID of the habit
+     * @param startDate The start date (inclusive)
+     * @param endDate The end date (inclusive)
+     * @return List of habit records within the date range
+     */
+    suspend fun getUserHabitRecordsInDateRange(
+        userHabitId: Long,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<UserHabitRecord> = withContext(Dispatchers.IO) {
+        userHabitRecordsQueries
+            .selectUserHabitRecordsEntityByUserHabitIdAndDateRange(
+                userHabitId = userHabitId,
+                date = startDate.toString(),
+                date_ = endDate.toString()
+            )
+            .executeAsList()
+            .map { record ->
+                UserHabitRecord(
+                    id = record.id,
+                    userHabitId = record.userHabitId,
+                    date = LocalDate.parse(record.date),
+                    isCompleted = record.isCompleted == 1L
+                )
+            }
+    }
 }

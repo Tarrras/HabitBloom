@@ -717,47 +717,86 @@ class HabitsRepository(
                         flowerHealthDataSource.getFlowerHealthWithLastUpdatedDate(userHabit.id)
                     val lastUpdatedDate = healthRecord?.lastUpdatedDate
 
-                    if (lastUpdatedDate != null && lastUpdatedDate < today) {
-                        // Calculate days between last update and today
-                        val daysBetween = calculateDaysBetween(lastUpdatedDate, today)
+                    // Skip if no health record or updated today
+                    if (lastUpdatedDate == null || lastUpdatedDate == today) {
+                        return@forEach
+                    }
 
-                        if (daysBetween > 0) {
+                    // Always update the lastUpdatedDate to today
+                    var needsHealthUpdate = false
+                    var currentHealth = healthRecord.flowerHealth
+
+                    // Get all dates between last update and yesterday
+                    if (lastUpdatedDate < today) {
+                        val datesToProcess = generateDateRange(
+                            lastUpdatedDate.plus(1, DateTimeUnit.DAY),
+                            today.minus(1, DateTimeUnit.DAY)
+                        )
+
+                        if (datesToProcess.isNotEmpty()) {
                             Napier.d(
-                                "Updating health for habit ${userHabit.id} - $daysBetween days missed",
+                                "Processing ${datesToProcess.size} days for habit ${userHabit.id}",
                                 tag = TAG
                             )
 
-                            // Check if the habit was completed on each of those missed days
-                            val missedDates =
-                                generateDateRange(lastUpdatedDate.plus(1, DateTimeUnit.DAY), today)
+                            // Get all habit records in this time period to avoid repeated DB calls
+                            val recordsInRange = localDataSource.getUserHabitRecordsInDateRange(
+                                userHabit.id,
+                                datesToProcess.first(),
+                                datesToProcess.last()
+                            )
 
-                            // Apply penalties for each genuinely missed day (when the habit should have been done)
-                            var currentHealth = healthRecord.flowerHealth
+                            // Map records by date for quick lookup
+                            val recordsByDate = recordsInRange.associateBy { it.date }
 
-                            missedDates.forEach { date ->
-                                // Check if the habit was scheduled for this date (based on daysOfWeek)
-                                if (isHabitScheduledForDate(userHabit, date)) {
-                                    // Check if it was actually completed
-                                    val wasCompleted =
-                                        localDataSource.wasHabitCompletedOnDate(userHabit.id, date)
-
-                                    currentHealth = if (!wasCompleted) {
-                                        // Apply missed penalty for this day
-                                        currentHealth.habitMissed()
-                                    } else {
-                                        // It was completed, so update the health positively
-                                        currentHealth.habitCompleted()
-                                    }
-                                }
+                            // Only check dates when the habit was scheduled
+                            val scheduledDates = datesToProcess.filter { date ->
+                                isHabitScheduledForDate(userHabit, date)
                             }
 
-                            // Update the flower health with accumulated penalties/rewards
-                            flowerHealthDataSource.updateFlowerHealth(
-                                userHabit.id,
-                                currentHealth,
-                                today
-                            )
+                            if (scheduledDates.isEmpty()) {
+                                Napier.d(
+                                    "No scheduled dates for habit ${userHabit.id} in this period",
+                                    tag = TAG
+                                )
+                                flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
+                                return@forEach
+                            }
+
+                            // Process each scheduled date
+                            scheduledDates.forEach { date ->
+                                val record = recordsByDate[date]
+                                val wasCompleted = record?.isCompleted ?: false
+
+                                val oldHealth = currentHealth
+                                currentHealth = if (wasCompleted) {
+                                    // It was completed, update health positively
+                                    Napier.d("Habit ${userHabit.id} completed on $date", tag = TAG)
+                                    currentHealth.habitCompleted()
+                                } else {
+                                    // Apply missed penalty for this day
+                                    Napier.d("Habit ${userHabit.id} missed on $date", tag = TAG)
+                                    currentHealth.habitMissed()
+                                }
+
+                                // Track if health actually changed
+                                if (oldHealth != currentHealth) {
+                                    needsHealthUpdate = true
+                                }
+                            }
                         }
+                    }
+
+                    // Update flower health if it changed
+                    if (needsHealthUpdate) {
+                        flowerHealthDataSource.updateFlowerHealth(
+                            userHabit.id,
+                            currentHealth,
+                            today
+                        )
+                    } else {
+                        // Just update the last updated date
+                        flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
                     }
                 }
             } catch (e: Exception) {
@@ -780,7 +819,7 @@ class HabitsRepository(
         }
 
         val daysSinceStart = calculateDaysBetween(userHabit.startDate, date)
-        if (userHabit.repeats > 0 && daysSinceStart >= userHabit.repeats) {
+        if (userHabit.repeats in 1..daysSinceStart) {
             return false  // Beyond the end date of the habit
         }
 

@@ -57,3 +57,9 @@ clearPastRecordsBeforeDate:
 DELETE FROM UserHabitRecordsEntity
 WHERE userHabitId = ? AND date < ?;
 
+-- Select habit records for a specific user habit within a date range
+selectUserHabitRecordsEntityByUserHabitIdAndDateRange:
+SELECT * FROM UserHabitRecordsEntity
+WHERE userHabitId = ? AND date >= ? AND date <= ?
+ORDER BY date;
+
