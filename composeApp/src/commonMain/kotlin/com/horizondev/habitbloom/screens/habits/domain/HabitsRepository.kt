@@ -728,61 +728,59 @@ class HabitsRepository(
 
                     // Get all dates between last update and yesterday
                     if (lastUpdatedDate < today) {
-                        val datesToProcess = generateDateRange(
-                            lastUpdatedDate.plus(1, DateTimeUnit.DAY),
-                            today.minus(1, DateTimeUnit.DAY)
+                        val yesterday = today.minus(1, DateTimeUnit.DAY)
+
+                        // If health was updated yesterday, just update the date without changing health
+                        if (lastUpdatedDate == yesterday) {
+                            flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
+                            return@forEach
+                        }
+
+                        // Get all records for this habit between last update (exclusive) and yesterday (inclusive)
+                        val startDate = lastUpdatedDate.plus(1, DateTimeUnit.DAY)
+                        val recordsInRange = localDataSource.getUserHabitRecordsInDateRange(
+                            userHabit.id,
+                            startDate,
+                            yesterday
                         )
 
-                        if (datesToProcess.isNotEmpty()) {
+                        if (recordsInRange.isEmpty()) {
                             Napier.d(
-                                "Processing ${datesToProcess.size} days for habit ${userHabit.id}",
+                                "No records found for habit ${userHabit.id} from ${startDate} to ${yesterday}",
                                 tag = TAG
                             )
+                            // No records to process, just update the date
+                            flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
+                            return@forEach
+                        }
 
-                            // Get all habit records in this time period to avoid repeated DB calls
-                            val recordsInRange = localDataSource.getUserHabitRecordsInDateRange(
-                                userHabit.id,
-                                datesToProcess.first(),
-                                datesToProcess.last()
-                            )
+                        Napier.d(
+                            "Processing ${recordsInRange.size} records for habit ${userHabit.id}",
+                            tag = TAG
+                        )
 
-                            // Map records by date for quick lookup
-                            val recordsByDate = recordsInRange.associateBy { it.date }
-
-                            // Only check dates when the habit was scheduled
-                            val scheduledDates = datesToProcess.filter { date ->
-                                isHabitScheduledForDate(userHabit, date)
-                            }
-
-                            if (scheduledDates.isEmpty()) {
+                        // Process each record
+                        recordsInRange.forEach { record ->
+                            val oldHealth = currentHealth
+                            currentHealth = if (record.isCompleted) {
+                                // It was completed, update health positively
                                 Napier.d(
-                                    "No scheduled dates for habit ${userHabit.id} in this period",
+                                    "Habit ${userHabit.id} completed on ${record.date}",
                                     tag = TAG
                                 )
-                                flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
-                                return@forEach
+                                currentHealth.habitCompleted()
+                            } else {
+                                // Apply missed penalty for this day
+                                Napier.d(
+                                    "Habit ${userHabit.id} missed on ${record.date}",
+                                    tag = TAG
+                                )
+                                currentHealth.habitMissed()
                             }
 
-                            // Process each scheduled date
-                            scheduledDates.forEach { date ->
-                                val record = recordsByDate[date]
-                                val wasCompleted = record?.isCompleted ?: false
-
-                                val oldHealth = currentHealth
-                                currentHealth = if (wasCompleted) {
-                                    // It was completed, update health positively
-                                    Napier.d("Habit ${userHabit.id} completed on $date", tag = TAG)
-                                    currentHealth.habitCompleted()
-                                } else {
-                                    // Apply missed penalty for this day
-                                    Napier.d("Habit ${userHabit.id} missed on $date", tag = TAG)
-                                    currentHealth.habitMissed()
-                                }
-
-                                // Track if health actually changed
-                                if (oldHealth != currentHealth) {
-                                    needsHealthUpdate = true
-                                }
+                            // Track if health actually changed
+                            if (oldHealth != currentHealth) {
+                                needsHealthUpdate = true
                             }
                         }
                     }
@@ -806,29 +804,6 @@ class HabitsRepository(
     }
 
     /**
-     * Checks if a habit is scheduled to be performed on a specific date.
-     *
-     * @param userHabit The user habit to check
-     * @param date The date to check
-     * @return true if the habit is scheduled for this date, false otherwise
-     */
-    private fun isHabitScheduledForDate(userHabit: UserHabit, date: LocalDate): Boolean {
-        // Check if the date falls within the habit's duration
-        if (date < userHabit.startDate) {
-            return false
-        }
-
-        val daysSinceStart = calculateDaysBetween(userHabit.startDate, date)
-        if (userHabit.repeats in 1..daysSinceStart) {
-            return false  // Beyond the end date of the habit
-        }
-
-        // Check if the day of week matches
-        val dayOfWeek = date.dayOfWeek
-        return userHabit.daysOfWeek.contains(dayOfWeek)
-    }
-
-    /**
      * Calculates the number of days between two dates, inclusive.
      */
     private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
@@ -843,23 +818,6 @@ class HabitsRepository(
         }
 
         return days
-    }
-
-    /**
-     * Generates a range of dates from start to end, inclusive.
-     */
-    private fun generateDateRange(startDate: LocalDate, endDate: LocalDate): List<LocalDate> {
-        if (endDate < startDate) return emptyList()
-
-        val dates = mutableListOf<LocalDate>()
-        var currentDate = startDate
-
-        while (currentDate <= endDate) {
-            dates.add(currentDate)
-            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
-        }
-
-        return dates
     }
 
     /**
