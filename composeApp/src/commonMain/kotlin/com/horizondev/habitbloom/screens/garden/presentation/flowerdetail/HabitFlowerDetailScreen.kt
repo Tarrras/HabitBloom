@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -33,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -48,7 +50,9 @@ import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitInf
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.WaterHabitButton
 import com.horizondev.habitbloom.utils.getGardenBackgroundRes
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
+import dev.chrisbanes.haze.materials.HazeMaterials
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.habit_flower_details
 import habitbloom.composeapp.generated.resources.show_bloom_progress
@@ -211,15 +215,27 @@ fun HabitFlowerDetailScreenContent(
                             modifier = Modifier
                                 .fillMaxSize()
                                 .verticalScroll(rememberScrollState())
-                                .padding(bottom = 16.dp)
+                                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
                         ) {
+                            Spacer(modifier = Modifier.height(16.dp))
+
                             // Flower visualization
                             FlowerVisualization(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .hazeEffect(
+                                        state = hazeState, style = HazeMaterials.regular(
+                                            containerColor = BloomTheme.colors.surface
+                                        )
+                                    )
+                                    .fillMaxWidth(),
                                 flowerType = habitFlowerDetail.flowerType,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
                                 showWateringAnimation = uiState.showWateringAnimation,
                                 flowerHealth = habitFlowerDetail.flowerHealth
                             )
+
+                            Spacer(modifier = Modifier.height(16.dp))
 
                             // Water habit button
                             WaterHabitButton(
@@ -227,11 +243,15 @@ fun HabitFlowerDetailScreenContent(
                                 isLoading = uiState.showWateringAnimation,
                                 onClick = {
                                     handleUiEvent(HabitFlowerDetailUiEvent.WaterTodaysHabit)
-                                }
+                                },
+                                modifier = Modifier.fillMaxWidth()
                             )
+
+                            Spacer(modifier = Modifier.height(16.dp))
 
                             // Habit info section
                             HabitInfoSection(
+                                modifier = Modifier.fillMaxWidth(),
                                 habitName = habitFlowerDetail.name,
                                 timeOfDay = habitFlowerDetail.timeOfDay,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
@@ -244,32 +264,32 @@ fun HabitFlowerDetailScreenContent(
                             // Flower health bar
                             FlowerHealthBar(
                                 flowerHealth = habitFlowerDetail.flowerHealth,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                                modifier = Modifier.fillMaxWidth()
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
 
                             BloomPrimaryFilledButton(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
+                                modifier = Modifier.fillMaxWidth(),
                                 text = stringResource(Res.string.show_bloom_progress),
                                 onClick = {
                                     showGrowthPathBottomSheet = true
                                 }
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
                             // 7-day completion history
                             CompletionHistorySection(
-                                completions = habitFlowerDetail.lastSevenDaysCompletions
+                                completions = habitFlowerDetail.lastSevenDaysCompletions,
+                                modifier = Modifier.fillMaxWidth()
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(16.dp))
 
                             // Habit details section
                             HabitDetailSection(
+                                modifier = Modifier.fillMaxWidth(),
                                 description = habitFlowerDetail.description,
                                 startDate = habitFlowerDetail.startDate,
                                 reminderTime = habitFlowerDetail.reminderTime,

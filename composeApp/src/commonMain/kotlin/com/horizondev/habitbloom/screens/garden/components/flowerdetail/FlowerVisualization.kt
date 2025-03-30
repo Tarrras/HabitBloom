@@ -9,12 +9,10 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -31,14 +29,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
@@ -76,148 +73,130 @@ fun FlowerVisualization(
             repeatMode = RepeatMode.Reverse
         )
     )
-    
-    BloomCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        onClick = {}
+
+    Box(
+        modifier = modifier.height(280.dp),
+        contentAlignment = Alignment.Center
     ) {
-        // Add a subtle light gradient background
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            BloomTheme.colors.background,
-                            BloomTheme.colors.background.copy(alpha = 0.7f)
-                        )
-                    )
-                ),
-            contentAlignment = Alignment.Center
+        // Background particle effects
+        if (!flowerHealth.isCritical) {
+            ParticleEffects(modifier = Modifier.fillMaxSize())
+        }
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
         ) {
-            // Background particle effects
-            if (!flowerHealth.isCritical) {
-                ParticleEffects(modifier = Modifier.fillMaxSize())
+            // The flower based on growth stage and health status
+            val displayedGrowthStage = determineDisplayGrowthStage(growthStage, flowerHealth)
+            val flowerResource = flowerType.getFlowerResource(displayedGrowthStage)
+            val flowerSize = when (displayedGrowthStage) {
+                FlowerGrowthStage.SEED -> 120.dp
+                FlowerGrowthStage.SPROUT -> 140.dp
+                FlowerGrowthStage.BUSH -> 160.dp
+                FlowerGrowthStage.BUD -> 180.dp
+                FlowerGrowthStage.BLOOM -> 200.dp
             }
-            
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(16.dp)
-            ) {
-                // The flower based on growth stage and health status
-                val displayedGrowthStage = determineDisplayGrowthStage(growthStage, flowerHealth)
-                val flowerResource = flowerType.getFlowerResource(displayedGrowthStage)
-                val flowerSize = when (displayedGrowthStage) {
-                    FlowerGrowthStage.SEED -> 120.dp
-                    FlowerGrowthStage.SPROUT -> 140.dp
-                    FlowerGrowthStage.BUSH -> 160.dp
-                    FlowerGrowthStage.BUD -> 180.dp
-                    FlowerGrowthStage.BLOOM -> 200.dp
-                }
 
-                // Calculate health-based visual effects
-                val saturation = if (flowerHealth.isWilting) {
-                    // Desaturate based on health (0.7 to 1.0 based on health)
-                    0.7f + (flowerHealth.value * 0.3f)
-                } else {
-                    1.0f // Full saturation when healthy
-                }
+            // Calculate health-based visual effects
+            val saturation = if (flowerHealth.isWilting) {
+                // Desaturate based on health (0.7 to 1.0 based on health)
+                0.7f + (flowerHealth.value * 0.3f)
+            } else {
+                1.0f // Full saturation when healthy
+            }
 
-                // Create color matrix for health-based visual effect
-                val colorMatrix = ColorMatrix().apply {
-                    setToSaturation(saturation)
-                }
+            // Create color matrix for health-based visual effect
+            val colorMatrix = ColorMatrix().apply {
+                setToSaturation(saturation)
+            }
 
-                // Apply wilting animation if health is critical
-                val rotationAngle = remember { Animatable(0f) }
+            // Apply wilting animation if health is critical
+            val rotationAngle = remember { Animatable(0f) }
 
-                LaunchedEffect(flowerHealth.isCritical) {
-                    if (flowerHealth.isCritical) {
-                        rotationAngle.animateTo(
-                            targetValue = 2f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(2000),
-                                repeatMode = RepeatMode.Reverse
-                            )
+            LaunchedEffect(flowerHealth.isCritical) {
+                if (flowerHealth.isCritical) {
+                    rotationAngle.animateTo(
+                        targetValue = 2f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(2000),
+                            repeatMode = RepeatMode.Reverse
                         )
+                    )
+                } else {
+                    // Reset rotation if not critical
+                    rotationAngle.snapTo(0f)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Box for the flower visualization
+            Box(
+                modifier = Modifier.height(220.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                // The flower image with effects (includes pot)
+                Image(
+                    painter = painterResource(flowerResource),
+                    contentDescription = "Flower at $displayedGrowthStage stage",
+                    modifier = Modifier
+                        .size(flowerSize)
+                        .align(Alignment.Center)
+                        .scale(if (flowerHealth.isWilting) 1f else breathingScale) // Subtle breathing animation when healthy
+                        .graphicsLayer {
+                            if (flowerHealth.isCritical) {
+                                rotationZ = rotationAngle.value
+                            }
+                        }
+                        .alpha(if (flowerHealth.isWilting) 0.9f else 1f),
+                    contentScale = ContentScale.Fit,
+                    colorFilter = if (flowerHealth.isWilting) {
+                        ColorFilter.colorMatrix(colorMatrix)
                     } else {
-                        // Reset rotation if not critical
-                        rotationAngle.snapTo(0f)
+                        null
                     }
+                )
+
+                // Water drops animation
+                if (showWateringAnimation) {
+                    WaterDropsAnimation(
+                        Modifier.align(Alignment.TopCenter).padding(top = 48.dp)
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Box for the flower visualization
-                Box(
-                    modifier = Modifier.height(220.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // The flower image with effects (includes pot)
-                    Image(
-                        painter = painterResource(flowerResource),
-                        contentDescription = "Flower at $displayedGrowthStage stage",
-                        modifier = Modifier
-                            .size(flowerSize)
-                            .align(Alignment.Center)
-                            .scale(if (flowerHealth.isWilting) 1f else breathingScale) // Subtle breathing animation when healthy
-                            .graphicsLayer {
-                                if (flowerHealth.isCritical) {
-                                    rotationZ = rotationAngle.value
-                                }
-                            }
-                            .alpha(if (flowerHealth.isWilting) 0.9f else 1f),
-                        contentScale = ContentScale.Fit,
-                        colorFilter = if (flowerHealth.isWilting) {
-                            ColorFilter.colorMatrix(colorMatrix)
-                        } else {
-                            null
-                        }
+                // Critical health indicator
+                if (flowerHealth.isCritical && !showWateringAnimation) {
+                    // Animated water drop that pulses
+                    val pulseScale by infiniteTransition.animateFloat(
+                        initialValue = 1f,
+                        targetValue = 1.3f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(800, easing = LinearEasing),
+                            repeatMode = RepeatMode.Reverse
+                        )
                     )
 
-                    // Water drops animation
-                    if (showWateringAnimation) {
-                        WaterDropsAnimation(
-                            Modifier.align(Alignment.TopCenter).padding(top = 48.dp)
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_solid_water_drop),
+                        contentDescription = "Needs urgent watering",
+                        tint = BloomTheme.colors.error,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .scale(pulseScale)
+                            .align(Alignment.TopEnd)
+                            .padding(top = 8.dp, end = 8.dp)
+                            .alpha(0.9f)
+                    )
+                }
 
-                    // Critical health indicator
-                    if (flowerHealth.isCritical && !showWateringAnimation) {
-                        // Animated water drop that pulses
-                        val pulseScale by infiniteTransition.animateFloat(
-                            initialValue = 1f,
-                            targetValue = 1.3f,
-                            animationSpec = infiniteRepeatable(
-                                animation = tween(800, easing = LinearEasing),
-                                repeatMode = RepeatMode.Reverse
-                            )
-                        )
-                        
-                        Icon(
-                            painter = painterResource(Res.drawable.ic_solid_water_drop),
-                            contentDescription = "Needs urgent watering",
-                            tint = BloomTheme.colors.error,
-                            modifier = Modifier
-                                .size(28.dp)
-                                .scale(pulseScale)
-                                .align(Alignment.TopEnd)
-                                .padding(top = 8.dp, end = 8.dp)
-                                .alpha(0.9f)
-                        )
-                    }
-
-                    // Add subtle shine effect on healthy flowers
-                    if (flowerHealth.value > FlowerHealth.HEALTHY_THRESHOLD && displayedGrowthStage == FlowerGrowthStage.BLOOM) {
-                        ShineEffect(
-                            Modifier
-                                .align(Alignment.TopCenter)
-                                .offset(y = (flowerSize.value * 0.15f).dp)
-                        )
-                    }
+                // Add subtle shine effect on healthy flowers
+                if (flowerHealth.value > FlowerHealth.HEALTHY_THRESHOLD && displayedGrowthStage == FlowerGrowthStage.BLOOM) {
+                    ShineEffect(
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .offset(y = (flowerSize.value * 0.15f).dp)
+                    )
                 }
             }
         }
@@ -373,48 +352,139 @@ private fun ShineEffect(modifier: Modifier = Modifier) {
 }
 
 /**
- * Animated background particles for a lively scene.
+ * Animated background particles for a lively scene, using leaf shapes.
  */
 @Composable
 private fun ParticleEffects(modifier: Modifier = Modifier) {
     val infiniteTransition = rememberInfiniteTransition()
 
+    // Create more varied particles with different sizes, colors and animation patterns
     val particles = remember {
-        List(8) {
+        List(12) {
             ParticleState(
                 x = Random.nextFloat() * 400f,
                 y = Random.nextFloat() * 300f,
-                alpha = 0.1f + (Random.nextFloat() * 0.1f),
-                size = 4f + (Random.nextFloat() * 4f)
+                alpha = 0.4f + (Random.nextFloat() * 0.3f),
+                size = 6f + (Random.nextFloat() * 6f),
+                rotationAngle = Random.nextFloat() * 360f,
+                colorIndex = Random.nextInt(3)  // 3 different green shades
             )
         }
     }
 
-    // Different animation offsets for particles
+    // Different animation parameters for particles
     val animations = particles.mapIndexed { index, _ ->
         val delay = (index * 300) % 2500
+        val duration = 3000 + (index % 5) * 500 // Varied durations
+
         infiniteTransition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
             animationSpec = infiniteRepeatable(
-                animation = tween(2500, delayMillis = delay, easing = LinearEasing),
+                animation = tween(duration, delayMillis = delay, easing = LinearEasing),
                 repeatMode = RepeatMode.Reverse
             )
         )
     }
 
-    Canvas(modifier = modifier) {
+    // Rotation animations for particles
+    val rotations = particles.mapIndexed { index, _ ->
+        val delay = (index * 200) % 2000
+        val duration = 4000 + (index % 3) * 1000 // Varied durations
+
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 360f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(duration, delayMillis = delay, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            )
+        )
+    }
+
+    // Define leaf colors
+    val leafColors = listOf(
+        Color(0xFF8BC34A), // Light green
+        Color(0xFF689F38), // Medium green
+        Color(0xFFA5D6A7)  // Pale green
+    )
+
+    Box(modifier = modifier) {
         particles.forEachIndexed { index, particle ->
             val animationValue = animations[index].value
-            val x = particle.x + (animationValue * 20f * if (index % 2 == 0) 1 else -1)
-            val y = particle.y - (animationValue * 15f)
+            val rotationValue = rotations[index].value
 
-            drawCircle(
-                color = Color(0xFFE3F2FD).copy(alpha = particle.alpha),
-                radius = particle.size,
-                center = Offset(x, y)
+            val x = particle.x + (animationValue * 30f * if (index % 2 == 0) 1 else -1)
+            val y = particle.y - (animationValue * 20f)
+
+            // Draw a leaf
+            LeafParticle(
+                color = leafColors[particle.colorIndex],
+                alpha = particle.alpha,
+                size = (particle.size * 1.5f).dp,
+                angle = rotationValue + particle.rotationAngle,
+                modifier = Modifier.offset(
+                    x = x.dp,
+                    y = y.dp
+                )
             )
         }
+    }
+}
+
+/**
+ * A simple leaf-shaped particle.
+ */
+@Composable
+private fun LeafParticle(
+    color: Color,
+    alpha: Float,
+    size: Dp,
+    angle: Float,
+    modifier: Modifier = Modifier
+) {
+    Canvas(
+        modifier = modifier
+            .size(size)
+            .graphicsLayer {
+                rotationZ = angle
+            }
+    ) {
+        // Draw leaf shape
+        val leafPath = androidx.compose.ui.graphics.Path().apply {
+            // Start from the bottom center
+            moveTo(size.toPx() / 2, size.toPx())
+
+            // Draw curve to the right and back
+            cubicTo(
+                size.toPx() * 0.8f, size.toPx() * 0.7f,  // control point 1
+                size.toPx(), size.toPx() * 0.3f,        // control point 2
+                size.toPx() / 2, 0f                     // end point
+            )
+
+            // Draw curve to the left and back to the bottom
+            cubicTo(
+                0f, size.toPx() * 0.3f,                // control point 1
+                size.toPx() * 0.2f, size.toPx() * 0.7f, // control point 2
+                size.toPx() / 2, size.toPx()           // end point
+            )
+
+            close()
+        }
+
+        // Draw the leaf with a stem
+        drawPath(
+            path = leafPath,
+            color = color.copy(alpha = alpha),
+        )
+
+        // Draw a small stem
+        drawLine(
+            color = Color(0xFF795548).copy(alpha = alpha),
+            start = Offset(size.toPx() / 2, size.toPx()),
+            end = Offset(size.toPx() / 2, size.toPx() * 1.2f),
+            strokeWidth = size.toPx() * 0.1f
+        )
     }
 }
 
@@ -425,7 +495,9 @@ private data class ParticleState(
     val x: Float,
     val y: Float,
     val alpha: Float,
-    val size: Float
+    val size: Float,
+    val rotationAngle: Float = 0f,
+    val colorIndex: Int = 0
 )
 
 /**

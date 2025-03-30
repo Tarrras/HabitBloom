@@ -46,9 +46,7 @@ fun HabitDetailSection(
     modifier: Modifier = Modifier
 ) {
     BloomCard(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+        modifier = modifier,
         onClick = {}
     ) {
         Column(

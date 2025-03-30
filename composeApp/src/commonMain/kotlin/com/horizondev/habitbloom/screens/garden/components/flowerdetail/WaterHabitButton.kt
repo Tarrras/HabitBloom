@@ -4,9 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -57,7 +54,6 @@ fun WaterHabitButton(
         stringResource(Res.string.water_today_habit)
     }
 
-    Spacer(modifier = Modifier.height(8.dp))
 
     Button(
         onClick = onClick,
@@ -68,8 +64,6 @@ fun WaterHabitButton(
             disabledContainerColor = buttonColor.copy(alpha = 0.6f)
         ),
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         AnimatedVisibility(
             visible = isLoading,
