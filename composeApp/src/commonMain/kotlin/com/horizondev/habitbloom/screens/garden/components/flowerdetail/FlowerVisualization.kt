@@ -7,13 +7,20 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -38,6 +47,7 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_solid_water_drop
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import kotlin.random.Random
 
 /**
  * Component to display a flower visualization at a specific growth stage.
@@ -56,28 +66,56 @@ fun FlowerVisualization(
     modifier: Modifier = Modifier,
     flowerHealth: FlowerHealth = FlowerHealth()
 ) {
+    // Calculate the animated scale for a subtle breathing effect
+    val infiniteTransition = rememberInfiniteTransition()
+    val breathingScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.02f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+    
     BloomCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(16.dp),
         onClick = {}
     ) {
+        // Add a subtle light gradient background
         Box(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            BloomTheme.colors.background,
+                            BloomTheme.colors.background.copy(alpha = 0.7f)
+                        )
+                    )
+                ),
             contentAlignment = Alignment.Center
         ) {
+            // Background particle effects
+            if (!flowerHealth.isCritical) {
+                ParticleEffects(modifier = Modifier.fillMaxSize())
+            }
+            
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
             ) {
                 // The flower based on growth stage and health status
                 val displayedGrowthStage = determineDisplayGrowthStage(growthStage, flowerHealth)
                 val flowerResource = flowerType.getFlowerResource(displayedGrowthStage)
                 val flowerSize = when (displayedGrowthStage) {
-                    FlowerGrowthStage.SEED -> 60.dp
-                    FlowerGrowthStage.SPROUT -> 80.dp
-                    FlowerGrowthStage.BUSH -> 100.dp
-                    FlowerGrowthStage.BUD -> 120.dp
-                    FlowerGrowthStage.BLOOM -> 150.dp
+                    FlowerGrowthStage.SEED -> 120.dp
+                    FlowerGrowthStage.SPROUT -> 140.dp
+                    FlowerGrowthStage.BUSH -> 160.dp
+                    FlowerGrowthStage.BUD -> 180.dp
+                    FlowerGrowthStage.BLOOM -> 200.dp
                 }
 
                 // Calculate health-based visual effects
@@ -111,16 +149,21 @@ fun FlowerVisualization(
                     }
                 }
 
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Box for the flower visualization
                 Box(
-                    modifier = Modifier.height(180.dp),
-                    contentAlignment = Alignment.BottomCenter
+                    modifier = Modifier.height(220.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // The flower with health effects
+                    // The flower image with effects (includes pot)
                     Image(
                         painter = painterResource(flowerResource),
                         contentDescription = "Flower at $displayedGrowthStage stage",
                         modifier = Modifier
                             .size(flowerSize)
+                            .align(Alignment.Center)
+                            .scale(if (flowerHealth.isWilting) 1f else breathingScale) // Subtle breathing animation when healthy
                             .graphicsLayer {
                                 if (flowerHealth.isCritical) {
                                     rotationZ = rotationAngle.value
@@ -144,15 +187,35 @@ fun FlowerVisualization(
 
                     // Critical health indicator
                     if (flowerHealth.isCritical && !showWateringAnimation) {
+                        // Animated water drop that pulses
+                        val pulseScale by infiniteTransition.animateFloat(
+                            initialValue = 1f,
+                            targetValue = 1.3f,
+                            animationSpec = infiniteRepeatable(
+                                animation = tween(800, easing = LinearEasing),
+                                repeatMode = RepeatMode.Reverse
+                            )
+                        )
+                        
                         Icon(
                             painter = painterResource(Res.drawable.ic_solid_water_drop),
                             contentDescription = "Needs urgent watering",
                             tint = BloomTheme.colors.error,
                             modifier = Modifier
-                                .size(24.dp)
+                                .size(28.dp)
+                                .scale(pulseScale)
                                 .align(Alignment.TopEnd)
                                 .padding(top = 8.dp, end = 8.dp)
                                 .alpha(0.9f)
+                        )
+                    }
+
+                    // Add subtle shine effect on healthy flowers
+                    if (flowerHealth.value > FlowerHealth.HEALTHY_THRESHOLD && displayedGrowthStage == FlowerGrowthStage.BLOOM) {
+                        ShineEffect(
+                            Modifier
+                                .align(Alignment.TopCenter)
+                                .offset(y = (flowerSize.value * 0.15f).dp)
                         )
                     }
                 }
@@ -269,6 +332,101 @@ private fun WaterDropsAnimation(
         )
     }
 }
+
+/**
+ * A shine effect for healthy blooming flowers.
+ */
+@Composable
+private fun ShineEffect(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val rotationAnim by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(7000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        )
+    )
+
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.3f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1500),
+            repeatMode = RepeatMode.Reverse
+        )
+    )
+
+    Box(modifier = modifier) {
+        Icon(
+            imageVector = Icons.Default.Star,
+            contentDescription = null,
+            tint = Color(0xFFFFF176).copy(alpha = alpha),
+            modifier = Modifier
+                .size(48.dp)
+                .graphicsLayer {
+                    rotationZ = rotationAnim
+                }
+        )
+    }
+}
+
+/**
+ * Animated background particles for a lively scene.
+ */
+@Composable
+private fun ParticleEffects(modifier: Modifier = Modifier) {
+    val infiniteTransition = rememberInfiniteTransition()
+
+    val particles = remember {
+        List(8) {
+            ParticleState(
+                x = Random.nextFloat() * 400f,
+                y = Random.nextFloat() * 300f,
+                alpha = 0.1f + (Random.nextFloat() * 0.1f),
+                size = 4f + (Random.nextFloat() * 4f)
+            )
+        }
+    }
+
+    // Different animation offsets for particles
+    val animations = particles.mapIndexed { index, _ ->
+        val delay = (index * 300) % 2500
+        infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(2500, delayMillis = delay, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+    }
+
+    Canvas(modifier = modifier) {
+        particles.forEachIndexed { index, particle ->
+            val animationValue = animations[index].value
+            val x = particle.x + (animationValue * 20f * if (index % 2 == 0) 1 else -1)
+            val y = particle.y - (animationValue * 15f)
+
+            drawCircle(
+                color = Color(0xFFE3F2FD).copy(alpha = particle.alpha),
+                radius = particle.size,
+                center = Offset(x, y)
+            )
+        }
+    }
+}
+
+/**
+ * Data class to track particle information.
+ */
+private data class ParticleState(
+    val x: Float,
+    val y: Float,
+    val alpha: Float,
+    val size: Float
+)
 
 /**
  * Determines the growth stage to display based on the actual growth stage and flower health.
