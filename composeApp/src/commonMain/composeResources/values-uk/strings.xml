@@ -118,7 +118,8 @@
     <string name="description">Опис</string>
 
     <string name="quick_action">Швидкі дії</string>
-    <string name="every_day">Щодня</string>
+    <string name="every_day">Кожен день</string>
+    <string name="weekdays">Робочі дні</string>
     <string name="only_weekends">Тільки вихідні</string>
     <string name="work_days">Робочі дні</string>
     <string name="custom_pattern">Власний шаблон</string>
@@ -127,6 +128,7 @@
     <string name="drag_to_select_multiple">Порада: Проведіть пальцем по днях, щоб вибрати кілька одразу</string>
     <string name="one_week">Один тиждень</string>
     <string name="one_month">Один місяць</string>
+    <string name="two_months">2 місяці</string>
     <string name="three_months">Три місяці</string>
 
     <string name="one_repeat">1 повторення (1 тиждень)</string>

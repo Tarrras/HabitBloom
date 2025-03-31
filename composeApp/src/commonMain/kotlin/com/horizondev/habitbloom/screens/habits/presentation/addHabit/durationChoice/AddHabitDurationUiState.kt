@@ -2,7 +2,6 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationC
 
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
-import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -15,7 +14,6 @@ data class AddHabitDurationUiState(
     val durationInDays: Int = 1,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0), // Default reminder time set to 8:00 AM
-    val selectedGroupOfDays: GroupOfDays? = null
 ) {
     val displayedStartDate: String? = formattedStartDate
     val nextButtonEnabled: Boolean = activeDays.isEmpty().not()
@@ -42,7 +40,7 @@ sealed interface AddHabitDurationUiEvent {
         val isActive: Boolean
     ) : AddHabitDurationUiEvent
 
-    data class SelectGroupOfDays(val group: GroupOfDays) : AddHabitDurationUiEvent
+    data class SelectGroupOfDays(val group: List<DayOfWeek>) : AddHabitDurationUiEvent
     data class SelectWeekStartOption(val option: HabitWeekStartOption) : AddHabitDurationUiEvent
     data class DurationChanged(val duration: Int) : AddHabitDurationUiEvent
     data class ReminderEnabledChanged(val enabled: Boolean) : AddHabitDurationUiEvent

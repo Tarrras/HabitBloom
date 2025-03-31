@@ -7,13 +7,14 @@ import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -21,10 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInParent
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -53,120 +55,111 @@ fun DragSelectDayPicker(
     listOfDays: List<DayOfWeek> = DayOfWeek.entries,
     enabled: Boolean = true
 ) {
-    // State for tracking drag selection
-    var dragStartIndex by remember { mutableIntStateOf(-1) }
-    var dragEndIndex by remember { mutableIntStateOf(-1) }
+    // Track drag operation
     var isDragging by remember { mutableStateOf(false) }
 
-    // Current selection state (clone of activeDays) that we'll mutate during drag
-    val currentSelection = remember(activeDays) { activeDays.toMutableList() }
-
-    // Map to store item positions (using parent-relative coordinates)
-    val itemBounds = remember { mutableMapOf<Int, Pair<Float, Float>>() }
-
-    // When drag ends, commit the changes
-    LaunchedEffect(isDragging) {
-        if (!isDragging && dragStartIndex >= 0 && dragEndIndex >= 0) {
-            // Finalize drag and send the updated selection
-            onDaysChanged(currentSelection)
-            dragStartIndex = -1
-            dragEndIndex = -1
-        }
+    // Track current selection - initialized with activeDays
+    val selectedDays = remember(activeDays) {
+        mutableStateListOf<DayOfWeek>().apply {
+            addAll(activeDays)
+        } 
     }
 
-    // Remember the initial selection state for determining toggle action
-    val initialSelectionState = remember { mutableStateOf<Boolean?>(null) }
+    // Keep track of last touched day to avoid repeat updates
+    var lastTouchedDay by remember { mutableStateOf<DayOfWeek?>(null) }
 
+    // The action we're performing (add or remove days)
+    var isAddingDays by remember { mutableStateOf(true) }
+
+    // Store bounds for each day cell by index for more reliable lookup
+    val dayBounds = remember { mutableStateMapOf<Int, Rect>() }
+    
     PickerRow(
-        modifier = modifier.pointerInput(enabled) {
-            if (!enabled) return@pointerInput
+        modifier = modifier
+            .fillMaxWidth()
+            .pointerInput(enabled) {
+                if (!enabled) return@pointerInput
 
-            detectDragGestures(
-                onDragStart = { offset ->
-                    // Find which day was initially touched
-                    val index = findIndexAtPosition(offset, itemBounds)
-                    if (index >= 0) {
-                        dragStartIndex = index
-                        dragEndIndex = index
+                detectDragGestures(
+                    onDragStart = { initialPosition ->
                         isDragging = true
 
-                        // Determine the toggle action based on initial state
-                        val day = listOfDays[index]
-                        val isCurrentlySelected = day in currentSelection
-                        initialSelectionState.value = !isCurrentlySelected
+                        // Find which day we initially touched
+                        val index = getDayIndexAtPosition(initialPosition, dayBounds)
+                        if (index != -1 && index < listOfDays.size) {
+                            val day = listOfDays[index]
+                            lastTouchedDay = day
 
-                        // Apply toggle to the initial day
-                        if (isCurrentlySelected) {
-                            currentSelection.remove(day)
-                        } else {
-                            currentSelection.add(day)
+                            // Determine if we're adding or removing days
+                            isAddingDays = day !in selectedDays
+
+                            // Toggle the initial day
+                            val newSelection = selectedDays.toMutableList()
+                            if (isAddingDays) {
+                                newSelection.add(day)
+                            } else {
+                                newSelection.remove(day)
+                            }
+
+                            selectedDays.clear()
+                            selectedDays.addAll(newSelection)
+                            onDaysChanged(newSelection) // Always notify
                         }
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                        lastTouchedDay = null
+                    },
+                    onDragCancel = {
+                        isDragging = false
+                        lastTouchedDay = null
+                    },
+                    onDrag = { change, _ ->
+                        // Important: Use the current drag position
+                        val index = getDayIndexAtPosition(change.position, dayBounds)
 
-                        // Immediately update the selection
-                        onDaysChanged(currentSelection)
-                    }
-                },
-                onDragEnd = {
-                    isDragging = false
-                    initialSelectionState.value = null
-                },
-                onDragCancel = {
-                    isDragging = false
-                    initialSelectionState.value = null
-                },
-                onDrag = { change, _ ->
-                    if (isDragging) {
-                        // Find which day is currently under the pointer
-                        val index = findIndexAtPosition(change.position, itemBounds)
-                        if (index >= 0 && index != dragEndIndex) {
-                            // Get the previous drag end index
-                            val previousEndIndex = dragEndIndex
-                            dragEndIndex = index
+                        // Only process if we've moved to a valid day that's different from the last one
+                        if (index != -1 && index < listOfDays.size) {
+                            val day = listOfDays[index]
 
-                            // Determine selection direction
-                            val startIdx = minOf(dragStartIndex, dragEndIndex)
-                            val endIdx = maxOf(dragStartIndex, dragEndIndex)
+                            // Skip if we're still on the same day
+                            if (day == lastTouchedDay) return@detectDragGestures
 
-                            // Get the desired selection state (from the initial toggle action)
-                            val targetState =
-                                initialSelectionState.value ?: return@detectDragGestures
+                            // Update last touched day
+                            lastTouchedDay = day
 
-                            // Create a new selection based on the full range
-                            val newSelection = currentSelection.toMutableList()
+                            // Apply our action (add or remove) to this day
+                            val newSelection = selectedDays.toMutableList()
 
-                            // Ensure all days in range match the target state
-                            for (i in startIdx..endIdx) {
-                                val day = listOfDays[i]
-                                if (targetState && day !in newSelection) {
+                            if (isAddingDays) {
+                                // We're in "add" mode - make sure this day is added
+                                if (day !in newSelection) {
                                     newSelection.add(day)
-                                } else if (!targetState && day in newSelection) {
-                                    newSelection.remove(day)
                                 }
+                            } else {
+                                // We're in "remove" mode - make sure this day is removed
+                                newSelection.remove(day)
                             }
 
-                            // Update with new selection
-                            if (newSelection != currentSelection) {
-                                currentSelection.clear()
-                                currentSelection.addAll(newSelection)
-                                onDaysChanged(currentSelection)
-                            }
+                            // Always update the selection and notify
+                            selectedDays.clear()
+                            selectedDays.addAll(newSelection)
+                            onDaysChanged(newSelection) // Always notify
                         }
                     }
-                }
-            )
-        },
+                )
+            },
         backgroundColor = backgroundColor,
         shapeSize = shapeSize
     ) {
         listOfDays.forEachIndexed { index, dayOfWeek ->
-            val isActiveDay = dayOfWeek in activeDays
+            val isActiveDay = dayOfWeek in selectedDays
             val shape = when (index) {
                 0 -> RoundedCornerShape(topStart = shapeSize, bottomStart = shapeSize)
                 listOfDays.lastIndex -> RoundedCornerShape(
                     topEnd = shapeSize,
                     bottomEnd = shapeSize
                 )
-
                 else -> RectangleShape
             }
 
@@ -183,24 +176,26 @@ fun DragSelectDayPicker(
                     .fillMaxHeight()
                     .clip(shape)
                     .clickable(
-                        enabled = enabled,
+                        enabled = enabled && !isDragging,
                         interactionSource = interactionSource,
                         indication = null
                     ) {
-                        // Handle click to toggle day selection
-                        val updatedSelection = activeDays.toMutableList()
-                        if (dayOfWeek in updatedSelection) {
-                            updatedSelection.remove(dayOfWeek)
+                        // Handle single click
+                        val newSelection = selectedDays.toMutableList()
+                        if (dayOfWeek in newSelection) {
+                            newSelection.remove(dayOfWeek)
                         } else {
-                            updatedSelection.add(dayOfWeek)
+                            newSelection.add(dayOfWeek)
                         }
-                        onDaysChanged(updatedSelection)
+
+                        selectedDays.clear()
+                        selectedDays.addAll(newSelection)
+                        onDaysChanged(newSelection)
                     }
                     .indication(interactionSource, ripple())
                     .onGloballyPositioned { coordinates ->
-                        // Store the position of this item using LOCAL coordinates
-                        val bounds = coordinates.boundsInParent()
-                        itemBounds[index] = bounds.left to bounds.right
+                        // Save the bounds of this day cell for hit-testing by index
+                        dayBounds[index] = coordinates.boundsInRoot()
                     }
             ) {
                 Text(
@@ -216,20 +211,17 @@ fun DragSelectDayPicker(
 }
 
 /**
- * Helper function to find index of item at a given position
+ * Find the index of the day at the given position
  */
-private fun findIndexAtPosition(
-    position: Offset,
-    itemBounds: Map<Int, Pair<Float, Float>>
-): Int {
-    val x = position.x
-
-    for ((index, bounds) in itemBounds) {
-        val (left, right) = bounds
-        if (x >= left && x <= right) {
+private fun getDayIndexAtPosition(position: Offset, bounds: Map<Int, Rect>): Int {
+    for ((index, rect) in bounds) {
+        if (position.x >= rect.left &&
+            position.x <= rect.right &&
+            position.y >= rect.top &&
+            position.y <= rect.bottom
+        ) {
             return index
         }
     }
-
     return -1
 } 

@@ -95,7 +95,7 @@ fun AddHabitFlowNavHost(
                 currentRoute?.step != null -> {
                     AddHabitFlowHostTopBar(
                         currentPageIndex = currentRoute.step.ordinal,
-                        onBackPressed = if (currentRoute.step.ordinal != 0) {
+                        onBackPressed = if (currentRoute.step.ordinal in 1..<AddHabitFlowScreenStep.entries.lastIndex) {
                             { navController.popBackStack() }
                         } else null,
                         onClearPressed = { onFinishFlow() }

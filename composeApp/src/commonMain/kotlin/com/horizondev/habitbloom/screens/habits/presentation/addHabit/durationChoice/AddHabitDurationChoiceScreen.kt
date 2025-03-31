@@ -27,33 +27,33 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
+import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
-import com.horizondev.habitbloom.core.designComponents.pickers.DragSelectDayPicker
-import com.horizondev.habitbloom.core.designComponents.pickers.GroupDaySelectorGrid
+import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
-import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
-import habitbloom.composeapp.generated.resources.drag_to_select_multiple
 import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.ends_around
+import habitbloom.composeapp.generated.resources.every_day
 import habitbloom.composeapp.generated.resources.four_repeats
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_week
+import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.select_days_for_habit
 import habitbloom.composeapp.generated.resources.select_reminder_time
 import habitbloom.composeapp.generated.resources.select_repeats
 import habitbloom.composeapp.generated.resources.selected_repeats
-import habitbloom.composeapp.generated.resources.start_date
 import habitbloom.composeapp.generated.resources.twelve_repeats
-import habitbloom.composeapp.generated.resources.when_do_you_want_to_start
+import habitbloom.composeapp.generated.resources.two_months
+import habitbloom.composeapp.generated.resources.weekdays
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -136,19 +136,13 @@ private fun AddHabitDurationChoiceScreenContent(
 
         SelectDaysForHabitCard(
             modifier = Modifier.fillMaxWidth(),
-            startDate = uiState.displayedStartDate,
             activeDays = uiState.activeDays,
-            weekStartOption = uiState.weekStartOption,
-            dayStateChanged = { day, isActive ->
-                handleUiEvent(AddHabitDurationUiEvent.UpdateDayState(day, isActive))
+            onDaysChanged = { dayOfWeek, isActive ->
+                handleUiEvent(AddHabitDurationUiEvent.UpdateDayState(dayOfWeek, isActive))
             },
-            selectGroupOfDays = {
-                handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(it))
-            },
-            onOptionSelected = {
-                handleUiEvent(AddHabitDurationUiEvent.SelectWeekStartOption(it))
-            },
-            selectedGroupOfDays = uiState.selectedGroupOfDays
+            onGroupChanged = { days ->
+                handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -205,87 +199,86 @@ private fun AddHabitDurationChoiceScreenContent(
 @Composable
 private fun SelectDaysForHabitCard(
     modifier: Modifier = Modifier,
-    startDate: String?,
     activeDays: List<DayOfWeek>,
-    weekStartOption: HabitWeekStartOption,
-    dayStateChanged: (DayOfWeek, Boolean) -> Unit,
-    selectGroupOfDays: (GroupOfDays) -> Unit,
-    onOptionSelected: (HabitWeekStartOption) -> Unit,
-    selectedGroupOfDays: GroupOfDays? = null
+    onDaysChanged: (dayOfWeek: DayOfWeek, isActive: Boolean) -> Unit,
+    onGroupChanged: (List<DayOfWeek>) -> Unit
 ) {
-    Surface(
-        color = BloomTheme.colors.surface,
-        shape = RoundedCornerShape(16.dp),
-        shadowElevation = 6.dp
+    BloomCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = {}
     ) {
         Column(
-            modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
                 text = stringResource(Res.string.select_days_for_habit),
-                style = BloomTheme.typography.heading,
-                color = BloomTheme.colors.textColor.primary,
+                style = BloomTheme.typography.subheading,
+                color = BloomTheme.colors.textColor.primary
             )
-            Spacer(modifier = Modifier.height(12.dp))
 
-            DragSelectDayPicker(
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Regular day picker
+            DayPicker(
                 activeDays = activeDays,
-                onDaysChanged = { days ->
-                    val current = activeDays.toSet()
-                    val new = days.toSet()
-
-                    (current - new).forEach { day ->
-                        dayStateChanged(day, false)
-                    }
-                    (new - current).forEach { day ->
-                        dayStateChanged(day, true)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
+                dayStateChanged = onDaysChanged
             )
 
-            Text(
-                text = stringResource(Res.string.drag_to_select_multiple),
-                style = BloomTheme.typography.small,
-                color = BloomTheme.colors.textColor.secondary,
-                modifier = Modifier.padding(top = 8.dp, bottom = 12.dp)
-            )
+            Spacer(modifier = Modifier.height(16.dp))
 
-            AnimatedVisibility(
-                startDate != null,
+            // Add preset buttons in a row
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Text(
-                    text = stringResource(Res.string.start_date, startDate.orEmpty()),
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.primary,
-                    textDecoration = TextDecoration.Underline
+                PresetDayButton(
+                    text = stringResource(Res.string.weekdays),
+                    onClick = {
+                        onGroupChanged(
+                            listOf(
+                                DayOfWeek.MONDAY,
+                                DayOfWeek.TUESDAY,
+                                DayOfWeek.WEDNESDAY,
+                                DayOfWeek.THURSDAY,
+                                DayOfWeek.FRIDAY
+                            )
+                        )
+                    }
+                )
+
+                PresetDayButton(
+                    text = stringResource(Res.string.only_weekends),
+                    onClick = {
+                        onGroupChanged(
+                            listOf(
+                                DayOfWeek.SATURDAY,
+                                DayOfWeek.SUNDAY
+                            )
+                        )
+                    }
+                )
+
+                PresetDayButton(
+                    text = stringResource(Res.string.every_day),
+                    onClick = {
+                        onGroupChanged(DayOfWeek.entries)
+                    }
                 )
             }
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(Res.string.when_do_you_want_to_start),
-                color = BloomTheme.colors.textColor.secondary,
-                style = BloomTheme.typography.subheading
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            SingleWeekStartOptionPicker(
-                modifier = Modifier,
-                onOptionSelected = onOptionSelected,
-                selectedOption = weekStartOption,
-                options = HabitWeekStartOption.entries
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            GroupDaySelectorGrid(
-                selectedGroup = selectedGroupOfDays,
-                activeDays = activeDays,
-                onGroupSelected = selectGroupOfDays,
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
+}
+
+@Composable
+private fun PresetDayButton(
+    text: String,
+    onClick: () -> Unit
+) {
+    BloomSmallActionButton(
+        text = text,
+        onClick = onClick,
+    )
 }
 
 @Composable
@@ -434,7 +427,7 @@ fun VisualDurationSelector(
     val durations = listOf(
         DurationOption(1, stringResource(Res.string.one_week)),
         DurationOption(4, stringResource(Res.string.four_repeats)),
-        DurationOption(8, "2 months"),
+        DurationOption(8, stringResource(Res.string.two_months)),
         DurationOption(12, stringResource(Res.string.twelve_repeats)),
     )
 

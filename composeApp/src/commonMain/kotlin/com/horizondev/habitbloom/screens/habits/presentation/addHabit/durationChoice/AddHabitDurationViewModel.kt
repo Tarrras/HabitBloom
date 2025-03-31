@@ -6,7 +6,6 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
 import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocale
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
 import habitbloom.composeapp.generated.resources.Res
@@ -59,18 +58,8 @@ class AddHabitDurationViewModel(
     fun handleUiEvent(event: AddHabitDurationUiEvent) {
         when (event) {
             is AddHabitDurationUiEvent.SelectGroupOfDays -> {
-                val newList = when (event.group) {
-                    GroupOfDays.EVERY_DAY -> DayOfWeek.entries
-                    GroupOfDays.WEEKENDS -> listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)
-                    GroupOfDays.WORK_DAYS -> listOf(
-                        DayOfWeek.MONDAY,
-                        DayOfWeek.TUESDAY,
-                        DayOfWeek.WEDNESDAY,
-                        DayOfWeek.THURSDAY,
-                        DayOfWeek.FRIDAY
-                    )
-                }
-                updateState { it.copy(activeDays = newList, selectedGroupOfDays = event.group) }
+                val newList = event.group
+                updateState { it.copy(activeDays = newList) }
             }
 
             is AddHabitDurationUiEvent.UpdateDayState -> {
@@ -85,34 +74,9 @@ class AddHabitDurationViewModel(
                     } else add(dayToChange)
                 }
 
-                // Determine if this matches any predefined group
-                val newSelectedGroup = when {
-                    newList.containsAll(DayOfWeek.entries) && newList.size == DayOfWeek.entries.size ->
-                        GroupOfDays.EVERY_DAY
-
-                    newList.containsAll(listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) &&
-                            newList.size == 2 ->
-                        GroupOfDays.WEEKENDS
-
-                    newList.containsAll(
-                        listOf(
-                            DayOfWeek.MONDAY,
-                            DayOfWeek.TUESDAY,
-                            DayOfWeek.WEDNESDAY,
-                            DayOfWeek.THURSDAY,
-                            DayOfWeek.FRIDAY
-                        )
-                    ) && newList.size == 5 ->
-                        GroupOfDays.WORK_DAYS
-
-                    else ->
-                        null
-                }
-
                 updateState {
                     it.copy(
                         activeDays = newList,
-                        selectedGroupOfDays = newSelectedGroup
                     )
                 }
             }
