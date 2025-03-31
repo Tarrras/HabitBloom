@@ -123,6 +123,8 @@
     <string name="work_days">Робочі дні</string>
     <string name="custom_pattern">Власний шаблон</string>
     <string name="days_count">%1$d днів</string>
+    <string name="ends_around">Завершується близько: %1$s</string>
+    <string name="drag_to_select_multiple">Порада: Проведіть пальцем по днях, щоб вибрати кілька одразу</string>
     <string name="one_week">Один тиждень</string>
     <string name="one_month">Один місяць</string>
     <string name="three_months">Три місяці</string>

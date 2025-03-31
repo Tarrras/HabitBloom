@@ -1,7 +1,11 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,9 +27,8 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
-import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
-import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
+import com.horizondev.habitbloom.core.designComponents.pickers.DragSelectDayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.GroupDaySelectorGrid
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
@@ -37,11 +40,12 @@ import com.horizondev.habitbloom.screens.habits.domain.models.GroupOfDays
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
+import habitbloom.composeapp.generated.resources.drag_to_select_multiple
 import habitbloom.composeapp.generated.resources.enable_reminder
+import habitbloom.composeapp.generated.resources.ends_around
 import habitbloom.composeapp.generated.resources.four_repeats
 import habitbloom.composeapp.generated.resources.next
-import habitbloom.composeapp.generated.resources.one_repeat
-import habitbloom.composeapp.generated.resources.quick_action
+import habitbloom.composeapp.generated.resources.one_week
 import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.select_days_for_habit
 import habitbloom.composeapp.generated.resources.select_reminder_time
@@ -50,9 +54,11 @@ import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date
 import habitbloom.composeapp.generated.resources.twelve_repeats
 import habitbloom.composeapp.generated.resources.when_do_you_want_to_start
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -152,7 +158,9 @@ private fun AddHabitDurationChoiceScreenContent(
             duration = uiState.durationInDays,
             onDurationChanged = {
                 handleUiEvent(AddHabitDurationUiEvent.DurationChanged(it))
-            }
+            },
+            startDate = uiState.startDate,
+            activeDays = uiState.activeDays
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -221,12 +229,28 @@ private fun SelectDaysForHabitCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
 
-            DayPicker(
-                modifier = Modifier.fillMaxWidth(),
+            DragSelectDayPicker(
                 activeDays = activeDays,
-                dayStateChanged = dayStateChanged
+                onDaysChanged = { days ->
+                    val current = activeDays.toSet()
+                    val new = days.toSet()
+
+                    (current - new).forEach { day ->
+                        dayStateChanged(day, false)
+                    }
+                    (new - current).forEach { day ->
+                        dayStateChanged(day, true)
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = stringResource(Res.string.drag_to_select_multiple),
+                style = BloomTheme.typography.small,
+                color = BloomTheme.colors.textColor.secondary,
+                modifier = Modifier.padding(top = 8.dp, bottom = 12.dp)
+            )
 
             AnimatedVisibility(
                 startDate != null,
@@ -254,7 +278,6 @@ private fun SelectDaysForHabitCard(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            // New visual group day selector
             GroupDaySelectorGrid(
                 selectedGroup = selectedGroupOfDays,
                 activeDays = activeDays,
@@ -334,7 +357,9 @@ private fun ReminderSettingsCard(
 private fun SelectDurationForHabitCard(
     modifier: Modifier = Modifier,
     duration: Int,
-    onDurationChanged: (Int) -> Unit
+    onDurationChanged: (Int) -> Unit,
+    startDate: LocalDate? = null,
+    activeDays: List<DayOfWeek> = emptyList()
 ) {
     Surface(
         color = BloomTheme.colors.surface,
@@ -350,38 +375,14 @@ private fun SelectDurationForHabitCard(
                 style = BloomTheme.typography.heading,
                 color = BloomTheme.colors.textColor.primary,
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            DurationSlider(
+            Spacer(modifier = Modifier.height(16.dp))
+
+            VisualDurationSelector(
                 duration = duration,
                 onDurationChanged = onDurationChanged,
+                startDate = startDate,
+                activeDays = activeDays,
                 modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = stringResource(Res.string.quick_action),
-                color = BloomTheme.colors.textColor.secondary,
-                style = BloomTheme.typography.subheading
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            BloomSmallActionButton(
-                text = stringResource(Res.string.one_repeat),
-                onClick = {
-                    onDurationChanged(1)
-                }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            BloomSmallActionButton(
-                text = stringResource(Res.string.four_repeats),
-                onClick = {
-                    onDurationChanged(4)
-                }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            BloomSmallActionButton(
-                text = stringResource(Res.string.twelve_repeats),
-                onClick = {
-                    onDurationChanged(12)
-                }
             )
         }
     }
@@ -414,6 +415,149 @@ fun DurationSlider(
             color = BloomTheme.colors.textColor.primary,
             textDecoration = TextDecoration.Underline,
         )
+    }
+}
+
+/**
+ * Visual representation of duration with chips and calendar-based explanation
+ */
+@Composable
+fun VisualDurationSelector(
+    modifier: Modifier = Modifier,
+    duration: Int,
+    onDurationChanged: (Int) -> Unit,
+    startDate: LocalDate?,
+    activeDays: List<DayOfWeek>,
+    enabled: Boolean = true
+) {
+    // Define common durations with more meaningful labels
+    val durations = listOf(
+        DurationOption(1, stringResource(Res.string.one_week)),
+        DurationOption(4, stringResource(Res.string.four_repeats)),
+        DurationOption(8, "2 months"),
+        DurationOption(12, stringResource(Res.string.twelve_repeats)),
+    )
+
+    Column(modifier = modifier) {
+        // Duration chips in a wrapped flow layout
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            durations.forEach { option ->
+                DurationChip(
+                    text = option.label,
+                    isSelected = duration == option.value,
+                    onClick = { onDurationChanged(option.value) },
+                    enabled = enabled
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Regular slider for fine-tuning
+        BloomSlider(
+            value = duration.toFloat(),
+            onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
+            valueRange = 1f..12f,
+            steps = 11,
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Show current duration with completion date
+        if (startDate != null && activeDays.isNotEmpty()) {
+            val approximateEndDate = calculateApproximateEndDate(startDate, duration, activeDays)
+            val formattedDate = approximateEndDate.formatToMmDdYyWithLocale()
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = pluralStringResource(
+                        resource = Res.plurals.selected_repeats,
+                        quantity = duration,
+                        duration
+                    ),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary,
+                    modifier = Modifier.weight(1f)
+                )
+
+                Text(
+                    text = stringResource(Res.string.ends_around, formattedDate),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary
+                )
+            }
+        } else {
+            Text(
+                text = pluralStringResource(
+                    resource = Res.plurals.selected_repeats,
+                    quantity = duration,
+                    duration
+                ),
+                style = BloomTheme.typography.body,
+                color = BloomTheme.colors.textColor.primary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun DurationChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    enabled: Boolean = true
+) {
+    Surface(
+        color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface,
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface
+        ),
+        modifier = Modifier.clickable(enabled = enabled, onClick = onClick)
+    ) {
+        Text(
+            text = text,
+            style = BloomTheme.typography.body,
+            color = if (isSelected) BloomTheme.colors.textColor.white else BloomTheme.colors.textColor.primary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
+/**
+ * Helper function to calculate approximate end date based on duration and selected days
+ */
+private fun calculateApproximateEndDate(
+    startDate: LocalDate,
+    durationInRepeats: Int,
+    activeDays: List<DayOfWeek>
+): LocalDate {
+    // Simple approximation: each repeat is roughly a week
+    val daysToAdd = durationInRepeats * 7
+    return startDate.plus(daysToAdd, DateTimeUnit.DAY)
+}
+
+// Helper data class for duration options
+private data class DurationOption(val value: Int, val label: String)
+
+/**
+ * Safe extension to format LocalDate with a fallback
+ */
+private fun LocalDate.formatToMmDdYyWithLocale(): String {
+    return try {
+        this.toString() // Use the toString method as fallback
+    } catch (e: Exception) {
+        "${monthNumber}/${dayOfMonth}/${year}"
     }
 }
 

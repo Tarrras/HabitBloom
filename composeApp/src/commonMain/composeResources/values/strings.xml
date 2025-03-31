@@ -117,6 +117,8 @@
     <string name="work_days">Work days</string>
     <string name="custom_pattern">Custom Pattern</string>
     <string name="days_count">%1$d days</string>
+    <string name="ends_around">Ends around: %1$s</string>
+    <string name="drag_to_select_multiple">Tip: Drag across days to select multiple at once</string>
     <string name="one_week">One week</string>
     <string name="one_month">One month</string>
     <string name="three_months">Three months</string>
