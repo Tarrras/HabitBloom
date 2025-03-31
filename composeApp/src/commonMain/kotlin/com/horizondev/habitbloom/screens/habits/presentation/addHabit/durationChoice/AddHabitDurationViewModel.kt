@@ -70,7 +70,7 @@ class AddHabitDurationViewModel(
                         DayOfWeek.FRIDAY
                     )
                 }
-                updateState { it.copy(activeDays = newList) }
+                updateState { it.copy(activeDays = newList, selectedGroupOfDays = event.group) }
             }
 
             is AddHabitDurationUiEvent.UpdateDayState -> {
@@ -84,7 +84,37 @@ class AddHabitDurationViewModel(
                         remove(dayToChange)
                     } else add(dayToChange)
                 }
-                updateState { it.copy(activeDays = newList) }
+
+                // Determine if this matches any predefined group
+                val newSelectedGroup = when {
+                    newList.containsAll(DayOfWeek.entries) && newList.size == DayOfWeek.entries.size ->
+                        GroupOfDays.EVERY_DAY
+
+                    newList.containsAll(listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) &&
+                            newList.size == 2 ->
+                        GroupOfDays.WEEKENDS
+
+                    newList.containsAll(
+                        listOf(
+                            DayOfWeek.MONDAY,
+                            DayOfWeek.TUESDAY,
+                            DayOfWeek.WEDNESDAY,
+                            DayOfWeek.THURSDAY,
+                            DayOfWeek.FRIDAY
+                        )
+                    ) && newList.size == 5 ->
+                        GroupOfDays.WORK_DAYS
+
+                    else ->
+                        null
+                }
+
+                updateState {
+                    it.copy(
+                        activeDays = newList,
+                        selectedGroupOfDays = newSelectedGroup
+                    )
+                }
             }
 
             is AddHabitDurationUiEvent.DurationChanged -> {

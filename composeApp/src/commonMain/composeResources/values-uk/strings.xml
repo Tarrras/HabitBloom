@@ -120,6 +120,9 @@
     <string name="quick_action">Швидкі дії</string>
     <string name="every_day">Щодня</string>
     <string name="only_weekends">Тільки вихідні</string>
+    <string name="work_days">Робочі дні</string>
+    <string name="custom_pattern">Власний шаблон</string>
+    <string name="days_count">%1$d днів</string>
     <string name="one_week">Один тиждень</string>
     <string name="one_month">Один місяць</string>
     <string name="three_months">Три місяці</string>

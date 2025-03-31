@@ -15,6 +15,7 @@ data class AddHabitDurationUiState(
     val durationInDays: Int = 1,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0), // Default reminder time set to 8:00 AM
+    val selectedGroupOfDays: GroupOfDays? = null
 ) {
     val displayedStartDate: String? = formattedStartDate
     val nextButtonEnabled: Boolean = activeDays.isEmpty().not()

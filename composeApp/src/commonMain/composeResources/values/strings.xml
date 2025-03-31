@@ -114,6 +114,9 @@
     <string name="quick_action">Quick actions</string>
     <string name="every_day">Every day</string>
     <string name="only_weekends">Weekends only</string>
+    <string name="work_days">Work days</string>
+    <string name="custom_pattern">Custom Pattern</string>
+    <string name="days_count">%1$d days</string>
     <string name="one_week">One week</string>
     <string name="one_month">One month</string>
     <string name="three_months">Three months</string>

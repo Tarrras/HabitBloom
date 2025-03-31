@@ -26,6 +26,7 @@ import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutli
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
+import com.horizondev.habitbloom.core.designComponents.pickers.GroupDaySelectorGrid
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.pickers.SingleWeekStartOptionPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
@@ -37,11 +38,9 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
 import habitbloom.composeapp.generated.resources.enable_reminder
-import habitbloom.composeapp.generated.resources.every_day
 import habitbloom.composeapp.generated.resources.four_repeats
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_repeat
-import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.quick_action
 import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.select_days_for_habit
@@ -142,7 +141,8 @@ private fun AddHabitDurationChoiceScreenContent(
             },
             onOptionSelected = {
                 handleUiEvent(AddHabitDurationUiEvent.SelectWeekStartOption(it))
-            }
+            },
+            selectedGroupOfDays = uiState.selectedGroupOfDays
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -202,7 +202,8 @@ private fun SelectDaysForHabitCard(
     weekStartOption: HabitWeekStartOption,
     dayStateChanged: (DayOfWeek, Boolean) -> Unit,
     selectGroupOfDays: (GroupOfDays) -> Unit,
-    onOptionSelected: (HabitWeekStartOption) -> Unit
+    onOptionSelected: (HabitWeekStartOption) -> Unit,
+    selectedGroupOfDays: GroupOfDays? = null
 ) {
     Surface(
         color = BloomTheme.colors.surface,
@@ -252,24 +253,13 @@ private fun SelectDaysForHabitCard(
                 options = HabitWeekStartOption.entries
             )
             Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = stringResource(Res.string.quick_action),
-                color = BloomTheme.colors.textColor.secondary,
-                style = BloomTheme.typography.subheading
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            BloomSmallActionButton(
-                text = stringResource(Res.string.every_day),
-                onClick = {
-                    selectGroupOfDays(GroupOfDays.EVERY_DAY)
-                }
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            BloomSmallActionButton(
-                text = stringResource(Res.string.only_weekends),
-                onClick = {
-                    selectGroupOfDays(GroupOfDays.WEEKENDS)
-                }
+
+            // New visual group day selector
+            GroupDaySelectorGrid(
+                selectedGroup = selectedGroupOfDays,
+                activeDays = activeDays,
+                onGroupSelected = selectGroupOfDays,
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
