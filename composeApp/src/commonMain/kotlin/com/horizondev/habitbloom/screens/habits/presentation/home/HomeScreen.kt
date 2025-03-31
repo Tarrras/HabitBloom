@@ -16,12 +16,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.FloatingActionButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,6 +27,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
+import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.calendar.DateSelectorStrip
 import com.horizondev.habitbloom.core.designComponents.switcher.TimeOfDaySwitcher
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
@@ -45,6 +40,7 @@ import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getBackgroundGradientColors
 import com.horizondev.habitbloom.utils.getTimeOfDay
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.add_new_habit
 import habitbloom.composeapp.generated.resources.good_afternoon
 import habitbloom.composeapp.generated.resources.good_evening
 import habitbloom.composeapp.generated.resources.good_morning
@@ -124,36 +120,17 @@ private fun HomeScreenContent(
                     },
                     onHabitClicked = {
                         handleUiEvent(HomeScreenUiEvent.OpenHabitDetails(it))
-                    }
+                    },
+                    onAddNewHabit = { handleUiEvent(HomeScreenUiEvent.AddNewHabit) }
                 )
             }
+
+            item("bottom_padding") { Spacer(modifier = Modifier.height(24.dp)) }
         }
 
         if (uiState.isLoading) {
             BloomLoadingAnimation(
                 modifier = Modifier.align(Alignment.Center).size(150.dp),
-            )
-        }
-
-        FloatingActionButton(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(bottom = 24.dp, end = 24.dp)
-                .size(48.dp),
-            containerColor = BloomTheme.colors.primary,
-            onClick = {
-                handleUiEvent(HomeScreenUiEvent.AddNewHabit)
-            },
-            elevation = FloatingActionButtonDefaults.elevation(
-                defaultElevation = 0.dp,
-            ),
-            shape = CircleShape,
-        ) {
-            Icon(
-                imageVector = Icons.Filled.Add,
-                contentDescription = "Add Habit",
-                tint = BloomTheme.colors.surface,
-                modifier = Modifier.size(24.dp),
             )
         }
     }
@@ -227,7 +204,8 @@ private fun LazyListScope.timeOfDaySwitcher(
 private fun LazyListScope.habitsList(
     uiState: HomeScreenUiState,
     onHabitStatusChanged: (Long, Boolean) -> Unit,
-    onHabitClicked: (Long) -> Unit
+    onHabitClicked: (Long) -> Unit,
+    onAddNewHabit: () -> Unit
 ) {
     if (uiState.userHabits.isEmpty()) {
         item(key = "no_habits_placeholder") {
@@ -268,5 +246,20 @@ private fun LazyListScope.habitsList(
             )
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    item("add_habit_button") {
+        Spacer(modifier = Modifier.height(12.dp))
+        BloomPrimaryFilledButton(
+            onClick = {
+                onAddNewHabit()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            text = stringResource(
+                Res.string.add_new_habit
+            )
+        )
     }
 }
