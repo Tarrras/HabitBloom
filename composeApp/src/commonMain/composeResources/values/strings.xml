@@ -66,7 +66,9 @@
     <string name="select_days_for_habit">Select days for habit</string>
     <string name="repeats">Repeats</string>
     <string name="select_repeats">Select repeats</string>
-    <string name="start_date">Start date: %1$d</string>
+    <string name="start_date">Start date: %s</string>
+    <string name="start_date_colon">Start date:</string>
+    <string name="end_date_colon">End date:</string>
 
     <plurals name="days_plural">
         <item quantity="one">%1$d Day</item>
@@ -364,4 +366,10 @@
     <string name="health_rule_consecutive_misses">• Missing 3+ consecutive days with critical health will cause regression</string>
     <string name="health_rule_recovery">• Completing your habit restores health gradually</string>
     <string name="bloom_stage_continued">You've reached the final stage with a %1$d+ day streak! Keep going to maintain your beautiful bloom.</string>
+
+    <string name="confirm">Confirm</string>
+    <string name="select_dates">Select Dates</string>
+
+    <string name="select_duration_for_habit">Select duration for habit</string>
+    <string name="repeats_count">Number of repeats: %d</string>
 </resources>

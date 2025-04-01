@@ -132,8 +132,14 @@ fun getFirstDateAfterStartDateOrNextWeek(
     }
 }
 
-suspend fun LocalDate.formatToMmDdYyWithLocale(): String {
+suspend fun LocalDate.formatToMmDdYyWithLocaleSuspend(): String {
     val names = MonthNames(Month.entries.map { it.getShortTitleSuspend() })
+    return this.format(customFormat(monthNames = names))
+}
+
+@Composable
+fun LocalDate.formatToMmDdYyWithLocale(): String {
+    val names = MonthNames(Month.entries.map { it.getShortTitle() })
     return this.format(customFormat(monthNames = names))
 }
 

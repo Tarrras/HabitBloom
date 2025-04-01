@@ -6,7 +6,7 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocale
+import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocaleSuspend
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.notification_permission_denied
@@ -39,7 +39,7 @@ class AddHabitDurationViewModel(
                 daysList = activeDays,
                 startOption = startOption
             )
-            val firstDateFormatted = firstDay?.formatToMmDdYyWithLocale()
+            val firstDateFormatted = firstDay?.formatToMmDdYyWithLocaleSuspend()
 
             if (firstDay != null) {
                 updateState {
@@ -171,6 +171,18 @@ class AddHabitDurationViewModel(
 
             is AddHabitDurationUiEvent.SelectWeekStartOption -> {
                 updateState { it.copy(weekStartOption = event.option) }
+            }
+
+            is AddHabitDurationUiEvent.StartDateChanged -> {
+                launch {
+                    val formattedDate = event.date.formatToMmDdYyWithLocaleSuspend()
+                    updateState {
+                        it.copy(
+                            startDate = event.date,
+                            formattedStartDate = formattedDate
+                        )
+                    }
+                }
             }
         }
     }

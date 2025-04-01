@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationC
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -21,25 +23,35 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
+import com.horizondev.habitbloom.core.designComponents.dialogs.SimpleDateRangePickerDialog
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
-import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
+import com.horizondev.habitbloom.core.designComponents.pickers.DragSelectDayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocale
+import com.horizondev.habitbloom.utils.getCurrentDate
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
+import habitbloom.composeapp.generated.resources.drag_to_select_multiple
 import habitbloom.composeapp.generated.resources.enable_reminder
+import habitbloom.composeapp.generated.resources.end_date_colon
 import habitbloom.composeapp.generated.resources.ends_around
 import habitbloom.composeapp.generated.resources.every_day
 import habitbloom.composeapp.generated.resources.four_repeats
@@ -47,10 +59,12 @@ import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_week
 import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.reminder_settings
+import habitbloom.composeapp.generated.resources.repeats_count
 import habitbloom.composeapp.generated.resources.select_days_for_habit
+import habitbloom.composeapp.generated.resources.select_duration_for_habit
 import habitbloom.composeapp.generated.resources.select_reminder_time
-import habitbloom.composeapp.generated.resources.select_repeats
 import habitbloom.composeapp.generated.resources.selected_repeats
+import habitbloom.composeapp.generated.resources.start_date_colon
 import habitbloom.composeapp.generated.resources.twelve_repeats
 import habitbloom.composeapp.generated.resources.two_months
 import habitbloom.composeapp.generated.resources.weekdays
@@ -149,12 +163,18 @@ private fun AddHabitDurationChoiceScreenContent(
 
         SelectDurationForHabitCard(
             modifier = Modifier.fillMaxWidth(),
-            duration = uiState.durationInDays,
-            onDurationChanged = {
-                handleUiEvent(AddHabitDurationUiEvent.DurationChanged(it))
-            },
             startDate = uiState.startDate,
-            activeDays = uiState.activeDays
+            activeDays = uiState.activeDays,
+            onDaysChanged = { days ->
+                handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
+            },
+            onStartDateChanged = { date ->
+                handleUiEvent(AddHabitDurationUiEvent.StartDateChanged(date))
+            },
+            onDurationChanged = { duration ->
+                handleUiEvent(AddHabitDurationUiEvent.DurationChanged(duration))
+            },
+            duration = uiState.durationInDays
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -200,7 +220,7 @@ private fun AddHabitDurationChoiceScreenContent(
 private fun SelectDaysForHabitCard(
     modifier: Modifier = Modifier,
     activeDays: List<DayOfWeek>,
-    onDaysChanged: (dayOfWeek: DayOfWeek, isActive: Boolean) -> Unit,
+    onDaysChanged: (DayOfWeek, Boolean) -> Unit,
     onGroupChanged: (List<DayOfWeek>) -> Unit
 ) {
     BloomCard(
@@ -217,12 +237,21 @@ private fun SelectDaysForHabitCard(
                 color = BloomTheme.colors.textColor.primary
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Hint text for drag selection
+            Text(
+                text = stringResource(Res.string.drag_to_select_multiple),
+                style = BloomTheme.typography.small,
+                color = BloomTheme.colors.textColor.secondary,
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Regular day picker
-            DayPicker(
+            // Use drag select day picker
+            DragSelectDayPicker(
                 activeDays = activeDays,
-                dayStateChanged = onDaysChanged
+                onDaysChanged = onGroupChanged
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -232,53 +261,46 @@ private fun SelectDaysForHabitCard(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                PresetDayButton(
-                    text = stringResource(Res.string.weekdays),
-                    onClick = {
-                        onGroupChanged(
-                            listOf(
-                                DayOfWeek.MONDAY,
-                                DayOfWeek.TUESDAY,
-                                DayOfWeek.WEDNESDAY,
-                                DayOfWeek.THURSDAY,
-                                DayOfWeek.FRIDAY
-                            )
-                        )
-                    }
-                )
-
-                PresetDayButton(
-                    text = stringResource(Res.string.only_weekends),
-                    onClick = {
-                        onGroupChanged(
-                            listOf(
-                                DayOfWeek.SATURDAY,
-                                DayOfWeek.SUNDAY
-                            )
-                        )
-                    }
-                )
-
-                PresetDayButton(
+                // Everyday button
+                BloomSmallActionButton(
                     text = stringResource(Res.string.every_day),
+                    modifier = Modifier.padding(4.dp),
                     onClick = {
                         onGroupChanged(DayOfWeek.entries)
+                    }
+                )
+
+                // Weekdays button
+                BloomSmallActionButton(
+                    text = stringResource(Res.string.weekdays),
+                    modifier = Modifier.padding(4.dp),
+                    onClick = {
+                        val weekdays = listOf(
+                            DayOfWeek.MONDAY,
+                            DayOfWeek.TUESDAY,
+                            DayOfWeek.WEDNESDAY,
+                            DayOfWeek.THURSDAY,
+                            DayOfWeek.FRIDAY
+                        )
+                        onGroupChanged(weekdays)
+                    }
+                )
+
+                // Weekends button
+                BloomSmallActionButton(
+                    text = stringResource(Res.string.only_weekends),
+                    modifier = Modifier.padding(4.dp),
+                    onClick = {
+                        val weekends = listOf(
+                            DayOfWeek.SATURDAY,
+                            DayOfWeek.SUNDAY
+                        )
+                        onGroupChanged(weekends)
                     }
                 )
             }
         }
     }
-}
-
-@Composable
-private fun PresetDayButton(
-    text: String,
-    onClick: () -> Unit
-) {
-    BloomSmallActionButton(
-        text = text,
-        onClick = onClick,
-    )
 }
 
 @Composable
@@ -349,36 +371,169 @@ private fun ReminderSettingsCard(
 @Composable
 private fun SelectDurationForHabitCard(
     modifier: Modifier = Modifier,
-    duration: Int,
+    startDate: LocalDate?,
+    activeDays: List<DayOfWeek>,
+    onDaysChanged: (List<DayOfWeek>) -> Unit,
+    onStartDateChanged: (LocalDate) -> Unit,
     onDurationChanged: (Int) -> Unit,
-    startDate: LocalDate? = null,
-    activeDays: List<DayOfWeek> = emptyList()
+    duration: Int = 4,
 ) {
-    Surface(
-        color = BloomTheme.colors.surface,
-        shape = RoundedCornerShape(16.dp),
-        shadowElevation = 6.dp
+    var showDatePicker by remember { mutableStateOf(false) }
+    val currentDate = remember { getCurrentDate() }
+    val effectiveStartDate = startDate ?: currentDate
+
+    val endDate = remember(effectiveStartDate, duration) {
+        calculateEndDate(effectiveStartDate, duration)
+    }
+
+    // Define common durations with more meaningful labels
+    val durations = listOf(
+        DurationOption(1, stringResource(Res.string.one_week)),
+        DurationOption(4, stringResource(Res.string.four_repeats)),
+        DurationOption(8, stringResource(Res.string.two_months)),
+        DurationOption(12, stringResource(Res.string.twelve_repeats)),
+    )
+
+    BloomCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = { /* No action */ },
     ) {
         Column(
-            modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.Start
+            modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = stringResource(Res.string.select_repeats),
-                style = BloomTheme.typography.heading,
-                color = BloomTheme.colors.textColor.primary,
+                text = stringResource(Res.string.select_duration_for_habit),
+                style = BloomTheme.typography.subheading,
+                color = BloomTheme.colors.textColor.primary
             )
+
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Visual Duration Selector
             VisualDurationSelector(
-                duration = duration,
-                onDurationChanged = onDurationChanged,
-                startDate = startDate,
-                activeDays = activeDays,
-                modifier = Modifier.fillMaxWidth()
+                durations = durations,
+                selectedDuration = duration,
+                onDurationSelected = onDurationChanged
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Date information with clickable behavior
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .border(
+                        width = 1.dp,
+                        color = BloomTheme.colors.surface,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { showDatePicker = true }
+                    .padding(16.dp)
+            ) {
+                // Date range display
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        // Start date
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.start_date_colon),
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.secondary,
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = formatLocalDate(effectiveStartDate),
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // End date
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.end_date_colon),
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.secondary,
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = formatLocalDate(endDate),
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                    }
+
+                    // Duration badge
+                    Surface(
+                        color = BloomTheme.colors.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.repeats_count, duration),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.primary,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = stringResource(Res.string.ends_around, formatLocalDate(endDate)),
+                style = BloomTheme.typography.small,
+                color = BloomTheme.colors.textColor.secondary,
             )
         }
     }
+
+    // Use the simplified date picker dialog
+    if (showDatePicker) {
+        SimpleDateRangePickerDialog(
+            startDate = effectiveStartDate,
+            onDatesSelected = { start, _ ->
+                onStartDateChanged(start)
+                showDatePicker = false
+            },
+            onDismiss = { showDatePicker = false },
+            minDate = getCurrentDate()
+        )
+    }
+}
+
+// Helper data class for duration options
+data class DurationOption(
+    val value: Int,
+    val label: String
+)
+
+// Helper function to calculate end date
+private fun calculateEndDate(startDate: LocalDate, durationInRepeats: Int): LocalDate {
+    return startDate.plus(durationInRepeats * 7L, DateTimeUnit.DAY)
+}
+
+// Helper extension to safely format LocalDate with locale
+private fun formatLocalDate(date: LocalDate): String {
+    return "${date.monthNumber}/${date.dayOfMonth}/${date.year}"
 }
 
 @Composable
@@ -417,20 +572,10 @@ fun DurationSlider(
 @Composable
 fun VisualDurationSelector(
     modifier: Modifier = Modifier,
-    duration: Int,
-    onDurationChanged: (Int) -> Unit,
-    startDate: LocalDate?,
-    activeDays: List<DayOfWeek>,
-    enabled: Boolean = true
+    durations: List<DurationOption>,
+    selectedDuration: Int,
+    onDurationSelected: (Int) -> Unit
 ) {
-    // Define common durations with more meaningful labels
-    val durations = listOf(
-        DurationOption(1, stringResource(Res.string.one_week)),
-        DurationOption(4, stringResource(Res.string.four_repeats)),
-        DurationOption(8, stringResource(Res.string.two_months)),
-        DurationOption(12, stringResource(Res.string.twelve_repeats)),
-    )
-
     Column(modifier = modifier) {
         // Duration chips in a wrapped flow layout
         FlowRow(
@@ -441,9 +586,9 @@ fun VisualDurationSelector(
             durations.forEach { option ->
                 DurationChip(
                     text = option.label,
-                    isSelected = duration == option.value,
-                    onClick = { onDurationChanged(option.value) },
-                    enabled = enabled
+                    isSelected = selectedDuration == option.value,
+                    onClick = { onDurationSelected(option.value) },
+                    enabled = true
                 )
             }
         }
@@ -452,20 +597,20 @@ fun VisualDurationSelector(
 
         // Regular slider for fine-tuning
         BloomSlider(
-            value = duration.toFloat(),
-            onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
+            value = selectedDuration.toFloat(),
+            onValueChange = { newValue -> onDurationSelected(newValue.roundToInt()) },
             valueRange = 1f..12f,
             steps = 11,
             modifier = Modifier.fillMaxWidth(),
-            enabled = enabled
+            enabled = true
         )
 
         Spacer(modifier = Modifier.height(8.dp))
 
         // Show current duration with completion date
-        if (startDate != null && activeDays.isNotEmpty()) {
-            val approximateEndDate = calculateApproximateEndDate(startDate, duration, activeDays)
-            val formattedDate = approximateEndDate.formatToMmDdYyWithLocale()
+        if (selectedDuration > 0) {
+            val formattedDate =
+                calculateApproximateEndDate(selectedDuration).formatToMmDdYyWithLocale()
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -474,8 +619,8 @@ fun VisualDurationSelector(
                 Text(
                     text = pluralStringResource(
                         resource = Res.plurals.selected_repeats,
-                        quantity = duration,
-                        duration
+                        quantity = selectedDuration,
+                        selectedDuration
                     ),
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.primary,
@@ -492,8 +637,8 @@ fun VisualDurationSelector(
             Text(
                 text = pluralStringResource(
                     resource = Res.plurals.selected_repeats,
-                    quantity = duration,
-                    duration
+                    quantity = selectedDuration,
+                    selectedDuration
                 ),
                 style = BloomTheme.typography.body,
                 color = BloomTheme.colors.textColor.primary,
@@ -530,27 +675,9 @@ private fun DurationChip(
 /**
  * Helper function to calculate approximate end date based on duration and selected days
  */
-private fun calculateApproximateEndDate(
-    startDate: LocalDate,
-    durationInRepeats: Int,
-    activeDays: List<DayOfWeek>
-): LocalDate {
+private fun calculateApproximateEndDate(duration: Int): LocalDate {
     // Simple approximation: each repeat is roughly a week
-    val daysToAdd = durationInRepeats * 7
-    return startDate.plus(daysToAdd, DateTimeUnit.DAY)
-}
-
-// Helper data class for duration options
-private data class DurationOption(val value: Int, val label: String)
-
-/**
- * Safe extension to format LocalDate with a fallback
- */
-private fun LocalDate.formatToMmDdYyWithLocale(): String {
-    return try {
-        this.toString() // Use the toString method as fallback
-    } catch (e: Exception) {
-        "${monthNumber}/${dayOfMonth}/${year}"
-    }
+    val daysToAdd = duration * 7
+    return getCurrentDate().plus(daysToAdd, DateTimeUnit.DAY)
 }
 

@@ -45,6 +45,7 @@ sealed interface AddHabitDurationUiEvent {
     data class DurationChanged(val duration: Int) : AddHabitDurationUiEvent
     data class ReminderEnabledChanged(val enabled: Boolean) : AddHabitDurationUiEvent
     data class ReminderTimeChanged(val time: LocalTime) : AddHabitDurationUiEvent
+    data class StartDateChanged(val date: LocalDate) : AddHabitDurationUiEvent
 
     data object OnNext : AddHabitDurationUiEvent
     data object Cancel : AddHabitDurationUiEvent

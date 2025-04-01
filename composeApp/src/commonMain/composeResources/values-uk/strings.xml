@@ -66,7 +66,9 @@
     <string name="select_days_for_habit">Виберіть дні для звички</string>
     <string name="repeats">Повторення</string>
     <string name="select_repeats">Виберіть повторення</string>
-    <string name="start_date">Дата початку: %1$d</string>
+    <string name="start_date">Дата початку: %s</string>
+    <string name="start_date_colon">Дата початку:</string>
+    <string name="end_date_colon">Дата завершення:</string>
 
     <plurals name="days_plural">
         <item quantity="one">%1$d День</item>
@@ -373,4 +375,10 @@
     <string name="health_rule_consecutive_misses">• Пропуск 3+ днів поспіль із критичним здоров'ям призведе до регресу</string>
     <string name="health_rule_recovery">• Виконання звички поступово відновлює здоров'я</string>
     <string name="bloom_stage_continued">Ви досягли фінальної стадії з серією у %1$d+ днів! Продовжуйте, щоб підтримувати прекрасне цвітіння.</string>
+
+    <string name="confirm">Підтвердити</string>
+    <string name="select_dates">Вибрати дати</string>
+
+    <string name="select_duration_for_habit">Виберіть тривалість звички</string>
+    <string name="repeats_count">Кількість повторень: %d</string>
 </resources>

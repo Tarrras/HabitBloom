@@ -1,11 +1,9 @@
 package com.horizondev.habitbloom.core.designComponents.buttons
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,14 +15,16 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 fun BloomSmallActionButton(
     modifier: Modifier = Modifier,
     text: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    enabled: Boolean = true
 ) {
     OutlinedButton(
         onClick = onClick,
         modifier = modifier.height(32.dp),
         shape = RoundedCornerShape(36.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 4.dp),
-        border = BorderStroke(width = 1.dp, color = BloomTheme.colors.primary)
+        border = BorderStroke(width = 1.dp, color = BloomTheme.colors.primary),
+        enabled = enabled
     ) {
         Text(
             text = text,
