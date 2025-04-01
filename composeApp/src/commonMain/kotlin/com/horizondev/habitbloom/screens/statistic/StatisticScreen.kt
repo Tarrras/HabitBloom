@@ -93,7 +93,7 @@ import kotlin.math.roundToInt
 @Composable
 fun StatisticScreen(
     viewModel: StatisticViewModel,
-    modifier: Modifier = Modifier
+    onNavigateToAddHabit: () -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -102,6 +102,9 @@ fun StatisticScreen(
         when (intent) {
             is StatisticUiIntent.OpenHabitDetails -> {
                 // Navigation will be handled by parent NavHost
+            }
+            is StatisticUiIntent.NavigateToAddHabit -> {
+                onNavigateToAddHabit()
             }
         }
     }
@@ -129,7 +132,10 @@ fun StatisticScreenContent(
 
                 if (!uiState.userHasAnyCompleted) {
                     NoCompletedHabitsPlaceholder(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        onAddHabitClick = {
+                            handleUiEvent(StatisticUiEvent.NavigateToAddHabit)
+                        }
                     )
                 } else {
                     StatisticScreenColumnContent(

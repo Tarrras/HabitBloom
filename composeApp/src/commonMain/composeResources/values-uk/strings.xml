@@ -170,6 +170,7 @@
     </plurals>
 
     <string name="no_completed_habits_title">Ви ще не виконали жодної звички!</string>
+    <string name="no_completed_habits_message">Почніть формувати здорові звички, створюючи та виконуючи їх. Відстежуйте свій прогрес і спостерігайте, як росте ваш сад!</string>
     <string name="no_completed_habits_in_this_unit_title">Ви не виконали жодної звички цього %1$d!</string>
     <string name="habit_statistic">Статистика звичок</string>
     <string name="completed_habit_statistic">Статистика виконаних звичок</string>

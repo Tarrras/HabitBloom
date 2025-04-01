@@ -108,6 +108,8 @@ sealed class StatisticUiEvent {
     data object PreviousPeriod : StatisticUiEvent()
     data object NextPeriod : StatisticUiEvent()
     data object CurrentPeriod : StatisticUiEvent() // Reset to current period
+
+    data object NavigateToAddHabit : StatisticUiEvent()
 }
 
 /**
@@ -118,4 +120,6 @@ sealed class StatisticUiIntent {
      * Intent to navigate to habit details.
      */
     data class OpenHabitDetails(val habitId: Long) : StatisticUiIntent()
+
+    data object NavigateToAddHabit : StatisticUiIntent()
 }

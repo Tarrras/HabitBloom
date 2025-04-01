@@ -107,7 +107,12 @@ fun MainScreen() {
 
                 composable<BottomNavItem.Statistics> {
                     val viewModel = koinViewModel<StatisticViewModel>()
-                    StatisticScreen(viewModel = viewModel)
+                    StatisticScreen(
+                        viewModel = viewModel,
+                        onNavigateToAddHabit = {
+                            navController.navigate(AddHabitFlowGlobalNavEntryPoint)
+                        }
+                    )
                 }
 
                 composable<BottomNavItem.Calendar> {

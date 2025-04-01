@@ -31,7 +31,7 @@ class HabitsRemoteDataSource(
                     querySnapshot.documents.map { document ->
                         document.data(HabitInfoResponse.serializer()).copy(id = document.id)
                     }
-                }.filter { userId == userId }.map { it.toDomainModel() }
+                }.filter { it.userId == userId }.map { it.toDomainModel() }
 
             habitResponse + habitPersonalHabits
         }

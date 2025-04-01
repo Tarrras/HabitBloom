@@ -103,6 +103,10 @@ class StatisticViewModel(
             }
 
             is StatisticUiEvent.OpenHabitDetails -> TODO()
+
+            is StatisticUiEvent.NavigateToAddHabit -> {
+                emitUiIntent(StatisticUiIntent.NavigateToAddHabit)
+            }
         }
     }
 
