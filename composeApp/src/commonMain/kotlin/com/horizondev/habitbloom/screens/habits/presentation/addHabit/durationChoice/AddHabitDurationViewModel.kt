@@ -16,7 +16,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
 /**
  * ViewModel for the duration choice step in the Add Habit flow.
@@ -42,10 +45,12 @@ class AddHabitDurationViewModel(
             val firstDateFormatted = firstDay?.formatToMmDdYyWithLocaleSuspend()
 
             if (firstDay != null) {
+                val endDate = calculateEndDate(firstDay, state.value.durationInDays)
                 updateState {
                     it.copy(
                         startDate = firstDay,
-                        formattedStartDate = firstDateFormatted
+                        formattedStartDate = firstDateFormatted,
+                        endDate = endDate
                     )
                 }
             }
@@ -82,7 +87,17 @@ class AddHabitDurationViewModel(
             }
 
             is AddHabitDurationUiEvent.DurationChanged -> {
-                updateState { it.copy(durationInDays = event.duration) }
+                val currentState = state.value
+                val endDate = if (currentState.startDate != null) {
+                    calculateEndDate(currentState.startDate, event.duration)
+                } else null
+
+                updateState {
+                    it.copy(
+                        durationInDays = event.duration,
+                        endDate = endDate
+                    )
+                }
             }
 
             is AddHabitDurationUiEvent.ReminderEnabledChanged -> {
@@ -176,15 +191,63 @@ class AddHabitDurationViewModel(
             is AddHabitDurationUiEvent.StartDateChanged -> {
                 launch {
                     val formattedDate = event.date.formatToMmDdYyWithLocaleSuspend()
+                    val endDate = calculateEndDate(event.date, state.value.durationInDays)
                     updateState {
                         it.copy(
                             startDate = event.date,
-                            formattedStartDate = formattedDate
+                            formattedStartDate = formattedDate,
+                            endDate = endDate
+                        )
+                    }
+                }
+            }
+
+            is AddHabitDurationUiEvent.DateRangeChanged -> {
+                viewModelScope.launch {
+                    val startDate = event.startDate
+                    val endDate = event.endDate ?: return@launch
+
+                    // Calculate appropriate duration based on the date range
+                    // Each duration unit is approximately 7 days, so divide by 7 and round
+                    val daysDifference = calculateDaysBetween(startDate, endDate)
+                    val calculatedDuration = (daysDifference / 7f).toInt().coerceIn(1, 12)
+
+                    val formattedDate = startDate.formatToMmDdYyWithLocaleSuspend()
+
+                    updateState {
+                        it.copy(
+                            startDate = startDate,
+                            endDate = endDate,
+                            formattedStartDate = formattedDate,
+                            durationInDays = calculatedDuration
                         )
                     }
                 }
             }
         }
+    }
+
+    /**
+     * Calculate the end date based on the start date and duration in days
+     */
+    private fun calculateEndDate(startDate: LocalDate, durationInRepeats: Int): LocalDate {
+        // Each repeat is approximately one week (7 days)
+        return startDate.plus(durationInRepeats * 7L, DateTimeUnit.DAY)
+    }
+
+    // Add this helper function to calculate days between dates
+    private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
+        if (startDate > endDate) return 0
+
+        var current = startDate
+        var days = 0
+
+        while (current <= endDate) {
+            days++
+            current = current.plus(1, DateTimeUnit.DAY)
+        }
+
+        return days
     }
 
     /**

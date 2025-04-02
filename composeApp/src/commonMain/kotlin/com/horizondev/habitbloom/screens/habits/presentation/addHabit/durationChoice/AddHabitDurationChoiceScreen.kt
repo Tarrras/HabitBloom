@@ -52,14 +52,12 @@ import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
 import habitbloom.composeapp.generated.resources.drag_to_select_multiple
 import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.end_date_colon
-import habitbloom.composeapp.generated.resources.ends_around
 import habitbloom.composeapp.generated.resources.every_day
 import habitbloom.composeapp.generated.resources.four_repeats
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_week
 import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.reminder_settings
-import habitbloom.composeapp.generated.resources.repeats_count
 import habitbloom.composeapp.generated.resources.select_days_for_habit
 import habitbloom.composeapp.generated.resources.select_duration_for_habit
 import habitbloom.composeapp.generated.resources.select_reminder_time
@@ -68,11 +66,9 @@ import habitbloom.composeapp.generated.resources.start_date_colon
 import habitbloom.composeapp.generated.resources.twelve_repeats
 import habitbloom.composeapp.generated.resources.two_months
 import habitbloom.composeapp.generated.resources.weekdays
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -164,6 +160,7 @@ private fun AddHabitDurationChoiceScreenContent(
         SelectDurationForHabitCard(
             modifier = Modifier.fillMaxWidth(),
             startDate = uiState.startDate,
+            endDate = uiState.endDate,
             activeDays = uiState.activeDays,
             onDaysChanged = { days ->
                 handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
@@ -173,6 +170,9 @@ private fun AddHabitDurationChoiceScreenContent(
             },
             onDurationChanged = { duration ->
                 handleUiEvent(AddHabitDurationUiEvent.DurationChanged(duration))
+            },
+            onDateRangeChanged = { startDate, endDate ->
+                handleUiEvent(AddHabitDurationUiEvent.DateRangeChanged(startDate, endDate))
             },
             duration = uiState.durationInDays
         )
@@ -372,20 +372,21 @@ private fun ReminderSettingsCard(
 private fun SelectDurationForHabitCard(
     modifier: Modifier = Modifier,
     startDate: LocalDate?,
+    endDate: LocalDate?,
     activeDays: List<DayOfWeek>,
     onDaysChanged: (List<DayOfWeek>) -> Unit,
     onStartDateChanged: (LocalDate) -> Unit,
     onDurationChanged: (Int) -> Unit,
-    duration: Int = 4,
+    onDateRangeChanged: (LocalDate, LocalDate?) -> Unit,
+    duration: Int = 4
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val currentDate = remember { getCurrentDate() }
     val effectiveStartDate = startDate ?: currentDate
 
-    val endDate = remember(effectiveStartDate, duration) {
-        calculateEndDate(effectiveStartDate, duration)
-    }
-
+    // Use the endDate passed from the ViewModel or default to the start date
+    val effectiveEndDate = endDate ?: effectiveStartDate
+    
     // Define common durations with more meaningful labels
     val durations = listOf(
         DurationOption(1, stringResource(Res.string.one_week)),
@@ -424,7 +425,7 @@ private fun SelectDurationForHabitCard(
                     .fillMaxWidth()
                     .border(
                         width = 1.dp,
-                        color = BloomTheme.colors.surface,
+                        color = BloomTheme.colors.background,
                         shape = RoundedCornerShape(12.dp)
                     )
                     .clip(RoundedCornerShape(12.dp))
@@ -432,86 +433,66 @@ private fun SelectDurationForHabitCard(
                     .padding(16.dp)
             ) {
                 // Date range display
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        // Start date
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.start_date_colon),
-                                style = BloomTheme.typography.body,
-                                color = BloomTheme.colors.textColor.secondary,
-                            )
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Text(
-                                text = formatLocalDate(effectiveStartDate),
-                                style = BloomTheme.typography.body,
-                                color = BloomTheme.colors.textColor.primary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(4.dp))
-
-                        // End date
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(Res.string.end_date_colon),
-                                style = BloomTheme.typography.body,
-                                color = BloomTheme.colors.textColor.secondary,
-                            )
-
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            Text(
-                                text = formatLocalDate(endDate),
-                                style = BloomTheme.typography.body,
-                                color = BloomTheme.colors.textColor.primary,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-
-                    // Duration badge
-                    Surface(
-                        color = BloomTheme.colors.primary.copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(16.dp)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    // Start date
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(Res.string.repeats_count, duration),
+                            text = stringResource(Res.string.start_date_colon),
                             style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.primary,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            color = BloomTheme.colors.textColor.secondary,
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = effectiveStartDate.formatToMmDdYyWithLocale(),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.primary,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // End date
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.end_date_colon),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.secondary,
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = effectiveEndDate.formatToMmDdYyWithLocale(),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.primary,
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
             }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(Res.string.ends_around, formatLocalDate(endDate)),
-                style = BloomTheme.typography.small,
-                color = BloomTheme.colors.textColor.secondary,
-            )
         }
     }
 
-    // Use the simplified date picker dialog
+    // Use the simplified date picker dialog with both start and end dates
     if (showDatePicker) {
         SimpleDateRangePickerDialog(
             startDate = effectiveStartDate,
-            onDatesSelected = { start, _ ->
-                onStartDateChanged(start)
+            endDate = effectiveEndDate,
+            onDatesSelected = { start, end ->
+                if (end != null) {
+                    // If the user selected an end date, send both dates to the ViewModel
+                    onDateRangeChanged(start, end)
+                } else {
+                    // Otherwise just update the start date
+                    onStartDateChanged(start)
+                }
                 showDatePicker = false
             },
             onDismiss = { showDatePicker = false },
@@ -525,16 +506,6 @@ data class DurationOption(
     val value: Int,
     val label: String
 )
-
-// Helper function to calculate end date
-private fun calculateEndDate(startDate: LocalDate, durationInRepeats: Int): LocalDate {
-    return startDate.plus(durationInRepeats * 7L, DateTimeUnit.DAY)
-}
-
-// Helper extension to safely format LocalDate with locale
-private fun formatLocalDate(date: LocalDate): String {
-    return "${date.monthNumber}/${date.dayOfMonth}/${date.year}"
-}
 
 @Composable
 fun DurationSlider(
@@ -609,31 +580,6 @@ fun VisualDurationSelector(
 
         // Show current duration with completion date
         if (selectedDuration > 0) {
-            val formattedDate =
-                calculateApproximateEndDate(selectedDuration).formatToMmDdYyWithLocale()
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = pluralStringResource(
-                        resource = Res.plurals.selected_repeats,
-                        quantity = selectedDuration,
-                        selectedDuration
-                    ),
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.primary,
-                    modifier = Modifier.weight(1f)
-                )
-
-                Text(
-                    text = stringResource(Res.string.ends_around, formattedDate),
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.secondary
-                )
-            }
-        } else {
             Text(
                 text = pluralStringResource(
                     resource = Res.plurals.selected_repeats,
@@ -642,6 +588,7 @@ fun VisualDurationSelector(
                 ),
                 style = BloomTheme.typography.body,
                 color = BloomTheme.colors.textColor.primary,
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -672,12 +619,4 @@ private fun DurationChip(
     }
 }
 
-/**
- * Helper function to calculate approximate end date based on duration and selected days
- */
-private fun calculateApproximateEndDate(duration: Int): LocalDate {
-    // Simple approximation: each repeat is roughly a week
-    val daysToAdd = duration * 7
-    return getCurrentDate().plus(daysToAdd, DateTimeUnit.DAY)
-}
 

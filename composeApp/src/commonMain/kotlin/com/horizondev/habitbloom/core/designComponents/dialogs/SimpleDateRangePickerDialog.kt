@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
@@ -58,6 +59,18 @@ fun SimpleDateRangePickerDialog(
         )
     }
 
+    // Create a formatted date range string
+    val formattedDateRange = when {
+        selection.startDate != null && selection.endDate != null -> {
+            val startStr = formatDate(selection.startDate!!)
+            val endStr = formatDate(selection.endDate!!)
+            if (startStr == endStr) startStr else "$startStr → $endStr"
+        }
+
+        selection.startDate != null -> formatDate(selection.startDate!!)
+        else -> ""
+    }
+
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier
@@ -79,29 +92,19 @@ fun SimpleDateRangePickerDialog(
                     color = BloomTheme.colors.textColor.primary
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                // Date range display
+                if (formattedDateRange.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                // Selected date display - simpler, inline representation
-                if (selection.startDate != null) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        val startDateText = formatDate(selection.startDate!!)
-                        val endDateText = selection.endDate?.let { formatDate(it) }
-
-                        Text(
-                            text = if (endDateText != null)
-                                "$startDateText → $endDateText"
-                            else startDateText,
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.primary,
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = formattedDateRange,
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.primary,
+                        fontWeight = FontWeight.SemiBold
+                    )
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
                 
                 // Calendar component
                 DateRangeSelectionCalendar(

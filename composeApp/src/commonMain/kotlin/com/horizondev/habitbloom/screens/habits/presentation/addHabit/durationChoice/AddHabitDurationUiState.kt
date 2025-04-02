@@ -9,6 +9,7 @@ import kotlinx.datetime.LocalTime
 data class AddHabitDurationUiState(
     val activeDays: List<DayOfWeek> = emptyList(),
     val startDate: LocalDate? = null,
+    val endDate: LocalDate? = null,
     val formattedStartDate: String? = null,
     val weekStartOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
     val durationInDays: Int = 1,
@@ -46,6 +47,8 @@ sealed interface AddHabitDurationUiEvent {
     data class ReminderEnabledChanged(val enabled: Boolean) : AddHabitDurationUiEvent
     data class ReminderTimeChanged(val time: LocalTime) : AddHabitDurationUiEvent
     data class StartDateChanged(val date: LocalDate) : AddHabitDurationUiEvent
+    data class DateRangeChanged(val startDate: LocalDate, val endDate: LocalDate?) :
+        AddHabitDurationUiEvent
 
     data object OnNext : AddHabitDurationUiEvent
     data object Cancel : AddHabitDurationUiEvent
