@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,6 +20,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.plusDays
 import com.kizitonwose.calendar.compose.VerticalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
@@ -30,7 +30,6 @@ import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.YearMonth
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
-import com.kizitonwose.calendar.core.plusMonths
 import kotlinx.datetime.LocalDate
 
 /**
@@ -58,15 +57,20 @@ fun DateRangeSelectionCalendar(
     selection: DateSelection,
     onSelectionChanged: (DateSelection) -> Unit,
     minDate: LocalDate = getCurrentDate(),
-    monthsToShow: Int = 12
+    maxDurationDays: Int = 7,
 ) {
-    val coroutineScope = rememberCoroutineScope()
     val today = minDate
 
-    // Convert Kotlin LocalDate to Java LocalDate for the calendar library
     val currentMonth = remember { YearMonth(today.year, today.monthNumber) }
     val startMonth = remember { currentMonth }
-    val endMonth = remember { currentMonth.plusMonths(monthsToShow) }
+    val endMonth = remember(minDate) {
+        minDate.plusDays(maxDurationDays.toLong()).let {
+            YearMonth(
+                year = it.year,
+                month = it.month
+            )
+        }
+    }
     val firstDayOfWeek = remember { firstDayOfWeekFromLocale() }
 
     Column(modifier = modifier.fillMaxWidth()) {

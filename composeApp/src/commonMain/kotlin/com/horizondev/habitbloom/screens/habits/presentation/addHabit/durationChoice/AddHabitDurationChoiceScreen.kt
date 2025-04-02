@@ -2,7 +2,6 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationC
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -23,11 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
@@ -36,7 +34,7 @@ import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFille
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
-import com.horizondev.habitbloom.core.designComponents.dialogs.SimpleDateRangePickerDialog
+import com.horizondev.habitbloom.core.designComponents.dialogs.AddHabitDateRangePickerDialog
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DragSelectDayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
@@ -49,26 +47,30 @@ import com.horizondev.habitbloom.utils.getCurrentDate
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
-import habitbloom.composeapp.generated.resources.drag_to_select_multiple
+import habitbloom.composeapp.generated.resources.custom_date_range
+import habitbloom.composeapp.generated.resources.days_count
 import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.end_date_colon
 import habitbloom.composeapp.generated.resources.every_day
-import habitbloom.composeapp.generated.resources.four_repeats
 import habitbloom.composeapp.generated.resources.next
+import habitbloom.composeapp.generated.resources.one_month
 import habitbloom.composeapp.generated.resources.one_week
 import habitbloom.composeapp.generated.resources.only_weekends
+import habitbloom.composeapp.generated.resources.quick_selection
 import habitbloom.composeapp.generated.resources.reminder_settings
+import habitbloom.composeapp.generated.resources.select_date_range_for_habit
+import habitbloom.composeapp.generated.resources.select_days_first
 import habitbloom.composeapp.generated.resources.select_days_for_habit
-import habitbloom.composeapp.generated.resources.select_duration_for_habit
 import habitbloom.composeapp.generated.resources.select_reminder_time
 import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date_colon
-import habitbloom.composeapp.generated.resources.twelve_repeats
-import habitbloom.composeapp.generated.resources.two_months
+import habitbloom.composeapp.generated.resources.tap_to_edit_dates
+import habitbloom.composeapp.generated.resources.three_months
 import habitbloom.composeapp.generated.resources.weekdays
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -157,7 +159,7 @@ private fun AddHabitDurationChoiceScreenContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        SelectDurationForHabitCard(
+        SelectDateRangeForHabitCard(
             modifier = Modifier.fillMaxWidth(),
             startDate = uiState.startDate,
             endDate = uiState.endDate,
@@ -165,16 +167,9 @@ private fun AddHabitDurationChoiceScreenContent(
             onDaysChanged = { days ->
                 handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
             },
-            onStartDateChanged = { date ->
-                handleUiEvent(AddHabitDurationUiEvent.StartDateChanged(date))
-            },
-            onDurationChanged = { duration ->
-                handleUiEvent(AddHabitDurationUiEvent.DurationChanged(duration))
-            },
-            onDateRangeChanged = { startDate, endDate ->
-                handleUiEvent(AddHabitDurationUiEvent.DateRangeChanged(startDate, endDate))
-            },
-            duration = uiState.durationInDays
+            handleUiEvent = handleUiEvent,
+            maxDurationDays = uiState.maxHabitDurationDays,
+            isDatePickerVisible = uiState.isDatePickerVisible
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -235,15 +230,6 @@ private fun SelectDaysForHabitCard(
                 text = stringResource(Res.string.select_days_for_habit),
                 style = BloomTheme.typography.subheading,
                 color = BloomTheme.colors.textColor.primary
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Hint text for drag selection
-            Text(
-                text = stringResource(Res.string.drag_to_select_multiple),
-                style = BloomTheme.typography.small,
-                color = BloomTheme.colors.textColor.secondary,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -369,30 +355,40 @@ private fun ReminderSettingsCard(
 }
 
 @Composable
-private fun SelectDurationForHabitCard(
+private fun SelectDateRangeForHabitCard(
     modifier: Modifier = Modifier,
     startDate: LocalDate?,
     endDate: LocalDate?,
     activeDays: List<DayOfWeek>,
     onDaysChanged: (List<DayOfWeek>) -> Unit,
-    onStartDateChanged: (LocalDate) -> Unit,
-    onDurationChanged: (Int) -> Unit,
-    onDateRangeChanged: (LocalDate, LocalDate?) -> Unit,
-    duration: Int = 4
+    handleUiEvent: (AddHabitDurationUiEvent) -> Unit,
+    maxDurationDays: Int = 90,
+    isDatePickerVisible: Boolean = false
 ) {
-    var showDatePicker by remember { mutableStateOf(false) }
     val currentDate = remember { getCurrentDate() }
-    val effectiveStartDate = startDate ?: currentDate
 
-    // Use the endDate passed from the ViewModel or default to the start date
-    val effectiveEndDate = endDate ?: effectiveStartDate
-    
-    // Define common durations with more meaningful labels
-    val durations = listOf(
-        DurationOption(1, stringResource(Res.string.one_week)),
-        DurationOption(4, stringResource(Res.string.four_repeats)),
-        DurationOption(8, stringResource(Res.string.two_months)),
-        DurationOption(12, stringResource(Res.string.twelve_repeats)),
+    // Check if any days are selected
+    val hasSelectedDays = activeDays.isNotEmpty()
+
+    // Initialize startDate to today when days are first selected
+    LaunchedEffect(hasSelectedDays) {
+        if (hasSelectedDays && startDate == null) {
+            handleUiEvent(AddHabitDurationUiEvent.StartDateChanged(currentDate))
+        }
+    }
+
+    // Only use non-null dates if days are selected
+    val totalDays = if (hasSelectedDays && startDate != null && endDate != null) {
+        startDate.daysUntil(endDate)
+    } else {
+        0
+    }
+
+    // Define preset date ranges
+    val presetRanges = listOf(
+        PresetRange(7, stringResource(Res.string.one_week)),
+        PresetRange(30, stringResource(Res.string.one_month)),
+        PresetRange(90, stringResource(Res.string.three_months))
     )
 
     BloomCard(
@@ -403,107 +399,248 @@ private fun SelectDurationForHabitCard(
             modifier = Modifier.padding(16.dp)
         ) {
             Text(
-                text = stringResource(Res.string.select_duration_for_habit),
+                text = stringResource(Res.string.select_date_range_for_habit),
                 style = BloomTheme.typography.subheading,
                 color = BloomTheme.colors.textColor.primary
             )
 
+            if (!hasSelectedDays) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = stringResource(Res.string.select_days_first),
+                    style = BloomTheme.typography.small,
+                    color = BloomTheme.colors.error,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+            
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Visual Duration Selector
-            VisualDurationSelector(
-                durations = durations,
-                selectedDuration = duration,
-                onDurationSelected = onDurationChanged
+            // Custom date range selection
+            Text(
+                text = stringResource(Res.string.custom_date_range),
+                style = BloomTheme.typography.small,
+                color = BloomTheme.colors.textColor.secondary
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
+            Spacer(modifier = Modifier.height(8.dp))
+            
             // Date information with clickable behavior
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .border(
-                        width = 1.dp,
-                        color = BloomTheme.colors.background,
-                        shape = RoundedCornerShape(12.dp)
-                    )
                     .clip(RoundedCornerShape(12.dp))
-                    .clickable { showDatePicker = true }
-                    .padding(16.dp)
+                    .then(
+                        if (hasSelectedDays) {
+                            Modifier.clickable {
+                                handleUiEvent(AddHabitDurationUiEvent.SetDatePickerVisibility(true))
+                            }
+                        } else {
+                            Modifier.alpha(0.6f)
+                        }
+                    )
+                    .padding(vertical = 16.dp)
             ) {
                 // Date range display
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    // Start date
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.start_date_colon),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.secondary,
-                        )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        // Start date
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.start_date_colon),
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.secondary,
+                            )
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(8.dp))
 
-                        Text(
-                            text = effectiveStartDate.formatToMmDdYyWithLocale(),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.primary,
-                            fontWeight = FontWeight.SemiBold
-                        )
+                            Text(
+                                text = if (hasSelectedDays && startDate != null) startDate.formatToMmDdYyWithLocale() else "—",
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        // End date
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.end_date_colon),
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.secondary,
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+                            Text(
+                                text = if (hasSelectedDays && endDate != null) endDate.formatToMmDdYyWithLocale() else "—",
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.primary,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+
+                        // Days count badge (smaller screen display)
+                        if (hasSelectedDays && totalDays > 0) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    color = BloomTheme.colors.primary.copy(alpha = 0.1f),
+                                    shape = RoundedCornerShape(16.dp)
+                                ) {
+                                    Text(
+                                        text = pluralStringResource(
+                                            Res.plurals.days_count,
+                                            totalDays,
+                                            totalDays
+                                        ),
+                                        style = BloomTheme.typography.small,
+                                        color = BloomTheme.colors.primary,
+                                        fontWeight = FontWeight.Bold,
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 4.dp
+                                        )
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(4.dp))
+
+                                // Tap to edit hint
+                                if (hasSelectedDays) {
+                                    Text(
+                                        text = stringResource(Res.string.tap_to_edit_dates),
+                                        style = BloomTheme.typography.small,
+                                        color = BloomTheme.colors.primary,
+                                        fontWeight = FontWeight.Normal
+                                    )
+                                }
+                            }
+                        } else if (hasSelectedDays) {
+                            // Just the tap to edit hint if no days count
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(Res.string.tap_to_edit_dates),
+                                    style = BloomTheme.typography.small,
+                                    color = BloomTheme.colors.primary,
+                                    fontWeight = FontWeight.Normal
+                                )
+                            }
+                        }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(4.dp))
+            }
 
-                    // End date
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.end_date_colon),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.secondary,
-                        )
 
-                        Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = effectiveEndDate.formatToMmDdYyWithLocale(),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.primary,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
+            // Preset date range options
+            Text(
+                text = stringResource(Res.string.quick_selection),
+                style = BloomTheme.typography.small,
+                color = BloomTheme.colors.textColor.secondary
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Preset range chips
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                presetRanges.forEach { preset ->
+                    DateRangeChip(
+                        text = preset.label,
+                        isSelected = hasSelectedDays && totalDays == preset.days,
+                        onClick = {
+                            if (hasSelectedDays) {
+                                handleUiEvent(AddHabitDurationUiEvent.SelectPresetDateRange(preset.days))
+                            }
+                        },
+                        enabled = hasSelectedDays
+                    )
                 }
             }
         }
     }
 
     // Use the simplified date picker dialog with both start and end dates
-    if (showDatePicker) {
-        SimpleDateRangePickerDialog(
-            startDate = effectiveStartDate,
-            endDate = effectiveEndDate,
+    if (isDatePickerVisible && hasSelectedDays && startDate != null) {
+        AddHabitDateRangePickerDialog(
+            startDate = startDate,
+            endDate = endDate,
+            maxDurationDays = maxDurationDays,
             onDatesSelected = { start, end ->
                 if (end != null) {
                     // If the user selected an end date, send both dates to the ViewModel
-                    onDateRangeChanged(start, end)
+                    handleUiEvent(AddHabitDurationUiEvent.DateRangeChanged(start, end))
                 } else {
                     // Otherwise just update the start date
-                    onStartDateChanged(start)
+                    handleUiEvent(AddHabitDurationUiEvent.StartDateChanged(start))
                 }
-                showDatePicker = false
+                handleUiEvent(AddHabitDurationUiEvent.SetDatePickerVisibility(false))
             },
-            onDismiss = { showDatePicker = false },
-            minDate = getCurrentDate()
+            onDismiss = {
+                handleUiEvent(AddHabitDurationUiEvent.SetDatePickerVisibility(false))
+            },
+            minDate = currentDate
         )
     }
 }
 
-// Helper data class for duration options
-data class DurationOption(
-    val value: Int,
+@Composable
+private fun DateRangeChip(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    enabled: Boolean = true
+) {
+    val backgroundColor = if (isSelected) {
+        BloomTheme.colors.primary
+    } else {
+        BloomTheme.colors.surface
+    }
+
+    val textColor = if (isSelected) {
+        BloomTheme.colors.textColor.white
+    } else {
+        BloomTheme.colors.textColor.primary
+    }
+
+    Surface(
+        color = backgroundColor,
+        shape = RoundedCornerShape(16.dp),
+        border = if (!isSelected) BorderStroke(1.dp, BloomTheme.colors.background) else null,
+        modifier = Modifier.clickable(enabled = enabled, onClick = onClick)
+    ) {
+        Text(
+            text = text,
+            style = BloomTheme.typography.body,
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
+// Data class for preset date ranges
+private data class PresetRange(
+    val days: Int,
     val label: String
 )
 
@@ -540,7 +677,7 @@ fun DurationSlider(
 /**
  * Visual representation of duration with chips and calendar-based explanation
  */
-@Composable
+/*@Composable
 fun VisualDurationSelector(
     modifier: Modifier = Modifier,
     durations: List<DurationOption>,
@@ -592,7 +729,7 @@ fun VisualDurationSelector(
             )
         }
     }
-}
+}*/
 
 @Composable
 private fun DurationChip(

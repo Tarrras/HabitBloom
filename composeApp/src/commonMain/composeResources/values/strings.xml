@@ -119,7 +119,6 @@
     <string name="only_weekends">Only weekends</string>
     <string name="work_days">Work days</string>
     <string name="custom_pattern">Custom Pattern</string>
-    <string name="days_count">%1$d days</string>
     <string name="ends_around">Ends around: %1$s</string>
     <string name="drag_to_select_multiple">Tip: Drag across days to select multiple at once</string>
     <string name="one_week">One week</string>
@@ -368,8 +367,21 @@
     <string name="bloom_stage_continued">You've reached the final stage with a %1$d+ day streak! Keep going to maintain your beautiful bloom.</string>
 
     <string name="confirm">Confirm</string>
+    <string name="save_selection">Save Selection</string>
     <string name="select_dates">Select Dates</string>
-
-    <string name="select_duration_for_habit">Select duration for habit</string>
+    <string name="select_days_first">Please select at least one day of the week first</string>
+    <string name="select_date_range_for_habit">Select Date Range For Habit</string>
+    <string name="select_duration_for_habit">Select Duration For Habit</string>
     <string name="repeats_count">Number of repeats: %d</string>
+
+    <string name="duration_too_long">Habit duration is limited to 90 days</string>
+
+    <string name="quick_selection">Quick selection</string>
+    <string name="custom_date_range">Custom date range</string>
+    <plurals name="days_count">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+
+    <string name="tap_to_edit_dates">Tap to edit dates</string>
 </resources>

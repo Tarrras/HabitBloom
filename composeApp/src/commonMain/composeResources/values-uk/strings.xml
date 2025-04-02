@@ -70,12 +70,6 @@
     <string name="start_date_colon">Дата початку:</string>
     <string name="end_date_colon">Дата завершення:</string>
 
-    <plurals name="days_plural">
-        <item quantity="one">%1$d День</item>
-        <item quantity="few">%1$d Дні</item>
-        <item quantity="many">%1$d Днів</item>
-        <item quantity="other">%1$d Днів</item>
-    </plurals>
     <plurals name="selected_repeats">
         <item quantity="one">Тривалість: %1$d повторення</item>
         <item quantity="few">Тривалість: %1$d повторення</item>
@@ -125,7 +119,6 @@
     <string name="only_weekends">Тільки вихідні</string>
     <string name="work_days">Робочі дні</string>
     <string name="custom_pattern">Власний шаблон</string>
-    <string name="days_count">%1$d днів</string>
     <string name="ends_around">Завершується близько: %1$s</string>
     <string name="drag_to_select_multiple">Порада: Проведіть пальцем по днях, щоб вибрати кілька одразу</string>
     <string name="one_week">Один тиждень</string>
@@ -377,8 +370,23 @@
     <string name="bloom_stage_continued">Ви досягли фінальної стадії з серією у %1$d+ днів! Продовжуйте, щоб підтримувати прекрасне цвітіння.</string>
 
     <string name="confirm">Підтвердити</string>
-    <string name="select_dates">Вибрати дати</string>
+    <string name="save_selection">Зберегти вибір</string>
+    <string name="select_dates">Виберіть дати</string>
+    <string name="select_days_first">Будь ласка, спочатку виберіть хоча б один день тижня</string>
+    <string name="select_date_range_for_habit">Виберіть діапазон дат для звички</string>
+    <string name="select_duration_for_habit">Виберіть тривалість для звички</string>
+    <string name="tap_to_edit_dates">Торкніться, щоб змінити дати</string>
 
-    <string name="select_duration_for_habit">Виберіть тривалість звички</string>
     <string name="repeats_count">Кількість повторень: %d</string>
+
+    <string name="duration_too_long">Тривалість звички обмежена 90 днями</string>
+
+    <string name="quick_selection">Швидкий вибір</string>
+    <string name="custom_date_range">Власний діапазон дат</string>
+    <plurals name="days_count">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дні</item>
+        <item quantity="many">%1$d днів</item>
+        <item quantity="other">%1$d днів</item>
+    </plurals>
 </resources>
