@@ -54,7 +54,7 @@ fun AddHabitDateRangePickerDialog(
     startDate: LocalDate?,
     endDate: LocalDate? = null,
     maxDurationDays: Int = 90,
-    onDatesSelected: (start: LocalDate, end: LocalDate?) -> Unit,
+    onDatesSelected: (start: LocalDate, end: LocalDate) -> Unit,
     onDismiss: () -> Unit,
     minDate: LocalDate = getCurrentDate()
 ) {
@@ -147,8 +147,8 @@ fun AddHabitDateRangePickerDialog(
                         BloomPrimaryFilledButton(
                             text = stringResource(Res.string.save_selection),
                             onClick = {
-                                selection.startDate?.let { start ->
-                                    onDatesSelected(start, selection.endDate)
+                                if (selection.startDate != null && selection.endDate != null) {
+                                    onDatesSelected(selection.startDate!!, selection.endDate!!)
                                 }
                                 onDismiss()
                             },

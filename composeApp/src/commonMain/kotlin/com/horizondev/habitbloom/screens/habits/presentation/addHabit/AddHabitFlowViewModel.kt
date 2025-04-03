@@ -1,6 +1,5 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit
 
-import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
@@ -38,7 +37,6 @@ class AddHabitFlowViewModel : BloomViewModel<AddHabitFlowState, AddHabitFlowUiIn
                         durationInDays = event.durationInDays,
                         startDate = event.startDate,
                         selectedDays = event.selectedDays,
-                        weekStartOption = event.weekStartOption,
                         reminderEnabled = event.reminderEnabled,
                         reminderTime = event.reminderTime
                     )
@@ -67,7 +65,6 @@ sealed interface AddHabitFlowUiEvent {
         val durationInDays: Int,
         val startDate: LocalDate,
         val selectedDays: List<DayOfWeek>,
-        val weekStartOption: HabitWeekStartOption,
         val reminderEnabled: Boolean,
         val reminderTime: LocalTime
     ) : AddHabitFlowUiEvent
@@ -96,7 +93,6 @@ data class AddHabitFlowState(
         .toLocalDateTime(TimeZone.currentSystemDefault()).date,
     val isSubmitting: Boolean = false,
     val selectedDays: List<DayOfWeek> = DayOfWeek.entries,
-    val weekStartOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0) // Default reminder time set to 8:00 AM
 ) 

@@ -1,7 +1,6 @@
 package com.horizondev.habitbloom.utils
 
 import androidx.compose.runtime.Composable
-import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.month_april
@@ -86,6 +85,12 @@ fun LocalDate.calculateStartOfWeek(): LocalDate {
     return this.minusDays(daysSinceMonday.toLong())
 }
 
+fun LocalDate.calculateEndOfWeek(): LocalDate {
+    val startOfWeek = this.calculateStartOfWeek()
+    val endOfWeek = startOfWeek.plusDays(6)
+    return endOfWeek
+}
+
 fun getFirstDateFromDaysList(daysList: List<DayOfWeek>): LocalDate? {
     if (daysList.isEmpty()) return null
 
@@ -106,7 +111,6 @@ fun getFirstDateFromDaysList(daysList: List<DayOfWeek>): LocalDate? {
 
 fun getFirstDateAfterStartDateOrNextWeek(
     daysList: List<DayOfWeek>,
-    startOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
     startDate: LocalDate = getCurrentDate()
 ): LocalDate? {
     if (daysList.isEmpty()) return null
@@ -122,14 +126,8 @@ fun getFirstDateAfterStartDateOrNextWeek(
         startOfWeek.plusDays(daysDifference.toLong())
     }
 
-    val firstDayFromToday = datesInCurrentWeek.firstOrNull { it >= startDate }
-    return when (startOption) {
-        HabitWeekStartOption.THIS_WEEK -> firstDayFromToday
-        HabitWeekStartOption.NEXT_WEEK -> {
-            val minDay = datesInCurrentWeek.minOrNull()
-            minDay?.plusDays(7)
-        }
-    }
+    // Return the first day that is today or later
+    return datesInCurrentWeek.firstOrNull { it >= startDate }
 }
 
 suspend fun LocalDate.formatToMmDdYyWithLocaleSuspend(): String {

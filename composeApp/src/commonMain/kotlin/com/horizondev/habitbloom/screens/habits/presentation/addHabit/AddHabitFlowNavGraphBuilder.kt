@@ -81,13 +81,12 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
         // Duration choice screen
         composable<AddHabitFlowRoute.DurationChoice> {
             AddHabitDurationChoiceScreen(
-                onDurationSelected = { duration, startDate, selectedDays, weekStartOption, reminderEnabled, reminderTime ->
+                onDurationSelected = { duration, startDate, selectedDays, reminderEnabled, reminderTime ->
                     viewModel.handleUiEvent(
                         AddHabitFlowUiEvent.UpdateDuration(
                             durationInDays = duration,
                             startDate = startDate,
                             selectedDays = selectedDays,
-                            weekStartOption = weekStartOption,
                             reminderEnabled = reminderEnabled,
                             reminderTime = reminderTime
                         )

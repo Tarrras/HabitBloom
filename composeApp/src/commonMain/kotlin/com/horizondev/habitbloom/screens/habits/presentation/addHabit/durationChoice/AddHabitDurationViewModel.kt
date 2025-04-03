@@ -6,8 +6,10 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocaleSuspend
+import com.horizondev.habitbloom.utils.calculateEndOfWeek
+import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
+import com.horizondev.habitbloom.utils.plusDays
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.duration_too_long
 import habitbloom.composeapp.generated.resources.notification_permission_denied
@@ -20,7 +22,10 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
+import org.jetbrains.compose.resources.getString
 
 /**
  * ViewModel for the duration choice step in the Add Habit flow.
@@ -31,6 +36,8 @@ class AddHabitDurationViewModel(
 ) : BloomViewModel<AddHabitDurationUiState, AddHabitDurationUiIntent>(
     initialState = AddHabitDurationUiState(
         activeDays = DayOfWeek.entries,
+        startDate = getCurrentDate(),
+        endDate = getCurrentDate().calculateEndOfWeek()
     )
 ) {
 
@@ -38,25 +45,44 @@ class AddHabitDurationViewModel(
         // Setup derived state for start date
         combine(
             state.map { it.activeDays },
-            state.map { it.weekStartOption }
-        ) { activeDays, startOption ->
-            val firstDay = getFirstDateAfterStartDateOrNextWeek(
-                daysList = activeDays,
-                startOption = startOption
-            )
-            val firstDateFormatted = firstDay?.formatToMmDdYyWithLocaleSuspend()
+            state.map { it.startDate to it.endDate }
+        ) { activeDays, currentDates ->
+            val (currentStart, currentEnd) = currentDates
 
-            if (firstDay != null) {
-                // Default end date is now 7 days ahead (for a weekly habit)
-                val endDate = calculateEndDate(firstDay, 7)
-                updateState {
-                    it.copy(
-                        startDate = firstDay,
-                        formattedStartDate = firstDateFormatted,
-                        endDate = endDate,
-                        // Calculate duration in days for backward compatibility
-                        durationInDays = 1
-                    )
+            // Only calculate if we have active days
+            if (activeDays.isEmpty()) return@combine
+
+            // Get the first available day based on selection
+            val newFirstDay = getFirstDateAfterStartDateOrNextWeek(
+                daysList = activeDays
+            ) ?: return@combine
+
+            // Determine if this is an initial setup or an update due to day selection change
+            when {
+                currentStart == null || currentEnd == null -> {
+                    // Initial setup - default to end of week
+                    val newEndDate = newFirstDay.calculateEndOfWeek()
+
+                    updateState {
+                        it.copy(
+                            startDate = newFirstDay,
+                            endDate = newEndDate,
+                            durationInDays = calculateDurationValue(newFirstDay, newEndDate)
+                        )
+                    }
+                }
+
+                currentEnd != null &&
+                        currentStart != newFirstDay -> {
+                    // Start date changed due to day selection - keep the same end date
+                    // This handles the case when a user deselects a day
+
+                    updateState {
+                        it.copy(
+                            startDate = newFirstDay,
+                            durationInDays = calculateDurationValue(newFirstDay, currentEnd)
+                        )
+                    }
                 }
             }
         }.launchIn(viewModelScope)
@@ -67,240 +93,211 @@ class AddHabitDurationViewModel(
      */
     fun handleUiEvent(event: AddHabitDurationUiEvent) {
         when (event) {
-            is AddHabitDurationUiEvent.SelectGroupOfDays -> {
-                val newList = event.group
-                updateState { it.copy(activeDays = newList) }
+            is AddHabitDurationUiEvent.SelectGroupOfDays -> selectGroupOfDays(event.group)
+            is AddHabitDurationUiEvent.UpdateDayState -> updateDayState(event.dayOfWeek)
+            is AddHabitDurationUiEvent.SelectPresetDateRange -> selectPresetDateRange(event.daysAhead)
+            is AddHabitDurationUiEvent.ReminderEnabledChanged -> handleReminderEnabledChanged(event.enabled)
+            is AddHabitDurationUiEvent.ReminderTimeChanged -> handleReminderTimeChanged(event.time)
+            is AddHabitDurationUiEvent.DateRangeChanged -> handleDateRangeChanged(
+                event.startDate,
+                event.endDate
+            )
+
+            is AddHabitDurationUiEvent.SetDatePickerVisibility -> setDatePickerVisibility(event.isVisible)
+            AddHabitDurationUiEvent.Cancel -> handleCancel()
+            AddHabitDurationUiEvent.OnNext -> handleNext()
+        }
+    }
+
+    private fun selectGroupOfDays(days: List<DayOfWeek>) {
+        updateState { it.copy(activeDays = days) }
+    }
+
+    private fun updateDayState(dayOfWeek: DayOfWeek) {
+        val currentState = state.value
+        val currentActiveDays = currentState.activeDays
+
+        // Update active days list
+        val newList = currentActiveDays.toMutableList().apply {
+            if (contains(dayOfWeek)) {
+                remove(dayOfWeek)
+            } else {
+                add(dayOfWeek)
             }
+        }
 
-            is AddHabitDurationUiEvent.UpdateDayState -> {
-                val currentState = state.value
-                val dayToChange = event.dayOfWeek
+        // Update the active days - the combine flow will handle date adjustments
+        updateState {
+            it.copy(activeDays = newList)
+        }
+    }
 
-                val currentActiveDays = currentState.activeDays
+    private fun selectPresetDateRange(daysAhead: Int) {
+        val currentState = state.value
+        val startDate = currentState.startDate ?: return
 
-                val newList = currentActiveDays.toMutableList().apply {
-                    if (contains(dayToChange)) {
-                        remove(dayToChange)
-                    } else add(dayToChange)
-                }
+        // Calculate new end date based on preset days
+        val adjustedDaysAhead =
+            daysAhead.coerceAtMost(currentState.maxHabitDurationDays) - 1 // Adjust to include start date
+        val endDate = startDate.plusDays(adjustedDaysAhead.toLong())
 
-                updateState {
-                    it.copy(
-                        activeDays = newList,
-                    )
-                }
-            }
+        // Update state with new date range and calculated duration
+        updateState {
+            it.copy(
+                endDate = endDate,
+            )
+        }
+    }
 
-            is AddHabitDurationUiEvent.SelectPresetDateRange -> {
-                val currentState = state.value
-                val startDate = currentState.startDate ?: return
+    private fun handleReminderEnabledChanged(enabled: Boolean) {
+        viewModelScope.launch {
+            if (enabled) {
+                // Request notification permission when enabling reminders
+                val permissionGranted = permissionsManager.requestNotificationPermission()
 
-                // Calculate new end date based on preset days
-                val daysAhead = event.daysAhead.coerceAtMost(currentState.maxHabitDurationDays)
-                val endDate = startDate.plus(daysAhead, DateTimeUnit.DAY)
-
-                // Update state with new date range and calculated duration
-                updateState {
-                    val calculatedDuration = calculateDurationValue(startDate, endDate)
-                    it.copy(
-                        endDate = endDate,
-                        durationInDays = calculatedDuration
-                    )
-                }
-            }
-
-            is AddHabitDurationUiEvent.ReminderEnabledChanged -> {
-                viewModelScope.launch {
-                    if (event.enabled) {
-                        // Request notification permission when enabling reminders
-                        val permissionGranted = permissionsManager.requestNotificationPermission()
-
-                        if (permissionGranted) {
-                            updateState { it.copy(reminderEnabled = true) }
-                        } else {
-                            // Show error if permission denied
-                            emitUiIntent(
-                                AddHabitDurationUiIntent.ShowValidationError(
-                                    BloomSnackbarVisuals(
-                                        message = getString(Res.string.notification_permission_denied),
-                                        state = BloomSnackbarState.Error,
-                                        duration = SnackbarDuration.Short,
-                                        withDismissAction = true
-                                    )
-                                )
-                            )
-                            // Ensure switch remains off
-                            updateState { it.copy(reminderEnabled = false) }
-                        }
-                    } else {
-                        // Simply disable reminders if turning off
-                        updateState { it.copy(reminderEnabled = false) }
-                    }
-                }
-            }
-
-            is AddHabitDurationUiEvent.ReminderTimeChanged -> {
-                updateState { it.copy(reminderTime = event.time) }
-            }
-
-            AddHabitDurationUiEvent.Cancel -> {
-                emitUiIntent(AddHabitDurationUiIntent.NavigateBack)
-            }
-
-            AddHabitDurationUiEvent.OnNext -> viewModelScope.launch {
-                val currentState = state.value
-
-                if (currentState.startDate == null) {
+                if (permissionGranted) {
+                    updateState { it.copy(reminderEnabled = true) }
+                } else {
+                    // Show error if permission denied
                     emitUiIntent(
                         AddHabitDurationUiIntent.ShowValidationError(
                             BloomSnackbarVisuals(
-                                message = getString(Res.string.the_habit_cannot_start_on_past_days),
+                                message = getString(Res.string.notification_permission_denied),
                                 state = BloomSnackbarState.Error,
                                 duration = SnackbarDuration.Short,
                                 withDismissAction = true
                             )
                         )
                     )
-                    return@launch
-                }
-
-                if (currentState.endDate == null) {
-                    // This shouldn't happen with our UI, but just in case
-                    return@launch
-                }
-
-                val daysBetween = calculateDaysBetween(currentState.startDate, currentState.endDate)
-                if (daysBetween > currentState.maxHabitDurationDays) {
-                    emitUiIntent(
-                        AddHabitDurationUiIntent.ShowValidationError(
-                            BloomSnackbarVisuals(
-                                message = getString(Res.string.duration_too_long),
-                                state = BloomSnackbarState.Warning,
-                                duration = SnackbarDuration.Short,
-                                withDismissAction = true
-                            )
-                        )
-                    )
-                    return@launch
-                }
-
-                // Check if reminders are enabled but permissions are not granted
-                if (currentState.reminderEnabled && !permissionsManager.hasNotificationPermission()) {
-                    emitUiIntent(
-                        AddHabitDurationUiIntent.ShowValidationError(
-                            BloomSnackbarVisuals(
-                                message = getString(Res.string.notifications_required),
-                                state = BloomSnackbarState.Warning,
-                                duration = SnackbarDuration.Short,
-                                withDismissAction = true
-                            )
-                        )
-                    )
-                    // Disable reminders since permissions were not granted
+                    // Ensure switch remains off
                     updateState { it.copy(reminderEnabled = false) }
-                    return@launch
                 }
+            } else {
+                // Simply disable reminders if turning off
+                updateState { it.copy(reminderEnabled = false) }
+            }
+        }
+    }
 
-                val calculatedStartedDate = currentState.startDate
-                val calculatedDuration = calculateDurationValue(
-                    currentState.startDate,
-                    currentState.endDate
+    private fun handleReminderTimeChanged(time: LocalTime) {
+        updateState { it.copy(reminderTime = time) }
+    }
+
+    private fun handleCancel() {
+        emitUiIntent(AddHabitDurationUiIntent.NavigateBack)
+    }
+
+    private fun handleDateRangeChanged(startDate: LocalDate, endDate: LocalDate?) {
+        viewModelScope.launch {
+            if (endDate == null) return@launch
+
+            // Enforce maximum duration
+            val daysBetween = calculateDaysBetween(startDate, endDate)
+            val maxDays = state.value.maxHabitDurationDays
+
+            val effectiveEndDate = if (daysBetween > maxDays) {
+                // Limit to max duration
+                startDate.plus(maxDays, DateTimeUnit.DAY)
+            } else {
+                endDate
+            }
+
+            updateState {
+                it.copy(
+                    startDate = startDate,
+                    endDate = effectiveEndDate,
                 )
+            }
 
+            // Show warning if the date range was limited
+            if (effectiveEndDate != endDate) {
                 emitUiIntent(
-                    AddHabitDurationUiIntent.NavigateNext(
-                        selectedDays = currentState.activeDays,
-                        durationInDays = calculatedDuration,
-                        weekStartOption = currentState.weekStartOption,
-                        startDate = calculatedStartedDate,
-                        reminderEnabled = currentState.reminderEnabled,
-                        reminderTime = currentState.reminderTime
+                    AddHabitDurationUiIntent.ShowValidationError(
+                        BloomSnackbarVisuals(
+                            message = getString(Res.string.duration_too_long),
+                            state = BloomSnackbarState.Warning,
+                            duration = SnackbarDuration.Short,
+                            withDismissAction = true
+                        )
                     )
                 )
             }
+        }
+    }
 
-            is AddHabitDurationUiEvent.SelectWeekStartOption -> {
-                updateState { it.copy(weekStartOption = event.option) }
-            }
+    private fun setDatePickerVisibility(isVisible: Boolean) {
+        updateState { it.copy(isDatePickerVisible = isVisible) }
+    }
 
-            is AddHabitDurationUiEvent.StartDateChanged -> {
-                launch {
-                    val formattedDate = event.date.formatToMmDdYyWithLocaleSuspend()
+    private fun handleNext() {
+        viewModelScope.launch {
+            val currentState = state.value
 
-                    // When start date changes, adjust end date to maintain similar duration
-                    val currentState = state.value
-                    val oldEndDate = currentState.endDate
-                    val oldStartDate = currentState.startDate
-
-                    val newEndDate = if (oldEndDate != null && oldStartDate != null) {
-                        // Maintain the same duration between dates
-                        val daysBetween = calculateDaysBetween(oldStartDate, oldEndDate)
-                        event.date.plus(daysBetween, DateTimeUnit.DAY)
-                    } else {
-                        // Default to 7 days if we don't have previous dates
-                        event.date.plus(7, DateTimeUnit.DAY)
-                    }
-
-                    val calculatedDuration = calculateDurationValue(event.date, newEndDate)
-                    
-                    updateState {
-                        it.copy(
-                            startDate = event.date,
-                            formattedStartDate = formattedDate,
-                            endDate = newEndDate,
-                            durationInDays = calculatedDuration
+            if (currentState.startDate == null) {
+                emitUiIntent(
+                    AddHabitDurationUiIntent.ShowValidationError(
+                        BloomSnackbarVisuals(
+                            message = getString(Res.string.the_habit_cannot_start_on_past_days),
+                            state = BloomSnackbarState.Error,
+                            duration = SnackbarDuration.Short,
+                            withDismissAction = true
                         )
-                    }
-                }
+                    )
+                )
+                return@launch
             }
 
-            is AddHabitDurationUiEvent.DateRangeChanged -> {
-                viewModelScope.launch {
-                    val startDate = event.startDate
-                    val endDate = event.endDate ?: return@launch
+            if (currentState.endDate == null) {
+                // This shouldn't happen with our UI, but just in case
+                return@launch
+            }
 
-                    // Enforce maximum duration
-                    val daysBetween = calculateDaysBetween(startDate, endDate)
-                    val maxDays = state.value.maxHabitDurationDays
-
-                    val effectiveEndDate = if (daysBetween > maxDays) {
-                        // Limit to max duration
-                        startDate.plus(maxDays, DateTimeUnit.DAY)
-                    } else {
-                        endDate
-                    }
-                    
-                    val formattedDate = startDate.formatToMmDdYyWithLocaleSuspend()
-                    val calculatedDuration = calculateDurationValue(startDate, effectiveEndDate)
-                    
-                    updateState {
-                        it.copy(
-                            startDate = startDate,
-                            endDate = effectiveEndDate,
-                            formattedStartDate = formattedDate,
-                            durationInDays = calculatedDuration
+            val daysBetween = calculateDaysBetween(currentState.startDate, currentState.endDate)
+            if (daysBetween > currentState.maxHabitDurationDays) {
+                emitUiIntent(
+                    AddHabitDurationUiIntent.ShowValidationError(
+                        BloomSnackbarVisuals(
+                            message = getString(Res.string.duration_too_long),
+                            state = BloomSnackbarState.Warning,
+                            duration = SnackbarDuration.Short,
+                            withDismissAction = true
                         )
-                    }
+                    )
+                )
+                return@launch
+            }
 
-                    // Show warning if the date range was limited
-                    if (effectiveEndDate != endDate) {
-                        emitUiIntent(
-                            AddHabitDurationUiIntent.ShowValidationError(
-                                BloomSnackbarVisuals(
-                                    message = getString(Res.string.duration_too_long),
-                                    state = BloomSnackbarState.Warning,
-                                    duration = SnackbarDuration.Short,
-                                    withDismissAction = true
-                                )
-                            )
+            // Check if reminders are enabled but permissions are not granted
+            if (currentState.reminderEnabled && !permissionsManager.hasNotificationPermission()) {
+                emitUiIntent(
+                    AddHabitDurationUiIntent.ShowValidationError(
+                        BloomSnackbarVisuals(
+                            message = getString(Res.string.notifications_required),
+                            state = BloomSnackbarState.Warning,
+                            duration = SnackbarDuration.Short,
+                            withDismissAction = true
                         )
-                    }
-                }
+                    )
+                )
+                // Disable reminders since permissions were not granted
+                updateState { it.copy(reminderEnabled = false) }
+                return@launch
             }
 
-            is AddHabitDurationUiEvent.SetDatePickerVisibility -> {
-                updateState { it.copy(isDatePickerVisible = event.isVisible) }
-            }
+            val calculatedStartedDate = currentState.startDate
+
+            emitUiIntent(
+                AddHabitDurationUiIntent.NavigateNext(
+                    selectedDays = currentState.activeDays,
+                    startDate = calculatedStartedDate,
+                    reminderEnabled = currentState.reminderEnabled,
+                    reminderTime = currentState.reminderTime,
+                    durationInDays = calculateDurationValue(
+                        currentState.startDate,
+                        currentState.endDate
+                    )
+                )
+            )
         }
     }
 
@@ -316,33 +313,9 @@ class AddHabitDurationViewModel(
     }
 
     /**
-     * Calculate the end date based on the start date and number of days
-     */
-    private fun calculateEndDate(startDate: LocalDate, daysAhead: Int): LocalDate {
-        return startDate.plus(daysAhead, DateTimeUnit.DAY)
-    }
-
-    /**
      * Calculate days between two dates (inclusive)
      */
     private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
-        if (startDate > endDate) return 0
-
-        var current = startDate
-        var days = 0
-
-        while (current <= endDate) {
-            days++
-            current = current.plus(1, DateTimeUnit.DAY)
-        }
-
-        return days
-    }
-
-    /**
-     * Helper method to get string resources.
-     */
-    private suspend fun getString(resource: org.jetbrains.compose.resources.StringResource): String {
-        return org.jetbrains.compose.resources.getString(resource)
+        return startDate.daysUntil(endDate)
     }
 }

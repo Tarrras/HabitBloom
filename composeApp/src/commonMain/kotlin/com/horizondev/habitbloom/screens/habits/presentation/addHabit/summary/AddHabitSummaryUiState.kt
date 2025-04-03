@@ -1,6 +1,5 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary
 
-import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
@@ -14,7 +13,6 @@ data class AddHabitSummaryUiState(
     val days: List<DayOfWeek>,
     val duration: Int,
     val startDate: LocalDate,
-    val weekStartOption: HabitWeekStartOption = HabitWeekStartOption.THIS_WEEK,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime? = null,
     val isLoading: Boolean = false

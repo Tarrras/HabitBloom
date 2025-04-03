@@ -24,7 +24,6 @@ class AddHabitSummaryViewModel(
         days = addHabitState.selectedDays,
         duration = addHabitState.durationInDays,
         startDate = addHabitState.startDate,
-        weekStartOption = addHabitState.weekStartOption,
         reminderEnabled = addHabitState.reminderEnabled,
         reminderTime = addHabitState.reminderTime
     )

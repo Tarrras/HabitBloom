@@ -37,7 +37,6 @@ import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designComponents.dialogs.AddHabitDateRangePickerDialog
 import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DragSelectDayPicker
-import com.horizondev.habitbloom.core.designComponents.pickers.HabitWeekStartOption
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
@@ -70,7 +69,6 @@ import habitbloom.composeapp.generated.resources.weekdays
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.daysUntil
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -79,7 +77,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun AddHabitDurationChoiceScreen(
-    onDurationSelected: (Int, LocalDate, List<DayOfWeek>, HabitWeekStartOption, Boolean, LocalTime) -> Unit,
+    onDurationSelected: (Int, LocalDate, List<DayOfWeek>, Boolean, LocalTime) -> Unit,
     onBack: () -> Unit,
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
     modifier: Modifier = Modifier
@@ -99,7 +97,6 @@ fun AddHabitDurationChoiceScreen(
                         uiIntent.durationInDays,
                         uiIntent.startDate,
                         uiIntent.selectedDays,
-                        uiIntent.weekStartOption,
                         uiIntent.reminderEnabled,
                         uiIntent.reminderTime
                     )
@@ -157,20 +154,20 @@ private fun AddHabitDurationChoiceScreenContent(
             }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        SelectDateRangeForHabitCard(
-            modifier = Modifier.fillMaxWidth(),
-            startDate = uiState.startDate,
-            endDate = uiState.endDate,
-            activeDays = uiState.activeDays,
-            onDaysChanged = { days ->
-                handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
-            },
-            handleUiEvent = handleUiEvent,
-            maxDurationDays = uiState.maxHabitDurationDays,
-            isDatePickerVisible = uiState.isDatePickerVisible
-        )
+        AnimatedVisibility(
+            uiState.activeDays.isNotEmpty(),
+            modifier = Modifier.padding(top = 16.dp)
+        ) {
+            SelectDateRangeForHabitCard(
+                modifier = Modifier.fillMaxWidth(),
+                uiState = uiState,
+                onDaysChanged = { days ->
+                    handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
+                },
+                handleUiEvent = handleUiEvent,
+                isDatePickerVisible = uiState.isDatePickerVisible
+            )
+        }
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -194,7 +191,7 @@ private fun AddHabitDurationChoiceScreenContent(
             onClick = {
                 handleUiEvent(AddHabitDurationUiEvent.OnNext)
             },
-            enabled = uiState.displayedStartDate != null
+            enabled = uiState.nextButtonEnabled
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -357,32 +354,21 @@ private fun ReminderSettingsCard(
 @Composable
 private fun SelectDateRangeForHabitCard(
     modifier: Modifier = Modifier,
-    startDate: LocalDate?,
-    endDate: LocalDate?,
-    activeDays: List<DayOfWeek>,
+    uiState: AddHabitDurationUiState,
     onDaysChanged: (List<DayOfWeek>) -> Unit,
     handleUiEvent: (AddHabitDurationUiEvent) -> Unit,
-    maxDurationDays: Int = 90,
     isDatePickerVisible: Boolean = false
 ) {
+    val activeDays = uiState.activeDays
+    val startDate = uiState.startDate
+    val endDate = uiState.endDate
+    val maxDurationDays = uiState.maxHabitDurationDays
+    val durationInDays = uiState.durationInDays
+
     val currentDate = remember { getCurrentDate() }
 
     // Check if any days are selected
     val hasSelectedDays = activeDays.isNotEmpty()
-
-    // Initialize startDate to today when days are first selected
-    LaunchedEffect(hasSelectedDays) {
-        if (hasSelectedDays && startDate == null) {
-            handleUiEvent(AddHabitDurationUiEvent.StartDateChanged(currentDate))
-        }
-    }
-
-    // Only use non-null dates if days are selected
-    val totalDays = if (hasSelectedDays && startDate != null && endDate != null) {
-        startDate.daysUntil(endDate)
-    } else {
-        0
-    }
 
     // Define preset date ranges
     val presetRanges = listOf(
@@ -413,7 +399,7 @@ private fun SelectDateRangeForHabitCard(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(16.dp))
 
             // Custom date range selection
@@ -424,7 +410,7 @@ private fun SelectDateRangeForHabitCard(
             )
 
             Spacer(modifier = Modifier.height(8.dp))
-            
+
             // Date information with clickable behavior
             Column(
                 modifier = Modifier
@@ -490,7 +476,7 @@ private fun SelectDateRangeForHabitCard(
                         }
 
                         // Days count badge (smaller screen display)
-                        if (hasSelectedDays && totalDays > 0) {
+                        if (hasSelectedDays && durationInDays > 0) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Row(
                                 verticalAlignment = Alignment.CenterVertically
@@ -502,8 +488,8 @@ private fun SelectDateRangeForHabitCard(
                                     Text(
                                         text = pluralStringResource(
                                             Res.plurals.days_count,
-                                            totalDays,
-                                            totalDays
+                                            durationInDays,
+                                            durationInDays
                                         ),
                                         style = BloomTheme.typography.small,
                                         color = BloomTheme.colors.primary,
@@ -567,7 +553,7 @@ private fun SelectDateRangeForHabitCard(
                 presetRanges.forEach { preset ->
                     DateRangeChip(
                         text = preset.label,
-                        isSelected = hasSelectedDays && totalDays == preset.days,
+                        isSelected = hasSelectedDays && durationInDays == preset.days,
                         onClick = {
                             if (hasSelectedDays) {
                                 handleUiEvent(AddHabitDurationUiEvent.SelectPresetDateRange(preset.days))
@@ -587,13 +573,7 @@ private fun SelectDateRangeForHabitCard(
             endDate = endDate,
             maxDurationDays = maxDurationDays,
             onDatesSelected = { start, end ->
-                if (end != null) {
-                    // If the user selected an end date, send both dates to the ViewModel
-                    handleUiEvent(AddHabitDurationUiEvent.DateRangeChanged(start, end))
-                } else {
-                    // Otherwise just update the start date
-                    handleUiEvent(AddHabitDurationUiEvent.StartDateChanged(start))
-                }
+                handleUiEvent(AddHabitDurationUiEvent.DateRangeChanged(start, end))
                 handleUiEvent(AddHabitDurationUiEvent.SetDatePickerVisibility(false))
             },
             onDismiss = {
