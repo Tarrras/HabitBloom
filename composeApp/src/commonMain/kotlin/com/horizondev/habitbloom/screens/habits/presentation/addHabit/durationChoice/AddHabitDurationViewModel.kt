@@ -8,7 +8,6 @@ import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.utils.calculateEndOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
-import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
 import com.horizondev.habitbloom.utils.plusDays
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.duration_too_long
@@ -37,7 +36,8 @@ class AddHabitDurationViewModel(
     initialState = AddHabitDurationUiState(
         activeDays = DayOfWeek.entries,
         startDate = getCurrentDate(),
-        endDate = getCurrentDate().calculateEndOfWeek()
+        endDate = getCurrentDate().calculateEndOfWeek(),
+        durationInDays = getCurrentDate().daysUntil(getCurrentDate().calculateEndOfWeek())
     )
 ) {
 
@@ -49,40 +49,46 @@ class AddHabitDurationViewModel(
         ) { activeDays, currentDates ->
             val (currentStart, currentEnd) = currentDates
 
-            // Only calculate if we have active days
-            if (activeDays.isEmpty()) return@combine
+            // If no days are selected, reset dates to null
+            if (activeDays.isEmpty()) {
+                updateState {
+                    it.copy(
+                        startDate = null,
+                        endDate = null,
+                    )
+                }
+                return@combine
+            }
 
-            // Get the first available day based on selection
-            val newFirstDay = getFirstDateAfterStartDateOrNextWeek(
-                daysList = activeDays
-            ) ?: return@combine
-
-            // Determine if this is an initial setup or an update due to day selection change
             when {
-                currentStart == null || currentEnd == null -> {
-                    // Initial setup - default to end of week
-                    val newEndDate = newFirstDay.calculateEndOfWeek()
+                currentStart != null && currentEnd != null -> {
 
-                    updateState {
-                        it.copy(
-                            startDate = newFirstDay,
-                            endDate = newEndDate,
-                            durationInDays = calculateDurationValue(newFirstDay, newEndDate)
+                    // Check if start or end dates fall on days that are no longer selected
+                    val startDayStillSelected = activeDays.contains(currentStart.dayOfWeek)
+                    val endDayStillSelected = activeDays.contains(currentEnd.dayOfWeek)
+
+                    // Only recalculate if necessary
+                    if (!startDayStillSelected || !endDayStillSelected) {
+                        // Find new valid dates within the current range
+                        val newRange = recalculateDateRange(
+                            currentStart = currentStart,
+                            currentEnd = currentEnd,
+                            activeDays = activeDays
                         )
+
+                        updateState {
+                            it.copy(
+                                startDate = newRange.first,
+                                endDate = newRange.second,
+                                durationInDays = if (newRange.first != null && newRange.second != null)
+                                    calculateDaysBetween(newRange.first!!, newRange.second!!) else 0
+                            )
+                        }
                     }
                 }
 
-                currentEnd != null &&
-                        currentStart != newFirstDay -> {
-                    // Start date changed due to day selection - keep the same end date
-                    // This handles the case when a user deselects a day
+                else -> {
 
-                    updateState {
-                        it.copy(
-                            startDate = newFirstDay,
-                            durationInDays = calculateDurationValue(newFirstDay, currentEnd)
-                        )
-                    }
                 }
             }
         }.launchIn(viewModelScope)
@@ -316,6 +322,40 @@ class AddHabitDurationViewModel(
      * Calculate days between two dates (inclusive)
      */
     private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
-        return startDate.daysUntil(endDate)
+        return startDate.daysUntil(endDate) + 1
+    }
+
+    /**
+     * Recalculate date range when day selection changes
+     * @return Pair of (new start date, new end date)
+     */
+    private fun recalculateDateRange(
+        currentStart: LocalDate,
+        currentEnd: LocalDate,
+        activeDays: List<DayOfWeek>
+    ): Pair<LocalDate?, LocalDate?> {
+        // If no active days, return null dates
+        if (activeDays.isEmpty()) {
+            return Pair(null, null)
+        }
+
+        // Get available dates within our existing range (including current week and next)
+        val dateRange = generateSequence(currentStart) { date ->
+            val next = date.plus(1, DateTimeUnit.DAY)
+            if (next <= currentEnd) next else null
+        }.toList()
+
+        // Filter to only dates matching selected days
+        val validDates = dateRange.filter { date ->
+            activeDays.contains(date.dayOfWeek)
+        }
+
+        return if (validDates.isEmpty()) {
+            // No valid dates found within current range
+            Pair(null, null)
+        } else {
+            // Return first and last valid dates
+            Pair(validDates.firstOrNull(), validDates.lastOrNull())
+        }
     }
 }
