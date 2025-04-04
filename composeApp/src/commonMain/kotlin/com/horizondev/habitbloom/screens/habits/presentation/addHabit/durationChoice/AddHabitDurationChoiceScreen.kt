@@ -567,7 +567,7 @@ private fun SelectDateRangeForHabitCard(
     }
 
     // Use the simplified date picker dialog with both start and end dates
-    if (isDatePickerVisible && hasSelectedDays && startDate != null) {
+    if (isDatePickerVisible && hasSelectedDays) {
         AddHabitDateRangePickerDialog(
             startDate = startDate,
             endDate = endDate,

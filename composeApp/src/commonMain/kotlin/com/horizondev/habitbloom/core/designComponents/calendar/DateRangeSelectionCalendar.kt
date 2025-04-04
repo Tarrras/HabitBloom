@@ -223,14 +223,35 @@ private fun getUpdatedSelection(
         endDate == null -> {
             if (clickedDate < startDate) {
                 // If clicked date is before start date, make it the new start date
-                DateSelection(startDate = clickedDate)
+                DateSelection(startDate = clickedDate, endDate = startDate)
             } else {
                 // Otherwise set it as end date
                 DateSelection(startDate = startDate, endDate = clickedDate)
             }
         }
 
-        // Both dates already selected - start a new selection
-        else -> DateSelection(startDate = clickedDate)
+        else -> {
+            when {
+                clickedDate < startDate -> {
+                    // If clicked date is before start date, make it the new start date
+                    DateSelection(startDate = clickedDate, endDate = endDate)
+                }
+
+                clickedDate > endDate -> {
+                    // If clicked date is after end date, make it the new end date
+                    DateSelection(startDate = startDate, endDate = clickedDate)
+                }
+
+                clickedDate in startDate..endDate -> {
+                    // If clicked date is within the range, reset the selection
+                    DateSelection(startDate = clickedDate)
+                }
+
+                else -> {
+                    // Otherwise set it as end date
+                    DateSelection(startDate = clickedDate)
+                }
+            }
+        }
     }
 } 
