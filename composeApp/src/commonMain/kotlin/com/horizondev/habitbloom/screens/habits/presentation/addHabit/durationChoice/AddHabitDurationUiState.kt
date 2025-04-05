@@ -31,6 +31,7 @@ sealed interface AddHabitDurationUiIntent {
         val selectedDays: List<DayOfWeek>,
         val startDate: LocalDate,
         val endDate: LocalDate,
+        val durationInDays: Int,
         val reminderEnabled: Boolean,
         val reminderTime: LocalTime
     ) : AddHabitDurationUiIntent

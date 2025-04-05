@@ -36,6 +36,7 @@ class AddHabitFlowViewModel : BloomViewModel<AddHabitFlowState, AddHabitFlowUiIn
                         startDate = event.startDate,
                         endDate = event.endDate,
                         selectedDays = event.selectedDays,
+                        durationInDays = event.durationInDays,
                         reminderEnabled = event.reminderEnabled,
                         reminderTime = event.reminderTime
                     )
@@ -63,6 +64,7 @@ sealed interface AddHabitFlowUiEvent {
         val startDate: LocalDate,
         val endDate: LocalDate,
         val selectedDays: List<DayOfWeek>,
+        val durationInDays: Int,
         val reminderEnabled: Boolean,
         val reminderTime: LocalTime
     ) : AddHabitFlowUiEvent
@@ -88,6 +90,7 @@ data class AddHabitFlowState(
     val habitInfo: HabitInfo? = null,
     val startDate: LocalDate = getCurrentDate(),
     val endDate: LocalDate = getCurrentDate().calculateEndOfWeek(), // Default end date is the end of current week
+    val durationInDays: Int = 0, // Number of days the habit will take (only counting active days)
     val isSubmitting: Boolean = false,
     val selectedDays: List<DayOfWeek> = DayOfWeek.entries,
     val reminderEnabled: Boolean = false,

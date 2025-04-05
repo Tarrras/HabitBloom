@@ -77,7 +77,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun AddHabitDurationChoiceScreen(
-    onDurationSelected: (LocalDate, LocalDate, List<DayOfWeek>, Boolean, LocalTime) -> Unit,
+    onDurationSelected: (LocalDate, LocalDate, List<DayOfWeek>, Int, Boolean, LocalTime) -> Unit,
     onBack: () -> Unit,
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
     modifier: Modifier = Modifier
@@ -97,6 +97,7 @@ fun AddHabitDurationChoiceScreen(
                         uiIntent.startDate,
                         uiIntent.endDate,
                         uiIntent.selectedDays,
+                        uiIntent.durationInDays,
                         uiIntent.reminderEnabled,
                         uiIntent.reminderTime
                     )

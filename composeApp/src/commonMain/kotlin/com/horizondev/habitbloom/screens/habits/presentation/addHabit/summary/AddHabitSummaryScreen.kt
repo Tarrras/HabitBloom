@@ -24,7 +24,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
@@ -38,8 +37,10 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.complete
 import habitbloom.composeapp.generated.resources.do_you_want_add_this_habit
+import habitbloom.composeapp.generated.resources.duration_display
+import habitbloom.composeapp.generated.resources.end_date_display
 import habitbloom.composeapp.generated.resources.reminder_set_for
-import habitbloom.composeapp.generated.resources.start_date
+import habitbloom.composeapp.generated.resources.start_date_display
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -185,12 +186,34 @@ private fun SummaryHabitCard(
                 enabled = false
             )
 
-            Text(
-                text = stringResource(Res.string.start_date, uiState.startDate),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary,
-                textDecoration = TextDecoration.Underline
-            )
+            // Date information section
+            Column(
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                // Start date
+                Text(
+                    text = stringResource(
+                        Res.string.start_date_display,
+                        uiState.startDate.toString()
+                    ),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary
+                )
+
+                // End date
+                Text(
+                    text = stringResource(Res.string.end_date_display, uiState.endDate.toString()),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary
+                )
+
+                // Duration in days
+                Text(
+                    text = stringResource(Res.string.duration_display, uiState.durationInDays),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.primary
+                )
+            }
 
             // Reminder information
             if (uiState.reminderEnabled && uiState.reminderTime != null) {

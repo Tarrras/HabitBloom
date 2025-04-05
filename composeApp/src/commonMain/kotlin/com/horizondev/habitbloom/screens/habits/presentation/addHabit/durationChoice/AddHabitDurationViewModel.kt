@@ -55,6 +55,7 @@ class AddHabitDurationViewModel(
                     it.copy(
                         startDate = null,
                         endDate = null,
+                        durationInDays = 0
                     )
                 }
                 return@combine
@@ -76,19 +77,38 @@ class AddHabitDurationViewModel(
                             activeDays = activeDays
                         )
 
+                        // Calculate actual active days that match selected pattern
+                        val actualDuration = countActiveDaysBetween(
+                            startDate = newRange.first,
+                            endDate = newRange.second,
+                            activeDays = activeDays
+                        )
+
                         updateState {
                             it.copy(
                                 startDate = newRange.first,
                                 endDate = newRange.second,
-                                durationInDays = if (newRange.first != null && newRange.second != null)
-                                    calculateDaysBetween(newRange.first!!, newRange.second!!) else 0
+                                durationInDays = actualDuration
                             )
+                        }
+                    } else {
+                        // Even if dates didn't change, recalculate duration as day selection might have changed
+                        val actualDuration = countActiveDaysBetween(
+                            startDate = currentStart,
+                            endDate = currentEnd,
+                            activeDays = activeDays
+                        )
+
+                        if (actualDuration != state.value.durationInDays) {
+                            updateState {
+                                it.copy(durationInDays = actualDuration)
+                            }
                         }
                     }
                 }
 
                 else -> {
-
+                    // No valid date range yet
                 }
             }
         }.launchIn(viewModelScope)
@@ -147,10 +167,18 @@ class AddHabitDurationViewModel(
             daysAhead.coerceAtMost(currentState.maxHabitDurationDays) - 1 // Adjust to include start date
         val endDate = startDate.plusDays(adjustedDaysAhead.toLong())
 
+        // Calculate actual days that match active days pattern
+        val actualDuration = countActiveDaysBetween(
+            startDate = startDate,
+            endDate = endDate,
+            activeDays = currentState.activeDays
+        )
+
         // Update state with new date range and calculated duration
         updateState {
             it.copy(
                 endDate = endDate,
+                durationInDays = actualDuration
             )
         }
     }
@@ -208,10 +236,18 @@ class AddHabitDurationViewModel(
                 endDate
             }
 
+            // Calculate actual days that match active days pattern
+            val actualDuration = countActiveDaysBetween(
+                startDate = startDate,
+                endDate = effectiveEndDate,
+                activeDays = state.value.activeDays
+            )
+
             updateState {
                 it.copy(
                     startDate = startDate,
                     endDate = effectiveEndDate,
+                    durationInDays = actualDuration
                 )
             }
 
@@ -297,6 +333,7 @@ class AddHabitDurationViewModel(
                     selectedDays = currentState.activeDays,
                     startDate = calculatedStartedDate,
                     endDate = currentState.endDate,
+                    durationInDays = currentState.durationInDays,
                     reminderEnabled = currentState.reminderEnabled,
                     reminderTime = currentState.reminderTime
                 )
@@ -343,5 +380,31 @@ class AddHabitDurationViewModel(
             // Return first and last valid dates
             Pair(validDates.firstOrNull(), validDates.lastOrNull())
         }
+    }
+
+    /**
+     * Count the number of active days between start and end dates
+     * Only counts days whose day of week is in the activeDays list
+     */
+    private fun countActiveDaysBetween(
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        activeDays: List<DayOfWeek>
+    ): Int {
+        if (startDate == null || endDate == null || activeDays.isEmpty()) {
+            return 0
+        }
+
+        var count = 0
+        var currentDate = startDate
+
+        while (currentDate <= endDate) {
+            if (activeDays.contains(currentDate.dayOfWeek)) {
+                count++
+            }
+            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
+        }
+
+        return count
     }
 }

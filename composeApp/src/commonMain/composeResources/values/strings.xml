@@ -257,6 +257,11 @@
     <string name="apply">Apply</string>
     <string name="edit_date_range">Edit date range</string>
 
+    <!-- Habit Summary strings -->
+    <string name="start_date_display">Start date: %1$s</string>
+    <string name="end_date_display">End date: %1$s</string>
+    <string name="duration_display">Duration: %1$d days</string>
+
     <!-- Calendar Screen -->
     <string name="calendar_screen_title">Habit Calendar</string>
     <string name="calendar_statistics_title">Monthly Statistics</string>

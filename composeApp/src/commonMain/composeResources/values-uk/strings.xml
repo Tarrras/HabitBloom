@@ -400,4 +400,9 @@
     <string name="select_date">Виберіть дату</string>
     <string name="apply">Застосувати</string>
     <string name="edit_date_range">Редагувати діапазон дат</string>
+
+    <!-- Habit Summary strings -->
+    <string name="start_date_display">Дата початку: %s</string>
+    <string name="end_date_display">Дата завершення: %s</string>
+    <string name="duration_display">Тривалість: %d днів</string>
 </resources>
