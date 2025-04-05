@@ -3,12 +3,15 @@ package com.horizondev.habitbloom.core.designComponents.dialogs
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,7 +24,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.calendar.DateRangeSelectionCalendar
@@ -35,6 +37,7 @@ import habitbloom.composeapp.generated.resources.save_selection
 import habitbloom.composeapp.generated.resources.select_dates
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
@@ -49,6 +52,7 @@ import org.jetbrains.compose.resources.stringResource
  * @param onDismiss Callback when the dialog is dismissed
  * @param minDate The minimum selectable date (defaults to current date)
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddHabitDateRangePickerDialog(
     startDate: LocalDate?,
@@ -70,14 +74,14 @@ fun AddHabitDateRangePickerDialog(
     // Calculate number of days in the selection
     val selectedDaysCount = when {
         selection.startDate != null && selection.endDate != null -> {
-            calculateDaysBetween(selection.startDate!!, selection.endDate!!)
+            selection.startDate?.daysUntil(selection.endDate!!) ?: 0
         }
 
         selection.startDate != null -> 1
         else -> 0
     }
 
-    Dialog(onDismissRequest = onDismiss) {
+    BasicAlertDialog(onDismissRequest = onDismiss) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
@@ -127,35 +131,6 @@ fun AddHabitDateRangePickerDialog(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Action buttons at the top
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Cancel button
-                        BloomSmallActionButton(
-                            text = stringResource(Res.string.cancel),
-                            onClick = onDismiss,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Save button
-                        BloomPrimaryFilledButton(
-                            text = stringResource(Res.string.save_selection),
-                            onClick = {
-                                if (selection.startDate != null && selection.endDate != null) {
-                                    onDatesSelected(selection.startDate!!, selection.endDate!!)
-                                }
-                                onDismiss()
-                            },
-                            modifier = Modifier.fillMaxWidth(),
-                            enabled = selection.startDate != null && selection.endDate != null
-                        )
-                    }
                 }
 
                 // Calendar component (with its own internal scrolling)
@@ -173,7 +148,7 @@ fun AddHabitDateRangePickerDialog(
                             val endDate = newSelection.endDate
 
                             if (startDate != null && endDate != null) {
-                                val days = calculateDaysBetween(startDate, endDate)
+                                val days = startDate.daysUntil(endDate)
 
                                 // If exceeded max duration, limit the end date
                                 if (days > maxDurationDays) {
@@ -192,29 +167,39 @@ fun AddHabitDateRangePickerDialog(
                         maxDurationDays = maxDurationDays
                     )
                 }
+
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Action buttons at the top
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Cancel button
+                    BloomSmallActionButton(
+                        text = stringResource(Res.string.cancel),
+                        onClick = onDismiss,
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Save button
+                    BloomPrimaryFilledButton(
+                        contentPadding = PaddingValues(vertical = 4.dp, horizontal = 16.dp),
+                        text = stringResource(Res.string.save_selection),
+                        onClick = {
+                            if (selection.startDate != null && selection.endDate != null) {
+                                onDatesSelected(selection.startDate!!, selection.endDate!!)
+                            }
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        enabled = selection.startDate != null && selection.endDate != null
+                    )
+                }
             }
         }
     }
 }
-
-// Helper function to format dates consistently
-private fun formatDate(date: LocalDate): String {
-    return "${date.dayOfMonth}/${date.monthNumber}/${date.year}"
-}
-
-/**
- * Calculate days between two dates (inclusive)
- */
-private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
-    if (startDate > endDate) return 0
-
-    var current = startDate
-    var days = 1 // Start with 1 to include the start date
-
-    while (current < endDate) {
-        days++
-        current = current.plus(1, DateTimeUnit.DAY)
-    }
-
-    return days
-} 

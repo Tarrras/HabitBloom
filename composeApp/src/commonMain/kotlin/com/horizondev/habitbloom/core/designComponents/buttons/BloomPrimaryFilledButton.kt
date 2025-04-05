@@ -18,6 +18,7 @@ fun BloomPrimaryFilledButton(
     text: String,
     onClick: () -> Unit,
     enabled: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     colors: ButtonColors = ButtonDefaults.buttonColors(
         containerColor = BloomTheme.colors.primary,
         contentColor = BloomTheme.colors.textColor.white,
@@ -28,7 +29,7 @@ fun BloomPrimaryFilledButton(
         onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(8.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        contentPadding = contentPadding,
         border = null,
         colors = colors,
         enabled = enabled
