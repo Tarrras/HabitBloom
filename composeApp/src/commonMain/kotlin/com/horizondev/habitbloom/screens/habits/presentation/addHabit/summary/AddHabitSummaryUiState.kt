@@ -11,8 +11,8 @@ data class AddHabitSummaryUiState(
     val timeOfDay: TimeOfDay,
     val habitInfo: HabitInfo,
     val days: List<DayOfWeek>,
-    val duration: Int,
     val startDate: LocalDate,
+    val endDate: LocalDate,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime? = null,
     val isLoading: Boolean = false

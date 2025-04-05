@@ -13,7 +13,7 @@ data class AddHabitDurationUiState(
     val activeDays: List<DayOfWeek> = emptyList(),
     val startDate: LocalDate? = null,
     val endDate: LocalDate? = null,
-    val durationInDays: Int = 1, // Kept for backward compatibility, but now derived from date range
+    val durationInDays: Int = 1, // Display how many days the habit will take
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0), // Default reminder time set to 8:00 AM
     val maxHabitDurationDays: Int = 90, // Maximum allowed habit duration in days
@@ -29,8 +29,8 @@ sealed interface AddHabitDurationUiIntent {
 
     data class NavigateNext(
         val selectedDays: List<DayOfWeek>,
-        val durationInDays: Int,
         val startDate: LocalDate,
+        val endDate: LocalDate,
         val reminderEnabled: Boolean,
         val reminderTime: LocalTime
     ) : AddHabitDurationUiIntent

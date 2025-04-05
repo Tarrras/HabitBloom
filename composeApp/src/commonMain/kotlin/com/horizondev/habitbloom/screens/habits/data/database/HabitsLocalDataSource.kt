@@ -5,10 +5,8 @@ import com.horizondev.habitbloom.database.HabitBloomDatabase
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.toTimeString
-import com.horizondev.habitbloom.utils.calculateStartOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.mapToString
-import com.horizondev.habitbloom.utils.plusDays
 import database.UserHabitRecordsEntityQueries
 import database.UserHabitsEntityQueries
 import io.github.aakira.napier.Napier
@@ -109,8 +107,7 @@ class HabitsLocalDataSource(
 
     suspend fun updateUserHabit(
         userHabitId: Long,
-        allRepeats: Int,
-        repeatsToChangeRecords: Int,
+        endDate: LocalDate,
         days: List<DayOfWeek>,
         updateAfterDate: LocalDate = getCurrentDate()
     ) = withContext(Dispatchers.IO) {
@@ -123,7 +120,7 @@ class HabitsLocalDataSource(
 
             userHabitsQueries.updateUserHabitById(
                 startDate = existingHabit.startDate,
-                repeats = allRepeats.toLong(),
+                endDate = endDate.toString(),
                 daysOfWeek = days.mapToString(),
                 id = existingHabit.id
             )
@@ -146,8 +143,8 @@ class HabitsLocalDataSource(
 
             val habitDates = generateHabitDates(
                 startDate = updateAfterDate,
-                habitDays = days.sortedBy { it.ordinal },
-                repeats = repeatsToChangeRecords
+                endDate = endDate,
+                habitDays = days.sortedBy { it.ordinal }
             )
 
             habitDates.forEach { date ->
@@ -181,13 +178,22 @@ class HabitsLocalDataSource(
             userHabit.habitId
         ).executeAsOneOrNull()
 
+        val effectiveEndDate = userHabit.endDate
+
         val localHabitId = if (existingHabit != null) {
             val existingStartDate = LocalDate.parse(existingHabit.startDate)
+            val existingEndDate = existingHabit.endDate.let { LocalDate.parse(it) }
+            
             val mergedStartDay = when {
                 existingStartDate < userHabit.startDate -> existingStartDate
                 else -> userHabit.startDate
             }
-            val repeats = (existingHabit.repeats + userHabit.repeats.toLong()).coerceAtMost(12)
+
+            val mergedEndDate = when {
+                existingEndDate != null && existingEndDate > effectiveEndDate -> existingEndDate
+                else -> effectiveEndDate
+            }
+            
             val existingDays = existingHabit.daysOfWeek.split(",").map {
                 DayOfWeek.valueOf(it)
             }
@@ -198,7 +204,7 @@ class HabitsLocalDataSource(
 
             userHabitsQueries.updateUserHabitById(
                 startDate = mergedStartDay.toString(),
-                repeats = repeats,
+                endDate = mergedEndDate.toString(),
                 daysOfWeek = mergedDays,
                 id = existingHabit.id
             )
@@ -207,7 +213,7 @@ class HabitsLocalDataSource(
             userHabitsQueries.insertUserHabit(
                 habitId = userHabit.habitId,
                 startDate = userHabit.startDate.toString(),
-                repeats = userHabit.repeats.toLong(),
+                endDate = effectiveEndDate.toString(),
                 daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
                 timeOfDay = userHabit.timeOfDay.ordinal.toLong(),
                 reminderEnabled = if (userHabit.reminderEnabled) 1L else 0L,
@@ -222,59 +228,68 @@ class HabitsLocalDataSource(
         }
 
         // Generate habit records
-        return@withContext generateHabitRecords(localHabitId, userHabit)
+        return@withContext generateHabitRecords(localHabitId, userHabit, effectiveEndDate)
     }
 
-    private suspend fun generateHabitRecords(userHabitId: Long, userHabit: UserHabit) =
-        withContext(Dispatchers.IO) {
-            val existingHabitRecords =
-                userHabitRecordsQueries.selectUserHabitRecordsEntityByUserHabitId(
-                    userHabitId = userHabitId
-                ).executeAsList()
+    private suspend fun generateHabitRecords(
+        userHabitId: Long,
+        userHabit: UserHabit,
+        effectiveEndDate: LocalDate
+    ) = withContext(Dispatchers.IO) {
+        val existingHabitRecords =
+            userHabitRecordsQueries.selectUserHabitRecordsEntityByUserHabitId(
+                userHabitId = userHabitId
+            ).executeAsList()
 
-            val habitDates = generateHabitDates(
-                startDate = userHabit.startDate,
-                habitDays = userHabit.daysOfWeek.sortedBy { it.ordinal },
-                repeats = userHabit.repeats
-            )
+        val habitDates = generateHabitDates(
+            startDate = userHabit.startDate,
+            endDate = effectiveEndDate,
+            habitDays = userHabit.daysOfWeek.sortedBy { it.ordinal }
+        )
 
-            habitDates.forEach { date ->
-                val isRecordExistAlready = existingHabitRecords.any { it.date == date.toString() }
+        habitDates.forEach { date ->
+            val isRecordExistAlready = existingHabitRecords.any { it.date == date.toString() }
 
-                if (isRecordExistAlready.not()) {
-                    userHabitRecordsQueries.insertOrReplaceUserHabitRecord(
-                        userHabitId = userHabitId,
-                        date = date.toString(),
-                        isCompleted = 0  // Not completed by default
-                    )
-                }
+            if (isRecordExistAlready.not()) {
+                userHabitRecordsQueries.insertOrReplaceUserHabitRecord(
+                    userHabitId = userHabitId,
+                    date = date.toString(),
+                    isCompleted = 0  // Not completed by default
+                )
             }
-
-            return@withContext userHabitId
         }
 
+        return@withContext userHabitId
+    }
+
+    /**
+     * Generate habit dates based on a date range and selected days of the week
+     *
+     * @param startDate The start date of the habit range
+     * @param endDate The end date of the habit range
+     * @param habitDays The days of the week the habit should occur on
+     * @return List of dates that match the selected days within the date range
+     */
     private fun generateHabitDates(
         startDate: LocalDate,
-        habitDays: List<DayOfWeek>,
-        repeats: Int
+        endDate: LocalDate,
+        habitDays: List<DayOfWeek>
     ): List<LocalDate> {
         val habitDates = mutableListOf<LocalDate>()
 
-        val startOfFirstWeek = startDate.calculateStartOfWeek()
-
-        for (weekOffset in 0 until repeats) {
-            val startOfWeek = startOfFirstWeek.plus(
-                value = weekOffset.toLong(), unit = DateTimeUnit.WEEK
-            )
-
-            for (dayOfWeek in habitDays) {
-                val date = startOfWeek.plusDays(dayOfWeek.ordinal.toLong())
-                if (date >= startDate) {
-                    habitDates.add(date)
-                }
-            }
+        // Generate a sequence of dates from start to end
+        val dateRange = generateSequence(startDate) { date ->
+            val next = date.plus(1, DateTimeUnit.DAY)
+            if (next <= endDate) next else null
         }
 
+        // Filter to include only dates that match the selected days of week
+        dateRange.forEach { date ->
+            if (habitDays.contains(date.dayOfWeek)) {
+                habitDates.add(date)
+            }
+        }
+        
         return habitDates
     }
 

@@ -4,12 +4,11 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVis
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
-import kotlinx.datetime.Clock
+import com.horizondev.habitbloom.utils.calculateEndOfWeek
+import com.horizondev.habitbloom.utils.getCurrentDate
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 
 /**
  * ViewModel for the Add Habit flow that maintains state across the different steps.
@@ -34,8 +33,8 @@ class AddHabitFlowViewModel : BloomViewModel<AddHabitFlowState, AddHabitFlowUiIn
             is AddHabitFlowUiEvent.UpdateDuration -> {
                 updateState {
                     it.copy(
-                        durationInDays = event.durationInDays,
                         startDate = event.startDate,
+                        endDate = event.endDate,
                         selectedDays = event.selectedDays,
                         reminderEnabled = event.reminderEnabled,
                         reminderTime = event.reminderTime
@@ -50,7 +49,6 @@ class AddHabitFlowViewModel : BloomViewModel<AddHabitFlowState, AddHabitFlowUiIn
             is AddHabitFlowUiEvent.ShowSnackbar -> {
                 emitUiIntent(AddHabitFlowUiIntent.ShowShackbar(visuals = event.visuals))
             }
-
         }
     }
 }
@@ -62,8 +60,8 @@ sealed interface AddHabitFlowUiEvent {
     data class UpdateTimeOfDay(val timeOfDay: TimeOfDay) : AddHabitFlowUiEvent
     data class UpdateHabit(val habitInfo: HabitInfo) : AddHabitFlowUiEvent
     data class UpdateDuration(
-        val durationInDays: Int,
         val startDate: LocalDate,
+        val endDate: LocalDate,
         val selectedDays: List<DayOfWeek>,
         val reminderEnabled: Boolean,
         val reminderTime: LocalTime
@@ -88,9 +86,8 @@ sealed interface AddHabitFlowUiIntent {
 data class AddHabitFlowState(
     val timeOfDay: TimeOfDay? = null,
     val habitInfo: HabitInfo? = null,
-    val durationInDays: Int = 21,
-    val startDate: LocalDate = Clock.System.now()
-        .toLocalDateTime(TimeZone.currentSystemDefault()).date,
+    val startDate: LocalDate = getCurrentDate(),
+    val endDate: LocalDate = getCurrentDate().calculateEndOfWeek(), // Default end date is the end of current week
     val isSubmitting: Boolean = false,
     val selectedDays: List<DayOfWeek> = DayOfWeek.entries,
     val reminderEnabled: Boolean = false,

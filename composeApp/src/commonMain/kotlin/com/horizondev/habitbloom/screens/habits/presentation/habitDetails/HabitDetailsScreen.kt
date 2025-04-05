@@ -1,10 +1,10 @@
 package com.horizondev.habitbloom.screens.habits.presentation.habitDetails
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -35,24 +35,22 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
-import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallFilledActionButton
 import com.horizondev.habitbloom.core.designComponents.calendar.CalendarDayStatusColors
 import com.horizondev.habitbloom.core.designComponents.calendar.CalendarTitle
 import com.horizondev.habitbloom.core.designComponents.calendar.Day
 import com.horizondev.habitbloom.core.designComponents.calendar.HabitDayState
 import com.horizondev.habitbloom.core.designComponents.calendar.MonthHeader
-import com.horizondev.habitbloom.core.designComponents.charts.BloomProgressIndicator
+import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
+import com.horizondev.habitbloom.core.designComponents.dialogs.AddHabitDateRangePickerDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
-import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.pickers.formatTime
@@ -70,37 +68,39 @@ import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.active_days
 import habitbloom.composeapp.generated.resources.add
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.clear
 import habitbloom.composeapp.generated.resources.clear_history_description
 import habitbloom.composeapp.generated.resources.clear_history_question
 import habitbloom.composeapp.generated.resources.completed_repeats
+import habitbloom.composeapp.generated.resources.date_range
 import habitbloom.composeapp.generated.resources.delete
 import habitbloom.composeapp.generated.resources.delete_habit_description
 import habitbloom.composeapp.generated.resources.delete_habit_question
+import habitbloom.composeapp.generated.resources.duration_and_days
 import habitbloom.composeapp.generated.resources.edit
+import habitbloom.composeapp.generated.resources.edit_dates
 import habitbloom.composeapp.generated.resources.enable_reminder
-import habitbloom.composeapp.generated.resources.habit_active_days
-import habitbloom.composeapp.generated.resources.habit_repeats
 import habitbloom.composeapp.generated.resources.habit_schedule
 import habitbloom.composeapp.generated.resources.ic_warning_filled
 import habitbloom.composeapp.generated.resources.no_reminder_set
 import habitbloom.composeapp.generated.resources.reminder_set_for
 import habitbloom.composeapp.generated.resources.reminder_settings
-import habitbloom.composeapp.generated.resources.repeats
 import habitbloom.composeapp.generated.resources.save
+import habitbloom.composeapp.generated.resources.save_changes
 import habitbloom.composeapp.generated.resources.select_reminder_time
-import habitbloom.composeapp.generated.resources.selected_repeats
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
-import kotlin.math.roundToInt
 
 @Composable
 fun HabitDetailsScreen(
@@ -201,31 +201,32 @@ fun HabitDetailsScreenContent(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        UserHabitDurationCard(
+                        HabitDurationEditor(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp),
-                            isEditMode = uiState.habitDurationEditMode,
-                            days = uiState.habitDays,
-                            repeats = uiState.habitRepeats,
+                            editMode = uiState.habitDurationEditMode,
+                            startDate = uiState.startDate,
+                            endDate = uiState.endDate,
+                            activeDays = uiState.habitDays,
                             completedRepeats = uiState.habitInfo.completedRepeats,
-                            dayStateChanged = { dayOfWeek, isActive ->
-                                handleUiEvent(
-                                    HabitScreenDetailsUiEvent.DayStateChanged(
-                                        dayOfWeek = dayOfWeek,
-                                        isActive = isActive
-                                    )
-                                )
-                            },
                             onEditModeChanged = {
                                 handleUiEvent(HabitScreenDetailsUiEvent.DurationEditModeChanged)
                             },
-                            onDurationChanged = {
-                                handleUiEvent(HabitScreenDetailsUiEvent.DurationChanged(it))
+                            onDayStateChanged = { dayOfWeek, isActive ->
+                                handleUiEvent(
+                                    HabitScreenDetailsUiEvent.DayStateChanged(
+                                        dayOfWeek, isActive
+                                    )
+                                )
+                            },
+                            onDateRangeEditorRequest = {
+                                handleUiEvent(HabitScreenDetailsUiEvent.ShowDatePickerDialog)
                             },
                             onUpdateHabitDuration = {
                                 handleUiEvent(HabitScreenDetailsUiEvent.UpdateHabitDuration)
-                            }
+                            },
+                            updateButtonEnabled = uiState.durationUpdateButtonEnabled
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -253,61 +254,72 @@ fun HabitDetailsScreenContent(
                         Spacer(modifier = Modifier.height(32.dp))
                         Spacer(modifier = Modifier.navigationBarsPadding())
                     }
-                }
-            }
-            if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    BloomLoadingAnimation(
-                        modifier = Modifier.align(Alignment.Center).size(150.dp),
+
+                    // Date Range Picker Dialog
+                    DateRangePickerDialog(
+                        isVisible = uiState.showDatePickerDialog,
+                        startDate = uiState.startDate,
+                        endDate = uiState.endDate,
+                        onDismiss = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DismissDatePickerDialog)
+                        },
+                        onDateRangeSelected = { startDate, endDate ->
+                            handleUiEvent(
+                                HabitScreenDetailsUiEvent.DateRangeChanged(
+                                    startDate,
+                                    endDate
+                                )
+                            )
+                        }
+                    )
+
+                    // Delete Habit Confirmation Dialog
+                    DeleteHabitDialog(
+                        showDeleteDialog = uiState.showDeleteDialog,
+                        onDismiss = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DismissHabitDeletion)
+                        },
+                        onDelete = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DeleteHabit)
+                        }
+                    )
+
+                    // Clear History Confirmation Dialog
+                    ClearHistoryDialog(
+                        showClearDialog = uiState.showClearHistoryDialog,
+                        onDismiss = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DismissClearHistory)
+                        },
+                        onClear = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.ClearHistory)
+                        }
                     )
                 }
+
+                ReminderDialog(
+                    showDialog = uiState.showReminderDialog,
+                    reminderEnabled = uiState.reminderEnabled,
+                    reminderTime = uiState.reminderTime,
+                    onDismiss = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.DismissReminderDialog)
+                    },
+                    onReminderEnabledChanged = { enabled ->
+                        handleUiEvent(HabitScreenDetailsUiEvent.ReminderEnabledChanged(enabled))
+                    },
+                    onReminderTimeChanged = { time ->
+                        handleUiEvent(HabitScreenDetailsUiEvent.ReminderTimeChanged(time))
+                    },
+                    onSave = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.SaveReminderSettings)
+                    }
+                )
+            } else {
+                BloomLoadingAnimation(
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
-
-
-    DeleteHabitDialog(
-        showDeleteDialog = uiState.showDeleteDialog,
-        onDismiss = {
-            handleUiEvent(HabitScreenDetailsUiEvent.DismissHabitDeletion)
-        },
-        onDelete = {
-            handleUiEvent(HabitScreenDetailsUiEvent.DeleteHabit)
-        }
-    )
-
-    ClearHistoryDialog(
-        showDialog = uiState.showClearHistoryDialog,
-        onDismiss = {
-            handleUiEvent(HabitScreenDetailsUiEvent.DismissClearHistory)
-        },
-        onConfirm = {
-            handleUiEvent(HabitScreenDetailsUiEvent.ClearHistory)
-        }
-    )
-
-    ReminderDialog(
-        showDialog = uiState.showReminderDialog,
-        reminderEnabled = uiState.reminderEnabled,
-        reminderTime = uiState.reminderTime,
-        onDismiss = {
-            handleUiEvent(HabitScreenDetailsUiEvent.DismissReminderDialog)
-        },
-        onReminderEnabledChanged = { enabled ->
-            handleUiEvent(HabitScreenDetailsUiEvent.ReminderEnabledChanged(enabled))
-        },
-        onReminderTimeChanged = { time ->
-            handleUiEvent(HabitScreenDetailsUiEvent.ReminderTimeChanged(time))
-        },
-        onSave = {
-            handleUiEvent(HabitScreenDetailsUiEvent.SaveReminderSettings)
-        }
-    )
 }
 
 
@@ -343,152 +355,167 @@ private fun UserHabitFullInfoCard(
 }
 
 @Composable
-private fun UserHabitDurationCard(
+fun HabitDurationEditor(
     modifier: Modifier = Modifier,
-    repeats: Int,
+    editMode: Boolean,
+    startDate: LocalDate?,
+    endDate: LocalDate?,
+    activeDays: List<DayOfWeek>,
     completedRepeats: Int,
-    days: List<DayOfWeek>,
-    isEditMode: Boolean,
-    dayStateChanged: (DayOfWeek, Boolean) -> Unit,
-    onDurationChanged: (Int) -> Unit,
     onEditModeChanged: () -> Unit,
-    onUpdateHabitDuration: () -> Unit
+    onDayStateChanged: (DayOfWeek, Boolean) -> Unit,
+    onDateRangeEditorRequest: () -> Unit,
+    onUpdateHabitDuration: () -> Unit,
+    updateButtonEnabled: Boolean
 ) {
-    val completedRepeatsRate = (completedRepeats.toFloat() / repeats.toFloat())
+    val editButtonText = if (editMode) {
+        stringResource(Res.string.cancel)
+    } else {
+        stringResource(Res.string.edit)
+    }
 
-    BloomSurface(
-        modifier = modifier
+    BloomCard(
+        modifier = modifier,
+        onClick = {}
     ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Text(
-                text = stringResource(Res.string.habit_active_days),
-                style = BloomTheme.typography.heading,
-                color = BloomTheme.colors.textColor.primary,
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            DayPicker(
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-                activeDays = days,
-                dayStateChanged = dayStateChanged,
-                enabled = isEditMode
-            )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(Res.string.duration_and_days),
+                    style = BloomTheme.typography.heading,
+                    color = BloomTheme.colors.textColor.primary
+                )
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(Res.string.habit_repeats),
-                style = BloomTheme.typography.heading,
-                color = BloomTheme.colors.textColor.primary,
-            )
+                BloomSmallActionButton(
+                    text = editButtonText,
+                    onClick = onEditModeChanged
+                )
+            }
 
-            AnimatedContent(isEditMode) { isEditModeState ->
-                if (isEditModeState) {
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        if (completedRepeats <= 10) {
-                            BloomSlider(
-                                value = repeats.toFloat(),
-                                onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
-                                valueRange = (completedRepeats.toFloat() + 1)..12f, // Set the range from 1 to 12
-                                steps = 11, // 11 steps because we start from 1
-                                enabled = true
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = pluralStringResource(
-                                resource = Res.plurals.selected_repeats,
-                                quantity = repeats,
-                                repeats
-                            ),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.primary,
-                            textDecoration = TextDecoration.Underline,
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = pluralStringResource(
-                                resource = Res.plurals.completed_repeats,
-                                quantity = completedRepeats,
-                                completedRepeats
-                            ),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.primary,
-                            textDecoration = TextDecoration.Underline,
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        BloomSmallFilledActionButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(Res.string.save),
-                            onClick = {
-                                onUpdateHabitDuration()
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        BloomSmallActionButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(Res.string.cancel),
-                            onClick = {
-                                onEditModeChanged()
-                            }
-                        )
-                    }
-                } else {
+            // Date Range Section (only editable in edit mode)
+            if (startDate != null && endDate != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                        modifier = Modifier.weight(1f)
                     ) {
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        Box(Modifier.fillMaxWidth()) {
-                            BloomProgressIndicator(
-                                modifier = Modifier.align(Alignment.Center),
-                                percentage = completedRepeatsRate,
-                                radius = 24.dp
-                            )
-
-                            Column(
-                                modifier = Modifier.align(Alignment.Center),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "$completedRepeats/$repeats",
-                                    style = BloomTheme.typography.heading,
-                                    color = BloomTheme.colors.textColor.primary,
-                                )
-                                Spacer(modifier = Modifier.height(2.dp))
-
-                                Text(
-                                    text = stringResource(Res.string.repeats).lowercase(),
-                                    style = BloomTheme.typography.small,
-                                    color = BloomTheme.colors.textColor.secondary,
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-
-
-                        BloomSmallActionButton(
-                            modifier = Modifier.fillMaxWidth(),
-                            text = stringResource(Res.string.edit),
-                            onClick = {
-                                onEditModeChanged()
-                            }
+                        Text(
+                            text = stringResource(Res.string.date_range),
+                            style = BloomTheme.typography.body,
+                            color = BloomTheme.colors.textColor.secondary
                         )
 
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "$startDate - $endDate",
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.primary
+                            )
+                        }
+                    }
+
+                    if (editMode) {
+                        BloomSmallActionButton(
+                            text = stringResource(Res.string.edit_dates),
+                            onClick = onDateRangeEditorRequest
+                        )
                     }
                 }
+            }
+
+            // Active Days Section
+            Column(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(Res.string.active_days),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                DayPicker(
+                    activeDays = activeDays,
+                    dayStateChanged = { day, selected ->
+                        onDayStateChanged(day, selected)
+                    },
+                    enabled = editMode
+                )
+            }
+
+            // Completed repeats display (always shown)
+            Text(
+                text = pluralStringResource(
+                    Res.plurals.completed_repeats,
+                    completedRepeats,
+                    completedRepeats
+                ),
+                style = BloomTheme.typography.body,
+                color = BloomTheme.colors.textColor.secondary
+            )
+
+            // Update Button (only shown in edit mode)
+            if (editMode) {
+                BloomPrimaryFilledButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = updateButtonEnabled,
+                    text = stringResource(Res.string.save_changes),
+                    onClick = onUpdateHabitDuration
+                )
             }
         }
     }
 }
 
+// Helper to capitalize the first letter of a string
+fun String.capitalize(): String {
+    return this.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+}
+
+// Add the DateRangePickerDialog component
+@Composable
+fun DateRangePickerDialog(
+    isVisible: Boolean,
+    startDate: LocalDate?,
+    endDate: LocalDate?,
+    onDismiss: () -> Unit,
+    onDateRangeSelected: (startDate: LocalDate, endDate: LocalDate) -> Unit
+) {
+    if (!isVisible) return
+
+    // Use the existing AddHabitDateRangePickerDialog component
+    val minimumStartDate = getCurrentDate()
+    val initialStartDate = startDate ?: minimumStartDate
+    val initialEndDate = endDate ?: initialStartDate.plus(30, kotlinx.datetime.DateTimeUnit.DAY)
+
+    AddHabitDateRangePickerDialog(
+        startDate = initialStartDate,
+        endDate = initialEndDate,
+        maxDurationDays = 90, // Maximum 3 months
+        onDatesSelected = { newStartDate, newEndDate ->
+            if (newEndDate != null) {
+                onDateRangeSelected(newStartDate, newEndDate)
+            }
+        },
+        onDismiss = onDismiss,
+        minDate = minimumStartDate
+    )
+}
 
 @Composable
 private fun UserHabitScheduleCard(
@@ -635,12 +662,12 @@ fun DeleteHabitDialog(
 @Composable
 fun ClearHistoryDialog(
     modifier: Modifier = Modifier,
-    showDialog: Boolean,
+    showClearDialog: Boolean,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit
+    onClear: () -> Unit
 ) {
     BloomAlertDialog(
-        isShown = showDialog,
+        isShown = showClearDialog,
         onDismiss = onDismiss,
         modifier = modifier
     ) {
@@ -673,7 +700,7 @@ fun ClearHistoryDialog(
             BloomPrimaryFilledButton(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(Res.string.clear),
-                onClick = onConfirm,
+                onClick = onClear,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = BloomTheme.colors.error,
                     contentColor = BloomTheme.colors.textColor.white

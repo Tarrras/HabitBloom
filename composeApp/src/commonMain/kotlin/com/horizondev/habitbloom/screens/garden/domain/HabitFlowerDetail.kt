@@ -17,7 +17,6 @@ data class HabitFlowerDetail(
     val currentStreak: Int,
     val longestStreak: Int,
     val startDate: LocalDate,
-    val repeats: Int,
     val reminderTime: LocalTime?,
     val lastSevenDaysCompletions: List<DailyCompletion>,
     val isCompletedToday: Boolean,

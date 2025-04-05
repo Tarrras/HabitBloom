@@ -20,7 +20,7 @@ fun UserHabitsEntity.toDomainModel() = UserHabit(
     id = id,
     habitId = habitId,
     startDate = LocalDate.parse(startDate),
-    repeats = repeats.toInt(),
+    endDate = LocalDate.parse(endDate),
     daysOfWeek = daysOfWeek.split(",").map { DayOfWeek.valueOf(it) },
     timeOfDay = TimeOfDay.entries[timeOfDay.toInt()],
     reminderEnabled = reminderEnabled == 1L,

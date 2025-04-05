@@ -39,10 +39,8 @@ import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.complete
 import habitbloom.composeapp.generated.resources.do_you_want_add_this_habit
 import habitbloom.composeapp.generated.resources.reminder_set_for
-import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.start_date
 import kotlinx.datetime.LocalTime
-import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -189,17 +187,6 @@ private fun SummaryHabitCard(
 
             Text(
                 text = stringResource(Res.string.start_date, uiState.startDate),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary,
-                textDecoration = TextDecoration.Underline
-            )
-
-            Text(
-                text = pluralStringResource(
-                    resource = Res.plurals.selected_repeats,
-                    quantity = uiState.duration,
-                    uiState.duration
-                ),
                 style = BloomTheme.typography.body,
                 color = BloomTheme.colors.textColor.primary,
                 textDecoration = TextDecoration.Underline

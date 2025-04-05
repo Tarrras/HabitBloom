@@ -22,8 +22,8 @@ class AddHabitSummaryViewModel(
         timeOfDay = addHabitState.timeOfDay ?: TimeOfDay.Morning,
         habitInfo = addHabitState.habitInfo ?: throw IllegalStateException("Habit info is null"),
         days = addHabitState.selectedDays,
-        duration = addHabitState.durationInDays,
         startDate = addHabitState.startDate,
+        endDate = addHabitState.endDate,
         reminderEnabled = addHabitState.reminderEnabled,
         reminderTime = addHabitState.reminderTime
     )
@@ -57,8 +57,9 @@ class AddHabitSummaryViewModel(
             runCatching {
                 val result = repository.addUserHabit(
                     habitInfo = info,
-                    durationInDays = addHabitState.durationInDays,
                     startDate = addHabitState.startDate,
+                    endDate = addHabitState.endDate,
+                    selectedDays = addHabitState.selectedDays,
                     reminderEnabled = currentState.reminderEnabled,
                     reminderTime = currentState.reminderTime
                 )

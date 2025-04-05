@@ -48,10 +48,11 @@ class HabitDetailsViewModel(
             it.copy(
                 habitInfo = userHabitFullInfo,
                 isLoading = false,
-                habitRepeats = userHabitFullInfo?.repeats ?: 0,
                 habitDays = userHabitFullInfo?.days ?: emptyList(),
+                startDate = userHabitFullInfo?.startDate,
+                endDate = userHabitFullInfo?.endDate ?: userHabitFullInfo?.startDate,
                 habitDurationEditMode = false,
-                habitDurationEditEnabled = (userHabitFullInfo?.completedRepeats ?: 12) < 12,
+                habitDurationEditEnabled = true,
                 reminderEnabled = userHabitFullInfo?.reminderEnabled ?: false,
                 reminderTime = userHabitFullInfo?.reminderTime ?: LocalTime(8, 0),
                 progressUiState = userHabitFullInfo?.let { info -> calculateHabitProgress(info) }
@@ -87,18 +88,13 @@ class HabitDetailsViewModel(
                 }
             }
 
-            is HabitScreenDetailsUiEvent.DurationChanged -> updateState {
-                it.copy(
-                    habitRepeats = event.duration,
-                )
-            }
-
             HabitScreenDetailsUiEvent.DurationEditModeChanged -> {
                 updateState {
                     it.copy(
                         habitDurationEditMode = it.habitDurationEditMode.not(),
-                        habitRepeats = it.habitInfo?.repeats ?: 0,
-                        habitDays = it.habitInfo?.days ?: emptyList()
+                        habitDays = it.habitInfo?.days ?: emptyList(),
+                        startDate = it.habitInfo?.startDate,
+                        endDate = it.habitInfo?.endDate ?: it.habitInfo?.startDate
                     )
                 }
             }
@@ -108,11 +104,13 @@ class HabitDetailsViewModel(
                     val uiState = state.value
 
                     val habitOriginalInfo = uiState.habitInfo ?: return@launch
-                    val habitNewRepeats = uiState.habitRepeats
                     val habitNewDays = uiState.habitDays
+                    val newStartDate = uiState.startDate ?: return@launch
+                    val newEndDate = uiState.endDate ?: return@launch
 
-                    if (habitNewRepeats == habitOriginalInfo.repeats
-                        && habitNewDays == habitOriginalInfo.days
+                    if (newStartDate == habitOriginalInfo.startDate &&
+                        newEndDate == habitOriginalInfo.endDate &&
+                        habitNewDays == habitOriginalInfo.days
                     ) {
                         updateState { it.copy(habitDurationEditMode = false) }
                         return@launch
@@ -137,17 +135,10 @@ class HabitDetailsViewModel(
                         return@launch
                     }
 
-                    val repeatsToChangeRecords =
-                        (habitNewRepeats - habitOriginalInfo.completedRepeats).coerceIn(
-                            minimumValue = 1,
-                            maximumValue = 12
-                        )
-
                     repository.updateExistingHabit(
                         userHabitId = uiState.habitInfo.userHabitId,
-                        allRepeats = habitNewRepeats,
-                        days = habitNewDays,
-                        repeatsToChangeRecords = repeatsToChangeRecords
+                        endDate = newEndDate,
+                        days = habitNewDays
                     ).onSuccess {
                         emitUiIntent(
                             HabitScreenDetailsUiIntent.ShowSnackbar(
@@ -328,6 +319,26 @@ class HabitDetailsViewModel(
                             )
                         )
                     }
+                }
+            }
+
+            // Date range dialog events
+            HabitScreenDetailsUiEvent.ShowDatePickerDialog -> {
+                updateState { it.copy(showDatePickerDialog = true) }
+            }
+
+            HabitScreenDetailsUiEvent.DismissDatePickerDialog -> {
+                updateState { it.copy(showDatePickerDialog = false) }
+            }
+
+            is HabitScreenDetailsUiEvent.DateRangeChanged -> {
+                updateState {
+                    it.copy(
+                        startDate = event.startDate,
+                        endDate = event.endDate,
+                        showDatePickerDialog = false,
+                        durationUpdateButtonEnabled = true
+                    )
                 }
             }
         }

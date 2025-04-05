@@ -139,36 +139,23 @@ class HabitsRepository(
         }.flowOn(Dispatchers.IO).distinctUntilChanged()
     }
 
-    suspend fun addHabit(
-        habitInfo: HabitInfo,
-        startDate: LocalDate,
-        repeats: Int,
-        days: List<DayOfWeek>
-    ): Result<Boolean> {
-        val userHabit = UserHabit(
-            id = 0L,
-            habitId = habitInfo.id,
-            startDate = startDate,
-            repeats = repeats,
-            daysOfWeek = days,
-            timeOfDay = habitInfo.timeOfDay
-        )
-        return runCatching {
-            localDataSource.insertUserHabit(userHabit)
-        }.map { true }
-    }
-
+    /**
+     * Updates an existing habit with new duration and days.
+     *
+     * @param userHabitId The ID of the user habit to update
+     * @param endDate The new end date for the habit
+     * @param days The days of the week the habit should occur on
+     * @return Result containing success (true) or failure with error
+     */
     suspend fun updateExistingHabit(
         userHabitId: Long,
-        allRepeats: Int,
-        repeatsToChangeRecords: Int,
+        endDate: LocalDate,
         days: List<DayOfWeek>
     ): Result<Boolean> {
         return runCatching {
             localDataSource.updateUserHabit(
                 userHabitId = userHabitId,
-                allRepeats = allRepeats,
-                repeatsToChangeRecords = repeatsToChangeRecords,
+                endDate = endDate,
                 days = days
             )
         }.map { true }
@@ -313,13 +300,13 @@ class HabitsRepository(
                 records = localHabitRecords,
                 startDate = userHabitInfo.startDate,
                 days = userHabitInfo.daysOfWeek,
-                repeats = userHabitInfo.repeats,
                 completedRepeats = calculateCompletedRepeats(
                     dayOfCreation = userHabitInfo.startDate,
                     records = localHabitRecords
                 ),
                 reminderTime = userHabitInfo.reminderTime,
-                reminderEnabled = userHabitInfo.reminderEnabled
+                reminderEnabled = userHabitInfo.reminderEnabled,
+                endDate = userHabitInfo.endDate
             )
         }.flowOn(Dispatchers.IO)
     }
@@ -427,21 +414,21 @@ class HabitsRepository(
     }
 
     /**
-     * Adds a habit for the user with the specified duration and start date.
+     * Adds a new habit with the specified details.
      *
-     * @param habitInfo The information about the habit to add
-     * @param durationInDays The number of days the habit should run for
-     * @param startDate The date when the habit should start
-     * @param selectedDays The specific days of the week for the habit (optional)
-     * @param reminderEnabled Whether a reminder should be set for this habit
-     * @param reminderTime The time at which to send the reminder (if enabled)
-     * @return Result containing the habit ID on success or failure with error
+     * @param habitInfo The habit information
+     * @param startDate The start date for the habit
+     * @param endDate The end date for the habit
+     * @param selectedDays The days of the week the habit should occur on
+     * @param reminderEnabled Whether reminder notifications are enabled
+     * @param reminderTime The time to send reminder notifications
+     * @return Result containing the ID of the newly created habit or an error
      */
     suspend fun addUserHabit(
         habitInfo: HabitInfo,
-        durationInDays: Int,
         startDate: LocalDate,
-        selectedDays: List<DayOfWeek> = DayOfWeek.entries,
+        endDate: LocalDate,
+        selectedDays: List<DayOfWeek> = emptyList(),
         reminderEnabled: Boolean = false,
         reminderTime: LocalTime? = null
     ): Result<Long> {
@@ -455,7 +442,7 @@ class HabitsRepository(
                     id = 0L,
                     habitId = habitInfo.id,
                     startDate = startDate,
-                    repeats = durationInDays,
+                    endDate = endDate,
                     daysOfWeek = days,
                     timeOfDay = habitInfo.timeOfDay,
                     reminderEnabled = reminderEnabled,

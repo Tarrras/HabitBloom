@@ -246,6 +246,17 @@
     <string name="notifications_required">Notifications permission is required for reminders. Please grant permission in app settings.</string>
     <string name="failed_to_update_reminder_settings">Failed to update reminder settings</string>
 
+    <!-- Habit Duration Editor strings -->
+    <string name="duration_and_days">Duration and Days</string>
+    <string name="date_range">Date Range</string>
+    <string name="active_days">Active Days</string>
+    <string name="edit_dates">Edit Dates</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="select_date_range">Select Date Range</string>
+    <string name="select_date">Select Date</string>
+    <string name="apply">Apply</string>
+    <string name="edit_date_range">Edit date range</string>
+
     <!-- Calendar Screen -->
     <string name="calendar_screen_title">Habit Calendar</string>
     <string name="calendar_statistics_title">Monthly Statistics</string>

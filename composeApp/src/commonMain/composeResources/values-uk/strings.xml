@@ -389,4 +389,15 @@
         <item quantity="many">%1$d днів</item>
         <item quantity="other">%1$d днів</item>
     </plurals>
+
+    <!-- Habit Duration Editor strings -->
+    <string name="duration_and_days">Тривалість та дні</string>
+    <string name="date_range">Діапазон дат</string>
+    <string name="active_days">Активні дні</string>
+    <string name="edit_dates">Редагувати дати</string>
+    <string name="save_changes">Зберегти зміни</string>
+    <string name="select_date_range">Виберіть діапазон дат</string>
+    <string name="select_date">Виберіть дату</string>
+    <string name="apply">Застосувати</string>
+    <string name="edit_date_range">Редагувати діапазон дат</string>
 </resources>

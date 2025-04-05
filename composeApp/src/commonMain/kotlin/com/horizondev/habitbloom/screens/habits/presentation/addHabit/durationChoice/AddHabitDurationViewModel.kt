@@ -296,26 +296,12 @@ class AddHabitDurationViewModel(
                 AddHabitDurationUiIntent.NavigateNext(
                     selectedDays = currentState.activeDays,
                     startDate = calculatedStartedDate,
+                    endDate = currentState.endDate,
                     reminderEnabled = currentState.reminderEnabled,
-                    reminderTime = currentState.reminderTime,
-                    durationInDays = calculateDurationValue(
-                        currentState.startDate,
-                        currentState.endDate
-                    )
+                    reminderTime = currentState.reminderTime
                 )
             )
         }
-    }
-
-    /**
-     * Calculate the equivalent duration value (in repeats) from a date range
-     * This is for backward compatibility with the rest of the codebase
-     */
-    private fun calculateDurationValue(startDate: LocalDate, endDate: LocalDate): Int {
-        val daysBetween = calculateDaysBetween(startDate, endDate)
-        // Each repeat is approximately one week (7 days)
-        // We calculate repeats by dividing by 7 and rounding up
-        return ((daysBetween + 6) / 7).coerceIn(1, 12)
     }
 
     /**
