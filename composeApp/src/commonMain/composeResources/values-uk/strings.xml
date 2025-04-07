@@ -66,10 +66,16 @@
     <string name="select_days_for_habit">Виберіть дні для звички</string>
     <string name="repeats">Повторення</string>
     <string name="select_repeats">Виберіть повторення</string>
-    <string name="start_date">Дата початку: %s</string>
+    <string name="start_date">Дата початку: %1$s</string>
     <string name="start_date_colon">Дата початку:</string>
     <string name="end_date_colon">Дата завершення:</string>
 
+    <plurals name="days_plural">
+        <item quantity="one">%1$d день</item>
+        <item quantity="few">%1$d дні</item>
+        <item quantity="many">%1$d днів</item>
+        <item quantity="other">%1$d дня</item>
+    </plurals>
     <plurals name="selected_repeats">
         <item quantity="one">Тривалість: %1$d повторення</item>
         <item quantity="few">Тривалість: %1$d повторення</item>
@@ -377,7 +383,7 @@
     <string name="select_duration_for_habit">Виберіть тривалість для звички</string>
     <string name="tap_to_edit_dates">Торкніться, щоб змінити дати</string>
 
-    <string name="repeats_count">Кількість повторень: %d</string>
+    <string name="repeats_count">Кількість повторень: %1$d</string>
 
     <string name="duration_too_long">Тривалість звички обмежена 90 днями</string>
 
@@ -402,7 +408,7 @@
     <string name="edit_date_range">Редагувати діапазон дат</string>
 
     <!-- Habit Summary strings -->
-    <string name="start_date_display">Дата початку: %s</string>
-    <string name="end_date_display">Дата завершення: %s</string>
-    <string name="duration_display">Тривалість: %d днів</string>
+    <string name="start_date_display">Дата початку: %1$s</string>
+    <string name="end_date_display">Дата завершення: %1$s</string>
+    <string name="duration_display">Тривалість: %1$d днів</string>
 </resources>

@@ -16,7 +16,6 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.screens.settings.data.ProfileRemoteDataSource
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
-import com.horizondev.habitbloom.utils.calculateCompletedRepeats
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getNearestDateForNotification
 import com.russhwolf.settings.ObservableSettings
@@ -300,10 +299,6 @@ class HabitsRepository(
                 records = localHabitRecords,
                 startDate = userHabitInfo.startDate,
                 days = userHabitInfo.daysOfWeek,
-                completedRepeats = calculateCompletedRepeats(
-                    dayOfCreation = userHabitInfo.startDate,
-                    records = localHabitRecords
-                ),
                 reminderTime = userHabitInfo.reminderTime,
                 reminderEnabled = userHabitInfo.reminderEnabled,
                 endDate = userHabitInfo.endDate

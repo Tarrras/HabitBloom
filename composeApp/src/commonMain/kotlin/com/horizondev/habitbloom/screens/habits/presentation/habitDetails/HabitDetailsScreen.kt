@@ -74,7 +74,6 @@ import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.clear
 import habitbloom.composeapp.generated.resources.clear_history_description
 import habitbloom.composeapp.generated.resources.clear_history_question
-import habitbloom.composeapp.generated.resources.completed_repeats
 import habitbloom.composeapp.generated.resources.date_range
 import habitbloom.composeapp.generated.resources.delete
 import habitbloom.composeapp.generated.resources.delete_habit_description
@@ -97,7 +96,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.plus
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -209,7 +207,6 @@ fun HabitDetailsScreenContent(
                             startDate = uiState.startDate,
                             endDate = uiState.endDate,
                             activeDays = uiState.habitDays,
-                            completedRepeats = uiState.habitInfo.completedRepeats,
                             onEditModeChanged = {
                                 handleUiEvent(HabitScreenDetailsUiEvent.DurationEditModeChanged)
                             },
@@ -361,7 +358,6 @@ fun HabitDurationEditor(
     startDate: LocalDate?,
     endDate: LocalDate?,
     activeDays: List<DayOfWeek>,
-    completedRepeats: Int,
     onEditModeChanged: () -> Unit,
     onDayStateChanged: (DayOfWeek, Boolean) -> Unit,
     onDateRangeEditorRequest: () -> Unit,
@@ -457,17 +453,6 @@ fun HabitDurationEditor(
                     enabled = editMode
                 )
             }
-
-            // Completed repeats display (always shown)
-            Text(
-                text = pluralStringResource(
-                    Res.plurals.completed_repeats,
-                    completedRepeats,
-                    completedRepeats
-                ),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.secondary
-            )
 
             // Update Button (only shown in edit mode)
             if (editMode) {

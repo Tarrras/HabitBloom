@@ -16,7 +16,6 @@ data class UserHabitFullInfo(
     val timeOfDay: TimeOfDay,
     val daysStreak: Int,
     val records: List<UserHabitRecord>,
-    val completedRepeats: Int,
     val days: List<DayOfWeek>,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime? = null

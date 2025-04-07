@@ -66,7 +66,7 @@
     <string name="select_days_for_habit">Select days for habit</string>
     <string name="repeats">Repeats</string>
     <string name="select_repeats">Select repeats</string>
-    <string name="start_date">Start date: %s</string>
+    <string name="start_date">Start date: %1$s</string>
     <string name="start_date_colon">Start date:</string>
     <string name="end_date_colon">End date:</string>
 
@@ -388,7 +388,7 @@
     <string name="select_days_first">Please select at least one day of the week first</string>
     <string name="select_date_range_for_habit">Select Date Range For Habit</string>
     <string name="select_duration_for_habit">Select Duration For Habit</string>
-    <string name="repeats_count">Number of repeats: %d</string>
+    <string name="repeats_count">Number of repeats: %1$d</string>
 
     <string name="duration_too_long">Habit duration is limited to 90 days</string>
 
