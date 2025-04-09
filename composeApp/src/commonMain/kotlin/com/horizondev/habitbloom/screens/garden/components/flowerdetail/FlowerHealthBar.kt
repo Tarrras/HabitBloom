@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.sp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
+import com.horizondev.habitbloom.screens.garden.domain.roundToDecimal
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.flower_health
 import habitbloom.composeapp.generated.resources.health_description
@@ -59,16 +60,19 @@ fun FlowerHealthBar(
     flowerHealth: FlowerHealth,
     modifier: Modifier = Modifier
 ) {
+    // Round health value to avoid floating point precision issues
+    val roundedHealthValue = flowerHealth.value.roundToDecimal(1)
+    
     val animatedHealthValue by animateFloatAsState(
-        targetValue = flowerHealth.value,
+        targetValue = roundedHealthValue,
         animationSpec = tween(durationMillis = 500)
     )
 
     // Health bar color based on current health
     val healthColor by animateColorAsState(
         targetValue = when {
-            flowerHealth.value > FlowerHealth.HEALTHY_THRESHOLD -> BloomTheme.colors.success
-            flowerHealth.value > FlowerHealth.WILTING_THRESHOLD -> BloomTheme.colors.secondary
+            roundedHealthValue >= FlowerHealth.HEALTHY_THRESHOLD -> BloomTheme.colors.success
+            roundedHealthValue >= FlowerHealth.WILTING_THRESHOLD -> BloomTheme.colors.secondary
             else -> BloomTheme.colors.error
         },
         animationSpec = tween(durationMillis = 300)
@@ -86,10 +90,13 @@ fun FlowerHealthBar(
 
     // Health status labels
     val healthStatus = when {
-        flowerHealth.value > FlowerHealth.HEALTHY_THRESHOLD -> stringResource(Res.string.health_status_healthy)
-        flowerHealth.value > FlowerHealth.WILTING_THRESHOLD -> stringResource(Res.string.health_status_wilting)
+        roundedHealthValue >= FlowerHealth.HEALTHY_THRESHOLD -> stringResource(Res.string.health_status_healthy)
+        roundedHealthValue >= FlowerHealth.WILTING_THRESHOLD -> stringResource(Res.string.health_status_wilting)
         else -> stringResource(Res.string.health_status_critical)
     }
+
+    // Display the formatted health value
+    val healthValueText = "${(roundedHealthValue * 100).toInt()}%"
 
     BloomCard(
         modifier = modifier,
@@ -124,7 +131,7 @@ fun FlowerHealthBar(
                 }
 
                 Text(
-                    text = healthStatus,
+                    text = "$healthStatus ($healthValueText)",
                     style = BloomTheme.typography.body,
                     color = healthColor,
                     fontWeight = FontWeight.Bold

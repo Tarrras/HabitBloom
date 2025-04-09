@@ -1,5 +1,7 @@
 package com.horizondev.habitbloom.screens.garden.domain
 
+import kotlin.math.pow
+import kotlin.math.round
 
 /**
  * Represents the health status of a habit flower.
@@ -47,7 +49,9 @@ data class FlowerHealth(
     fun habitCompleted(): FlowerHealth {
         // Reset consecutive missed days and increase health
         val newHealth = (value + COMPLETION_RECOVERY).coerceAtMost(1.0f)
-        return copy(value = newHealth, consecutiveMissedDays = 0)
+        // Round to prevent floating point precision issues
+        val roundedHealth = newHealth.roundToDecimal(1)
+        return copy(value = roundedHealth, consecutiveMissedDays = 0)
     }
 
     /**
@@ -66,7 +70,9 @@ data class FlowerHealth(
         }
 
         val newHealth = (value - penalty).coerceAtLeast(0.0f)
-        return copy(value = newHealth, consecutiveMissedDays = newConsecutiveMissedDays)
+        // Round to prevent floating point precision issues
+        val roundedHealth = newHealth.roundToDecimal(1)
+        return copy(value = roundedHealth, consecutiveMissedDays = newConsecutiveMissedDays)
     }
 
     /**
@@ -77,4 +83,15 @@ data class FlowerHealth(
     fun shouldRegress(): Boolean {
         return consecutiveMissedDays >= 3 && isCritical
     }
+}
+
+/**
+ * Rounds a float value to the specified number of decimal places to avoid floating point precision issues.
+ *
+ * @param decimals The number of decimal places to round to
+ * @return The rounded value
+ */
+fun Float.roundToDecimal(decimals: Int = 1): Float {
+    val factor = 10.0f.pow(decimals)
+    return round(this * factor) / factor
 }
