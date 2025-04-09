@@ -24,11 +24,11 @@ class AppViewModel(
             Napier.e("Failed to initialize user", it, tag = TAG)
         }
 
-        // Update flower health for habits that were missed while the app wasn't used
+        /*// Update flower health for habits that were missed while the app wasn't used
         runCatching {
             habitsRepository.updateFlowerHealthForMissedDays()
         }.onFailure {
             Napier.e("Failed to update flower health for missed days", it, tag = TAG)
-        }
+        }*/
     }
 }

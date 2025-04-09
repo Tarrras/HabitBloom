@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.di
 import com.horizondev.habitbloom.auth.domain.AuthRepository
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
 import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
@@ -15,6 +16,12 @@ import org.koin.dsl.module
 @OptIn(ExperimentalSettingsApi::class)
 val domainModule = module {
     single {
+        FlowerHealthRepository(
+            flowerHealthDataSource = get()
+        )
+    }
+    
+    single {
         HabitsRepository(
             remoteDataSource = get(),
             profileRemoteDataSource = get(),
@@ -22,8 +29,7 @@ val domainModule = module {
             storageService = get(),
             notificationManager = get(),
             permissionsManager = get(),
-            settings = get(),
-            flowerHealthDataSource = get()
+            flowerHealthRepository = get()
         )
     }
     

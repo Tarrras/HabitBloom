@@ -25,7 +25,7 @@ data class FlowerHealth(
         const val SECOND_MISS_PENALTY = 0.2f
         const val ADDITIONAL_MISS_PENALTY = 0.15f
 
-        // Health recovery for completed days
+        // Health recovery for completed days - set equal to first miss penalty for balance
         const val COMPLETION_RECOVERY = 0.2f
     }
 

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
@@ -26,6 +27,7 @@ import kotlinx.datetime.plus
  */
 class HabitGardenViewModel(
     private val repository: HabitsRepository,
+    private val flowerHealthRepository: FlowerHealthRepository,
     themeUseCase: ThemeUseCase
 ) : BloomViewModel<HabitGardenUiState, HabitGardenUiIntent>(
     HabitGardenUiState(
@@ -119,7 +121,7 @@ class HabitGardenViewModel(
             val habitInfo = records.firstOrNull() ?: return@mapNotNull null
 
             // Get health in a single call
-            val health = repository.getFlowerHealth(habitId)
+            val health = flowerHealthRepository.getFlowerHealth(habitId)
 
             // Calculate the bloom stage based on streak
             val streak = habitInfo.daysStreak

@@ -24,6 +24,9 @@ val localDataModule = module {
 
     // Flower health data source
     single {
-        FlowerHealthDataSource(get())
+        FlowerHealthDataSource(
+            database = get(),
+            localDataSource = get()
+        )
     }
 }

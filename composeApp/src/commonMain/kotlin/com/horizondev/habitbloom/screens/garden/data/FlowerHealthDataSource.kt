@@ -1,11 +1,12 @@
 package com.horizondev.habitbloom.screens.garden.data
 
-import app.cash.sqldelight.coroutines.asFlow
-import app.cash.sqldelight.coroutines.mapToOne
 import com.horizondev.habitbloom.database.HabitBloomDatabase
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
+import com.horizondev.habitbloom.screens.garden.domain.roundToDecimal
+import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
+import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.utils.getCurrentDate
-import database.FlowerHealthEntity
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
@@ -22,49 +23,89 @@ data class FlowerHealthRecord(
 )
 
 /**
- * Data source for managing flower health information in the database.
+ * Data source for managing flower health calculations based on habit completion history.
  */
 class FlowerHealthDataSource(
-    database: HabitBloomDatabase
+    database: HabitBloomDatabase,
+    private val localDataSource: HabitsLocalDataSource
 ) {
-    private val flowerHealthQueries = database.flowerHealthEntityQueries
+    private val TAG = "FlowerHealthDataSource"
 
     /**
-     * Gets the flower health for a specific habit.
-     * If no health record exists, creates a new one with default values.
+     * Gets the flower health for a specific habit by calculating it from completion history.
      *
      * @param userHabitId The habit ID
-     * @return The flower health for the habit
+     * @return The calculated flower health
      */
     suspend fun getFlowerHealth(userHabitId: Long): FlowerHealth = withContext(Dispatchers.IO) {
-        val entity =
-            flowerHealthQueries.selectFlowerHealthByUserHabitId(userHabitId).executeAsOneOrNull()
+        try {
+            // Get habit info to determine start date
+            val userHabit =
+                localDataSource.getUserHabitInfo(userHabitId) ?: return@withContext FlowerHealth()
+            val startDate = userHabit.startDate
+            val currentDate = getCurrentDate()
 
-        if (entity == null) {
-            // Create default health if not exists
-            val defaultHealth = FlowerHealth()
-            insertOrUpdateFlowerHealth(userHabitId, defaultHealth)
-            return@withContext defaultHealth
+            // Get all records from start date to now
+            val records = localDataSource.getUserHabitRecordsInDateRange(
+                userHabitId = userHabitId,
+                startDate = startDate,
+                endDate = currentDate
+            ).sortedBy { it.date }
+
+            // Start with perfect health
+            var health = 1.0f
+            var consecutiveMissedDays = 0
+
+            // Process each record in chronological order, applying the same penalty/recovery logic
+            for (record in records) {
+                if (record.isCompleted) {
+                    // Reset consecutive missed days and increase health
+                    consecutiveMissedDays = 0
+                    health = (health + FlowerHealth.COMPLETION_RECOVERY).coerceAtMost(1.0f)
+                } else {
+                    // Increase consecutive missed days and apply appropriate penalty
+                    consecutiveMissedDays++
+                    val penalty = when (consecutiveMissedDays) {
+                        1 -> FlowerHealth.FIRST_MISS_PENALTY
+                        2 -> FlowerHealth.SECOND_MISS_PENALTY
+                        else -> FlowerHealth.ADDITIONAL_MISS_PENALTY
+                    }
+                    health = (health - penalty).coerceAtLeast(0.0f)
+                }
+            }
+
+            // Apply rounding to avoid floating point issues
+            health = health.roundToDecimal(1)
+
+            return@withContext FlowerHealth(
+                value = health,
+                consecutiveMissedDays = consecutiveMissedDays
+            )
+        } catch (e: Exception) {
+            Napier.e("Error calculating flower health", e, tag = TAG)
+            return@withContext FlowerHealth()
         }
-
-        return@withContext entity.toFlowerHealth()
     }
 
     /**
-     * Gets the flower health along with the last time it was updated.
+     * Calculates the flower health for a specific habit with the last update date
+     * This is used for batch processing historical records
      *
      * @param userHabitId The habit ID
-     * @return FlowerHealthRecord containing the health and last update date, or null if not found
+     * @return FlowerHealthRecord containing the health and last update date
      */
     suspend fun getFlowerHealthWithLastUpdatedDate(userHabitId: Long): FlowerHealthRecord? =
         withContext(Dispatchers.IO) {
-            val entity = flowerHealthQueries.selectFlowerHealthByUserHabitId(userHabitId)
-                .executeAsOneOrNull() ?: return@withContext null
-
-            return@withContext FlowerHealthRecord(
-                flowerHealth = entity.toFlowerHealth(),
-                lastUpdatedDate = runCatching { LocalDate.parse(entity.lastUpdatedDate) }.getOrNull()
-            )
+            try {
+                val flowerHealth = getFlowerHealth(userHabitId)
+                return@withContext FlowerHealthRecord(
+                    flowerHealth = flowerHealth,
+                    lastUpdatedDate = getCurrentDate()
+                )
+            } catch (e: Exception) {
+                Napier.e("Error getting flower health with date", e, tag = TAG)
+                return@withContext null
+            }
         }
 
     /**
@@ -74,117 +115,100 @@ class FlowerHealthDataSource(
      * @return Flow of FlowerHealth for the habit
      */
     fun observeFlowerHealth(userHabitId: Long): Flow<FlowerHealth> {
-        return flowerHealthQueries.selectFlowerHealthByUserHabitId(userHabitId)
-            .asFlow()
-            .mapToOne(Dispatchers.IO)
-            .map { it.toFlowerHealth() }
+        // Create a flow of all records for this habit
+        return localDataSource.getAllUserHabitRecordsForHabitId(userHabitId)
+            .map { records -> calculateFlowerHealth(userHabitId, records) }
+    }
+
+    /**
+     * Helper method to calculate flower health from a list of records
+     * Used by the observeFlowerHealth flow
+     */
+    private suspend fun calculateFlowerHealth(
+        userHabitId: Long,
+        records: List<UserHabitRecord>
+    ): FlowerHealth {
+        val today = getCurrentDate()
+        val filteredRecords = records
+            .sortedBy { it.date }
+            .filter { it.date <= today }
+
+        // Start with perfect health
+        var health = 1.0f
+        var consecutiveMissedDays = 0
+
+        // Process each record in chronological order
+        for (record in filteredRecords) {
+            if (record.isCompleted) {
+                // Reset consecutive missed days and increase health
+                consecutiveMissedDays = 0
+                health = (health + FlowerHealth.COMPLETION_RECOVERY).coerceAtMost(1.0f)
+            } else {
+                // Increase consecutive missed days and apply appropriate penalty
+                consecutiveMissedDays++
+                val penalty = when (consecutiveMissedDays) {
+                    1 -> FlowerHealth.FIRST_MISS_PENALTY
+                    2 -> FlowerHealth.SECOND_MISS_PENALTY
+                    else -> FlowerHealth.ADDITIONAL_MISS_PENALTY
+                }
+                health = (health - penalty).coerceAtLeast(0.0f)
+            }
+        }
+
+        // Apply rounding to avoid floating point issues
+        health = health.roundToDecimal(1)
+
+        return FlowerHealth(value = health, consecutiveMissedDays = consecutiveMissedDays)
     }
 
     /**
      * Updates the flower health when a habit is completed.
+     * With the runtime calculation approach, this method doesn't need to do anything
+     * since health is calculated on demand.
      *
      * @param userHabitId The habit ID
      * @return The updated flower health
      */
     suspend fun updateHealthForCompletedHabit(userHabitId: Long): FlowerHealth =
         withContext(Dispatchers.IO) {
-            val currentHealth = getFlowerHealth(userHabitId)
-            val updatedHealth = currentHealth.habitCompleted()
-            insertOrUpdateFlowerHealth(userHabitId, updatedHealth)
-            return@withContext updatedHealth
+            // Health is calculated on demand now, just return the current health
+            return@withContext getFlowerHealth(userHabitId)
         }
 
     /**
      * Updates the flower health when a habit is missed.
+     * With the runtime calculation approach, this method doesn't need to do anything
+     * since health is calculated on demand.
      *
      * @param userHabitId The habit ID
      * @return The updated flower health
      */
     suspend fun updateHealthForMissedHabit(userHabitId: Long): FlowerHealth =
         withContext(Dispatchers.IO) {
-            val currentHealth = getFlowerHealth(userHabitId)
-            val updatedHealth = currentHealth.habitMissed()
-            insertOrUpdateFlowerHealth(userHabitId, updatedHealth)
-            return@withContext updatedHealth
+            // Health is calculated on demand now, just return the current health
+            return@withContext getFlowerHealth(userHabitId)
         }
 
     /**
-     * Directly updates the flower health with a pre-computed value.
-     * This is useful when batch processing missed days.
-     *
-     * @param userHabitId The habit ID
-     * @param health The new flower health
-     * @param updateDate The date to mark as the last update date
+     * Updates the flower health with a pre-computed value.
+     * With the runtime calculation approach, this method doesn't need to do anything.
      */
     suspend fun updateFlowerHealth(
         userHabitId: Long,
         health: FlowerHealth,
         updateDate: LocalDate = getCurrentDate()
     ) = withContext(Dispatchers.IO) {
-        insertOrUpdateFlowerHealth(userHabitId, health, updateDate)
+        // No-op in runtime calculation approach
     }
 
     /**
-     * Updates only the last updated date for a flower health record without changing the health values.
-     *
-     * @param userHabitId The habit ID
-     * @param updateDate The date to mark as the last update date (defaults to current date)
+     * Updates only the last updated date for a flower health record.
+     * With the runtime calculation approach, this method doesn't need to do anything.
      */
     suspend fun updateLastUpdatedDate(
         userHabitId: Long,
         updateDate: LocalDate = getCurrentDate()
     ) = withContext(Dispatchers.IO) {
-        val entity =
-            flowerHealthQueries.selectFlowerHealthByUserHabitId(userHabitId).executeAsOneOrNull()
-
-        if (entity != null) {
-            // Update only the date field, preserving existing health values
-            flowerHealthQueries.updateFlowerHealthLastUpdatedDate(
-                lastUpdatedDate = updateDate.toString(),
-                userHabitId = userHabitId
-            )
-        } else {
-            // If no record exists, create one with default health values
-            insertOrUpdateFlowerHealth(userHabitId, FlowerHealth(), updateDate)
-        }
+        // No-op in runtime calculation approach
     }
-
-    /**
-     * Inserts or updates flower health in the database.
-     *
-     * @param userHabitId The habit ID
-     * @param health The flower health to save
-     * @param updateDate The date to mark as the last update date
-     */
-    private suspend fun insertOrUpdateFlowerHealth(
-        userHabitId: Long,
-        health: FlowerHealth,
-        updateDate: LocalDate = getCurrentDate()
-    ) = withContext(Dispatchers.IO) {
-        flowerHealthQueries.insertOrReplaceFlowerHealth(
-            userHabitId = userHabitId,
-            healthValue = health.value.toDouble(),
-            consecutiveMissedDays = health.consecutiveMissedDays.toLong(),
-            lastUpdatedDate = updateDate.toString()
-        )
-    }
-
-    /**
-     * Deletes the flower health record for a specific habit.
-     *
-     * @param userHabitId The habit ID
-     */
-    suspend fun deleteFlowerHealth(userHabitId: Long) = withContext(Dispatchers.IO) {
-        flowerHealthQueries.deleteFlowerHealthByUserHabitId(userHabitId)
-    }
-}
-
-/**
- * Extension function to convert database entity to domain model.
- */
-private fun FlowerHealthEntity.toFlowerHealth(): FlowerHealth {
-    return FlowerHealth(
-        value = healthValue.toFloat(),
-        consecutiveMissedDays = consecutiveMissedDays.toInt()
-    )
 }

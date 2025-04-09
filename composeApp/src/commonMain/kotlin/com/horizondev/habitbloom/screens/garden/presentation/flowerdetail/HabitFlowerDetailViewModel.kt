@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
@@ -23,6 +24,7 @@ import kotlinx.coroutines.flow.onEach
 class HabitFlowerDetailViewModel(
     private val habitId: Long,
     private val repository: HabitsRepository,
+    private val flowerHealthRepository: FlowerHealthRepository,
     private val themeUseCase: ThemeUseCase
 ) : BloomViewModel<HabitFlowerDetailUiState, HabitFlowerDetailUiIntent>(
     HabitFlowerDetailUiState(
@@ -42,7 +44,7 @@ class HabitFlowerDetailViewModel(
     private fun loadHabitFlowerDetails() {
         // Combine habit data with flower health data
         val habitDataFlow = repository.getUserHabitWithAllRecordsFlow(habitId)
-        val healthDataFlow = repository.observeFlowerHealth(habitId)
+        val healthDataFlow = flowerHealthRepository.observeFlowerHealth(habitId)
 
         combine(habitDataFlow, healthDataFlow) { habitInfo, flowerHealth ->
             if (habitInfo == null) {

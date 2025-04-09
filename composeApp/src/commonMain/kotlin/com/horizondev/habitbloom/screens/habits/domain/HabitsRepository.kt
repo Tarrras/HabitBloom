@@ -3,8 +3,7 @@ package com.horizondev.habitbloom.screens.habits.domain
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.screens.calendar.HabitStreakInfo
-import com.horizondev.habitbloom.screens.garden.data.FlowerHealthDataSource
-import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
@@ -18,7 +17,6 @@ import com.horizondev.habitbloom.screens.settings.data.ProfileRemoteDataSource
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getNearestDateForNotification
-import com.russhwolf.settings.ObservableSettings
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -47,8 +45,7 @@ class HabitsRepository(
     private val storageService: SupabaseStorageService,
     private val notificationManager: NotificationScheduler,
     private val permissionsManager: PermissionsManager,
-    private val settings: ObservableSettings,
-    private val flowerHealthDataSource: FlowerHealthDataSource
+    private val flowerHealthRepository: FlowerHealthRepository
 ) : KoinComponent {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
@@ -177,9 +174,9 @@ class HabitsRepository(
 
         // Update flower health based on completion status
         if (isCompleted) {
-            flowerHealthDataSource.updateHealthForCompletedHabit(record.userHabitId)
+            flowerHealthRepository.updateHealthForCompletedHabit(record.userHabitId)
         } else {
-            flowerHealthDataSource.updateHealthForMissedHabit(record.userHabitId)
+            flowerHealthRepository.updateHealthForMissedHabit(record.userHabitId)
         }
     }
 
@@ -197,9 +194,9 @@ class HabitsRepository(
 
         // Update flower health based on completion status
         if (isCompleted) {
-            flowerHealthDataSource.updateHealthForCompletedHabit(habitId)
+            flowerHealthRepository.updateHealthForCompletedHabit(habitId)
         } else {
-            flowerHealthDataSource.updateHealthForMissedHabit(habitId)
+            flowerHealthRepository.updateHealthForMissedHabit(habitId)
         }
     }
 
@@ -661,129 +658,6 @@ class HabitsRepository(
         val reminderEnabled: Boolean,
         val reminderTime: LocalTime?
     )
-
-    /**
-     * Gets the current flower health for a habit directly (non-reactive).
-     *
-     * @param habitId The ID of the habit
-     * @return The current FlowerHealth
-     */
-    suspend fun getFlowerHealth(habitId: Long): FlowerHealth = withContext(Dispatchers.IO) {
-        flowerHealthDataSource.getFlowerHealth(habitId)
-    }
-
-    /**
-     * Observes flower health for a habit as a Flow.
-     *
-     * @param habitId The ID of the habit
-     * @return Flow of FlowerHealth updates
-     */
-    fun observeFlowerHealth(habitId: Long): Flow<FlowerHealth> {
-        return flowerHealthDataSource.observeFlowerHealth(habitId)
-    }
-
-    /**
-     * Updates flower health for all habits that haven't been updated today.
-     * This should be called when the app starts to account for days when the user didn't open the app.
-     */
-    suspend fun updateFlowerHealthForMissedDays() {
-        withContext(Dispatchers.IO) {
-            try {
-                val today = getCurrentDate()
-                val allUserHabits = localDataSource.getAllUserHabits()
-
-                // Process each habit
-                allUserHabits.forEach { userHabit ->
-                    // Get the last time this habit's health was updated
-                    val healthRecord =
-                        flowerHealthDataSource.getFlowerHealthWithLastUpdatedDate(userHabit.id)
-                    val lastUpdatedDate = healthRecord?.lastUpdatedDate
-
-                    // Skip if no health record or updated today
-                    if (lastUpdatedDate == null || lastUpdatedDate == today) {
-                        return@forEach
-                    }
-
-                    // Always update the lastUpdatedDate to today
-                    var needsHealthUpdate = false
-                    var currentHealth = healthRecord.flowerHealth
-
-                    // Get all dates between last update and yesterday
-                    if (lastUpdatedDate < today) {
-                        val yesterday = today.minus(1, DateTimeUnit.DAY)
-
-                        // If health was updated yesterday, just update the date without changing health
-                        if (lastUpdatedDate == yesterday) {
-                            flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
-                            return@forEach
-                        }
-
-                        // Get all records for this habit between last update (exclusive) and yesterday (inclusive)
-                        val startDate = lastUpdatedDate.plus(1, DateTimeUnit.DAY)
-                        val recordsInRange = localDataSource.getUserHabitRecordsInDateRange(
-                            userHabit.id,
-                            startDate,
-                            yesterday
-                        )
-
-                        if (recordsInRange.isEmpty()) {
-                            Napier.d(
-                                "No records found for habit ${userHabit.id} from ${startDate} to ${yesterday}",
-                                tag = TAG
-                            )
-                            // No records to process, just update the date
-                            flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
-                            return@forEach
-                        }
-
-                        Napier.d(
-                            "Processing ${recordsInRange.size} records for habit ${userHabit.id}",
-                            tag = TAG
-                        )
-
-                        // Process each record
-                        recordsInRange.forEach { record ->
-                            val oldHealth = currentHealth
-                            currentHealth = if (record.isCompleted) {
-                                // It was completed, update health positively
-                                Napier.d(
-                                    "Habit ${userHabit.id} completed on ${record.date}",
-                                    tag = TAG
-                                )
-                                currentHealth.habitCompleted()
-                            } else {
-                                // Apply missed penalty for this day
-                                Napier.d(
-                                    "Habit ${userHabit.id} missed on ${record.date}",
-                                    tag = TAG
-                                )
-                                currentHealth.habitMissed()
-                            }
-
-                            // Track if health actually changed
-                            if (oldHealth != currentHealth) {
-                                needsHealthUpdate = true
-                            }
-                        }
-                    }
-
-                    // Update flower health if it changed
-                    if (needsHealthUpdate) {
-                        flowerHealthDataSource.updateFlowerHealth(
-                            userHabit.id,
-                            currentHealth,
-                            today
-                        )
-                    } else {
-                        // Just update the last updated date
-                        flowerHealthDataSource.updateLastUpdatedDate(userHabit.id, today)
-                    }
-                }
-            } catch (e: Exception) {
-                Napier.e("Error updating flower health for missed days", e, tag = TAG)
-            }
-        }
-    }
 
     /**
      * Calculates the number of days between two dates, inclusive.
