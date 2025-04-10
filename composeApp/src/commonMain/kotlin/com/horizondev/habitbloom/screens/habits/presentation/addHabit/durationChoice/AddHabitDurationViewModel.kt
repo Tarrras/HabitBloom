@@ -391,20 +391,32 @@ class AddHabitDurationViewModel(
         endDate: LocalDate?,
         activeDays: List<DayOfWeek>
     ): Int {
-        if (startDate == null || endDate == null || activeDays.isEmpty()) {
-            return 0
-        }
-
-        var count = 0
-        var currentDate = startDate
-
-        while (currentDate <= endDate) {
-            if (activeDays.contains(currentDate.dayOfWeek)) {
-                count++
+        when {
+            startDate == null -> {
+                return 0
             }
-            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
-        }
 
-        return count
+            endDate == null -> {
+                return 0
+            }
+
+            activeDays.isEmpty() -> {
+                return 0
+            }
+
+            else -> {
+                var count = 0
+                var currentDate = startDate
+
+                while (currentDate <= endDate) {
+                    if (activeDays.contains(currentDate.dayOfWeek)) {
+                        count++
+                    }
+                    currentDate = currentDate.plus(1, DateTimeUnit.DAY)
+                }
+
+                return count
+            }
+        }
     }
 }
