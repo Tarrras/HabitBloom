@@ -406,7 +406,7 @@ class AddHabitDurationViewModel(
 
             else -> {
                 var count = 0
-                var currentDate = startDate
+                var currentDate = startDate!!
 
                 while (currentDate <= endDate) {
                     if (activeDays.contains(currentDate.dayOfWeek)) {
