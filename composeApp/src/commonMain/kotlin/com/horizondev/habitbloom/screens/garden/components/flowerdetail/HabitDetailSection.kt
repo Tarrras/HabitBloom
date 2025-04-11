@@ -19,11 +19,13 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.check_full_habit_info
-import habitbloom.composeapp.generated.resources.date_created_label
+import habitbloom.composeapp.generated.resources.date_range_label
 import habitbloom.composeapp.generated.resources.description_label
 import habitbloom.composeapp.generated.resources.formatted_date
+import habitbloom.composeapp.generated.resources.formatted_date_range
 import habitbloom.composeapp.generated.resources.habit_detail_section_title
 import habitbloom.composeapp.generated.resources.reminder_time_label
+import habitbloom.composeapp.generated.resources.start_date_label
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.stringResource
@@ -32,7 +34,8 @@ import org.jetbrains.compose.resources.stringResource
  * Component to display the habit's detailed information and edit option.
  *
  * @param description The habit description
- * @param startDate The date when the habit was created
+ * @param startDate The date when the habit starts
+ * @param endDate The date when the habit ends
  * @param reminderTime The time of day when the reminder is set (if any)
  * @param onCheckFullHabitInfoClick Callback when the edit button is clicked
  * @param modifier Modifier for styling
@@ -41,6 +44,7 @@ import org.jetbrains.compose.resources.stringResource
 fun HabitDetailSection(
     description: String,
     startDate: LocalDate,
+    endDate: LocalDate? = null,
     reminderTime: LocalTime?,
     onCheckFullHabitInfoClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -106,25 +110,43 @@ fun HabitDetailSection(
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.primary
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Start date section
-            Spacer(modifier = Modifier.height(12.dp))
+            // Date range section
+            if (endDate != null && startDate != endDate) {
+                Text(
+                    text = stringResource(Res.string.date_range_label),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary,
+                    fontWeight = FontWeight.Medium
+                )
 
-            Text(
-                text = stringResource(Res.string.date_created_label),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.secondary,
-                fontWeight = FontWeight.Medium
-            )
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = formatDateRange(startDate, endDate),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary
+                )
+            } else {
+                // Start date section
+                Text(
+                    text = stringResource(Res.string.start_date_label),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary,
+                    fontWeight = FontWeight.Medium
+                )
 
-            Text(
-                text = formatDate(startDate),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary
-            )
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = formatDate(startDate),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.primary
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -148,4 +170,23 @@ private fun formatDate(date: LocalDate): String {
     val month = date.month.getTitle()
 
     return stringResource(Res.string.formatted_date, month, date.dayOfMonth, date.year)
+}
+
+/**
+ * Formats a date range for display.
+ *
+ * @param startDate The start date
+ * @param endDate The end date
+ * @return Formatted date range string (e.g., "March 15, 2023 - April 15, 2023")
+ */
+@Composable
+private fun formatDateRange(startDate: LocalDate, endDate: LocalDate): String {
+    val startMonth = startDate.month.getTitle()
+    val endMonth = endDate.month.getTitle()
+
+    return stringResource(
+        Res.string.formatted_date_range,
+        startMonth, startDate.dayOfMonth, startDate.year,
+        endMonth, endDate.dayOfMonth, endDate.year
+    )
 } 

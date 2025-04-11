@@ -93,6 +93,7 @@ class HabitFlowerDetailViewModel(
                 currentStreak = habitInfo.daysStreak,
                 longestStreak = habitInfo.records.getLongestCompletionStreak(),
                 startDate = habitInfo.startDate,
+                endDate = habitInfo.endDate,
                 reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
                 lastSevenDaysCompletions = lastSevenScheduledDays,
                 isCompletedToday = isCompletedToday,

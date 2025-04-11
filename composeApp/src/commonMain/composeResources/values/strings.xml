@@ -328,6 +328,9 @@
     <string name="every_day_label">Every day</string>
     <string name="reminder_time_label">Reminder Time:</string>
     <string name="date_created_label">Date Created:</string>
+    <string name="date_range_label">Date Range:</string>
+    <string name="start_date_label">Start Date:</string>
+    <string name="end_date_label">End Date:</string>
     <string name="completed_on_date">Completed on %1$s</string>
     <string name="not_completed_on_date">Not completed on %1$s</string>
 
@@ -345,6 +348,7 @@
     <string name="month_full_november">November</string>
     <string name="month_full_december">December</string>
     <string name="formatted_date">%1$s %2$d, %3$d</string>
+    <string name="formatted_date_range">%1$s %2$d, %3$d - %4$s %5$d, %6$d</string>
     <string name="formatted_time">%1$d:%2$s %3$s</string>
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>
@@ -400,4 +404,9 @@
     </plurals>
 
     <string name="tap_to_edit_dates">Tap to edit dates</string>
+
+    <string name="flower_potential_stage">Potential stage:</string>
+    <string name="flower_health_critical">Health critical: Your flower has regressed one stage. Water daily to recover!</string>
+    <string name="flower_health_wilting">Health wilting: Your flower is at risk. Regular watering will help it recover.</string>
+    <string name="flower_health_impact">Health affects your flower's appearance. Maintain regular completion to keep it healthy.</string>
 </resources>

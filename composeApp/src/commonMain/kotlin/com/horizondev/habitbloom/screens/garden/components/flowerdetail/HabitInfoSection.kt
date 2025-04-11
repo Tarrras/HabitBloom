@@ -16,7 +16,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.screens.garden.domain.FlowerDisplayUtils
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.getTitle
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
@@ -30,6 +32,10 @@ import habitbloom.composeapp.generated.resources.day
 import habitbloom.composeapp.generated.resources.days
 import habitbloom.composeapp.generated.resources.days_in_row
 import habitbloom.composeapp.generated.resources.evening_habits_image
+import habitbloom.composeapp.generated.resources.flower_health_critical
+import habitbloom.composeapp.generated.resources.flower_health_impact
+import habitbloom.composeapp.generated.resources.flower_health_wilting
+import habitbloom.composeapp.generated.resources.flower_potential_stage
 import habitbloom.composeapp.generated.resources.more_completions_to_grow
 import habitbloom.composeapp.generated.resources.morning_habits_image
 import habitbloom.composeapp.generated.resources.progress_to_next_stage
@@ -52,10 +58,23 @@ fun HabitInfoSection(
     habitName: String,
     timeOfDay: TimeOfDay,
     growthStage: FlowerGrowthStage,
+    flowerHealth: FlowerHealth,
     currentStreak: Int,
     streaksToNextStage: Int,
     modifier: Modifier = Modifier
 ) {
+    // Determine the actual display stage based on health impact
+    val displayedGrowthStage =
+        FlowerDisplayUtils.determineDisplayGrowthStage(growthStage, flowerHealth)
+    val isHealthImpactingStage = displayedGrowthStage != growthStage
+
+    // Determine health status for display
+    val healthStatusColor = when {
+        flowerHealth.isCritical -> BloomTheme.colors.error
+        flowerHealth.isWilting -> BloomTheme.colors.secondary
+        else -> BloomTheme.colors.success
+    }
+
     BloomCard(
         modifier = modifier,
         onClick = {}
@@ -102,10 +121,49 @@ fun HabitInfoSection(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = growthStage.getTitle(),
+                    text = displayedGrowthStage.getTitle(),
                     style = BloomTheme.typography.subheading,
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium
+                )
+            }
+
+            // Show the potential stage if health is impacting it
+            if (isHealthImpactingStage) {
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(Res.string.flower_potential_stage),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+
+                    Spacer(modifier = Modifier.width(4.dp))
+
+                    Text(
+                        text = growthStage.getTitle(),
+                        style = BloomTheme.typography.body,
+                        color = healthStatusColor,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // Health impact explanation
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = when {
+                        flowerHealth.isCritical -> stringResource(Res.string.flower_health_critical)
+                        flowerHealth.isWilting -> stringResource(Res.string.flower_health_wilting)
+                        else -> stringResource(Res.string.flower_health_impact)
+                    },
+                    style = BloomTheme.typography.small,
+                    color = healthStatusColor,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 

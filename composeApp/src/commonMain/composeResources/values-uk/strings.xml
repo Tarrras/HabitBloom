@@ -320,6 +320,9 @@
     <string name="every_day_label">Щодня</string>
     <string name="reminder_time_label">Час нагадування:</string>
     <string name="date_created_label">Дата створення:</string>
+    <string name="date_range_label">Діапазон дат:</string>
+    <string name="start_date_label">Дата початку:</string>
+    <string name="end_date_label">Дата завершення:</string>
     <string name="completed_on_date">Виконано %1$s</string>
     <string name="not_completed_on_date">Не виконано %1$s</string>
 
@@ -337,6 +340,7 @@
     <string name="month_full_november">Листопад</string>
     <string name="month_full_december">Грудень</string>
     <string name="formatted_date">%1$s %2$d, %3$d</string>
+    <string name="formatted_date_range">%1$s %2$d, %3$d - %4$s %5$d, %6$d</string>
     <string name="formatted_time">%1$d:%2$s %3$s</string>
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>

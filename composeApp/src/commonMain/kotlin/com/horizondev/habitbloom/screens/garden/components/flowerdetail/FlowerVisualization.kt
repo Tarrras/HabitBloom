@@ -37,6 +37,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.screens.garden.domain.FlowerDisplayUtils
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
@@ -59,9 +60,9 @@ import kotlin.random.Random
 fun FlowerVisualization(
     flowerType: FlowerType,
     growthStage: FlowerGrowthStage,
+    flowerHealth: FlowerHealth,
     showWateringAnimation: Boolean = false,
-    modifier: Modifier = Modifier,
-    flowerHealth: FlowerHealth = FlowerHealth()
+    modifier: Modifier = Modifier
 ) {
     // Calculate the animated scale for a subtle breathing effect
     val infiniteTransition = rememberInfiniteTransition()
@@ -73,6 +74,49 @@ fun FlowerVisualization(
             repeatMode = RepeatMode.Reverse
         )
     )
+
+    // Apply health effects to the flower display
+    val displayedGrowthStage =
+        FlowerDisplayUtils.determineDisplayGrowthStage(growthStage, flowerHealth)
+    val flowerResource = flowerType.getFlowerResource(displayedGrowthStage)
+    val flowerSize = when (displayedGrowthStage) {
+        FlowerGrowthStage.SEED -> 120.dp
+        FlowerGrowthStage.SPROUT -> 140.dp
+        FlowerGrowthStage.BUSH -> 160.dp
+        FlowerGrowthStage.BUD -> 180.dp
+        FlowerGrowthStage.BLOOM -> 200.dp
+    }
+
+    // Calculate health-based visual effects
+    val saturation = if (flowerHealth.isWilting) {
+        // Desaturate based on health (0.7 to 1.0 based on health)
+        0.7f + (flowerHealth.value * 0.3f)
+    } else {
+        1.0f // Full saturation when healthy
+    }
+
+    // Create color matrix for health-based visual effect
+    val colorMatrix = ColorMatrix().apply {
+        setToSaturation(saturation)
+    }
+
+    // Apply wilting animation if health is critical
+    val rotationAngle = remember { Animatable(0f) }
+
+    LaunchedEffect(flowerHealth.isCritical) {
+        if (flowerHealth.isCritical) {
+            rotationAngle.animateTo(
+                targetValue = 2f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(2000),
+                    repeatMode = RepeatMode.Reverse
+                )
+            )
+        } else {
+            // Reset rotation if not critical
+            rotationAngle.snapTo(0f)
+        }
+    }
 
     Box(
         modifier = modifier.height(280.dp),
@@ -88,47 +132,6 @@ fun FlowerVisualization(
             modifier = Modifier.padding(16.dp)
         ) {
             // The flower based on growth stage and health status
-            val displayedGrowthStage = determineDisplayGrowthStage(growthStage, flowerHealth)
-            val flowerResource = flowerType.getFlowerResource(displayedGrowthStage)
-            val flowerSize = when (displayedGrowthStage) {
-                FlowerGrowthStage.SEED -> 120.dp
-                FlowerGrowthStage.SPROUT -> 140.dp
-                FlowerGrowthStage.BUSH -> 160.dp
-                FlowerGrowthStage.BUD -> 180.dp
-                FlowerGrowthStage.BLOOM -> 200.dp
-            }
-
-            // Calculate health-based visual effects
-            val saturation = if (flowerHealth.isWilting) {
-                // Desaturate based on health (0.7 to 1.0 based on health)
-                0.7f + (flowerHealth.value * 0.3f)
-            } else {
-                1.0f // Full saturation when healthy
-            }
-
-            // Create color matrix for health-based visual effect
-            val colorMatrix = ColorMatrix().apply {
-                setToSaturation(saturation)
-            }
-
-            // Apply wilting animation if health is critical
-            val rotationAngle = remember { Animatable(0f) }
-
-            LaunchedEffect(flowerHealth.isCritical) {
-                if (flowerHealth.isCritical) {
-                    rotationAngle.animateTo(
-                        targetValue = 2f,
-                        animationSpec = infiniteRepeatable(
-                            animation = tween(2000),
-                            repeatMode = RepeatMode.Reverse
-                        )
-                    )
-                } else {
-                    // Reset rotation if not critical
-                    rotationAngle.snapTo(0f)
-                }
-            }
-
             Spacer(modifier = Modifier.height(8.dp))
 
             // Box for the flower visualization
@@ -498,33 +501,4 @@ private data class ParticleState(
     val size: Float,
     val rotationAngle: Float = 0f,
     val colorIndex: Int = 0
-)
-
-/**
- * Determines the growth stage to display based on the actual growth stage and flower health.
- * When health is critical, the flower will be displayed at a lower growth stage.
- * When health is wilting but not critical, visual effects will be applied but stage remains.
- *
- * @param actualGrowthStage The current or maximum growth stage based on streak
- * @param flowerHealth The health status of the flower
- * @return The growth stage to display visually
- */
-private fun determineDisplayGrowthStage(
-    actualGrowthStage: FlowerGrowthStage,
-    flowerHealth: FlowerHealth
-): FlowerGrowthStage {
-    // When health is critical (below 0.3), reduce the stage by 1
-    if (flowerHealth.isCritical) {
-        val currentIndex = actualGrowthStage.ordinal
-        // Ensure we don't go below SEED stage
-        return if (currentIndex > 0) {
-            FlowerGrowthStage.entries[currentIndex - 1]
-        } else {
-            FlowerGrowthStage.SEED
-        }
-    }
-
-    // If health is wilting (below 0.7) but not critical, keep the same stage
-    // Visual effects (desaturation and alpha) will be applied by other code
-    return actualGrowthStage
-} 
+) 

@@ -256,7 +256,8 @@ fun HabitFlowerDetailScreenContent(
                                 timeOfDay = habitFlowerDetail.timeOfDay,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
                                 currentStreak = habitFlowerDetail.currentStreak,
-                                streaksToNextStage = habitFlowerDetail.streaksToNextStage
+                                streaksToNextStage = habitFlowerDetail.streaksToNextStage,
+                                flowerHealth = habitFlowerDetail.flowerHealth
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -292,6 +293,7 @@ fun HabitFlowerDetailScreenContent(
                                 modifier = Modifier.fillMaxWidth(),
                                 description = habitFlowerDetail.description,
                                 startDate = habitFlowerDetail.startDate,
+                                endDate = habitFlowerDetail.endDate,
                                 reminderTime = habitFlowerDetail.reminderTime,
                                 onCheckFullHabitInfoClick = {
                                     handleUiEvent(
