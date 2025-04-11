@@ -203,7 +203,7 @@
     <string name="habit_day_state_missed">Пропущено</string>
     <string name="habit_day_state_future">Потрібно виконати</string>
 
-    <string name="update_habit_error">Щось пішло не так! Спробуйте інші параметри або повторіть спробу пізніше</string>
+    <string name="update_habit_error">Щось пішло не так! Будь ласка, спробуйте інші параметри або спробуйте пізніше</string>
     <string name="update_habit_success">Звичку успішно оновлено!</string>
     <string name="delete_habit">Видалити звичку</string>
     <string name="delete_habit_question">Видалити звичку?</string>
@@ -415,4 +415,7 @@
     <string name="start_date_display">Дата початку: %1$s</string>
     <string name="end_date_display">Дата завершення: %1$s</string>
     <string name="duration_display">Тривалість: %1$d днів</string>
+
+    <!-- Habit Related Errors -->
+    <string name="habit_already_added">Ця звичка вже є у вашій колекції! Будь ласка, виберіть іншу звичку.</string>
 </resources>

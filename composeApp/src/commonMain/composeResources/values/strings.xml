@@ -409,4 +409,7 @@
     <string name="flower_health_critical">Health critical: Your flower has regressed one stage. Water daily to recover!</string>
     <string name="flower_health_wilting">Health wilting: Your flower is at risk. Regular watering will help it recover.</string>
     <string name="flower_health_impact">Health affects your flower's appearance. Maintain regular completion to keep it healthy.</string>
+
+    <!-- Habit Related Errors -->
+    <string name="habit_already_added">This habit is already in your collection! Please choose a different habit.</string>
 </resources>

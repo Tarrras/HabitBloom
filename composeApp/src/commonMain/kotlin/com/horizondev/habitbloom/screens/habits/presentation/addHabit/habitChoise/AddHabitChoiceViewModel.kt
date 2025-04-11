@@ -5,9 +5,11 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
+import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.delete_custom_habit_success
+import habitbloom.composeapp.generated.resources.habit_already_added
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -47,7 +49,7 @@ class AddHabitChoiceViewModel(
             }
 
             is AddHabitChoiceUiEvent.SelectHabit -> {
-                emitUiIntent(AddHabitChoiceUiIntent.NavigateNext(event.habit))
+                checkHabitAndProceed(event.habit)
             }
 
             AddHabitChoiceUiEvent.CreateCustomHabit -> {
@@ -86,6 +88,36 @@ class AddHabitChoiceViewModel(
 
             AddHabitChoiceUiEvent.RefreshPage -> {
                 searchHabits(state.value.searchInput)
+            }
+        }
+    }
+
+    /**
+     * Checks if a habit is already added before proceeding with selection
+     */
+    private fun checkHabitAndProceed(habit: HabitInfo) {
+        launch {
+            runCatching {
+                val isAlreadyAdded = repository.isHabitAlreadyAdded(habit.id)
+
+                if (isAlreadyAdded) {
+                    emitUiIntent(
+                        AddHabitChoiceUiIntent.ShowSnackbar(
+                            BloomSnackbarVisuals(
+                                message = getString(Res.string.habit_already_added),
+                                state = BloomSnackbarState.Error,
+                                withDismissAction = true,
+                                duration = SnackbarDuration.Short
+                            )
+                        )
+                    )
+                } else {
+                    emitUiIntent(AddHabitChoiceUiIntent.NavigateNext(habit))
+                }
+            }.onFailure {
+                Napier.e("Error checking if habit exists", it)
+                // Proceed anyway in case of error
+                emitUiIntent(AddHabitChoiceUiIntent.NavigateNext(habit))
             }
         }
     }

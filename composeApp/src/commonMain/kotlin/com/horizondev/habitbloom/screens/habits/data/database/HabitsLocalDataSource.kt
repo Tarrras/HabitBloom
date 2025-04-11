@@ -479,4 +479,19 @@ class HabitsLocalDataSource(
                 )
             }
     }
+
+    /**
+     * Gets a user habit by its remote ID
+     *
+     * @param habitId The remote ID of the habit
+     * @return The user habit or null if not found
+     */
+    suspend fun getUserHabitByRemoteId(habitId: String): UserHabit? = withContext(Dispatchers.IO) {
+        userHabitsQueries
+            .selectUserHabitByRemoteId(habitId)
+            .executeAsOneOrNull()
+            ?.let { entity ->
+                entity.toDomainModel()
+            }
+    }
 }

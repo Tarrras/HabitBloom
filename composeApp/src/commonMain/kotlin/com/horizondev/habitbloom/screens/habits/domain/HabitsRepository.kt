@@ -775,4 +775,17 @@ class HabitsRepository(
 
             resultList
         }
+
+    /**
+     * Checks if a habit is already added by the user
+     *
+     * @param habitId The ID of the habit to check
+     * @return True if the habit is already added, false otherwise
+     */
+    suspend fun isHabitAlreadyAdded(habitId: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            val existingHabit = localDataSource.getUserHabitByRemoteId(habitId)
+            existingHabit != null
+        }
+    }
 }
