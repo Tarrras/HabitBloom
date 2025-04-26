@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
@@ -60,8 +61,11 @@ import org.koin.compose.viewmodel.koinViewModel
 /**
  * Main screen with bottom navigation tabs.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onNavigateToOnboarding: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val commonNavigator: CommonNavigator = koinInject()
 
@@ -122,7 +126,10 @@ fun MainScreen() {
 
                 composable<BottomNavItem.Settings> {
                     val viewModel = koinViewModel<SettingsViewModel>()
-                    SettingsScreen(viewModel = viewModel)
+                    SettingsScreen(
+                        viewModel = viewModel,
+                        onNavigateToOnboarding = onNavigateToOnboarding
+                    )
                 }
 
                 composable<HabitDetailsDestination> { entry ->
@@ -200,8 +207,10 @@ fun MainScreen() {
                                     navController.navigate(navItem.route) {
                                         // Pop up to the start destination of the graph to
                                         // avoid building up a large stack of destinations
-                                        popUpTo(navController.graph.findStartDestination()) {
-                                            saveState = true
+                                        navController.graph.findStartDestination().route?.let {
+                                            popUpTo(it) {
+                                                saveState = true
+                                            }
                                         }
                                         // Avoid multiple copies of the same destination
                                         launchSingleTop = true

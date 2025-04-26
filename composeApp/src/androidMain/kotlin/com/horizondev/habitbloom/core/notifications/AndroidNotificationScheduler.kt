@@ -8,7 +8,6 @@ import com.horizondev.habitbloom.HabitReminderReceiver
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import java.util.Calendar
@@ -40,7 +39,7 @@ class AndroidNotificationScheduler(
                 putExtra("DAY", date.dayOfMonth)
             }
 
-            val requestCode = generateRequestCodeForHabit(habitId, date.dayOfWeek)
+            val requestCode = generateRequestCodeForHabit(habitId)
             val pendingIntent = PendingIntent.getBroadcast(
                 context,
                 requestCode,
@@ -87,21 +86,19 @@ class AndroidNotificationScheduler(
         runCatching {
             val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
-            // Cancel for all possible days
-            for (dayOfWeek in DayOfWeek.entries) {
-                val intent = Intent(context, HabitReminderReceiver::class.java)
-                val requestCode = generateRequestCodeForHabit(habitId, dayOfWeek)
-                val pendingIntent = PendingIntent.getBroadcast(
-                    context,
-                    requestCode,
-                    intent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
-                )
+            // Cancel
+            val intent = Intent(context, HabitReminderReceiver::class.java)
+            val requestCode = generateRequestCodeForHabit(habitId)
+            val pendingIntent = PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_NO_CREATE
+            )
 
-                pendingIntent?.let {
-                    alarmManager.cancel(it)
-                    it.cancel()
-                }
+            pendingIntent?.let {
+                alarmManager.cancel(it)
+                it.cancel()
             }
         }.onFailure {
             it.printStackTrace()
@@ -109,7 +106,7 @@ class AndroidNotificationScheduler(
     }
 
     // Generate a unique request code for each habit and day combination
-    private fun generateRequestCodeForHabit(habitId: Long, dayOfWeek: DayOfWeek): Int {
-        return (habitId * 10 + dayOfWeek.ordinal).toInt()
+    private fun generateRequestCodeForHabit(habitId: Long): Int {
+        return (habitId * 10).toInt()
     }
 } 

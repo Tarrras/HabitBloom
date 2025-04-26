@@ -788,4 +788,16 @@ class HabitsRepository(
             existingHabit != null
         }
     }
+
+    /**
+     * Gets a list of all user habits without detailed information.
+     * This is a lightweight method for getting just the basic habit information.
+     *
+     * @return List of UserHabit objects
+     */
+    suspend fun getUserHabitsWithoutDetails(): List<UserHabit> {
+        return withContext(Dispatchers.IO) {
+            localDataSource.getAllUserHabits()
+        }
+    }
 }

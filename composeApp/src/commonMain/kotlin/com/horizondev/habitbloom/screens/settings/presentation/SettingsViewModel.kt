@@ -5,6 +5,7 @@ import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -19,6 +20,7 @@ class SettingsViewModel(
 ) : BloomViewModel<SettingsUiState, SettingsUiIntent>(
     SettingsUiState()
 ), KoinComponent {
+    private val TAG = "SettingsViewModel"
 
     init {
         // Listen for notification state changes
@@ -71,6 +73,32 @@ class SettingsViewModel(
 
             SettingsUiEvent.CloseThemeDialog -> {
                 updateState { it.copy(isThemeDialogVisible = false) }
+            }
+
+            SettingsUiEvent.ShowDeleteDataDialog -> {
+                updateState { it.copy(showDeleteDataDialog = true) }
+            }
+
+            SettingsUiEvent.DismissDeleteDataDialog -> {
+                updateState { it.copy(showDeleteDataDialog = false) }
+            }
+
+            SettingsUiEvent.ConfirmDeleteData -> {
+                launch {
+                    updateState { it.copy(isLoading = true, showDeleteDataDialog = false) }
+
+                    repository.resetAllAppData()
+                        .onSuccess {
+                            Napier.d("App data reset successfully", tag = TAG)
+                            // Navigate to the onboarding flow
+                            emitUiIntent(SettingsUiIntent.NavigateToOnboarding)
+                        }
+                        .onFailure { error ->
+                            Napier.e("Failed to reset app data", error, tag = TAG)
+                            // Stay on the current screen but update loading state
+                            updateState { it.copy(isLoading = false) }
+                        }
+                }
             }
         }
     }

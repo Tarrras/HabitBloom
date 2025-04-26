@@ -428,4 +428,10 @@
     <!-- Onboarding Page 3: Visual Growth -->
     <string name="onboarding_growth_title">Watch Your Garden Grow</string>
     <string name="onboarding_growth_desc">Every habit you maintain helps your garden flourish. See your efforts bloom into beautiful flowers!</string>
+
+    <!-- Add these two new strings in the Settings section -->
+    <string name="data_management">Data Management</string>
+    <string name="delete_all_data">Delete All Data</string>
+    <string name="delete_data_question">Delete All Data?</string>
+    <string name="delete_data_description">This will delete all your habits, tracking data, and app settings. The app will restart and return to the onboarding screen. This action cannot be undone.</string>
 </resources>

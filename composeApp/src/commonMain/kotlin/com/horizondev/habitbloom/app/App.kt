@@ -64,7 +64,13 @@ fun App() {
                 }
 
                 composable<AppRoute.MainRoute> {
-                    MainScreen()
+                    MainScreen(
+                        onNavigateToOnboarding = {
+                            navController.navigate(AppRoute.OnboardingRoute) {
+                                popUpTo(AppRoute.MainRoute) { inclusive = true }
+                            }
+                        }
+                    )
                 }
             }
         }

@@ -39,5 +39,17 @@ val dataModule = module {
 
     single { Settings().makeObservable() }
     singleOf(::AuthRepository)
-    singleOf(::ProfileRepository)
+    
+    // Update ProfileRepository with notificationScheduler parameter
+    single {
+        ProfileRepository(
+            remoteDataSource = get(),
+            settings = get(),
+            permissionsManager = get(),
+            habitsRepository = get(),
+            flowerHealthRepository = get(),
+            onboardingRepository = get(),
+            notificationScheduler = get()
+        )
+    }
 } 

@@ -250,8 +250,8 @@
     <string name="no_reminder_set">Нагадування не встановлено</string>
     <string name="select_reminder_time">Виберіть час нагадування</string>
     <string name="reminder_set_for">Нагадування встановлено на %1$s</string>
-    <string name="notification_permission_denied">Дозвіл на сповіщення відхилено. Нагадування не можуть бути увімкнені.</string>
-    <string name="notifications_required">Для нагадувань потрібен дозвіл на сповіщення. Надайте дозвіл у налаштуваннях додатку.</string>
+    <string name="notification_permission_denied">Дозвіл на сповіщення відхилено. Неможливо увімкнути нагадування.</string>
+    <string name="notifications_required">Для нагадувань потрібен дозвіл на сповіщення. Будь ласка, надайте дозвіл в налаштуваннях додатка.</string>
     <string name="failed_to_update_reminder_settings">Не вдалося оновити налаштування нагадувань</string>
 
     <!-- Calendar Screen -->
@@ -434,4 +434,9 @@
     <!-- Onboarding Page 3: Visual Growth -->
     <string name="onboarding_growth_title">Спостерігайте, як Росте Ваш Сад</string>
     <string name="onboarding_growth_desc">Кожна звичка, яку ви підтримуєте, допомагає вашому саду процвітати. Бачте, як ваші зусилля розквітають у прекрасні квіти!</string>
+
+    <!-- Delete Data strings -->
+    <string name="delete_all_data">Видалити всі дані</string>
+    <string name="delete_data_question">Видалити всі дані?</string>
+    <string name="delete_data_description">Це видалить усі ваші звички, дані відстеження та налаштування додатка. Додаток перезапуститься та повернеться до екрану вступу. Цю дію неможливо скасувати.</string>
 </resources>

@@ -5,20 +5,29 @@ import com.horizondev.habitbloom.common.settings.SETTINGS_NOTIFICATIONS_KEY
 import com.horizondev.habitbloom.common.settings.SETTINGS_NOTIFICATION_STATE_KEY
 import com.horizondev.habitbloom.common.settings.SETTINGS_THEME_KEY
 import com.horizondev.habitbloom.common.settings.ThemeOption
+import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
+import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
+import com.horizondev.habitbloom.screens.onboarding.domain.OnboardingRepository
 import com.horizondev.habitbloom.screens.settings.data.ProfileRemoteDataSource
 import com.horizondev.habitbloom.screens.settings.data.model.toDomainModel
 import com.russhwolf.settings.ObservableSettings
 import com.russhwolf.settings.coroutines.getBooleanFlow
 import com.russhwolf.settings.coroutines.getStringFlow
 import com.russhwolf.settings.set
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class ProfileRepository(
     private val remoteDataSource: ProfileRemoteDataSource,
     private val settings: ObservableSettings,
-    private val permissionsManager: PermissionsManager
+    private val permissionsManager: PermissionsManager,
+    private val habitsRepository: HabitsRepository,
+    private val flowerHealthRepository: FlowerHealthRepository,
+    private val onboardingRepository: OnboardingRepository,
+    private val notificationScheduler: NotificationScheduler
 ) {
     suspend fun getUserInfo() = remoteDataSource.getUser().mapCatching { it.toDomainModel() }
 
@@ -92,12 +101,35 @@ class ProfileRepository(
                     return Result.failure(Exception("Notification permission denied"))
                 }
             }
+        } else if (state == NotificationState.DISABLED) {
+            // If notifications are being disabled, cancel all habit reminders
+            cancelAllHabitReminders()
         }
 
         return runCatching {
             // Update both the new enum state and legacy boolean for backward compatibility
             settings[SETTINGS_NOTIFICATION_STATE_KEY] = state.toString()
             settings[SETTINGS_NOTIFICATIONS_KEY] = state.isEnabled()
+        }
+    }
+
+    /**
+     * Cancels all habit reminders for all user habits
+     * This is called when notifications are globally disabled
+     */
+    private suspend fun cancelAllHabitReminders() {
+        runCatching {
+            val userHabits = habitsRepository.getUserHabitsWithoutDetails()
+            userHabits.forEach { habit ->
+                notificationScheduler.cancelHabitReminder(habit.id)
+            }
+            Napier.d(tag = "ProfileRepository", message = "Cancelled all habit reminders")
+        }.onFailure {
+            Napier.e(
+                tag = "ProfileRepository",
+                message = "Failed to cancel habit reminders",
+                throwable = it
+            )
         }
     }
 
@@ -129,5 +161,33 @@ class ProfileRepository(
         option: ThemeOption
     ): Result<Unit> {
         return runCatching { settings[SETTINGS_THEME_KEY] = option.toString() }
+    }
+
+    /**
+     * Resets all app data, effectively resetting the app to a clean slate.
+     * This includes:
+     * - Deleting all habits and habit records
+     * - Clearing user preferences and settings
+     * - Resetting onboarding status
+     *
+     * @return Result<Unit> with success or failure
+     */
+    suspend fun resetAllAppData(): Result<Unit> {
+        return runCatching {
+            // Cancel all notifications
+            cancelAllHabitReminders()
+
+            // Reset onboarding completed status
+            onboardingRepository.setOnboardingCompleted(false)
+
+            // Delete all habits (which should cascade to habit records)
+            val userHabits = habitsRepository.getUserHabitsWithoutDetails()
+            userHabits.forEach { habit ->
+                habitsRepository.deleteUserHabit(habit.id)
+            }
+
+            // Clear all settings
+            settings.clear()
+        }
     }
 }

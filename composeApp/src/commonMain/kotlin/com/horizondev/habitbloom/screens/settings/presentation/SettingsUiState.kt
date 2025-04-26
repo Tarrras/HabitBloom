@@ -10,7 +10,8 @@ data class SettingsUiState(
     val isLoading: Boolean = false,
     val notificationState: NotificationState = NotificationState.NOT_DETERMINED,
     val themeMode: ThemeOption = ThemeOption.Device,
-    val isThemeDialogVisible: Boolean = false
+    val isThemeDialogVisible: Boolean = false,
+    val showDeleteDataDialog: Boolean = false
 ) {
     val notificationsEnabled: Boolean
         get() = notificationState.isEnabled()
@@ -25,6 +26,9 @@ sealed interface SettingsUiEvent {
     data object Logout : SettingsUiEvent
     data object OpenThemeDialog : SettingsUiEvent
     data object CloseThemeDialog : SettingsUiEvent
+    data object ShowDeleteDataDialog : SettingsUiEvent
+    data object DismissDeleteDataDialog : SettingsUiEvent
+    data object ConfirmDeleteData : SettingsUiEvent
 }
 
 /**
@@ -32,4 +36,5 @@ sealed interface SettingsUiEvent {
  */
 sealed interface SettingsUiIntent {
     data object NavigateToLogin : SettingsUiIntent
+    data object NavigateToOnboarding : SettingsUiIntent
 } 
