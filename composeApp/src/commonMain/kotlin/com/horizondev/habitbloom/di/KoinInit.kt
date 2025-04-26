@@ -13,6 +13,7 @@ class KoinInit {
                     remoteDataModule,
                     localDataModule,
                     domainModule,
+                    dataModule,
                     viewModelModule,
                     platformModule,
                     navigationModule

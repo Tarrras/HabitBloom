@@ -1,9 +1,8 @@
-package com.horizondev.habitbloom.app
+package com.horizondev.habitbloom.common
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.auth.domain.AuthRepository
-import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.onboarding.domain.OnboardingRepository
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,12 +16,11 @@ import kotlinx.coroutines.launch
  */
 data class AppUiState(
     val isLoading: Boolean = true,
-    val isOnboardingNeeded: Boolean = true
+    val isOnboardingNeeded: Boolean? = null
 )
 
 class AppViewModel(
     private val authRepository: AuthRepository,
-    private val habitsRepository: HabitsRepository,
     private val onboardingRepository: OnboardingRepository
 ) : ViewModel() {
     private val TAG = "AppViewModel"
@@ -61,12 +59,5 @@ class AppViewModel(
                 )
             }
         }
-
-        /*// Update flower health for habits that were missed while the app wasn't used
-        runCatching {
-            habitsRepository.updateFlowerHealthForMissedDays()
-        }.onFailure {
-            Napier.e("Failed to update flower health for missed days", it, tag = TAG)
-        }*/
     }
-}
+} 

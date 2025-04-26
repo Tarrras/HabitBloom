@@ -58,7 +58,7 @@ import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
- * Main screen with bottom navigation tabs and a FAB for habit addition.
+ * Main screen with bottom navigation tabs.
  */
 @Composable
 fun MainScreen() {
@@ -200,7 +200,7 @@ fun MainScreen() {
                                     navController.navigate(navItem.route) {
                                         // Pop up to the start destination of the graph to
                                         // avoid building up a large stack of destinations
-                                        popUpTo(navController.graph.findStartDestination().id) {
+                                        popUpTo(navController.graph.findStartDestination()) {
                                             saveState = true
                                         }
                                         // Avoid multiple copies of the same destination

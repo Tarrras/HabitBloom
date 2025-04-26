@@ -418,4 +418,20 @@
 
     <!-- Habit Related Errors -->
     <string name="habit_already_added">Ця звичка вже є у вашій колекції! Будь ласка, виберіть іншу звичку.</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Пропустити</string>
+    <string name="get_started">Почати</string>
+
+    <!-- Onboarding Page 1: Habit Tracking -->
+    <string name="onboarding_habit_title">Формуйте Кращі Звички</string>
+    <string name="onboarding_habit_desc">Відстежуйте та керуйте щоденними звичками за допомогою елегантного, інтуїтивного інтерфейсу, розробленого для вашого успіху.</string>
+
+    <!-- Onboarding Page 2: Consistency -->
+    <string name="onboarding_consistency_title">Підтримуйте Послідовність</string>
+    <string name="onboarding_consistency_desc">Залишайтеся мотивованими за допомогою серій, нагадувань та чіткого огляду свого прогресу для формування тривалих звичок.</string>
+
+    <!-- Onboarding Page 3: Visual Growth -->
+    <string name="onboarding_growth_title">Спостерігайте, як Росте Ваш Сад</string>
+    <string name="onboarding_growth_desc">Кожна звичка, яку ви підтримуєте, допомагає вашому саду процвітати. Бачте, як ваші зусилля розквітають у прекрасні квіти!</string>
 </resources>

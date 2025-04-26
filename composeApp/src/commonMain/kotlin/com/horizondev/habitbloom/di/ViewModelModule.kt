@@ -1,7 +1,7 @@
 package com.horizondev.habitbloom.di
 
 import CreatePersonalHabitViewModel
-import com.horizondev.habitbloom.app.AppViewModel
+import com.horizondev.habitbloom.common.AppViewModel
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.flowerdetail.HabitFlowerDetailViewModel
@@ -13,6 +13,7 @@ import com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary.Ad
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
+import com.horizondev.habitbloom.screens.onboarding.OnboardingViewModel
 import com.horizondev.habitbloom.screens.settings.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import org.koin.core.module.Module
@@ -46,4 +47,6 @@ val viewModelModule: Module = module {
     // Garden flow ViewModels
     viewModelOf(::HabitGardenViewModel)
     viewModelOf(::HabitFlowerDetailViewModel)
+
+    viewModelOf(::OnboardingViewModel)
 }

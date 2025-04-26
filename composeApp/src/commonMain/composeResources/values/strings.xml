@@ -412,4 +412,20 @@
 
     <!-- Habit Related Errors -->
     <string name="habit_already_added">This habit is already in your collection! Please choose a different habit.</string>
+
+    <!-- Onboarding -->
+    <string name="skip">Skip</string>
+    <string name="get_started">Get Started</string>
+
+    <!-- Onboarding Page 1: Habit Tracking -->
+    <string name="onboarding_habit_title">Build Better Habits</string>
+    <string name="onboarding_habit_desc">Track and manage your daily habits with an elegant, intuitive interface designed to help you succeed.</string>
+
+    <!-- Onboarding Page 2: Consistency -->
+    <string name="onboarding_consistency_title">Maintain Consistency</string>
+    <string name="onboarding_consistency_desc">Stay motivated with streaks, reminders, and a clear view of your progress to build lasting habits.</string>
+
+    <!-- Onboarding Page 3: Visual Growth -->
+    <string name="onboarding_growth_title">Watch Your Garden Grow</string>
+    <string name="onboarding_growth_desc">Every habit you maintain helps your garden flourish. See your efforts bloom into beautiful flowers!</string>
 </resources>
