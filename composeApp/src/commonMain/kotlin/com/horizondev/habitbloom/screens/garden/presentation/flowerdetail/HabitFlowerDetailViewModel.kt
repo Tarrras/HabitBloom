@@ -83,6 +83,9 @@ class HabitFlowerDetailViewModel(
             val isCompletedToday = habitInfo.records
                 .any { it.date == today && it.isCompleted }
 
+            val longestStreak = habitInfo.records.getLongestCompletionStreak()
+            val maxStage = FlowerGrowthStage.fromStreak(longestStreak)
+
             // Create the flower detail model
             HabitFlowerDetail(
                 habitId = habitInfo.userHabitId,
@@ -91,7 +94,7 @@ class HabitFlowerDetailViewModel(
                 iconUrl = habitInfo.iconUrl,
                 timeOfDay = habitInfo.timeOfDay,
                 currentStreak = habitInfo.daysStreak,
-                longestStreak = habitInfo.records.getLongestCompletionStreak(),
+                longestStreak = longestStreak,
                 startDate = habitInfo.startDate,
                 endDate = habitInfo.endDate,
                 reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
@@ -100,7 +103,8 @@ class HabitFlowerDetailViewModel(
                 flowerGrowthStage = growthStage,
                 flowerType = flowerType,
                 streaksToNextStage = streaksToNextStage,
-                flowerHealth = flowerHealth
+                flowerHealth = flowerHealth,
+                flowerMaxGrowthStage = maxStage
             )
         }
             .onEach { habitFlowerDetail ->

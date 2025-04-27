@@ -227,6 +227,41 @@ fun List<UserHabitRecord>.getLongestCompletionStreak(): Int {
     return maxStreak
 }
 
+fun List<UserHabitRecordFullInfo>.getLongestCompletionStreakFromFullRecords(): Int {
+    if (isEmpty()) return 0
+
+    // Sort records by date to ensure chronological order
+    val sortedRecords = this.sortedBy { it.date }
+
+    var maxStreak = 0
+    var currentStreak = 0
+    var lastDate: LocalDate? = null
+
+    for (record in sortedRecords) {
+        if (record.isCompleted) {
+            if (lastDate == null) {
+                // Starting a new streak
+                currentStreak = 1
+            } else if (record.date == lastDate.plus(1, DateTimeUnit.DAY)) {
+                // Continuing streak
+                currentStreak++
+            } else {
+                // Gap in dates, start a new streak
+                currentStreak = 1
+            }
+
+            maxStreak = maxOf(maxStreak, currentStreak)
+            lastDate = record.date
+        } else {
+            // Break in streak
+            currentStreak = 0
+            lastDate = null
+        }
+    }
+
+    return maxStreak
+}
+
 @Composable
 fun TimeOfDay.getChartBorder(): Color {
     return when (this) {

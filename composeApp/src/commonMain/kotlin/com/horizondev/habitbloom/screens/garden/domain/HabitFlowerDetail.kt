@@ -22,6 +22,7 @@ data class HabitFlowerDetail(
     val lastSevenDaysCompletions: List<DailyCompletion>,
     val isCompletedToday: Boolean,
     val flowerGrowthStage: FlowerGrowthStage,
+    val flowerMaxGrowthStage: FlowerGrowthStage,
     val flowerType: FlowerType,
     val streaksToNextStage: Int,
     val flowerHealth: FlowerHealth = FlowerHealth()

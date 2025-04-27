@@ -1,23 +1,16 @@
 package com.horizondev.habitbloom.screens.garden.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.ColorMatrix
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -30,7 +23,6 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
-import com.horizondev.habitbloom.screens.garden.domain.iconWidth
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
@@ -38,7 +30,6 @@ import dev.chrisbanes.haze.materials.HazeMaterials
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.current_streak
 import org.jetbrains.compose.resources.DrawableResource
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -74,54 +65,12 @@ fun HabitFlowerCell(
                 .padding(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Calculate the flower image resource based on the blooming stage and health
-            val flowerResource = remember(habitFlower.maxStage, habitFlower.health) {
-                getFlowerResource(
-                    bloomingStage = habitFlower.maxStage,
-                    health = habitFlower.health,
-                    timeOfDay = habitFlower.timeOfDay
-                )
-            }
-
-            Box(
-                contentAlignment = Alignment.Center
-            ) {
-                // Show a larger image for later stages
-                val displayedGrowthStage = FlowerDisplayUtils.determineDisplayGrowthStage(
-                    habitFlower.maxStage,
-                    habitFlower.health
-                )
-                val flowerSize = displayedGrowthStage.iconWidth()
-
-                // Calculate health-based visual effects
-                val saturation = if (habitFlower.health.isWilting) {
-                    // Desaturate based on health (0.7 to 1.0 based on health)
-                    0.7f + (habitFlower.health.value * 0.3f)
-                } else {
-                    1.0f // Full saturation when healthy
-                }
-
-                // Create color matrix for health-based visual effect
-                val colorMatrix = remember(habitFlower.health.value) {
-                    ColorMatrix().apply {
-                        setToSaturation(saturation)
-                    }
-                }
-
-                Image(
-                    painter = painterResource(flowerResource),
-                    contentDescription = habitFlower.name,
-                    modifier = Modifier
-                        .width(flowerSize)
-                        .alpha(if (habitFlower.health.isWilting) 0.9f else 1f),
-                    contentScale = ContentScale.FillWidth,
-                    colorFilter = if (habitFlower.health.isWilting) {
-                        ColorFilter.colorMatrix(colorMatrix)
-                    } else {
-                        null
-                    }
-                )
-            }
+            HabitFlowerIcon(
+                modifier = Modifier,
+                flowerMaxStage = habitFlower.maxStage,
+                flowerHealth = habitFlower.health,
+                flowerType = FlowerType.fromTimeOfDay(habitFlower.timeOfDay)
+            )
 
             // Habit name
             Text(

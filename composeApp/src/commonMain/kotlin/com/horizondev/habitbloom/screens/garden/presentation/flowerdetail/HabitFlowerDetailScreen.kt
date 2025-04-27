@@ -231,6 +231,7 @@ fun HabitFlowerDetailScreenContent(
                                     .fillMaxWidth(),
                                 flowerType = habitFlowerDetail.flowerType,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
+                                maxGrowthStage = habitFlowerDetail.flowerMaxGrowthStage,
                                 showWateringAnimation = uiState.showWateringAnimation,
                                 flowerHealth = habitFlowerDetail.flowerHealth
                             )

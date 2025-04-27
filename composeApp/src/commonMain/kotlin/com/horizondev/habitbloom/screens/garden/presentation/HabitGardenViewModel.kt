@@ -8,7 +8,7 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
-import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.utils.getLongestCompletionStreakFromFullRecords
 import com.horizondev.habitbloom.utils.getTimeOfDay
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,9 +17,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.plus
 
 /**
  * ViewModel for the Habit Garden screen.
@@ -129,7 +126,7 @@ class HabitGardenViewModel(
 
             // Calculate the longest streak from records
             val sortedRecords = records.sortedBy { it.date }
-            val longestStreak = calculateLongestStreak(sortedRecords)
+            val longestStreak = sortedRecords.getLongestCompletionStreakFromFullRecords()
             val maxStage = FlowerGrowthStage.fromStreak(longestStreak)
 
             // Create the flower object
@@ -150,44 +147,6 @@ class HabitGardenViewModel(
     }.catch { error ->
         Napier.e("Error processing garden data", error, tag = TAG)
         emit(emptyList())
-    }
-
-    /**
-     * Calculates the maximum streak achieved from a list of habit records
-     */
-    private fun calculateLongestStreak(records: List<UserHabitRecordFullInfo>): Int {
-        if (records.isEmpty()) return 0
-
-        var maxStreak = 0
-        var currentStreak = 0
-        var lastDate: LocalDate? = null
-
-        // Sort by date to ensure we process records chronologically
-        val sortedRecords = records.sortedBy { it.date }
-
-        for (record in sortedRecords) {
-            if (record.isCompleted) {
-                if (lastDate == null) {
-                    // Starting a new streak
-                    currentStreak = 1
-                } else if (record.date == lastDate.plus(1, DateTimeUnit.DAY)) {
-                    // Continuing streak
-                    currentStreak++
-                } else {
-                    // Gap in dates, start a new streak
-                    currentStreak = 1
-                }
-
-                maxStreak = maxOf(maxStreak, currentStreak)
-                lastDate = record.date
-            } else {
-                // Break in streak
-                currentStreak = 0
-                lastDate = null
-            }
-        }
-
-        return maxStreak
     }
 
     /**
