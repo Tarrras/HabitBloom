@@ -11,7 +11,6 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
-import com.horizondev.habitbloom.utils.getLongestCompletionStreak
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.failed_to_clear_history
 import habitbloom.composeapp.generated.resources.failed_to_update_reminder_settings
@@ -348,7 +347,7 @@ class HabitDetailsViewModel(
         info: UserHabitFullInfo
     ): UserHabitProgressUiState {
         val currentStreak = info.daysStreak
-        val bestStreak = info.records.getLongestCompletionStreak()
+        val bestStreak = 0
         val habitRecordsBeforeUntilToday = info.records
             .sortedBy {
                 it.date

@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.graphicsLayer
@@ -55,16 +58,18 @@ import kotlin.random.Random
 fun FlowerVisualization(
     flowerType: FlowerType,
     growthStage: FlowerGrowthStage,
-    maxGrowthStage: FlowerGrowthStage,
     flowerHealth: FlowerHealth,
+    level: Int,
     showWateringAnimation: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     // Calculate the animated scale for a subtle breathing effect
     val infiniteTransition = rememberInfiniteTransition()
+    // Vitality-driven subtle breathing effect: higher vitality -> slightly larger amplitude
+    val breathingTargetScale = 1f + (0.01f + 0.02f * flowerHealth.value.coerceIn(0f, 1f))
     val breathingScale by infiniteTransition.animateFloat(
         initialValue = 1f,
-        targetValue = 1.02f,
+        targetValue = breathingTargetScale,
         animationSpec = infiniteRepeatable(
             animation = tween(2000, easing = LinearEasing),
             repeatMode = RepeatMode.Reverse
@@ -93,9 +98,10 @@ fun FlowerVisualization(
         modifier = modifier.height(280.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Background particle effects
+        // Background particle effects scale with vitality (density from 50%..100%)
         if (!flowerHealth.isCritical) {
-            ParticleEffects(modifier = Modifier.fillMaxSize())
+            val density = 0.5f + (flowerHealth.value.coerceIn(0f, 1f) * 0.5f)
+            ParticleEffects(modifier = Modifier.fillMaxSize(), density = density)
         }
 
         Column(
@@ -110,21 +116,39 @@ fun FlowerVisualization(
                 modifier = Modifier.height(220.dp),
                 contentAlignment = Alignment.Center
             ) {
+                // Vitality-driven glow halo behind the flower
+                GlowHalo(
+                    intensity = flowerHealth.value.coerceIn(0f, 1f),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(180.dp)
+                        .alpha(0.7f)
+                )
+
                 // The flower image with effects (includes pot)
                 HabitFlowerIcon(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .scale(1.2f)
-                        .scale(if (flowerHealth.isWilting) 1f else breathingScale) // Subtle breathing animation when healthy
+                        .scale(breathingScale)
                         .graphicsLayer {
                             if (flowerHealth.isCritical) {
                                 rotationZ = rotationAngle.value
                             }
                         }
                         .alpha(if (flowerHealth.isWilting) 0.9f else 1f),
-                    flowerMaxStage = maxGrowthStage,
+                    // Display current level-based stage; visual regression handled internally
+                    flowerMaxStage = growthStage,
                     flowerHealth = flowerHealth,
                     flowerType = flowerType
+                )
+
+                // Tiny level stars around the flower (L2..L5 show 1..4 stars)
+                LevelStarsOverlay(
+                    starCount = (level - 1).coerceIn(0, 4),
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(200.dp)
                 )
 
                 // Water drops animation
@@ -148,7 +172,7 @@ fun FlowerVisualization(
 
                     Icon(
                         painter = painterResource(Res.drawable.ic_solid_water_drop),
-                        contentDescription = "Needs urgent watering",
+                        contentDescription = null,
                         tint = BloomTheme.colors.error,
                         modifier = Modifier
                             .size(28.dp)
@@ -159,6 +183,50 @@ fun FlowerVisualization(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun GlowHalo(intensity: Float, modifier: Modifier = Modifier) {
+    // Color shifts from secondary to primary as vitality grows
+    val inner = BloomTheme.colors.primary.copy(alpha = 0.45f * intensity)
+    val middle = BloomTheme.colors.primary.copy(alpha = 0.25f * intensity)
+    val outer = Color.Transparent
+
+    Canvas(modifier = modifier) {
+        val radius = size.minDimension / 2
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(inner, middle, outer),
+                center = center,
+                radius = radius
+            ),
+            radius = radius
+        )
+    }
+}
+
+@Composable
+private fun LevelStarsOverlay(starCount: Int, modifier: Modifier = Modifier) {
+    Box(modifier = modifier) {
+        val positions = listOf(
+            Alignment.TopCenter,
+            Alignment.CenterStart,
+            Alignment.CenterEnd,
+            Alignment.BottomCenter
+        )
+        repeat(starCount) { index ->
+            val align = positions.getOrNull(index) ?: Alignment.TopCenter
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = null,
+                tint = Color(0xFFFFD54F).copy(alpha = 0.9f),
+                modifier = Modifier
+                    .align(align)
+                    .size(16.dp)
+                    .alpha(0.9f)
+            )
         }
     }
 }
@@ -277,12 +345,13 @@ private fun WaterDropsAnimation(
  * Animated background particles for a lively scene, using leaf shapes.
  */
 @Composable
-private fun ParticleEffects(modifier: Modifier = Modifier) {
+private fun ParticleEffects(modifier: Modifier = Modifier, density: Float = 1f) {
     val infiniteTransition = rememberInfiniteTransition()
 
     // Create more varied particles with different sizes, colors and animation patterns
-    val particles = remember {
-        List(12) {
+    val particles = remember(density) {
+        val count = (12 * density.coerceIn(0.2f, 1.0f)).toInt().coerceAtLeast(3)
+        List(count) {
             ParticleState(
                 x = Random.nextFloat() * 400f,
                 y = Random.nextFloat() * 300f,

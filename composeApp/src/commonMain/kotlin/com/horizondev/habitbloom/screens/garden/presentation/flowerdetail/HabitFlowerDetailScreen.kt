@@ -54,6 +54,7 @@ import dev.chrisbanes.haze.hazeEffect
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.materials.HazeMaterials
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.habit_flower_details
 import habitbloom.composeapp.generated.resources.show_bloom_progress
 import org.jetbrains.compose.resources.painterResource
@@ -138,7 +139,7 @@ fun HabitFlowerDetailScreenContent(
                     .fillMaxSize(),
                 painter = painterResource(backgroundImage),
                 contentScale = ContentScale.Crop,
-                contentDescription = "background"
+                contentDescription = null
             )
 
             Column(
@@ -155,7 +156,7 @@ fun HabitFlowerDetailScreenContent(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = "back",
+                        contentDescription = stringResource(Res.string.back),
                         modifier = Modifier
                             .size(24.dp)
                             .clickable(
@@ -231,9 +232,9 @@ fun HabitFlowerDetailScreenContent(
                                     .fillMaxWidth(),
                                 flowerType = habitFlowerDetail.flowerType,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
-                                maxGrowthStage = habitFlowerDetail.flowerMaxGrowthStage,
-                                showWateringAnimation = uiState.showWateringAnimation,
-                                flowerHealth = habitFlowerDetail.flowerHealth
+                                flowerHealth = habitFlowerDetail.flowerHealth,
+                                level = habitFlowerDetail.level,
+                                showWateringAnimation = uiState.showWateringAnimation
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -256,8 +257,14 @@ fun HabitFlowerDetailScreenContent(
                                 habitName = habitFlowerDetail.name,
                                 timeOfDay = habitFlowerDetail.timeOfDay,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
-                                currentStreak = habitFlowerDetail.currentStreak,
-                                streaksToNextStage = habitFlowerDetail.streaksToNextStage,
+                                streakBasedGrowthStage = habitFlowerDetail.flowerGrowthStage,
+                                currentStreak = 0,
+                                streaksToNextStage = 0,
+                                level = habitFlowerDetail.level,
+                                vitalityPercent = (habitFlowerDetail.flowerHealth.value * 100).toInt(),
+                                xpToNextLevel = habitFlowerDetail.xpToNextLevel,
+                                xpInLevel = habitFlowerDetail.xpInLevel,
+                                xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
                                 flowerHealth = habitFlowerDetail.flowerHealth
                             )
 
@@ -310,10 +317,11 @@ fun HabitFlowerDetailScreenContent(
                         if (showGrowthPathBottomSheet) {
                             HabitGrowthPathBottomSheet(
                                 currentStage = habitFlowerDetail.flowerGrowthStage,
-                                streaksToNextStage = habitFlowerDetail.streaksToNextStage,
-                                currentStreak = habitFlowerDetail.currentStreak,
-                                onDismissRequest = { showGrowthPathBottomSheet = false },
-                                flowerType = habitFlowerDetail.flowerType
+                                flowerType = habitFlowerDetail.flowerType,
+                                level = habitFlowerDetail.level,
+                                xpInLevel = habitFlowerDetail.xpInLevel,
+                                xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
+                                onDismissRequest = { showGrowthPathBottomSheet = false }
                             )
                         }
                     }

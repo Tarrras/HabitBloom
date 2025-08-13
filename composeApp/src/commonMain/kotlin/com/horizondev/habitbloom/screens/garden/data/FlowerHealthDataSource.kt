@@ -52,33 +52,25 @@ class FlowerHealthDataSource(
                 endDate = currentDate
             ).sortedBy { it.date }
 
-            // Start with perfect health
-            var health = 1.0f
+            // EMA vitality based on scheduled records
+            val alpha = selectAlpha(userHabit.daysOfWeek.size)
+            var vitality = 0.6f
             var consecutiveMissedDays = 0
 
-            // Process each record in chronological order, applying the same penalty/recovery logic
             for (record in records) {
+                val x = if (record.isCompleted) 1f else 0f
+                vitality = alpha * x + (1 - alpha) * vitality
                 if (record.isCompleted) {
-                    // Reset consecutive missed days and increase health
                     consecutiveMissedDays = 0
-                    health = (health + FlowerHealth.COMPLETION_RECOVERY).coerceAtMost(1.0f)
                 } else {
-                    // Increase consecutive missed days and apply appropriate penalty
                     consecutiveMissedDays++
-                    val penalty = when (consecutiveMissedDays) {
-                        1 -> FlowerHealth.FIRST_MISS_PENALTY
-                        2 -> FlowerHealth.SECOND_MISS_PENALTY
-                        else -> FlowerHealth.ADDITIONAL_MISS_PENALTY
-                    }
-                    health = (health - penalty).coerceAtLeast(0.0f)
                 }
             }
 
-            // Apply rounding to avoid floating point issues
-            health = health.roundToDecimal(1)
+            vitality = vitality.roundToDecimal(2)
 
             return@withContext FlowerHealth(
-                value = health,
+                value = vitality,
                 consecutiveMissedDays = consecutiveMissedDays
             )
         } catch (e: Exception) {
@@ -133,32 +125,25 @@ class FlowerHealthDataSource(
             .sortedBy { it.date }
             .filter { it.date <= today }
 
-        // Start with perfect health
-        var health = 1.0f
+        val userHabit = localDataSource.getUserHabitInfo(userHabitId)
+        val alpha = selectAlpha(userHabit?.daysOfWeek?.size ?: 7)
+
+        var vitality = 0.6f
         var consecutiveMissedDays = 0
 
-        // Process each record in chronological order
         for (record in filteredRecords) {
+            val x = if (record.isCompleted) 1f else 0f
+            vitality = alpha * x + (1 - alpha) * vitality
             if (record.isCompleted) {
-                // Reset consecutive missed days and increase health
                 consecutiveMissedDays = 0
-                health = (health + FlowerHealth.COMPLETION_RECOVERY).coerceAtMost(1.0f)
             } else {
-                // Increase consecutive missed days and apply appropriate penalty
                 consecutiveMissedDays++
-                val penalty = when (consecutiveMissedDays) {
-                    1 -> FlowerHealth.FIRST_MISS_PENALTY
-                    2 -> FlowerHealth.SECOND_MISS_PENALTY
-                    else -> FlowerHealth.ADDITIONAL_MISS_PENALTY
-                }
-                health = (health - penalty).coerceAtLeast(0.0f)
             }
         }
 
-        // Apply rounding to avoid floating point issues
-        health = health.roundToDecimal(1)
+        vitality = vitality.roundToDecimal(2)
 
-        return FlowerHealth(value = health, consecutiveMissedDays = consecutiveMissedDays)
+        return FlowerHealth(value = vitality, consecutiveMissedDays = consecutiveMissedDays)
     }
 
     /**
@@ -210,5 +195,13 @@ class FlowerHealthDataSource(
         updateDate: LocalDate = getCurrentDate()
     ) = withContext(Dispatchers.IO) {
         // No-op in runtime calculation approach
+    }
+
+    private fun selectAlpha(daysPerWeek: Int): Float {
+        return when {
+            daysPerWeek >= 5 -> 0.15f
+            daysPerWeek >= 3 -> 0.10f
+            else -> 0.08f
+        }
     }
 }

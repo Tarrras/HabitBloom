@@ -3,12 +3,13 @@ package com.horizondev.habitbloom.screens.garden.presentation
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
+import com.horizondev.habitbloom.screens.garden.domain.calculateLevelProgress
+import com.horizondev.habitbloom.screens.garden.domain.levelToGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
-import com.horizondev.habitbloom.utils.getLongestCompletionStreakFromFullRecords
+import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.utils.getTimeOfDay
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -105,6 +106,9 @@ class HabitGardenViewModel(
     private fun loadGardenData(timeOfDay: TimeOfDay) = flow {
         // Get only the habit records for this time of day
         val habitRecords = repository.getHabitRecordsByTimeOfDay(timeOfDay)
+        // Also fetch basic habit configs to derive days-per-week for EMA alpha
+        val userHabits = repository.getUserHabitsWithoutDetails()
+        val habitIdToDaysPerWeek = userHabits.associate { it.id to it.daysOfWeek.size }
 
         // Group records by habit ID
         val habitGroups = habitRecords.groupBy { it.userHabitId }
@@ -120,24 +124,29 @@ class HabitGardenViewModel(
             // Get health in a single call
             val health = flowerHealthRepository.getFlowerHealth(habitId)
 
-            // Calculate the bloom stage based on streak
-            val streak = habitInfo.daysStreak
-            val bloomingStage = FlowerGrowthStage.fromStreak(streak)
-
-            // Calculate the longest streak from records
-            val sortedRecords = records.sortedBy { it.date }
-            val longestStreak = sortedRecords.getLongestCompletionStreakFromFullRecords()
-            val maxStage = FlowerGrowthStage.fromStreak(longestStreak)
+            // Calculate Level/Vitality via EMA and map to growth stage
+            val domainRecords: List<UserHabitRecord> = records.map { r ->
+                UserHabitRecord(
+                    id = r.id,
+                    userHabitId = r.userHabitId,
+                    date = r.date,
+                    isCompleted = r.isCompleted
+                )
+            }.sortedBy { it.date }
+            val daysPerWeek = habitIdToDaysPerWeek[habitId] ?: 7
+            val levelProgress = calculateLevelProgress(
+                records = domainRecords,
+                daysPerWeek = daysPerWeek
+            )
+            val bloomingStage = levelToGrowthStage(levelProgress.level)
 
             // Create the flower object
             HabitFlower(
                 habitId = habitId,
                 name = habitInfo.name,
                 iconUrl = habitInfo.iconUrl,
-                streak = streak,
                 timeOfDay = habitInfo.timeOfDay,
                 bloomingStage = bloomingStage,
-                maxStage = maxStage,
                 health = health
             )
         }

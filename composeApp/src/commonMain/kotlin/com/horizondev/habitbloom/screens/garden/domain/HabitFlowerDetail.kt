@@ -14,18 +14,20 @@ data class HabitFlowerDetail(
     val description: String,
     val iconUrl: String?,
     val timeOfDay: TimeOfDay,
-    val currentStreak: Int,
-    val longestStreak: Int,
     val startDate: LocalDate,
     val endDate: LocalDate? = null,
     val reminderTime: LocalTime?,
     val lastSevenDaysCompletions: List<DailyCompletion>,
     val isCompletedToday: Boolean,
     val flowerGrowthStage: FlowerGrowthStage,
-    val flowerMaxGrowthStage: FlowerGrowthStage,
     val flowerType: FlowerType,
-    val streaksToNextStage: Int,
-    val flowerHealth: FlowerHealth = FlowerHealth()
+    val flowerHealth: FlowerHealth = FlowerHealth(),
+    // New progress model fields
+    val level: Int = 1,
+    val totalXp: Int = 0,
+    val xpInLevel: Int = 0,
+    val xpForCurrentLevel: Int = 0,
+    val xpToNextLevel: Int = 0,
 ) {
     /**
      * Calculate if the flower is in a wilting state (showing visual signs of declining health).

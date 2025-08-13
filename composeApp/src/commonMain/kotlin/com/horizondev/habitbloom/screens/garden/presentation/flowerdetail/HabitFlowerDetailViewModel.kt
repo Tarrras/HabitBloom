@@ -3,13 +3,13 @@ package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
+import com.horizondev.habitbloom.screens.garden.domain.calculateLevelProgress
+import com.horizondev.habitbloom.screens.garden.domain.levelToGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
-import com.horizondev.habitbloom.utils.getLongestCompletionStreak
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
@@ -67,24 +67,20 @@ class HabitFlowerDetailViewModel(
                 }
                 .reversed()
 
-            // Consider both streak and health for the growth stage
-            val growthStage = FlowerGrowthStage.fromStreakAndHealth(
-                streak = habitInfo.daysStreak,
-                health = flowerHealth
+            // Compute Level/Vitality/XP using EMA over scheduled records
+            val levelProgress = calculateLevelProgress(
+                records = habitInfo.records,
+                daysPerWeek = habitInfo.days.size
             )
+
+            val growthStage = levelToGrowthStage(levelProgress.level)
 
             // Determine flower type based on time of day
             val flowerType = FlowerType.fromTimeOfDay(habitInfo.timeOfDay)
 
-            // Calculate streaks needed to reach next stage
-            val streaksToNextStage = FlowerGrowthStage.streakToNextStage(habitInfo.daysStreak)
-
             // Check if habit is completed today
             val isCompletedToday = habitInfo.records
                 .any { it.date == today && it.isCompleted }
-
-            val longestStreak = habitInfo.records.getLongestCompletionStreak()
-            val maxStage = FlowerGrowthStage.fromStreak(longestStreak)
 
             // Create the flower detail model
             HabitFlowerDetail(
@@ -93,8 +89,6 @@ class HabitFlowerDetailViewModel(
                 description = habitInfo.description,
                 iconUrl = habitInfo.iconUrl,
                 timeOfDay = habitInfo.timeOfDay,
-                currentStreak = habitInfo.daysStreak,
-                longestStreak = longestStreak,
                 startDate = habitInfo.startDate,
                 endDate = habitInfo.endDate,
                 reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
@@ -102,9 +96,12 @@ class HabitFlowerDetailViewModel(
                 isCompletedToday = isCompletedToday,
                 flowerGrowthStage = growthStage,
                 flowerType = flowerType,
-                streaksToNextStage = streaksToNextStage,
-                flowerHealth = flowerHealth,
-                flowerMaxGrowthStage = maxStage
+                flowerHealth = flowerHealth.copy(value = levelProgress.vitality),
+                level = levelProgress.level,
+                totalXp = levelProgress.totalXp,
+                xpInLevel = levelProgress.xpInLevel,
+                xpForCurrentLevel = levelProgress.xpForCurrentLevel,
+                xpToNextLevel = levelProgress.xpToNextLevel
             )
         }
             .onEach { habitFlowerDetail ->

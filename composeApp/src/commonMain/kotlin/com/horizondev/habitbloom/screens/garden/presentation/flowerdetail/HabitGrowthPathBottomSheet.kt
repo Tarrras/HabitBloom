@@ -42,9 +42,6 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.getTitle
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.bloom_stage_continued
-import habitbloom.composeapp.generated.resources.current_streak_info
-import habitbloom.composeapp.generated.resources.days_to_next_stage
 import habitbloom.composeapp.generated.resources.flower_health_system
 import habitbloom.composeapp.generated.resources.full_growth_path
 import habitbloom.composeapp.generated.resources.growth_stages_explained
@@ -56,14 +53,14 @@ import habitbloom.composeapp.generated.resources.health_rule_recovery
 import habitbloom.composeapp.generated.resources.health_status_critical
 import habitbloom.composeapp.generated.resources.health_status_healthy
 import habitbloom.composeapp.generated.resources.health_status_wilting
+import habitbloom.composeapp.generated.resources.level_label
+import habitbloom.composeapp.generated.resources.level_progress
 import habitbloom.composeapp.generated.resources.stage_description_bloom
 import habitbloom.composeapp.generated.resources.stage_description_bud
 import habitbloom.composeapp.generated.resources.stage_description_bush
 import habitbloom.composeapp.generated.resources.stage_description_seed
 import habitbloom.composeapp.generated.resources.stage_description_sprout
 import habitbloom.composeapp.generated.resources.stage_progress_info
-import habitbloom.composeapp.generated.resources.stage_threshold_next
-import habitbloom.composeapp.generated.resources.stage_threshold_started
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -72,7 +69,9 @@ import org.jetbrains.compose.resources.stringResource
  * A bottom sheet that displays the full growth path of a habit with an appealing visual design.
  *
  * @param currentStage The current growth stage of the habit.
- * @param streaksToNextStage Days needed to reach the next stage.
+ * @param level Current level of the habit.
+ * @param xpInLevel XP accumulated in current level.
+ * @param xpForCurrentLevel Total XP required for current level.
  * @param onDismissRequest Callback invoked when the bottom sheet is dismissed.
  */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,8 +79,9 @@ import org.jetbrains.compose.resources.stringResource
 fun HabitGrowthPathBottomSheet(
     currentStage: FlowerGrowthStage,
     flowerType: FlowerType,
-    streaksToNextStage: Int,
-    currentStreak: Int,
+    level: Int,
+    xpInLevel: Int,
+    xpForCurrentLevel: Int,
     onDismissRequest: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -93,15 +93,11 @@ fun HabitGrowthPathBottomSheet(
     val currentStageIndex = allStages.indexOf(currentStage)
     val totalStages = allStages.size
 
-    // Calculate progress to next stage (if not at max stage)
-    val progressToNextStage = if (currentStage == FlowerGrowthStage.BLOOM) {
-        1f // Max stage reached
-    } else {
-        val nextStage = allStages[currentStageIndex + 1]
-        val progressWithCurrentStage = currentStreak - currentStage.streakThreshold
-        val daysForCurrentStage = nextStage.streakThreshold - currentStage.streakThreshold
-        (progressWithCurrentStage.toFloat() / daysForCurrentStage).coerceIn(0f, 1f)
-    }
+    val levelProgressPercent =
+        if (xpForCurrentLevel <= 0) 1f else (xpInLevel.toFloat() / xpForCurrentLevel.toFloat()).coerceIn(
+            0f,
+            1f
+        )
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -179,9 +175,9 @@ fun HabitGrowthPathBottomSheet(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    // Display current streak info
+                    // Display current level
                     Text(
-                        text = stringResource(Res.string.current_streak_info, currentStreak),
+                        text = stringResource(Res.string.level_label, level),
                         style = BloomTheme.typography.body,
                         color = BloomTheme.colors.textColor.primary,
                         fontWeight = FontWeight.Normal
@@ -189,11 +185,11 @@ fun HabitGrowthPathBottomSheet(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    // Progress bar to next stage
-                    if (currentStage != FlowerGrowthStage.BLOOM) {
+                    // Level progress bar
+                    if (xpForCurrentLevel > 0) {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             BloomLinearProgressIndicator(
-                                percentage = progressToNextStage,
+                                percentage = levelProgressPercent,
                                 modifier = Modifier.fillMaxWidth()
                             )
 
@@ -204,49 +200,20 @@ fun HabitGrowthPathBottomSheet(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = stringResource(
-                                        Res.string.stage_threshold_started,
-                                        currentStage.streakThreshold
-                                    ),
+                                    text = stringResource(Res.string.level_progress),
                                     style = BloomTheme.typography.small,
                                     color = BloomTheme.colors.textColor.secondary
                                 )
 
                                 Text(
-                                    text = stringResource(
-                                        Res.string.stage_threshold_next,
-                                        allStages[currentStageIndex + 1].streakThreshold
-                                    ),
+                                    text = "${(levelProgressPercent * 100).toInt()}%",
                                     style = BloomTheme.typography.small,
                                     color = BloomTheme.colors.textColor.secondary
                                 )
                             }
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            Text(
-                                text = stringResource(
-                                    Res.string.days_to_next_stage,
-                                    streaksToNextStage
-                                ),
-                                style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.textColor.accent,
-                                fontWeight = FontWeight.Medium,
-                                textAlign = TextAlign.End,
-                                modifier = Modifier.fillMaxWidth()
-                            )
                         }
-                    } else {
-                        Text(
-                            text = stringResource(
-                                Res.string.bloom_stage_continued,
-                                currentStage.streakThreshold
-                            ),
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.textColor.secondary,
-                            textAlign = TextAlign.Center
-                        )
                     }
+                    // else BLOOM: keep the stage info card minimal
                 }
             }
 
@@ -582,13 +549,7 @@ private fun GrowthStagesPath(
                         modifier = Modifier.width(72.dp)
                     )
 
-                    // Streak threshold
-                    Text(
-                        text = "${stage.streakThreshold}+",
-                        style = BloomTheme.typography.small,
-                        color = BloomTheme.colors.textColor.secondary,
-                        textAlign = TextAlign.Center
-                    )
+                    // No streak thresholds anymore
                 }
             }
         }

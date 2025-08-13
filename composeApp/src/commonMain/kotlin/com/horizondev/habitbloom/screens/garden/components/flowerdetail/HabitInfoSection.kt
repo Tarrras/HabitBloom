@@ -14,31 +14,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.horizondev.habitbloom.core.designComponents.charts.BloomLinearProgressIndicator
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.garden.domain.FlowerDisplayUtils
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.getTitle
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.afternoon_habits_image
-import habitbloom.composeapp.generated.resources.completion
-import habitbloom.composeapp.generated.resources.completions
 import habitbloom.composeapp.generated.resources.congratulations_full_bloom
 import habitbloom.composeapp.generated.resources.current_stage
-import habitbloom.composeapp.generated.resources.current_streak
-import habitbloom.composeapp.generated.resources.day
-import habitbloom.composeapp.generated.resources.days
-import habitbloom.composeapp.generated.resources.days_in_row
 import habitbloom.composeapp.generated.resources.evening_habits_image
 import habitbloom.composeapp.generated.resources.flower_health_critical
 import habitbloom.composeapp.generated.resources.flower_health_impact
 import habitbloom.composeapp.generated.resources.flower_health_wilting
 import habitbloom.composeapp.generated.resources.flower_potential_stage
-import habitbloom.composeapp.generated.resources.more_completions_to_grow
+import habitbloom.composeapp.generated.resources.level_label
 import habitbloom.composeapp.generated.resources.morning_habits_image
-import habitbloom.composeapp.generated.resources.progress_to_next_stage
+import habitbloom.composeapp.generated.resources.vitality
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.stringResource
 
@@ -47,9 +41,11 @@ import org.jetbrains.compose.resources.stringResource
  *
  * @param habitName The name of the habit
  * @param timeOfDay The time of day associated with the habit
- * @param growthStage The current growth stage of the flower
- * @param currentStreak The current streak of the habit
- * @param streaksToNextStage The number of streaks needed to reach the next stage
+ * @param growthStage The current growth stage of the flower (already accounts for health)
+ * @param streakBasedGrowthStage The growth stage based only on streak (without health effects) [Deprecated]
+ * @param flowerHealth The health status of the flower
+ * @param currentStreak The current streak of the habit [Deprecated]
+ * @param streaksToNextStage The number of streaks needed to reach the next stage [Deprecated]
  * @param modifier Modifier for styling
  */
 @OptIn(ExperimentalResourceApi::class)
@@ -58,15 +54,19 @@ fun HabitInfoSection(
     habitName: String,
     timeOfDay: TimeOfDay,
     growthStage: FlowerGrowthStage,
+    streakBasedGrowthStage: FlowerGrowthStage,
     flowerHealth: FlowerHealth,
     currentStreak: Int,
     streaksToNextStage: Int,
+    level: Int,
+    vitalityPercent: Int,
+    xpToNextLevel: Int,
+    xpInLevel: Int,
+    xpForCurrentLevel: Int,
     modifier: Modifier = Modifier
 ) {
-    // Determine the actual display stage based on health impact
-    val displayedGrowthStage =
-        FlowerDisplayUtils.determineDisplayGrowthStage(growthStage, flowerHealth)
-    val isHealthImpactingStage = displayedGrowthStage != growthStage
+    // Determine if health is impacting the growth stage
+    val isHealthImpactingStage = growthStage != streakBasedGrowthStage
 
     // Determine health status for display
     val healthStatusColor = when {
@@ -121,7 +121,7 @@ fun HabitInfoSection(
                 Spacer(modifier = Modifier.width(4.dp))
 
                 Text(
-                    text = displayedGrowthStage.getTitle(),
+                    text = growthStage.getTitle(),
                     style = BloomTheme.typography.subheading,
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium
@@ -145,7 +145,7 @@ fun HabitInfoSection(
                     Spacer(modifier = Modifier.width(4.dp))
 
                     Text(
-                        text = growthStage.getTitle(),
+                        text = streakBasedGrowthStage.getTitle(),
                         style = BloomTheme.typography.body,
                         color = healthStatusColor,
                         fontWeight = FontWeight.Medium
@@ -169,63 +169,63 @@ fun HabitInfoSection(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Current streak
+            // Level and vitality
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(Res.string.current_streak) + ": ",
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.secondary
-                )
-
-                val daysText = if (currentStreak == 1)
-                    stringResource(Res.string.day)
-                else
-                    stringResource(Res.string.days)
-                
-                Text(
-                    text = stringResource(Res.string.days_in_row, currentStreak, daysText),
+                    text = stringResource(Res.string.level_label, level),
                     style = BloomTheme.typography.subheading,
                     color = BloomTheme.colors.primary,
                     fontWeight = FontWeight.Medium
+                )
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Text(
+                    text = stringResource(Res.string.vitality) + ": $vitalityPercent%",
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary
                 )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Progress to next stage
-            if (streaksToNextStage > 0) {
+            // Level progress within current level
+            if (xpForCurrentLevel > 0) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(Res.string.progress_to_next_stage),
+                        text = "Level progress",
                         style = BloomTheme.typography.body,
                         color = BloomTheme.colors.textColor.secondary
                     )
 
                     Spacer(modifier = Modifier.width(4.dp))
 
-                    val completionsText = if (streaksToNextStage == 1)
-                        stringResource(Res.string.completion)
-                    else
-                        stringResource(Res.string.completions)
-                    
+                    val percent =
+                        (xpInLevel.toFloat() / xpForCurrentLevel.toFloat()).coerceIn(0f, 1f)
                     Text(
-                        text = stringResource(
-                            Res.string.more_completions_to_grow,
-                            streaksToNextStage,
-                            completionsText
-                        ),
+                        text = "${(percent * 100).toInt()}%",
                         style = BloomTheme.typography.subheading,
                         color = BloomTheme.colors.textColor.primary,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center
                     )
                 }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                BloomLinearProgressIndicator(
+                    percentage = (xpInLevel.toFloat() / xpForCurrentLevel.toFloat()).coerceIn(
+                        0f,
+                        1f
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
             } else {
                 Text(
                     text = stringResource(Res.string.congratulations_full_bloom),
@@ -234,6 +234,10 @@ fun HabitInfoSection(
                     fontWeight = FontWeight.Medium
                 )
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Streak UI removed in favor of level/XP model
         }
     }
 } 
