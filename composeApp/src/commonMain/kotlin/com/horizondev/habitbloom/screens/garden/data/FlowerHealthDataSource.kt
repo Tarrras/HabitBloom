@@ -67,7 +67,12 @@ class FlowerHealthDataSource(
                 }
             }
 
-            vitality = vitality.roundToDecimal(2)
+            // If brand-new (no records), show full vitality; if all completed so far, also full
+            vitality = when {
+                records.isEmpty() -> 1.0f
+                records.all { it.isCompleted } -> 1.0f
+                else -> vitality
+            }.roundToDecimal(2)
 
             return@withContext FlowerHealth(
                 value = vitality,

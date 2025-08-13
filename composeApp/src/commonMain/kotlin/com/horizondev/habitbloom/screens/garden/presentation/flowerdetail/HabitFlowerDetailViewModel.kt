@@ -67,9 +67,10 @@ class HabitFlowerDetailViewModel(
                 }
                 .reversed()
 
-            // Compute Level/Vitality/XP using EMA over scheduled records
+            // Compute Level/Vitality/XP using EMA over scheduled records up to today (exclude future)
+            val progressRecords = habitInfo.records.filter { it.date <= today }
             val levelProgress = calculateLevelProgress(
-                records = habitInfo.records,
+                records = progressRecords,
                 daysPerWeek = habitInfo.days.size
             )
 

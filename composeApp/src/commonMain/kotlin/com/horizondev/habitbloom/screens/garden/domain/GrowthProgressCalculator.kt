@@ -45,6 +45,18 @@ fun calculateLevelProgress(
 ): LevelProgress {
     val sorted = records.sortedBy { it.date }
 
+    // Brand-new habits: show full vitality at the start
+    if (sorted.isEmpty()) {
+        return LevelProgress(
+            level = 1,
+            totalXp = 0,
+            xpInLevel = 0,
+            xpForCurrentLevel = (LEVEL_THRESHOLDS[1] - LEVEL_THRESHOLDS[0]),
+            xpToNextLevel = LEVEL_THRESHOLDS[1],
+            vitality = 1.0f
+        )
+    }
+
     val alpha = selectAlpha(daysPerWeek)
 
     var vitality = 0.6f // forgiving default starting vitality
@@ -54,7 +66,7 @@ fun calculateLevelProgress(
     var lastDate: LocalDate? = null
 
     for (record in sorted) {
-        // Only consider scheduled records; gaps imply non-scheduled days.
+        // Only consider scheduled records provided by caller (should be up to today)
         val x = if (record.isCompleted) 1f else 0f
 
         // Update EMA vitality for this scheduled day
@@ -86,6 +98,11 @@ fun calculateLevelProgress(
     val xpInLevel = (roundedXp - floor).coerceAtLeast(0)
     val xpForCurrentLevel = (ceil - floor).coerceAtLeast(0)
     val xpToNext = if (level < 5) (ceil - roundedXp).coerceAtLeast(0) else 0
+
+    // If all records so far are completed, treat vitality as perfect
+    if (sorted.all { it.isCompleted }) {
+        vitality = 1.0f
+    }
 
     return LevelProgress(
         level = level,

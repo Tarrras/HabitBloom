@@ -10,6 +10,7 @@ import com.horizondev.habitbloom.screens.garden.domain.levelToGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
+import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getTimeOfDay
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -132,7 +133,7 @@ class HabitGardenViewModel(
                     date = r.date,
                     isCompleted = r.isCompleted
                 )
-            }.sortedBy { it.date }
+            }.sortedBy { it.date }.filter { it.date <= getCurrentDate() }
             val daysPerWeek = habitIdToDaysPerWeek[habitId] ?: 7
             val levelProgress = calculateLevelProgress(
                 records = domainRecords,
