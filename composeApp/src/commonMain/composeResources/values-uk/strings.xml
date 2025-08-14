@@ -388,6 +388,13 @@
     <string name="health_rule_consecutive_misses">• Тривалі пропуски при низькій життєвій силі можуть тимчасово тьмянити вигляд, але рівні здобуваються XP і не втрачаються</string>
     <string name="health_rule_recovery">• Виконання звички поступово відновлює здоров'я</string>
     <string name="health_rule_vitality_boosts_xp">• Вища життєва сила дає більше XP за кожне виконання</string>
+    <string name="due_now">Нагадування зараз</string>
+    <string name="due_in_minutes">Нагадування через %1$d хв</string>
+    <string name="due_in_hours">Нагадування через %1$d год</string>
+    <string name="due_in_hours_minutes">Нагадування через %1$d год %2$d хв</string>
+    <string name="due_ago_minutes">%1$d хв тому</string>
+    <string name="due_ago_hours">%1$d год тому</string>
+    <string name="due_ago_hours_minutes">%1$d год %2$d хв тому</string>
     <string name="bloom_stage_continued">Ви досягли фінальної стадії з серією у %1$d+ днів! Продовжуйте, щоб підтримувати прекрасне цвітіння.</string>
 
     <string name="confirm">Підтвердити</string>

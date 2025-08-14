@@ -234,12 +234,16 @@ private fun LazyListScope.habitsList(
             }
         }
         items(uiState.userHabits, key = { it.id }) {
+            val vitalityPercent = uiState.habitVitalityPercent[it.userHabitId]
+            val dueInMinutes = uiState.habitDueInMinutes[it.userHabitId]
             UserHabitItem(
                 modifier = Modifier
                     .fillMaxWidth()
                     .animateItem()
                     .padding(horizontal = 16.dp),
                 habitInfo = it,
+                vitalityPercent = vitalityPercent,
+                dueInMinutes = dueInMinutes,
                 onCompletionStatusChanged = onHabitStatusChanged,
                 editModeEnabled = uiState.habitStatusEditMode,
                 onClick = { onHabitClicked(it.userHabitId) }

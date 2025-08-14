@@ -20,6 +20,13 @@ import habitbloom.composeapp.generated.resources._50_percentage_task_done
 import habitbloom.composeapp.generated.resources._75_percentage_task_done
 import habitbloom.composeapp.generated.resources._90_percentage_task_done
 import habitbloom.composeapp.generated.resources.afternoon
+import habitbloom.composeapp.generated.resources.due_ago_hours
+import habitbloom.composeapp.generated.resources.due_ago_hours_minutes
+import habitbloom.composeapp.generated.resources.due_ago_minutes
+import habitbloom.composeapp.generated.resources.due_in_hours
+import habitbloom.composeapp.generated.resources.due_in_hours_minutes
+import habitbloom.composeapp.generated.resources.due_in_minutes
+import habitbloom.composeapp.generated.resources.due_now
 import habitbloom.composeapp.generated.resources.evening
 import habitbloom.composeapp.generated.resources.friday_short
 import habitbloom.composeapp.generated.resources.garden_background_evening
@@ -246,5 +253,34 @@ fun ThemeOption.getGardenBackgroundRes(
 
         ThemeOption.Dark -> Res.drawable.garden_background_evening
         ThemeOption.Light -> Res.drawable.garden_background_morning
+    }
+}
+
+/**
+ * Format minutes until due into a localized short string.
+ * - <= 0: due now
+ * - < 60: in Xm
+ * - otherwise: in Hh or in Hh Mm
+ */
+@Composable
+fun formatDueInMinutes(minutes: Int): String {
+    return when {
+        minutes == 0 -> stringResource(Res.string.due_now)
+        minutes > 0 && minutes < 60 -> stringResource(Res.string.due_in_minutes, minutes)
+        minutes > 0 -> {
+            val h = minutes / 60
+            val m = minutes % 60
+            if (m == 0) stringResource(Res.string.due_in_hours, h)
+            else stringResource(Res.string.due_in_hours_minutes, h, m)
+        }
+        // minutes < 0 → already due (ago)
+        minutes < 0 && minutes > -60 -> stringResource(Res.string.due_ago_minutes, -minutes)
+        else -> {
+            val total = -minutes
+            val h = total / 60
+            val m = total % 60
+            if (m == 0) stringResource(Res.string.due_ago_hours, h)
+            else stringResource(Res.string.due_ago_hours_minutes, h, m)
+        }
     }
 }

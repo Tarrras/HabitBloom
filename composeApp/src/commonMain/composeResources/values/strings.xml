@@ -398,6 +398,13 @@
     <string name="health_rule_consecutive_misses">• Missing many consecutive days at low vitality may dim visuals, but levels are earned by XP and are never lost</string>
     <string name="health_rule_recovery">• Completing your habit restores health gradually</string>
     <string name="health_rule_vitality_boosts_xp">• Higher vitality yields more XP for each completion</string>
+    <string name="due_now">Due now</string>
+    <string name="due_in_minutes">in %1$dm</string>
+    <string name="due_in_hours">in %1$dh</string>
+    <string name="due_in_hours_minutes">in %1$dh %2$dm</string>
+    <string name="due_ago_minutes">%1$dm ago</string>
+    <string name="due_ago_hours">%1$dh ago</string>
+    <string name="due_ago_hours_minutes">%1$dh %2$dm ago</string>
     <string name="bloom_stage_continued">You've reached the final stage with a %1$d+ day streak! Keep going to maintain your beautiful bloom.</string>
 
     <string name="confirm">Confirm</string>
