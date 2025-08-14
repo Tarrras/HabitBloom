@@ -17,19 +17,7 @@ object FlowerDisplayUtils {
         actualGrowthStage: FlowerGrowthStage,
         flowerHealth: FlowerHealth
     ): FlowerGrowthStage {
-        // When vitality is critical, reduce the stage by 1
-        if (flowerHealth.isCritical) {
-            val currentIndex = actualGrowthStage.ordinal
-            // Ensure we don't go below SEED stage
-            return if (currentIndex > 0) {
-                FlowerGrowthStage.entries[currentIndex - 1]
-            } else {
-                FlowerGrowthStage.SEED
-            }
-        }
-
-        // If vitality is wilting but not critical, keep the same stage
-        // Visual effects (desaturation and alpha) will be applied by other code
+        // No stage regression; health influences only visual effects elsewhere
         return actualGrowthStage
     }
 } 

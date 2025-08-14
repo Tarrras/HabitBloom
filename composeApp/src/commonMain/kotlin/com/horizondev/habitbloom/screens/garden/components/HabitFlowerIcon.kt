@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.ColorMatrix
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.screens.garden.domain.FlowerDisplayUtils
 import com.horizondev.habitbloom.screens.garden.domain.FlowerGrowthStage
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
@@ -40,12 +39,8 @@ fun HabitFlowerIcon(
     flowerHealth: FlowerHealth,
     flowerType: FlowerType
 ) {
-    val displayedGrowthStage = remember(flowerMaxStage, flowerHealth) {
-        FlowerDisplayUtils.determineDisplayGrowthStage(
-            flowerMaxStage,
-            flowerHealth
-        )
-    }
+    // Align health with XP logic: do not regress stage; visuals only
+    val displayedGrowthStage = remember(flowerMaxStage, flowerHealth) { flowerMaxStage }
     val flowerResource = flowerType.getFlowerResource(displayedGrowthStage)
 
 

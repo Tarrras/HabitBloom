@@ -308,6 +308,8 @@
     <string name="streak_boost">Бонус серії</string>
     <string name="needs_urgent_watering">Потрібен терміновий полив</string>
     <string name="background">фон</string>
+    <string name="how_xp_works_title">Як працює XP</string>
+    <string name="how_xp_works_body">Виконуйте заплановані дні, щоб отримувати базовий XP. Життєва сила підсилює XP. Підтримуйте послідовність, щоб швидше підвищувати рівень!</string>
 
     <!-- Flower Growth Stages -->
     <string name="flower_stage_seed">Насіння</string>
@@ -359,19 +361,20 @@
     <string name="full_growth_path">Повний шлях росту</string>
     <string name="stage_progress_info">Етап %1$d з %2$d: %3$s</string>
     <string name="days_to_next_stage">%1$d днів до наступного етапу</string>
-    <string name="growth_system_explanation">Ваша звичка розквітає з підтримкою щоденних серій. Послідовність - ключ до успіху! Кожен етап росту відкривається на основі тривалості вашої серії.</string>
+    <string name="xp_system_title">Система XP</string>
+    <string name="xp_system_explanation">Отримуйте XP за виконання запланованих днів. Життєва сила може підсилювати здобутки. Досягаючи порогів XP, ви підвищуєте рівень, а рівень визначає стадію квітки.</string>
+    <string name="xp_current_in_level">%1$d/%2$d XP на цьому рівні</string>
+    <string name="xp_remaining_to_next">%1$d XP до наступного рівня</string>
+    <string name="growth_system_explanation">Ваша квітка розквітає зі зростанням рівня. Рівень отримується через XP, а не через серію.</string>
     <string name="growth_stages_explained">Пояснення етапів росту</string>
-    <string name="current_streak_info">Поточна серія: %1$d днів</string>
-    <string name="stage_threshold_started">Початок на %1$d днів</string>
-    <string name="stage_threshold_next">Наступний на %1$d днів</string>
-    <string name="bloom_stage_congrats_extended">Ви досягли фінального етапу з серією %1$d+ днів! Продовжуйте, щоб підтримувати прекрасне цвітіння.</string>
+    <string name="bloom_stage_congrats_extended">Ви досягли фінального етапу! Підтримуйте рівень здоров'я, щоб зберігати цвітіння.</string>
 
     <!-- Growth stage descriptions -->
-    <string name="stage_description_seed">Тільки початок (0-2 дні)</string>
-    <string name="stage_description_sprout">Формування звички (3-6 днів)</string>
-    <string name="stage_description_bush">Набираємо темп (7-13 днів)</string>
-    <string name="stage_description_bud">Формування стійкої звички (14-29 днів)</string>
-    <string name="stage_description_bloom">Звичка повністю сформована! (30+ днів)</string>
+    <string name="stage_description_seed">Початок шляху. Отримуйте XP, виконуючи завдання.</string>
+    <string name="stage_description_sprout">Перші успіхи. Більше послідовності — більше XP.</string>
+    <string name="stage_description_bush">Прогрес відчутний. Життєва сила посилює XP.</string>
+    <string name="stage_description_bud">Близько до розквіту. Продовжуйте стабільність.</string>
+    <string name="stage_description_bloom">Повне цвітіння. Підтримуйте здоров'я та рівень.</string>
 
     <!-- Flower Health -->
     <string name="flower_health">Здоров'я квітки</string>
@@ -382,8 +385,9 @@
     <string name="health_description">Життєва сила вашої квітки відображає постійність звички. Пропуск днів викликає в'янення, а регулярний догляд зберігає її здоровою.</string>
     <string name="flower_health_system">Система здоров'я квітки</string>
     <string name="health_rule_missing_days">• Пропуск 1-2 днів знижує здоров'я квітки, але не впливає на стадію росту</string>
-    <string name="health_rule_consecutive_misses">• Пропуск 3+ днів поспіль із критичним здоров'ям призведе до регресу</string>
+    <string name="health_rule_consecutive_misses">• Тривалі пропуски при низькій життєвій силі можуть тимчасово тьмянити вигляд, але рівні здобуваються XP і не втрачаються</string>
     <string name="health_rule_recovery">• Виконання звички поступово відновлює здоров'я</string>
+    <string name="health_rule_vitality_boosts_xp">• Вища життєва сила дає більше XP за кожне виконання</string>
     <string name="bloom_stage_continued">Ви досягли фінальної стадії з серією у %1$d+ днів! Продовжуйте, щоб підтримувати прекрасне цвітіння.</string>
 
     <string name="confirm">Підтвердити</string>

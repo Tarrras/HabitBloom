@@ -48,6 +48,7 @@ import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerVi
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitDetailSection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitInfoSection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.WaterHabitButton
+import com.horizondev.habitbloom.screens.garden.domain.roundToDecimal
 import com.horizondev.habitbloom.utils.getGardenBackgroundRes
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.hazeEffect
@@ -261,11 +262,16 @@ fun HabitFlowerDetailScreenContent(
                                 currentStreak = 0,
                                 streaksToNextStage = 0,
                                 level = habitFlowerDetail.level,
-                                vitalityPercent = (habitFlowerDetail.flowerHealth.value * 100).toInt(),
+                                vitalityPercent = (habitFlowerDetail.flowerHealth.value.roundToDecimal(
+                                    1
+                                ) * 100).toInt(),
                                 xpToNextLevel = habitFlowerDetail.xpToNextLevel,
                                 xpInLevel = habitFlowerDetail.xpInLevel,
                                 xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
-                                flowerHealth = habitFlowerDetail.flowerHealth
+                                flowerHealth = habitFlowerDetail.flowerHealth,
+                                onShowXpInfo = {
+                                    showGrowthPathBottomSheet = true
+                                }
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))

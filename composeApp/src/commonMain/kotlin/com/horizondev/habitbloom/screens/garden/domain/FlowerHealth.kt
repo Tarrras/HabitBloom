@@ -16,16 +16,16 @@ data class FlowerHealth(
     val consecutiveMissedDays: Int = 0,
 ) {
     companion object {
-        // Thresholds for health states
-        const val HEALTHY_THRESHOLD = 0.7f
-        const val WILTING_THRESHOLD = 0.3f
+        // Thresholds for health states (more resilient)
+        const val HEALTHY_THRESHOLD = 0.65f
+        const val WILTING_THRESHOLD = 0.2f
 
-        // Health penalties for missed days
-        const val FIRST_MISS_PENALTY = 0.3f
-        const val SECOND_MISS_PENALTY = 0.2f
-        const val ADDITIONAL_MISS_PENALTY = 0.15f
+        // Health penalties for missed days (lighter penalties)
+        const val FIRST_MISS_PENALTY = 0.15f
+        const val SECOND_MISS_PENALTY = 0.10f
+        const val ADDITIONAL_MISS_PENALTY = 0.08f
 
-        // Health recovery for completed days - set equal to first miss penalty for balance
+        // Health recovery for completed days
         const val COMPLETION_RECOVERY = 0.2f
     }
 
@@ -81,7 +81,7 @@ data class FlowerHealth(
      * @return True if the flower should regress, false otherwise
      */
     fun shouldRegress(): Boolean {
-        return consecutiveMissedDays >= 3 && isCritical
+        return consecutiveMissedDays >= 5 && isCritical
     }
 }
 

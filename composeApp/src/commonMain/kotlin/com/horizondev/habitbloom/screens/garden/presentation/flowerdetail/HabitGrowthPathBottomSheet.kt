@@ -45,11 +45,11 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.flower_health_system
 import habitbloom.composeapp.generated.resources.full_growth_path
 import habitbloom.composeapp.generated.resources.growth_stages_explained
-import habitbloom.composeapp.generated.resources.growth_system_explanation
 import habitbloom.composeapp.generated.resources.health_description
 import habitbloom.composeapp.generated.resources.health_rule_consecutive_misses
 import habitbloom.composeapp.generated.resources.health_rule_missing_days
 import habitbloom.composeapp.generated.resources.health_rule_recovery
+import habitbloom.composeapp.generated.resources.health_rule_vitality_boosts_xp
 import habitbloom.composeapp.generated.resources.health_status_critical
 import habitbloom.composeapp.generated.resources.health_status_healthy
 import habitbloom.composeapp.generated.resources.health_status_wilting
@@ -61,6 +61,10 @@ import habitbloom.composeapp.generated.resources.stage_description_bush
 import habitbloom.composeapp.generated.resources.stage_description_seed
 import habitbloom.composeapp.generated.resources.stage_description_sprout
 import habitbloom.composeapp.generated.resources.stage_progress_info
+import habitbloom.composeapp.generated.resources.xp_current_in_level
+import habitbloom.composeapp.generated.resources.xp_remaining_to_next
+import habitbloom.composeapp.generated.resources.xp_system_explanation
+import habitbloom.composeapp.generated.resources.xp_system_title
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -117,14 +121,14 @@ fun HabitGrowthPathBottomSheet(
                 text = stringResource(Res.string.full_growth_path),
                 style = BloomTheme.typography.heading,
                 color = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier.padding(bottom = 20.dp)
             )
 
-            // New: Growth System Explanation
+            // XP System Explanation
             BloomCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 24.dp),
                 onClick = {}
             ) {
                 Row(
@@ -143,7 +147,9 @@ fun HabitGrowthPathBottomSheet(
                     Spacer(modifier = Modifier.width(12.dp))
 
                     Text(
-                        text = stringResource(Res.string.growth_system_explanation),
+                        text = stringResource(Res.string.xp_system_title) + ": " + stringResource(
+                            Res.string.xp_system_explanation
+                        ),
                         style = BloomTheme.typography.small,
                         color = BloomTheme.colors.textColor.primary
                     )
@@ -154,7 +160,7 @@ fun HabitGrowthPathBottomSheet(
             BloomCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 24.dp),
                 onClick = {}
             ) {
                 Column(
@@ -173,7 +179,7 @@ fun HabitGrowthPathBottomSheet(
                         color = BloomTheme.colors.textColor.primary
                     )
 
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Display current level
                     Text(
@@ -183,9 +189,9 @@ fun HabitGrowthPathBottomSheet(
                         fontWeight = FontWeight.Normal
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                    // Level progress bar
+                    // Level progress bar and numbers
                     if (xpForCurrentLevel > 0) {
                         Column(modifier = Modifier.fillMaxWidth()) {
                             BloomLinearProgressIndicator(
@@ -193,7 +199,7 @@ fun HabitGrowthPathBottomSheet(
                                 modifier = Modifier.fillMaxWidth()
                             )
 
-                            Spacer(modifier = Modifier.height(8.dp))
+                            Spacer(modifier = Modifier.height(12.dp))
 
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -211,17 +217,42 @@ fun HabitGrowthPathBottomSheet(
                                     color = BloomTheme.colors.textColor.secondary
                                 )
                             }
+
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = stringResource(
+                                        Res.string.xp_current_in_level,
+                                        xpInLevel,
+                                        xpForCurrentLevel
+                                    ),
+                                    style = BloomTheme.typography.small,
+                                    color = BloomTheme.colors.textColor.secondary
+                                )
+                                val remaining = (xpForCurrentLevel - xpInLevel).coerceAtLeast(0)
+                                Text(
+                                    text = stringResource(
+                                        Res.string.xp_remaining_to_next,
+                                        remaining
+                                    ),
+                                    style = BloomTheme.typography.small,
+                                    color = BloomTheme.colors.textColor.secondary
+                                )
+                            }
                         }
                     }
                     // else BLOOM: keep the stage info card minimal
                 }
             }
 
-            // Stage information legend
+            // Stage information legend (XP mindset with icons)
             BloomCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 24.dp),
                 onClick = {}
             ) {
                 Column(
@@ -235,35 +266,21 @@ fun HabitGrowthPathBottomSheet(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                    StageExplanationItem(
-                        stage = FlowerGrowthStage.SEED,
-                        descriptionResId = Res.string.stage_description_seed
-                    )
-
-                    StageExplanationItem(
-                        stage = FlowerGrowthStage.SPROUT,
-                        descriptionResId = Res.string.stage_description_sprout
-                    )
-
-                    StageExplanationItem(
-                        stage = FlowerGrowthStage.BUSH,
-                        descriptionResId = Res.string.stage_description_bush
-                    )
-
-                    StageExplanationItem(
-                        stage = FlowerGrowthStage.BUD,
-                        descriptionResId = Res.string.stage_description_bud
-                    )
-
-                    StageExplanationItem(
-                        stage = FlowerGrowthStage.BLOOM,
-                        descriptionResId = Res.string.stage_description_bloom
+                    StageExplanationRow(
+                        items = listOf(
+                            FlowerGrowthStage.SEED to Res.string.stage_description_seed,
+                            FlowerGrowthStage.SPROUT to Res.string.stage_description_sprout,
+                            FlowerGrowthStage.BUSH to Res.string.stage_description_bush,
+                            FlowerGrowthStage.BUD to Res.string.stage_description_bud,
+                            FlowerGrowthStage.BLOOM to Res.string.stage_description_bloom,
+                        ),
+                        flowerType = flowerType
                     )
                 }
             }
 
             // Growth stages visualization
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             GrowthStagesPath(
                 allStages = allStages,
@@ -273,7 +290,7 @@ fun HabitGrowthPathBottomSheet(
             )
 
             // Health system explanation
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text(
@@ -282,7 +299,7 @@ fun HabitGrowthPathBottomSheet(
                     color = BloomTheme.colors.textColor.primary
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
                     text = stringResource(Res.string.health_description),
@@ -290,7 +307,7 @@ fun HabitGrowthPathBottomSheet(
                     color = BloomTheme.colors.textColor.secondary
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
                 // Health levels explanation
                 Row(
@@ -350,7 +367,7 @@ fun HabitGrowthPathBottomSheet(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 // Health system rules
                 Column(
@@ -376,6 +393,13 @@ fun HabitGrowthPathBottomSheet(
 
                     Text(
                         text = stringResource(Res.string.health_rule_recovery),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = stringResource(Res.string.health_rule_vitality_boosts_xp),
                         style = BloomTheme.typography.body,
                         color = BloomTheme.colors.textColor.secondary
                     )
@@ -430,6 +454,56 @@ private fun StageExplanationItem(
             style = BloomTheme.typography.small,
             color = BloomTheme.colors.textColor.secondary
         )
+    }
+}
+
+@Composable
+private fun StageExplanationRow(
+    items: List<Pair<FlowerGrowthStage, StringResource>>,
+    flowerType: FlowerType
+) {
+    Column {
+        items.forEach { (stage, desc) ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Icon bubble
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(40.dp)
+                        .background(
+                            color = BloomTheme.colors.primary.copy(alpha = 0.08f),
+                            shape = CircleShape
+                        )
+                ) {
+                    Image(
+                        painter = painterResource(flowerType.getFlowerResource(stage)),
+                        contentDescription = stage.getTitle(),
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stage.getTitle(),
+                        style = BloomTheme.typography.body,
+                        color = BloomTheme.colors.textColor.primary,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = stringResource(desc),
+                        style = BloomTheme.typography.small,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+                }
+            }
+        }
     }
 }
 

@@ -305,6 +305,8 @@
     <string name="progress_to_next_stage">Progress to next stage:</string>
     <string name="vitality">Vitality</string>
     <string name="xp_to_next_stage">XP to next stage</string>
+    <string name="how_xp_works_title">How XP works</string>
+    <string name="how_xp_works_body">Complete scheduled days to earn base XP. Vitality boosts XP gains. Maintain consistency to level up faster!</string>
     <string name="more_completions_to_grow">%1$d more %2$s to grow</string>
     <string name="days_in_row">%1$d %2$s in a row</string>
     <string name="last_seven_days">Last 7 Days</string>
@@ -366,7 +368,11 @@
     <string name="full_growth_path">Full Growth Path</string>
     <string name="stage_progress_info">Stage %1$d of %2$d: %3$s</string>
     <string name="days_to_next_stage">%1$d days to next stage</string>
-    <string name="growth_system_explanation">Your habit blooms as you maintain daily streaks. Consistency is key! Each growth stage is unlocked based on your streak length.</string>
+    <string name="xp_system_title">XP system</string>
+    <string name="xp_system_explanation">Earn XP by completing scheduled days. Your vitality can boost gains. Reaching XP thresholds increases your level, and level maps to the flower stage.</string>
+    <string name="xp_current_in_level">%1$d/%2$d XP this level</string>
+    <string name="xp_remaining_to_next">%1$d XP to next level</string>
+    <string name="growth_system_explanation">Your habit blooms as your level increases. Levels are earned through XP, not streak length.</string>
     <string name="growth_stages_explained">Growth Stages Explained</string>
     <string name="current_streak_info">Current streak: %1$d days</string>
     <string name="stage_threshold_started">Started at %1$d days</string>
@@ -389,8 +395,9 @@
     <string name="health_description">Your flower's vitality reflects your habit consistency. Missing days causes wilting, while regular maintenance keeps it healthy.</string>
     <string name="flower_health_system">Flower Health System</string>
     <string name="health_rule_missing_days">• Missing 1-2 days reduces flower health but doesn't affect growth stage</string>
-    <string name="health_rule_consecutive_misses">• Missing 3+ consecutive days with critical health will cause regression</string>
+    <string name="health_rule_consecutive_misses">• Missing many consecutive days at low vitality may dim visuals, but levels are earned by XP and are never lost</string>
     <string name="health_rule_recovery">• Completing your habit restores health gradually</string>
+    <string name="health_rule_vitality_boosts_xp">• Higher vitality yields more XP for each completion</string>
     <string name="bloom_stage_continued">You've reached the final stage with a %1$d+ day streak! Keep going to maintain your beautiful bloom.</string>
 
     <string name="confirm">Confirm</string>
@@ -413,7 +420,7 @@
     <string name="tap_to_edit_dates">Tap to edit dates</string>
 
     <string name="flower_potential_stage">Potential stage:</string>
-    <string name="flower_health_critical">Health critical: Your flower has regressed one stage. Water daily to recover!</string>
+    <string name="flower_health_critical">Health critical: Visuals may dim temporarily. Water daily to recover!</string>
     <string name="flower_health_wilting">Health wilting: Your flower is at risk. Regular watering will help it recover.</string>
     <string name="flower_health_impact">Health affects your flower's appearance. Maintain regular completion to keep it healthy.</string>
 

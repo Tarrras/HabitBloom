@@ -1,12 +1,20 @@
 package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
+import androidx.compose.animation.core.animateIntAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,10 +38,15 @@ import habitbloom.composeapp.generated.resources.flower_health_critical
 import habitbloom.composeapp.generated.resources.flower_health_impact
 import habitbloom.composeapp.generated.resources.flower_health_wilting
 import habitbloom.composeapp.generated.resources.flower_potential_stage
+import habitbloom.composeapp.generated.resources.how_xp_works_title
 import habitbloom.composeapp.generated.resources.level_label
+import habitbloom.composeapp.generated.resources.level_progress
 import habitbloom.composeapp.generated.resources.morning_habits_image
+import habitbloom.composeapp.generated.resources.needs_urgent_watering
 import habitbloom.composeapp.generated.resources.vitality
+import habitbloom.composeapp.generated.resources.xp_to_next_stage
 import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -63,7 +76,8 @@ fun HabitInfoSection(
     xpToNextLevel: Int,
     xpInLevel: Int,
     xpForCurrentLevel: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onShowXpInfo: () -> Unit = {}
 ) {
     // Determine if health is impacting the growth stage
     val isHealthImpactingStage = growthStage != streakBasedGrowthStage
@@ -95,6 +109,14 @@ fun HabitInfoSection(
                     TimeOfDay.Afternoon -> Res.drawable.afternoon_habits_image
                     TimeOfDay.Evening -> Res.drawable.evening_habits_image
                 }
+
+                Image(
+                    painter = painterResource(timeOfDayIcon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .size(36.dp)
+                )
 
                 // Habit name
                 Text(
@@ -174,20 +196,11 @@ fun HabitInfoSection(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(Res.string.level_label, level),
-                    style = BloomTheme.typography.subheading,
-                    color = BloomTheme.colors.primary,
-                    fontWeight = FontWeight.Medium
-                )
+                LevelChip(level = level)
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                Text(
-                    text = stringResource(Res.string.vitality) + ": $vitalityPercent%",
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.secondary
-                )
+                VitalityPill(vitalityPercent = vitalityPercent)
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -198,34 +211,51 @@ fun HabitInfoSection(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = "Level progress",
-                        style = BloomTheme.typography.body,
-                        color = BloomTheme.colors.textColor.secondary
-                    )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    val percent =
-                        (xpInLevel.toFloat() / xpForCurrentLevel.toFloat()).coerceIn(0f, 1f)
-                    Text(
-                        text = "${(percent * 100).toInt()}%",
-                        style = BloomTheme.typography.subheading,
-                        color = BloomTheme.colors.textColor.primary,
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
-                    )
+                    ProgressLabel(xpInLevel = xpInLevel, xpForCurrentLevel = xpForCurrentLevel)
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))
 
+                val percent = (xpInLevel.toFloat() / xpForCurrentLevel.toFloat()).coerceIn(0f, 1f)
                 BloomLinearProgressIndicator(
-                    percentage = (xpInLevel.toFloat() / xpForCurrentLevel.toFloat()).coerceIn(
-                        0f,
-                        1f
-                    ),
-                    modifier = Modifier.fillMaxWidth()
+                    percentage = percent,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .background(
+                            color = BloomTheme.colors.surface,
+                            shape = RoundedCornerShape(6.dp)
+                        )
                 )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                val xpRemaining = (xpForCurrentLevel - xpInLevel).coerceAtLeast(0)
+                if (xpRemaining > 0) {
+                    Text(
+                        text = stringResource(Res.string.xp_to_next_stage) + ": $xpRemaining",
+                        style = BloomTheme.typography.small,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+                // Learn more about XP system
+                Text(
+                    text = stringResource(Res.string.how_xp_works_title),
+                    style = BloomTheme.typography.small,
+                    color = BloomTheme.colors.primary,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .background(
+                            color = BloomTheme.colors.primary.copy(alpha = 0.08f),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .clickable(onClick = onShowXpInfo)
+                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+
             } else {
                 Text(
                     text = stringResource(Res.string.congratulations_full_bloom),
@@ -237,7 +267,95 @@ fun HabitInfoSection(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Streak UI removed in favor of level/XP model
+            // Health tip for low vitality
+            if (flowerHealth.isCritical || flowerHealth.isWilting) {
+                BloomCard(onClick = {}) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        androidx.compose.foundation.layout.Box(
+                            modifier = Modifier
+                                .size(8.dp)
+                                .background(
+                                    if (flowerHealth.isCritical) BloomTheme.colors.error else BloomTheme.colors.secondary,
+                                    CircleShape
+                                )
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = stringResource(Res.string.needs_urgent_watering),
+                            style = BloomTheme.typography.small,
+                            color = if (flowerHealth.isCritical) BloomTheme.colors.error else BloomTheme.colors.secondary,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
+            }
         }
     }
-} 
+}
+
+@Composable
+private fun LevelChip(level: Int) {
+    androidx.compose.foundation.layout.Box(
+        modifier = Modifier
+            .background(
+                color = BloomTheme.colors.primary.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = stringResource(Res.string.level_label, level),
+            style = BloomTheme.typography.body,
+            color = BloomTheme.colors.primary,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun VitalityPill(vitalityPercent: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .background(
+                color = BloomTheme.colors.surface,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp)
+    ) {
+        // Animated vitality number for subtle feedback
+        val animated = animateIntAsState(targetValue = vitalityPercent, animationSpec = tween(300))
+        Text(
+            text = stringResource(Res.string.vitality) + ": ${animated.value}%",
+            style = BloomTheme.typography.body,
+            color = BloomTheme.colors.textColor.secondary
+        )
+    }
+}
+
+@Composable
+private fun ProgressLabel(xpInLevel: Int, xpForCurrentLevel: Int) {
+    val percent = (xpInLevel.toFloat() / xpForCurrentLevel.toFloat()).coerceIn(0f, 1f)
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(Res.string.level_progress),
+            style = BloomTheme.typography.body,
+            color = BloomTheme.colors.textColor.secondary
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text = "${(percent * 100).toInt()}%",
+            style = BloomTheme.typography.subheading,
+            color = BloomTheme.colors.textColor.primary,
+            fontWeight = FontWeight.Medium,
+            textAlign = TextAlign.Center
+        )
+    }
+}

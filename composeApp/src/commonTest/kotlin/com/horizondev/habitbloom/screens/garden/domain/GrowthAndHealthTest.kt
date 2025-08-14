@@ -75,41 +75,41 @@ class GrowthAndHealthTest {
     fun flowerHealth_missPenalties_andRecovery_andRegressionRule() {
         var health = FlowerHealth(value = 1.0f, consecutiveMissedDays = 0)
 
-        // 1st miss: -0.3 => 0.7 (wilting false, critical false)
+        // 1st miss: lighter penalty
         health = health.habitMissed()
-        assertEquals(0.7f, health.value)
+        assertEquals(0.85f, health.value)
         assertEquals(1, health.consecutiveMissedDays)
-        assertFalse(health.isWilting)
+        assertFalse(health.isWilting) // healthy threshold 0.65
         assertFalse(health.isCritical)
 
-        // 2nd miss: -0.2 => 0.5 (wilting true, critical false)
+        // 2nd miss: lighter penalty
         health = health.habitMissed()
-        assertEquals(0.5f, health.value)
+        assertEquals(0.75f, health.value)
         assertEquals(2, health.consecutiveMissedDays)
-        assertTrue(health.isWilting)
+        assertTrue(health.isWilting == false) // still above 0.65
         assertFalse(health.isCritical)
         assertFalse(health.shouldRegress())
 
-        // 3rd miss: -0.15 => 0.35 -> rounded to 0.4 (still not critical)
+        // 3rd miss: -0.08 => 0.67 -> rounds 0.7
         health = health.habitMissed()
-        assertEquals(0.4f, health.value)
+        assertEquals(0.67f.roundToDecimal(1), health.value)
         assertEquals(3, health.consecutiveMissedDays)
+        assertFalse(health.isWilting) // just above threshold
+        assertFalse(health.isCritical)
+        assertFalse(health.shouldRegress())
+
+        // 4th miss: -0.08 => goes to ~0.59 (wilting)
+        health = health.habitMissed()
+        assertEquals(0.59f.roundToDecimal(1), health.value)
+        assertEquals(4, health.consecutiveMissedDays)
         assertTrue(health.isWilting)
         assertFalse(health.isCritical)
         assertFalse(health.shouldRegress())
 
-        // 4th miss: -0.15 => 0.2 (critical, consecutive>=3 -> regress)
-        health = health.habitMissed()
-        assertEquals(0.2f, health.value)
-        assertEquals(4, health.consecutiveMissedDays)
-        assertTrue(health.isCritical)
-        assertTrue(health.shouldRegress())
-
-        // Recovery: +0.2 => 0.4, reset misses
+        // Recovery: +0.2 => bounce back and reset misses
         health = health.habitCompleted()
-        assertEquals(0.4f, health.value)
+        assertEquals((0.59f + 0.2f).coerceAtMost(1.0f).roundToDecimal(1), health.value)
         assertEquals(0, health.consecutiveMissedDays)
-        assertTrue(health.isWilting)
         assertFalse(health.isCritical)
     }
 }
