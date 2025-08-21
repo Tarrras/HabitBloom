@@ -282,7 +282,7 @@ class HabitDetailsViewModel(
                                     visuals = BloomSnackbarVisuals(
                                         message = if (enabled) getString(
                                             Res.string.reminder_set_for,
-                                            formatTime(time!!, use24HourFormat = false)
+                                            formatTime(time!!, use24HourFormat = true)
                                         ) else getString(
                                             Res.string.reminder_disabled
                                         ),
@@ -347,13 +347,24 @@ class HabitDetailsViewModel(
         info: UserHabitFullInfo
     ): UserHabitProgressUiState {
         val currentStreak = info.daysStreak
-        val bestStreak = 0
         val habitRecordsBeforeUntilToday = info.records
             .sortedBy {
                 it.date
             }.filter {
                 it.date <= getCurrentDate()
             }
+
+        // Longest run of consecutive completed scheduled records (up to today)
+        var bestStreak = 0
+        var run = 0
+        for (record in habitRecordsBeforeUntilToday) {
+            if (record.isCompleted) {
+                run += 1
+                if (run > bestStreak) bestStreak = run
+            } else {
+                run = 0
+            }
+        }
 
         val totalDone = habitRecordsBeforeUntilToday.count { it.isCompleted }
         val overallRate = habitRecordsBeforeUntilToday.let {
