@@ -7,40 +7,40 @@ kamelImage = "0.9.5"
 lifecycleCommon = "2.8.4"
 multiplatformSettingsCoroutines = "1.3.0"
 multiplatformSettingsVersion = "1.3.0"
-navigationCompose = "2.9.0-alpha14"
+navigationCompose = "2.9.0-beta05"
 permissions = "0.19.1"
-sqlDelight = "2.0.0"
-firebaseBom = "33.2.0"
+sqlDelight = "2.0.2"
+firebaseBom = "34.1.0"
 supabaseBom = "3.1.2"
 firebaseCommonKtx = "20.3.3"
-kotlin = "2.1.10"
-compose = "1.7.3"
-koinCore = "3.5.6"
+kotlin = "2.2.0"
+compose = "1.8.2"
+koinCore = "4.0.2"
 koinAndroid = "3.5.6"
-gradle = "8.5.2"
+gradle = "8.9.1"
 statelyCommon = "2.0.5"
 statelyIsoCollections = "2.0.5"
 statelyIsolate = "2.0.5"
-multiplatformSettings = "1.1.1"
+multiplatformSettings = "1.3.0"
 koin-compose = "4.0.2"
-core = "1.13.1"
+core = "1.17.0"
 jna = "5.14.0"
 koalaplotCore = "0.8.0"
 kotlinxCoroutinesSwing = "1.8.1"
-kotlinxSerializationJson = "1.7.1"
-kotlinxDateTime = "0.6.0"
+kotlinxSerializationJson = "1.8.0"
+kotlinxDateTime = "0.6.2"
 material3WindowSizeClassMultiplatform = "0.5.0"
 napier = "2.7.1"
-core-library-desugaring = "2.0.4"
+core-library-desugaring = "2.1.5"
 toast4j = "0.2.0"
-compose-activity = "1.9.0"
+compose-activity = "1.10.1"
 spotless = "6.25.0"
 accompanist-systemUIController = "0.34.0"
-ktor = "3.0.3"
+ktor = "3.1.1"
 
-google-services-plugin = "4.4.2"
-crashlitycs-plugin = "3.0.1"
-firebase-gitlive-sdk = "2.1.0"
+google-services-plugin = "4.4.3"
+crashlitycs-plugin = "3.0.6"
+firebase-gitlive-sdk = "2.3.0"
 
 [libraries]
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "androidDriver" }
@@ -81,7 +81,7 @@ kotlinX-dateTime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.
 multiplatformSettings-noArg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettings" }
 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
-firebase-common-ktx = { module = "com.google.firebase:firebase-common-ktx" }
+firebase-common-ktx = { module = "com.google.firebase:firebase-common" }
 firebase-android-crashlytics-ktx = { module = "com.google.firebase:firebase-crashlytics" }
 
 gitlive-firebase-kotlin-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }

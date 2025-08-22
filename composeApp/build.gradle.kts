@@ -22,27 +22,12 @@ kotlin {
     }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
-        }
-    }
-
-    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
-        binaries.withType<org.jetbrains.kotlin.gradle.plugin.mpp.Framework> {
-            @OptIn(ExperimentalKotlinGradlePluginApi::class)
-            transitiveExport = true
-            compilations.all {
-                kotlinOptions.freeCompilerArgs += arrayOf(
-                    "-linker-options",
-                    "-lsqlite3",
-                    "-Xbinary=bundleId=com.horizondev.habitbloom.HabitBloom"
-                )
-            }
         }
     }
 
@@ -58,7 +43,7 @@ kotlin {
 
             implementation(libs.koin.android)
 
-            implementation(libs.firebase.bom)
+            implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.common.ktx)
             implementation(libs.firebase.android.crashlytics.ktx)
 
@@ -177,7 +162,7 @@ kotlin {
 
 android {
     namespace = "com.horizondev.habitbloom"
-    compileSdk = 35
+    compileSdk = 36
 
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     sourceSets["main"].res.srcDirs("src/androidMain/res")
@@ -186,7 +171,7 @@ android {
     defaultConfig {
         applicationId = "com.horizondev.habitbloom"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
     }
