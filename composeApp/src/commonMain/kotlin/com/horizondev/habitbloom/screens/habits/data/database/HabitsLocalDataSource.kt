@@ -197,10 +197,7 @@ class HabitsLocalDataSource(
             val existingDays = existingHabit.daysOfWeek.split(",").map {
                 DayOfWeek.valueOf(it)
             }
-            val mergedDays = (existingDays + userHabit.daysOfWeek)
-                .toSet()
-                .sortedBy { it.ordinal }
-                .joinToString(",") { it.name }
+            val mergedDays = (existingDays + userHabit.daysOfWeek).mapToString()
 
             userHabitsQueries.updateUserHabitById(
                 startDate = mergedStartDay.toString(),

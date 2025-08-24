@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
@@ -20,6 +21,8 @@ import habitbloom.composeapp.generated.resources._50_percentage_task_done
 import habitbloom.composeapp.generated.resources._75_percentage_task_done
 import habitbloom.composeapp.generated.resources._90_percentage_task_done
 import habitbloom.composeapp.generated.resources.afternoon
+import habitbloom.composeapp.generated.resources.daily_progress
+import habitbloom.composeapp.generated.resources.daily_progress_alt
 import habitbloom.composeapp.generated.resources.due_ago_hours
 import habitbloom.composeapp.generated.resources.due_ago_hours_minutes
 import habitbloom.composeapp.generated.resources.due_ago_minutes
@@ -28,17 +31,29 @@ import habitbloom.composeapp.generated.resources.due_in_hours_minutes
 import habitbloom.composeapp.generated.resources.due_in_minutes
 import habitbloom.composeapp.generated.resources.due_now
 import habitbloom.composeapp.generated.resources.evening
+import habitbloom.composeapp.generated.resources.evening_progress
+import habitbloom.composeapp.generated.resources.friday
 import habitbloom.composeapp.generated.resources.friday_short
 import habitbloom.composeapp.generated.resources.garden_background_evening
 import habitbloom.composeapp.generated.resources.garden_background_morning
+import habitbloom.composeapp.generated.resources.ic_lucid_moon
+import habitbloom.composeapp.generated.resources.ic_lucid_sun
+import habitbloom.composeapp.generated.resources.ic_lucid_sunrise
+import habitbloom.composeapp.generated.resources.monday
 import habitbloom.composeapp.generated.resources.monday_short
 import habitbloom.composeapp.generated.resources.morning
+import habitbloom.composeapp.generated.resources.morning_progress
 import habitbloom.composeapp.generated.resources.no_habits_today
+import habitbloom.composeapp.generated.resources.saturday
 import habitbloom.composeapp.generated.resources.saturday_short
 import habitbloom.composeapp.generated.resources.some_percentage_task_done
+import habitbloom.composeapp.generated.resources.sunday
 import habitbloom.composeapp.generated.resources.sunday_short
+import habitbloom.composeapp.generated.resources.thursday
 import habitbloom.composeapp.generated.resources.thursday_short
+import habitbloom.composeapp.generated.resources.tuesday
 import habitbloom.composeapp.generated.resources.tuesday_short
+import habitbloom.composeapp.generated.resources.wednesday
 import habitbloom.composeapp.generated.resources.wednesday_short
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
@@ -48,6 +63,7 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -163,6 +179,39 @@ fun TimeOfDay.getTitle(): String {
         TimeOfDay.Morning -> stringResource(Res.string.morning)
         TimeOfDay.Afternoon -> stringResource(Res.string.afternoon)
         TimeOfDay.Evening -> stringResource(Res.string.evening)
+    }
+}
+
+@Composable
+fun TimeOfDay?.getProgressTitle(): String {
+    return when (this) {
+        TimeOfDay.Morning -> stringResource(Res.string.morning_progress)
+        TimeOfDay.Afternoon -> stringResource(Res.string.daily_progress)
+        TimeOfDay.Evening -> stringResource(Res.string.evening_progress)
+        else -> stringResource(Res.string.daily_progress_alt)
+    }
+}
+
+@Composable
+fun TimeOfDay.getIcon(): Painter {
+    return when (this) {
+        TimeOfDay.Morning -> painterResource(Res.drawable.ic_lucid_sunrise)
+        TimeOfDay.Afternoon -> painterResource(Res.drawable.ic_lucid_sun)
+        TimeOfDay.Evening -> painterResource(Res.drawable.ic_lucid_moon)
+    }
+}
+
+@Composable
+fun DayOfWeek.getTitle(): String {
+    return when (this) {
+        DayOfWeek.MONDAY -> stringResource(Res.string.monday)
+        DayOfWeek.TUESDAY -> stringResource(Res.string.tuesday)
+        DayOfWeek.WEDNESDAY -> stringResource(Res.string.wednesday)
+        DayOfWeek.THURSDAY -> stringResource(Res.string.thursday)
+        DayOfWeek.FRIDAY -> stringResource(Res.string.friday)
+        DayOfWeek.SATURDAY -> stringResource(Res.string.saturday)
+        DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
+        else -> stringResource(Res.string.sunday)
     }
 }
 

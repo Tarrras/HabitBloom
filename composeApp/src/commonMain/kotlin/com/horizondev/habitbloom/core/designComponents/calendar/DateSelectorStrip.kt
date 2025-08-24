@@ -1,5 +1,7 @@
 package com.horizondev.habitbloom.core.designComponents.calendar
 
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -15,10 +17,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -89,40 +95,77 @@ private fun RowScope.DateItem(
     val today = getCurrentDate()
     val isToday = date == today
 
-    val backgroundColor = when {
-        isSelected -> BloomTheme.colors.primary
-        else -> Color.Transparent
-    }
+    // Scale animation for selected item
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.05f else 1f,
+        animationSpec = tween(300),
+        label = "scale_animation"
+    )
 
     val textColor = when {
-        isSelected -> Color.White
-        else -> BloomTheme.colors.textColor.primary
+        isSelected -> Color.White  // text-white
+        else -> BloomTheme.colors.textColor.primary.copy(alpha = 0.8f)  // text-foreground/80
     }
 
     val shape = RoundedCornerShape(16.dp)
 
+    // Brand gradient for selected item (from-teal-500 to-cyan-500)
+    val selectedGradient = Brush.linearGradient(
+        colors = listOf(
+            BloomTheme.colors.primary,   // teal-500
+            BloomTheme.colors.secondary  // cyan-500
+        )
+    )
+
     Box(
         modifier = modifier
             .weight(1f)
-            .padding(horizontal = 4.dp)
-            .clip(shape)
-            .background(
-                color = backgroundColor,
+            .padding(horizontal = 2.dp)
+            .scale(scale)
+            .shadow(
+                elevation = 8.dp,
                 shape = shape
             )
+            .clip(shape)
             .then(
-                if (isToday && !isSelected) {
-                    Modifier.border(
-                        width = 2.dp,
-                        color = BloomTheme.colors.primary,
-                        shape = shape
-                    )
-                } else {
-                    Modifier
+                when {
+                    isToday && !isSelected -> {
+                        Modifier.background(
+                            color = BloomTheme.colors.card,
+                            shape = shape
+                        ).border(
+                            width = 2.dp,
+                            color = BloomTheme.colors.primary,
+                            shape = shape
+                        )
+                    }
+
+                    isSelected -> {
+                        // Selected: gradient with shadow (bg-gradient-to-br from-teal-500 to-cyan-500 shadow-lg)
+                        Modifier
+                            .background(
+                                brush = selectedGradient,
+                                shape = shape
+                            )
+                    }
+
+                    else -> {
+                        // Non-selected: card background with border (bg-card/20 border border-border/20)
+                        Modifier
+                            .background(
+                                color = BloomTheme.colors.card,
+                                shape = shape
+                            )
+                            .border(
+                                width = 1.dp,
+                                color = BloomTheme.colors.border.copy(alpha = 0.2f),
+                                shape = shape
+                            )
+                    }
                 }
             )
             .clickable { onDateSelected(date) }
-            .padding(vertical = 12.dp, horizontal = 8.dp),
+            .padding(vertical = 16.dp, horizontal = 12.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -131,18 +174,21 @@ private fun RowScope.DateItem(
             // Day number (e.g., "3")
             Text(
                 text = date.dayOfMonth.toString(),
-                style = BloomTheme.typography.heading,
+                style = BloomTheme.typography.h6.copy(
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
+                ),
                 color = textColor,
-                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(2.dp))
 
             // Day name (e.g., "SAT")
             Text(
-                text = date.dayOfWeek.getShortTitle().take(3),
-                style = BloomTheme.typography.small,
+                text = date.dayOfWeek.getShortTitle().take(2),
+                style = BloomTheme.typography.caption.copy(
+                    fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
+                ),
                 color = textColor,
                 textAlign = TextAlign.Center
             )

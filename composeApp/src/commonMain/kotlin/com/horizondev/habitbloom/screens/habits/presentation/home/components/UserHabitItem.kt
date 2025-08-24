@@ -1,168 +1,169 @@
 package com.horizondev.habitbloom.screens.habits.presentation.home.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.checkbox.BloomCheckBox
-import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
+import androidx.compose.ui.unit.sp
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
-import com.horizondev.habitbloom.utils.formatDueInMinutes
-import com.horizondev.habitbloom.utils.getChartBorder
-import com.horizondev.habitbloom.utils.getChartColor
-import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.level_label
-import org.jetbrains.compose.resources.stringResource
+import com.horizondev.habitbloom.utils.clippedShadow
 
 @Composable
-fun UserHabitItem(
+fun UserHabitCard(
     modifier: Modifier = Modifier,
     habitInfo: UserHabitRecordFullInfo,
     editModeEnabled: Boolean,
-    vitalityPercent: Int? = null,
-    dueInMinutes: Int? = null,
     onCompletionStatusChanged: (Long, Boolean) -> Unit,
     onClick: () -> Unit = {},
 ) {
-    val isCompleted = habitInfo.isCompleted
+    val completed = habitInfo.isCompleted
+    val wholeItemMutableInteractionState = remember { MutableInteractionSource() }
+    val completionMutableInteractionState = remember { MutableInteractionSource() }
 
-    BloomCard(
-        modifier = modifier,
-        onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = habitInfo.timeOfDay.getChartColor()
-        ),
-        border = BorderStroke(width = 3.dp, color = habitInfo.timeOfDay.getChartBorder()),
-        elevation = CardDefaults.cardElevation(0.dp)
+    val isWholeItemPressed by wholeItemMutableInteractionState.collectIsPressedAsState()
+    val isCompletionPressed by completionMutableInteractionState.collectIsPressedAsState()
+    val isPressed = isWholeItemPressed || isCompletionPressed
+
+    val scale by animateFloatAsState(
+        targetValue = when {
+            isPressed -> 0.95f
+            else -> 1f
+        },
+        animationSpec = tween(200)
+    )
+
+    val bgBrush = if (completed) {
+        Brush.horizontalGradient(
+            colors = listOf(
+                BloomTheme.colors.primary.copy(alpha = 0.1f),
+                BloomTheme.colors.secondary.copy(alpha = 0.1f)
+            )
+        )
+    } else Brush.horizontalGradient(
+        colors = listOf(
+            BloomTheme.colors.card.copy(alpha = 0.4f),
+            BloomTheme.colors.card.copy(alpha = 0.4f),
+        )
+    )
+
+    val borderColor = if (completed) BloomTheme.colors.primary.copy(alpha = 0.3f)
+    else BloomTheme.colors.border.copy(alpha = 0.6f)
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .scale(scale)
+            .clippedShadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(16.dp))
+            .background(bgBrush)
+            .clickable(
+                indication = ripple(),
+                interactionSource = wholeItemMutableInteractionState,
+                onClick = { onClick() }
+            )
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+            // Icon container
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
             ) {
-                // Avatar with vitality ring
-                Box(
-                    modifier = Modifier
-                        .size(60.dp)
-                        .background(BloomTheme.colors.surface, CircleShape)
-                        .clip(CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    BloomNetworkImage(
-                        iconUrl = habitInfo.iconUrl,
-                        size = 44.dp,
-                        contentDescription = habitInfo.name,
-                    )
-                    // Vitality arc overlay (simple colored halo)
-                    if (vitalityPercent != null) {
-                        val color = when {
-                            vitalityPercent >= 65 -> BloomTheme.colors.success
-                            vitalityPercent >= 20 -> BloomTheme.colors.secondary
-                            else -> BloomTheme.colors.error
-                        }
-                        Box(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .background(color.copy(alpha = 0.10f), CircleShape)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = habitInfo.name,
-                            style = BloomTheme.typography.heading,
-                            color = BloomTheme.colors.textColor.primary,
-                            textDecoration = if (isCompleted) TextDecoration.LineThrough else null,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        // Level chip placeholder (uses level string for now)
-                        Text(
-                            text = stringResource(Res.string.level_label, 1),
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.primary,
-                            modifier = Modifier
-                                .background(
-                                    color = BloomTheme.colors.primary.copy(alpha = 0.12f),
-                                    shape = RoundedCornerShape(12.dp)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = habitInfo.description,
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.secondary,
-                            modifier = Modifier.weight(1f)
-                        )
-                        // Due soon hint
-                        if (dueInMinutes != null) {
-                            val dueText = formatDueInMinutes(dueInMinutes)
-                            Text(
-                                text = dueText,
-                                style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.textColor.secondary,
-                                modifier = Modifier
-                                    .background(
-                                        color = BloomTheme.colors.primary.copy(alpha = 0.08f),
-                                        shape = RoundedCornerShape(10.dp)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-                    // Completion control: only a checkbox, enabled only for today
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (editModeEnabled) {
-                            BloomCheckBox(
-                                size = 28.dp,
-                                checked = habitInfo.isCompleted,
-                                onCheckedChange = { isChecked ->
-                                    onCompletionStatusChanged(habitInfo.id, isChecked)
-                                },
-                                iconSize = 16.dp,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                        }
-                    }
-                }
+                BloomNetworkImage(
+                    iconUrl = habitInfo.iconUrl,
+                    contentDescription = habitInfo.name,
+                    size = 56.dp,
+                    shape = CircleShape
+                )
             }
 
-            // Remove streak badge; XP/level UI lives in detail for now
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = habitInfo.name,
+                    color = if (completed) BloomTheme.colors.foreground.copy(alpha = 0.75f)
+                    else BloomTheme.colors.foreground,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(
+                        if (completed) BloomTheme.colors.primary else Color.Transparent
+                    )
+                    .border(
+                        width = 2.dp,
+                        color = if (completed) BloomTheme.colors.primary else BloomTheme.colors.mutedForeground.copy(
+                            alpha = 0.3f
+                        ),
+                        shape = RoundedCornerShape(50)
+                    ).clickable(
+                        enabled = editModeEnabled,
+                        interactionSource = completionMutableInteractionState,
+                        indication = null,
+                        onClick = {
+                            onCompletionStatusChanged(habitInfo.id, habitInfo.isCompleted.not())
+                        }
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                this@Row.AnimatedVisibility(
+                    visible = completed,
+                    enter = fadeIn() + scaleIn(),
+                    exit = fadeOut()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(8.dp)
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.White)
+                    )
+                }
+            }
         }
     }
 }

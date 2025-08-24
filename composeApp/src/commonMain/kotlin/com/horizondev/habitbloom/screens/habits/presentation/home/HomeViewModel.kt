@@ -75,15 +75,14 @@ class HomeViewModel(
             Pair(date, timeOfDay)
         }.flatMapLatest { (date, timeOfDay) ->
             updateState { it.copy(isLoading = true) }
-            // For each date/timeOfDay combo, load the habits and transform the result
             loadHabitsForDateAndTimeOfDay(date, timeOfDay)
         }.onEach { filteredState ->
             // Update the UI state with the filtered habits
             updateState { currentState ->
                 currentState.copy(
                     userHabits = filteredState.habits,
-                    habitsCount = filteredState.totalCount,
-                    completedHabitsCount = filteredState.completedCount,
+                    totalHabitsCountForTimeOfDay = filteredState.totalHabitsCountForTimeOfDay,
+                    completedHabitsCountForTimeOfDay = filteredState.completedHabitsCountForTimeOfDay,
                     userCompletedAllHabitsForTimeOfDay = filteredState.allCompleted,
                     isLoading = false
                 )
@@ -146,8 +145,8 @@ class HomeViewModel(
                 // Create a state object with all the calculated values
                 FilteredHabitState(
                     habits = filteredHabits,
-                    totalCount = allHabits.size,
-                    completedCount = allHabits.count { it.isCompleted },
+                    totalHabitsCountForTimeOfDay = filteredHabits.count(),
+                    completedHabitsCountForTimeOfDay = filteredHabits.count { it.isCompleted },
                     allCompleted = filteredHabits.isNotEmpty() &&
                             filteredHabits.all { it.isCompleted }
                 )
@@ -223,15 +222,15 @@ class HomeViewModel(
      */
     private data class FilteredHabitState(
         val habits: List<UserHabitRecordFullInfo>,
-        val totalCount: Int,
-        val completedCount: Int,
+        val totalHabitsCountForTimeOfDay: Int,
+        val completedHabitsCountForTimeOfDay: Int,
         val allCompleted: Boolean
     ) {
         companion object {
             fun empty() = FilteredHabitState(
                 habits = emptyList(),
-                totalCount = 0,
-                completedCount = 0,
+                totalHabitsCountForTimeOfDay = 0,
+                completedHabitsCountForTimeOfDay = 0,
                 allCompleted = false
             )
         }
