@@ -1,42 +1,42 @@
 [versions]
-androidDriver = "2.0.0"
-calendarComposeMultiplatform = "2.6.0-beta01"
-coilCompose = "3.1.0"
-haze = "1.5.2"
-kamelImage = "0.9.5"
-lifecycleCommon = "2.8.4"
+androidDriver = "2.1.0"
+calendarComposeMultiplatform = "2.8.0"
+coilCompose = "3.3.0"
+haze = "1.6.10"
+lifecycleCommon = "2.9.2"
+materialIconsExtended = "1.7.3"
 multiplatformSettingsCoroutines = "1.3.0"
 multiplatformSettingsVersion = "1.3.0"
 navigationCompose = "2.9.0-beta05"
-permissions = "0.19.1"
-sqlDelight = "2.0.2"
+permissions = "0.20.0"
+sqlDelight = "2.1.0"
 firebaseBom = "34.1.0"
-supabaseBom = "3.1.2"
+supabaseBom = "3.2.2"
 firebaseCommonKtx = "20.3.3"
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 compose = "1.8.2"
-koinCore = "4.0.2"
-koinAndroid = "3.5.6"
+koinCore = "4.1.0"
+koinAndroid = "4.1.0"
 gradle = "8.9.1"
-statelyCommon = "2.0.5"
-statelyIsoCollections = "2.0.5"
-statelyIsolate = "2.0.5"
+statelyCommon = "2.1.0"
+statelyIsoCollections = "2.1.0"
+statelyIsolate = "2.1.0"
 multiplatformSettings = "1.3.0"
-koin-compose = "4.0.2"
+koin-compose = "4.1.0"
 core = "1.17.0"
-jna = "5.14.0"
-koalaplotCore = "0.8.0"
-kotlinxCoroutinesSwing = "1.8.1"
-kotlinxSerializationJson = "1.8.0"
-kotlinxDateTime = "0.6.2"
+jna = "5.17.0"
+koalaplotCore = "0.9.1"
+kotlinxCoroutinesSwing = "1.10.2"
+kotlinxSerializationJson = "1.9.0"
+kotlinxDateTime = "0.7.1"
 material3WindowSizeClassMultiplatform = "0.5.0"
 napier = "2.7.1"
 core-library-desugaring = "2.1.5"
 toast4j = "0.2.0"
 compose-activity = "1.10.1"
-spotless = "6.25.0"
-accompanist-systemUIController = "0.34.0"
-ktor = "3.1.1"
+spotless = "7.2.1"
+accompanist-systemUIController = "0.36.0"
+ktor = "3.2.3"
 
 google-services-plugin = "4.4.3"
 crashlitycs-plugin = "3.0.6"
@@ -53,7 +53,6 @@ coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", 
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
 haze-materials = { module = "dev.chrisbanes.haze:haze-materials", version.ref = "haze" }
 jna = { module = "net.java.dev.jna:jna", version.ref = "jna" }
-kamel-image = { module = "media.kamel:kamel-image", version.ref = "kamelImage" }
 koalaplot-core = { module = "io.github.koalaplot:koalaplot-core", version.ref = "koalaplotCore" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koinCore" }
 
@@ -65,6 +64,7 @@ kotlinx-coroutines-swing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 kotlinX-serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationJson" }
 lifecycle-common = { module = "org.jetbrains.androidx.lifecycle:lifecycle-common", version.ref = "lifecycleCommon" }
 lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleCommon" }
+material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 material3-window-size-multiplatform = { module = "dev.chrisbanes.material3:material3-window-size-class-multiplatform", version.ref = "material3WindowSizeClassMultiplatform" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettingsVersion" }
 multiplatform-settings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettingsCoroutines" }

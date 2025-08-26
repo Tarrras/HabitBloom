@@ -132,6 +132,9 @@ kotlin {
             implementation(libs.haze)
             implementation(libs.haze.materials)
 
+            implementation(libs.material.icons.extended)
+
+
         }
 
         commonTest.dependencies {
@@ -202,7 +205,7 @@ android {
     }
 
     defaultConfig {
-        resourceConfigurations.addAll(listOf("en", "uk"))
+        androidResources.localeFilters.addAll(listOf("en", "uk"))
     }
 
     bundle {
