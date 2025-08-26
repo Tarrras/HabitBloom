@@ -410,8 +410,8 @@ private fun FullScreenCalendar(
                 val date = calendarDay.date
                 val kotlinDate = LocalDate(
                     year = date.year,
-                    monthNumber = date.monthNumber,
-                    dayOfMonth = date.dayOfMonth
+                    month = date.month,
+                    day = date.day
                 )
 
                 val habitsForDay = uiState.habitsByDate[kotlinDate] ?: emptyList()
@@ -454,8 +454,8 @@ private fun ImprovedCalendarDay(
     val date = remember(calendarDay) {
         LocalDate(
             year = calendarDay.date.year,
-            monthNumber = calendarDay.date.monthNumber,
-            dayOfMonth = calendarDay.date.dayOfMonth
+            month = calendarDay.date.month,
+            day = calendarDay.date.day
         )
     }
 
@@ -504,7 +504,7 @@ private fun ImprovedCalendarDay(
         ) {
             // Day number with appropriate styling
             Text(
-                text = calendarDay.date.dayOfMonth.toString(),
+                text = calendarDay.date.day.toString(),
                 style = BloomTheme.typography.body.copy(
                     fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal
                 ),

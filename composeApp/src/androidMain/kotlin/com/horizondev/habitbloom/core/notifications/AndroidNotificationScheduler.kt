@@ -35,8 +35,8 @@ class AndroidNotificationScheduler(
                 putExtra("HABIT_DESCRIPTION", description)
                 putExtra("DAY_OF_WEEK", date.dayOfWeek.ordinal)
                 putExtra("YEAR", date.year)
-                putExtra("MONTH", date.monthNumber)
-                putExtra("DAY", date.dayOfMonth)
+                putExtra("MONTH", date.month)
+                putExtra("DAY", date.day)
             }
 
             val requestCode = generateRequestCodeForHabit(habitId)
@@ -51,7 +51,7 @@ class AndroidNotificationScheduler(
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.YEAR, date.year)
                 set(Calendar.MONTH, date.monthNumber - 1) // Java Calendar months are 0-based
-                set(Calendar.DAY_OF_MONTH, date.dayOfMonth)
+                set(Calendar.DAY_OF_MONTH, date.day)
                 set(Calendar.HOUR_OF_DAY, time.hour)
                 set(Calendar.MINUTE, time.minute)
                 set(Calendar.SECOND, 0)

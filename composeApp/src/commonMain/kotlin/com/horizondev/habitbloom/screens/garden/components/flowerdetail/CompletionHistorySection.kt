@@ -157,7 +157,7 @@ private fun DayCompletionItem(
 
         // Day of month
         Text(
-            text = date.dayOfMonth.toString(),
+            text = date.day.toString(),
             style = BloomTheme.typography.small.copy(
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
             ),

@@ -77,7 +77,7 @@ fun DateRangePicker(
 
     // Convert kotlinx.datetime.LocalDate to java.time.LocalDate for the calendar library
     val currentMonth = remember {
-        YearMonth(minDate.year, minDate.monthNumber)
+        YearMonth(minDate.year, minDate.month)
     }
 
     // Set up calendar state
@@ -212,8 +212,8 @@ fun DateRangePicker(
             dayContent = { calendarDay ->
                 val date = LocalDate(
                     year = calendarDay.date.year,
-                    monthNumber = calendarDay.date.monthNumber,
-                    dayOfMonth = calendarDay.date.dayOfMonth
+                    month = calendarDay.date.month,
+                    day = calendarDay.date.day
                 )
 
                 val isInRange = selectedStartDate != null && selectedEndDate != null &&
@@ -295,7 +295,7 @@ private fun DateCell(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = date.dayOfMonth.toString(),
+            text = date.day.toString(),
             style = BloomTheme.typography.body,
             color = textColor,
             textAlign = TextAlign.Center

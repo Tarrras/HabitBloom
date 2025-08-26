@@ -169,7 +169,7 @@ fun HabitDetailSection(
 private fun formatDate(date: LocalDate): String {
     val month = date.month.getTitle()
 
-    return stringResource(Res.string.formatted_date, month, date.dayOfMonth, date.year)
+    return stringResource(Res.string.formatted_date, month, date.day, date.year)
 }
 
 /**
@@ -186,7 +186,7 @@ private fun formatDateRange(startDate: LocalDate, endDate: LocalDate): String {
 
     return stringResource(
         Res.string.formatted_date_range,
-        startMonth, startDate.dayOfMonth, startDate.year,
-        endMonth, endDate.dayOfMonth, endDate.year
+        startMonth, startDate.day, startDate.year,
+        endMonth, endDate.day, endDate.year
     )
 } 

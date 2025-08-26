@@ -33,7 +33,7 @@ fun Day(
         modifier = Modifier.aspectRatio(1f), // This is important for square sizing!
     ) {
         Text(
-            text = day.date.dayOfMonth.toString(),
+            text = day.date.day.toString(),
             style = BloomTheme.typography.subheading.copy(
                 fontWeight = if (selected) {
                     FontWeight.Bold

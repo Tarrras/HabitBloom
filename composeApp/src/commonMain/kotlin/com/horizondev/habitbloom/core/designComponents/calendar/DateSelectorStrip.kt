@@ -173,7 +173,7 @@ private fun RowScope.DateItem(
         ) {
             // Day number (e.g., "3")
             Text(
-                text = date.dayOfMonth.toString(),
+                text = date.day.toString(),
                 style = BloomTheme.typography.h6.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                 ),

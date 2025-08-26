@@ -61,7 +61,7 @@ fun DateRangeSelectionCalendar(
 ) {
     val today = minDate
 
-    val currentMonth = remember { YearMonth(today.year, today.monthNumber) }
+    val currentMonth = remember { YearMonth(today.year, today.month) }
     val startMonth = remember { currentMonth }
     val endMonth = remember(minDate) {
         minDate.plusDays(maxDurationDays.toLong()).let {
@@ -111,8 +111,8 @@ fun DateRangeSelectionCalendar(
                         if (clickedDay.position == DayPosition.MonthDate) {
                             val date = LocalDate(
                                 year = clickedDay.date.year,
-                                monthNumber = clickedDay.date.monthNumber,
-                                dayOfMonth = clickedDay.date.dayOfMonth
+                                month = clickedDay.date.month,
+                                day = clickedDay.date.day
                             )
 
                             // Only allow selection of today or future dates
@@ -157,8 +157,8 @@ private fun Day(
 ) {
     val date = LocalDate(
         year = day.date.year,
-        monthNumber = day.date.monthNumber,
-        dayOfMonth = day.date.dayOfMonth
+        month = day.date.month,
+        day = day.date.day
     )
 
     val isToday = date == today
@@ -198,7 +198,7 @@ private fun Day(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = day.date.dayOfMonth.toString(),
+            text = day.date.day.toString(),
             color = textColor,
             style = BloomTheme.typography.body,
             fontWeight = if (isToday || isSelected) FontWeight.Bold else FontWeight.Normal

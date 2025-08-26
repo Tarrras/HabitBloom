@@ -185,7 +185,7 @@ fun LocalDate.minusMonths(months: Long): LocalDate {
     val newMonthEnum = Month(newMonth)
 
     // Calculate the correct day value, accounting for shorter months
-    var newDay = dayOfMonth
+    var newDay = day
     val maxDaysInNewMonth = when (newMonthEnum) {
         Month.FEBRUARY -> if (isLeapYear(newYear)) 29 else 28
         Month.APRIL, Month.JUNE, Month.SEPTEMBER, Month.NOVEMBER -> 30
@@ -222,11 +222,11 @@ fun LocalDate.minusYears(years: Long): LocalDate {
     val newYear = year - years.toInt()
 
     // Handle Feb 29 in leap years
-    if (month == Month.FEBRUARY && dayOfMonth == 29 && !isLeapYear(newYear)) {
+    if (month == Month.FEBRUARY && day == 29 && !isLeapYear(newYear)) {
         return LocalDate(newYear, Month.FEBRUARY, 28)
     }
 
-    return LocalDate(newYear, month, dayOfMonth)
+    return LocalDate(newYear, month, day)
 }
 
 /**

@@ -469,7 +469,7 @@ class StatisticViewModel(
         return "${
             start.month.getTitleSuspend().lowercase()
                 .replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-        } ${start.dayOfMonth} - ${end.dayOfMonth}, ${start.year}"
+        } ${start.day} - ${end.day}, ${start.year}"
     }
 
     /**

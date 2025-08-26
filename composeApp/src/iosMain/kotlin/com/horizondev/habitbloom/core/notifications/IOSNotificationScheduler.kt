@@ -66,7 +66,7 @@ class IOSNotificationScheduler(
         val dateComponents = NSDateComponents().apply {
             setHour(time.hour.toLong())
             setMinute(time.minute.toLong())
-            setDay(date.dayOfMonth.toLong())
+            setDay(date.day.toLong())
 
             /*// Convert Kotlin DayOfWeek to iOS weekday (1 = Sunday, 2 = Monday, etc.)
             val iosWeekday = when (date.dayOfWeek) {
