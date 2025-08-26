@@ -1,13 +1,13 @@
 package com.horizondev.habitbloom.screens.habits.data.remote
 
 import com.horizondev.habitbloom.platform.platformReadFileAsBytes
+import com.horizondev.habitbloom.utils.getCurrentDateTime
 import io.github.aakira.napier.Napier
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 
 /**
  * Service for uploading files to Supabase Storage.
@@ -54,7 +54,7 @@ class SupabaseStorageService(
 
             // Generate a unique filename if not provided
             val storageFileName =
-                fileName ?: "habit_${Clock.System.now().toEpochMilliseconds()}.jpg"
+                fileName ?: "habit_${getCurrentDateTime().time.toMillisecondOfDay()}.jpg"
             val storagePath = "public/$storageFileName"
 
             // Read file as bytes

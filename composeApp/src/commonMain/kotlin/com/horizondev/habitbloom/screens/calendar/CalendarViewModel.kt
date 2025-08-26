@@ -6,7 +6,6 @@ import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.utils.getCurrentDate
-import com.kizitonwose.calendar.core.YearMonth
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
@@ -15,12 +14,10 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
+import kotlinx.datetime.YearMonth
 import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
 
 /**
  * ViewModel for the Calendar screen.
@@ -292,7 +289,7 @@ class CalendarViewModel(
             }
 
             is CalendarUiEvent.JumpToToday -> {
-                val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+                val today = getCurrentDate()
                 val currentMonth = YearMonth(today.year, today.monthNumber)
 
                 // Update state to show today's date and current month

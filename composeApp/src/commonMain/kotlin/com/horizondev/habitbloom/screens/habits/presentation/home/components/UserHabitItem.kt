@@ -84,7 +84,11 @@ fun UserHabitCard(
         modifier = modifier
             .fillMaxWidth()
             .scale(scale)
-            .clippedShadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+            .clippedShadow(
+                elevation = 4.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = BloomTheme.colors.primary
+            )
             .clip(RoundedCornerShape(16.dp))
             .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(16.dp))
             .background(bgBrush)

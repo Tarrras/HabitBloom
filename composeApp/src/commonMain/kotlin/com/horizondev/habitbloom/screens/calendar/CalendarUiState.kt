@@ -2,8 +2,8 @@ package com.horizondev.habitbloom.screens.calendar
 
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
-import com.kizitonwose.calendar.core.YearMonth
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
 
 /**
  * Represents the UI state for the Calendar screen.

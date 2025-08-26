@@ -552,9 +552,7 @@ fun CombinedHabitStatisticsCard(
                             .height(280.dp),
                         xAxisModel = CategoryAxisModel(categories = categories),
                         yAxisModel = rememberIntLinearAxisModel(
-                            range = 0..yAxisMaxValue,
-                            allowZooming = false,
-                            allowPanning = false
+                            range = 0..yAxisMaxValue
                         ),
                         xAxisTitle = {},
                         xAxisLabels = { label: String ->

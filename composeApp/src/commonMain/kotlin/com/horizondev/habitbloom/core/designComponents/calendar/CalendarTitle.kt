@@ -17,7 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.getTitle
-import com.kizitonwose.calendar.core.YearMonth
+import kotlinx.datetime.YearMonth
 
 @Composable
 fun CalendarTitle(

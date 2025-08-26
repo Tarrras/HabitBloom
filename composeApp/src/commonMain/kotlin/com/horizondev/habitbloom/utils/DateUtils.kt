@@ -27,7 +27,6 @@ import habitbloom.composeapp.generated.resources.month_october
 import habitbloom.composeapp.generated.resources.month_october_short
 import habitbloom.composeapp.generated.resources.month_september
 import habitbloom.composeapp.generated.resources.month_september_short
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -44,14 +43,17 @@ import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.todayIn
 import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 private fun customFormat(
     monthNames: MonthNames = MonthNames.ENGLISH_ABBREVIATED
 ) = LocalDate.Format {
-    monthName(monthNames); char(' '); dayOfMonth(); chars(", "); year()
+    monthName(monthNames); char(' '); day(); chars(", "); year()
 }
 
 
+@OptIn(ExperimentalTime::class)
 fun getCurrentDate(): LocalDate {
     // Obtain the current system time zone
     val timeZone = TimeZone.currentSystemDefault()
@@ -60,12 +62,14 @@ fun getCurrentDate(): LocalDate {
     return Clock.System.todayIn(timeZone)
 }
 
+@OptIn(ExperimentalTime::class)
 fun getCurrentDateTime(): LocalDateTime {
     val currentMoment = Clock.System.now()
     val timeZone = TimeZone.currentSystemDefault()
     return currentMoment.toLocalDateTime(timeZone)
 }
 
+@OptIn(ExperimentalTime::class)
 fun getTimeOfDay(): TimeOfDay {
     val currentMoment = Clock.System.now()
     val timeZone = TimeZone.currentSystemDefault()

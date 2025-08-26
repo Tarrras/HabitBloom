@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalTime::class)
+
 package com.horizondev.habitbloom.screens.habits.presentation.habitDetails
 
 import androidx.compose.animation.animateContentSize
@@ -63,7 +65,6 @@ import com.horizondev.habitbloom.utils.getCurrentDate
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.OutDateStyle
-import com.kizitonwose.calendar.core.YearMonth
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
 import com.kizitonwose.calendar.core.minusMonths
 import com.kizitonwose.calendar.core.plusMonths
@@ -95,10 +96,12 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.plus
+import kotlinx.datetime.yearMonth
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun HabitDetailsScreen(
@@ -507,7 +510,7 @@ private fun UserHabitScheduleCard(
     modifier: Modifier = Modifier,
     habitInfo: UserHabitFullInfo
 ) {
-    val currentMonth = remember { YearMonth.now() }
+    val currentMonth = remember { getCurrentDate().yearMonth }
     val currentDate = remember { getCurrentDate() }
     val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
     val endMonth = remember { currentMonth.plusMonths(3) } // Adjust as needed

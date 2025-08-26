@@ -100,6 +100,7 @@ import habitbloom.composeapp.generated.resources.yesterday
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.YearMonth
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -362,7 +363,7 @@ private fun CalendarScreenContent(
 private fun FullScreenCalendar(
     uiState: CalendarUiState,
     onDateSelected: (LocalDate) -> Unit,
-    onMonthChanged: (com.kizitonwose.calendar.core.YearMonth) -> Unit,
+    onMonthChanged: (YearMonth) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val currentMonth = uiState.currentMonth
