@@ -477,4 +477,7 @@
     <string name="delete_all_data">Delete All Data</string>
     <string name="delete_data_question">Delete All Data?</string>
     <string name="delete_data_description">This will delete all your habits, tracking data, and app settings. The app will restart and return to the onboarding screen. This action cannot be undone.</string>
+
+    <string name="habit_category_title">Choose a habit category</string>
+    <string name="habit_category_subtitle">Select a life area for your new habit</string>
 </resources>

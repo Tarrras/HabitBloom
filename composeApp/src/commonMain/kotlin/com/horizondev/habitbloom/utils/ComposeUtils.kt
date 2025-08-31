@@ -49,3 +49,14 @@ fun Modifier.clippedShadow(
 
     return if (clip) first.clip(shape) else first
 }
+
+fun String.parseHexColor(): Color {
+    val cleanHexString = this.removePrefix("#")
+    val argbString = if (cleanHexString.length == 6) {
+        "FF$cleanHexString" // Add full alpha if only RGB is provided
+    } else {
+        cleanHexString
+    }
+    val colorLong = argbString.toULong(16).toLong() // Convert to unsigned long then to signed long
+    return Color(colorLong)
+}

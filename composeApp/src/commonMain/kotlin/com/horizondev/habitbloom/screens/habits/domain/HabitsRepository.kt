@@ -7,6 +7,7 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.SupabaseStorageService
+import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
@@ -118,6 +119,10 @@ class HabitsRepository(
                 it.name.lowercase().contains(searchInput.lowercase())
             }
         }
+    }
+
+    suspend fun getHabitCategories(): Result<List<HabitCategoryData>> {
+        return remoteDataSource.getHabitCategories()
     }
 
     fun getUserHabitsByDayFlow(day: LocalDate): Flow<List<UserHabitRecordFullInfo>> {

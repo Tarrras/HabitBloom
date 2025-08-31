@@ -107,6 +107,7 @@ kotlin {
             implementation(libs.stately.common)
 
             implementation(libs.coil.compose)
+            implementation(libs.coil.svg)
             implementation(libs.coil.gif)
             implementation(libs.coil.network.ktor3)
 

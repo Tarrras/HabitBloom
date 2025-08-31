@@ -479,4 +479,7 @@
     <string name="delete_all_data">Видалити всі дані</string>
     <string name="delete_data_question">Видалити всі дані?</string>
     <string name="delete_data_description">Це видалить усі ваші звички, дані відстеження та налаштування додатка. Додаток перезапуститься та повернеться до екрану вступу. Цю дію неможливо скасувати.</string>
+
+    <string name="habit_category_title">Виберіть категорію звички</string>
+    <string name="habit_category_subtitle">Оберіть сферу життя для вашої нової звички</string>
 </resources>

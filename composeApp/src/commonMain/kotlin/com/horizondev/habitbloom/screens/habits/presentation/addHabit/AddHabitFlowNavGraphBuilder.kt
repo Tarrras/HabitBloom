@@ -9,11 +9,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.toRoute
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.AddHabitCategoryChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.success.AddHabitSuccessScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary.AddHabitSummaryScreen
-import com.horizondev.habitbloom.screens.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayChoiceScreen
 
 /**
  * Extension function for NavGraphBuilder to add routes defined in AddHabitFlowRoute
@@ -40,14 +40,14 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
     onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
 ) {
     navigation<AddHabitFlowGlobalNavEntryPoint>(
-        startDestination = AddHabitFlowRoute.TimeOfDayChoice
+        startDestination = AddHabitFlowRoute.CategoryChoice
     ) {
         // Time of Day choice screen
-        composable<AddHabitFlowRoute.TimeOfDayChoice> {
-            AddHabitTimeOfDayChoiceScreen(
-                onTimeOfDaySelected = { selectedTimeOfDay ->
-                    viewModel.handleUiEvent(AddHabitFlowUiEvent.UpdateTimeOfDay(selectedTimeOfDay))
-                    navController.navigate(AddHabitFlowRoute.HabitChoice(selectedTimeOfDay))
+        composable<AddHabitFlowRoute.CategoryChoice> {
+            AddHabitCategoryChoiceScreen(
+                onCategorySelected = { category ->
+                    //viewModel.handleUiEvent(AddHabitFlowUiEvent.UpdateTimeOfDay(selectedTimeOfDay))
+                    navController.navigate(AddHabitFlowRoute.HabitChoice(TimeOfDay.Morning))
                 },
                 onBack = {
                     viewModel.handleUiEvent(AddHabitFlowUiEvent.CancelFlow)

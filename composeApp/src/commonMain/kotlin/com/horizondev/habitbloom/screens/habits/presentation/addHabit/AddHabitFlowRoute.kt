@@ -14,10 +14,10 @@ object AddHabitFlowGlobalNavEntryPoint : NavTarget
 sealed class AddHabitFlowRoute : NavTarget {
 
     /**
-     * Time of day selection screen.
+     * Category selection screen.
      */
     @Serializable
-    data object TimeOfDayChoice : AddHabitFlowRoute()
+    data object CategoryChoice : AddHabitFlowRoute()
 
     /**
      * Habit choice screen with time of day parameter.
@@ -52,7 +52,7 @@ sealed class AddHabitFlowRoute : NavTarget {
             if (routeString.isNullOrBlank()) return null
 
             return when {
-                routeString.contains(TimeOfDayChoice::class.qualifiedName.toString()) -> TimeOfDayChoice
+                routeString.contains(CategoryChoice::class.qualifiedName.toString()) -> CategoryChoice
 
                 //in this case we don't need exact time of day
                 routeString.contains(HabitChoice::class.qualifiedName.toString()) -> HabitChoice(
@@ -71,7 +71,7 @@ sealed class AddHabitFlowRoute : NavTarget {
          */
         fun toScreenStep(route: AddHabitFlowRoute?): AddHabitFlowScreenStep? {
             return when (route) {
-                is TimeOfDayChoice -> AddHabitFlowScreenStep.CHOOSE_CATEGORY
+                is CategoryChoice -> AddHabitFlowScreenStep.CHOOSE_CATEGORY
                 is HabitChoice -> AddHabitFlowScreenStep.CHOOSE_HABIT
                 is DurationChoice -> AddHabitFlowScreenStep.CHOOSE_DURATION
                 is Summary -> AddHabitFlowScreenStep.SUMMARY

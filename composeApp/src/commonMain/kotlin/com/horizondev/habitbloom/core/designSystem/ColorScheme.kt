@@ -82,8 +82,7 @@ data class TimeOfDayColors(
 )
 
 val lightColorScheme = BloomColorScheme(
-
-    background = Color(0xFFFFFFFF),
+    background = Color(0xFFF9F8F4),
     foreground = Color(0xFF1A1A1A),
     surface = Color(0xFFFFFFFF),
     surfaceVariant = Color(0xFFF8F9FA),

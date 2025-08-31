@@ -31,6 +31,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.DefaultShadowColor
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -80,6 +81,8 @@ fun UserHabitCard(
     val borderColor = if (completed) BloomTheme.colors.primary.copy(alpha = 0.3f)
     else BloomTheme.colors.border.copy(alpha = 0.6f)
 
+    val shadowColor = if (completed) BloomTheme.colors.primary else DefaultShadowColor
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -87,7 +90,8 @@ fun UserHabitCard(
             .clippedShadow(
                 elevation = 4.dp,
                 shape = RoundedCornerShape(16.dp),
-                ambientColor = BloomTheme.colors.primary
+                spotColor = shadowColor,
+                ambientColor = shadowColor
             )
             .clip(RoundedCornerShape(16.dp))
             .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(16.dp))
