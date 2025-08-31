@@ -128,6 +128,10 @@ class HabitsRepository(
         return remoteDataSource.getHabitCategories()
     }
 
+    suspend fun getHabitIcons(): Result<List<String>> {
+        return remoteDataSource.getHabitIcons()
+    }
+
     fun getUserHabitsByDayFlow(day: LocalDate): Flow<List<UserHabitRecordFullInfo>> {
         return combine(
             remoteHabits.filter { it.isEmpty().not() },
@@ -210,45 +214,19 @@ class HabitsRepository(
 
     suspend fun createPersonalHabit(
         userId: String,
-        timeOfDay: TimeOfDay,
         title: String,
         description: String,
+        categoryId: String? = null,
         icon: String = DEFAULT_PHOTO_URL
     ): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            // If icon is a local file path, upload it to Supabase Storage
-            val iconUrl =
-                if (icon.isNotEmpty() && (icon.startsWith("/") || icon.startsWith("file://"))) {
-                    Napier.d("Uploading image from local path: $icon", tag = TAG)
-
-                    // Upload the image file to Supabase Storage
-                    storageService.uploadHabitImage(icon).fold(
-                        onSuccess = { url ->
-                            Napier.d(
-                                "Image uploaded successfully to Supabase before adding habit",
-                                tag = TAG
-                            )
-                            url
-                        },
-                        onFailure = { error ->
-                            Napier.e(
-                                "Failed to upload image to Supabase: ${error.message}",
-                                tag = TAG
-                            )
-                            return@withContext Result.failure(error)
-                        }
-                    )
-                } else {
-                    icon
-                }
-
             // Save the habit with the icon URL (either direct URL or uploaded image URL)
             remoteDataSource.savePersonalHabit(
                 userId = userId,
-                timeOfDay = timeOfDay,
                 title = title,
                 description = description,
-                icon = iconUrl
+                categoryId = categoryId,
+                icon = icon
             ).onSuccess {
                 getAllHabits().onSuccess { habits ->
                     remoteHabits.update { habits }

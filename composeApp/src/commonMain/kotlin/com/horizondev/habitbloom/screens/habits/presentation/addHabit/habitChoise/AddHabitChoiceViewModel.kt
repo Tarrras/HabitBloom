@@ -6,7 +6,6 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVis
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.delete_custom_habit_success
@@ -56,13 +55,7 @@ class AddHabitChoiceViewModel(
             }
 
             AddHabitChoiceUiEvent.CreateCustomHabit -> {
-                val timeOfDay =
-                    addHabitStateUseCase.getCurrentDraft().timeOfDay ?: TimeOfDay.Morning
-                emitUiIntent(
-                    AddHabitChoiceUiIntent.NavigateToCreateCustomHabit(
-                        timeOfDay = timeOfDay
-                    )
-                )
+                emitUiIntent(AddHabitChoiceUiIntent.NavigateToCreateCustomHabit)
             }
 
             is AddHabitChoiceUiEvent.DeleteHabit -> {

@@ -102,7 +102,9 @@ fun BloomBaseOutlinedTextField(
                             isError = isError,
                             interactionSource = interactionSource,
                             colors = colors,
-                            shape = shape
+                            shape = shape,
+                            focusedBorderThickness = 1.dp,
+                            unfocusedBorderThickness = 1.dp
                         )
                     },
                     contentPadding = contentPadding

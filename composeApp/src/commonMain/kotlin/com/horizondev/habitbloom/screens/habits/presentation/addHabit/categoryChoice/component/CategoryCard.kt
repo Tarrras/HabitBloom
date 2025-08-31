@@ -19,9 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.rememberAsyncImagePainter
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
@@ -77,16 +75,14 @@ fun CategoryCard(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = category.title,
-                    fontSize = 16.sp,
+                    style = BloomTheme.typography.titleMedium,
                     color = BloomTheme.colors.foreground,
-                    fontWeight = FontWeight.SemiBold
                 )
-                Spacer(Modifier.height(2.dp))
+                Spacer(Modifier.height(8.dp))
                 Text(
                     text = category.description,
-                    fontSize = 13.sp,
+                    style = BloomTheme.typography.bodyMedium,
                     color = BloomTheme.colors.mutedForeground,
-                    lineHeight = 18.sp
                 )
             }
         }

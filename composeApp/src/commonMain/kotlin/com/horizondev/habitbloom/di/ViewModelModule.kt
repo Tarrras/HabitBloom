@@ -5,14 +5,12 @@ import com.horizondev.habitbloom.common.AppViewModel
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.flowerdetail.HabitFlowerDetailViewModel
-
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.AddHabitCategoryChoiceViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.success.AddHabitSuccessViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary.AddHabitSummaryViewModel
-
 import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
 import com.horizondev.habitbloom.screens.onboarding.OnboardingViewModel
@@ -39,27 +37,11 @@ val viewModelModule: Module = module {
 
     // Add Habit flow ViewModels
     viewModelOf(::AddHabitFlowViewModel)
-    viewModel {
-        AddHabitCategoryChoiceViewModel(
-            repository = get(),
-            addHabitStateUseCase = get()
-        )
-    }
+    viewModelOf(::AddHabitCategoryChoiceViewModel)
 
     viewModelOf(::AddHabitChoiceViewModel)
-    viewModel {
-        AddHabitDurationViewModel(
-            permissionsManager = get(),
-            addHabitStateUseCase = get()
-        )
-    }
-    viewModel {
-        AddHabitSummaryViewModel(
-            repository = get(),
-            addHabitStateUseCase = get(),
-            enableNotificationsUseCase = get()
-        )
-    }
+    viewModelOf(::AddHabitDurationViewModel)
+    viewModelOf(::AddHabitSummaryViewModel)
     viewModelOf(::AddHabitSuccessViewModel)
     viewModelOf(::CreatePersonalHabitViewModel)
 

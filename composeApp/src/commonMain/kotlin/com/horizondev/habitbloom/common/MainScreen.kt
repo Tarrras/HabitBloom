@@ -142,8 +142,12 @@ fun MainScreen(
 
                 addHabitFlowGraph(
                     navController = navController,
-                    onNavigateToCreateCustomHabit = { timeOfDay ->
-                        navController.navigate(CreatePersonalHabitFlowRoute.CreateHabit(timeOfDay))
+                    onNavigateToCreateCustomHabit = { categoryId ->
+                        navController.navigate(
+                            CreatePersonalHabitFlowRoute.CreateHabit(
+                                categoryId ?: ""
+                            )
+                        )
                     }
                 )
 

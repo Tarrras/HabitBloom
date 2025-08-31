@@ -2,7 +2,7 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoi
 
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+
 
 data class AddHabitChoiceUiState(
     val habits: List<HabitInfo> = emptyList(),
@@ -26,7 +26,7 @@ sealed interface AddHabitChoiceUiEvent {
 
 sealed interface AddHabitChoiceUiIntent {
     data class NavigateNext(val info: HabitInfo): AddHabitChoiceUiIntent
-    data class NavigateToCreateCustomHabit(val timeOfDay: TimeOfDay) : AddHabitChoiceUiIntent
+    data object NavigateToCreateCustomHabit : AddHabitChoiceUiIntent
     data class ShowSnackbar(val visuals: BloomSnackbarVisuals) : AddHabitChoiceUiIntent
 
     data object NavigateBack : AddHabitChoiceUiIntent

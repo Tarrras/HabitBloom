@@ -156,19 +156,19 @@ private fun SummaryHabitCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 BloomNetworkImage(
-                    iconUrl = habitInfo.iconUrl,
-                    contentDescription = habitInfo.name
+                    iconUrl = habitInfo?.iconUrl ?: "",
+                    contentDescription = habitInfo?.name ?: ""
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
-                        text = habitInfo.name,
+                        text = habitInfo?.name ?: "",
                         style = BloomTheme.typography.heading,
                         color = BloomTheme.colors.textColor.primary
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = habitInfo.description,
+                        text = habitInfo?.description ?: "",
                         style = BloomTheme.typography.body,
                         color = BloomTheme.colors.textColor.secondary
                     )

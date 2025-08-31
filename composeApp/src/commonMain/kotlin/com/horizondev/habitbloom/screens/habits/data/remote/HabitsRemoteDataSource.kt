@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.habits.data.remote
 import com.horizondev.habitbloom.common.locale.AppLocaleManager
 import com.horizondev.habitbloom.core.data.HABITS_COLLECTION_ROUTE
 import com.horizondev.habitbloom.core.data.HABIT_CATEGORIES_COLLECTION_ROUTE
+import com.horizondev.habitbloom.core.data.HABIT_ICONS_COLLECTION_ROUTE
 import com.horizondev.habitbloom.core.data.USER_HABITS_COLLECTION_ROUTE
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
@@ -53,7 +54,6 @@ class HabitsRemoteDataSource(
 
     suspend fun savePersonalHabit(
         userId: String,
-        timeOfDay: TimeOfDay,
         title: String,
         description: String,
         categoryId: String? = null,
@@ -67,8 +67,8 @@ class HabitsRemoteDataSource(
                     iconUrl = icon,
                     userId = userId,
                     shortInfo = "",
-                    timeOfDay = timeOfDay.toNetworkModel(),
-                    categoryId = categoryId
+                    categoryId = categoryId,
+                    timeOfDay = TimeOfDay.Morning.toNetworkModel() //todo remove
                 )
             ).id.isNotEmpty()
         }
@@ -86,6 +86,16 @@ class HabitsRemoteDataSource(
             true
         }
     }
+
+    suspend fun getHabitIcons(): Result<List<String>> {
+        return runCatching {
+            firestore.collection(HABIT_ICONS_COLLECTION_ROUTE).get().let { querySnapshot ->
+                querySnapshot.documents.map { document ->
+                    document.data(HabitIconResponse.serializer())
+                }
+            }.map { it.iconUrl }
+        }
+    }
 }
 
 
@@ -100,4 +110,9 @@ data class Habit(
     val iconUrl: String,
     val timeOfDay: String,
     val localizations: Map<String, HabitLocalization>
+)
+
+@Serializable
+data class HabitIconResponse(
+    val iconUrl: String
 )

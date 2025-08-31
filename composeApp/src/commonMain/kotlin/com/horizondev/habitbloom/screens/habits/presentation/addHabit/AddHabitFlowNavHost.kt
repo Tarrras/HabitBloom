@@ -37,7 +37,7 @@ import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
 import kotlinx.coroutines.launch
@@ -53,7 +53,7 @@ fun AddHabitFlowNavHost(
     modifier: Modifier = Modifier,
     navigator: CommonNavigator = koinInject(),
     onFinishFlow: () -> Unit,
-    onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
+    onNavigateToCreateCustomHabit: (String?) -> Unit
 ) {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()

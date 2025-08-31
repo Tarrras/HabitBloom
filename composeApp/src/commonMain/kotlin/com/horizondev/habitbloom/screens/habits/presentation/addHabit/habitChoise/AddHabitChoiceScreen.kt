@@ -36,7 +36,6 @@ import com.horizondev.habitbloom.core.designComponents.list.NoResultsPlaceholder
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.presentation.components.HabitListItem
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_your_own_personal_habit_to_start_tracking
@@ -60,7 +59,7 @@ import org.koin.compose.viewmodel.koinViewModel
 fun AddHabitChoiceScreen(
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
     onHabitSelected: (HabitInfo) -> Unit,
-    onCreateCustomHabit: (TimeOfDay) -> Unit,
+    onCreateCustomHabit: () -> Unit,
     onBack: () -> Unit,
 ) {
     // Create ViewModel using Koin
@@ -82,7 +81,7 @@ fun AddHabitChoiceScreen(
                 }
 
                 is AddHabitChoiceUiIntent.NavigateToCreateCustomHabit -> {
-                    onCreateCustomHabit(uiIntent.timeOfDay)
+                    onCreateCustomHabit()
                 }
 
                 AddHabitChoiceUiIntent.NavigateBack -> {

@@ -115,7 +115,7 @@
     <string name="evening_reflection_title">Вечірня рефлексія</string>
     <string name="evening_reflection_description">Розслабтеся за допомогою заспокійливих дій, які дають можливість обміркувати свій день. Ідеально для ведення щоденника, читання або розслаблюючої ванни.</string>
 
-    <string name="next">Далі</string>
+    <string name="next">Продовжити</string>
     <string name="cancel">Скасувати</string>
     <string name="back">Назад</string>
     <string name="complete">Завершити</string>
@@ -236,14 +236,15 @@
     <string name="total_done">Всього виконано</string>
     <string name="overall_rate">Загальна частота</string>
 
-    <string name="create_personal_habit">Створити особисту звичку</string>
+    <string name="create_personal_habit">Створити власну звичку</string>
+    <string name="create_personal_habit_subtitle">Налаштуйте свою унікальну звичку під ваші потреби</string>
     <string name="no_habits_found">Звичок не знайдено!</string>
     <string name="add_your_own_personal_habit_to_start_tracking">Не знайдено звичок, які відповідають вашому пошуку. Створіть власну звичку, щоб персоналізувати ваш досвід відстеження звичок!</string>
 
-    <string name="enter_habit_title">Введіть назву звички</string>
-    <string name="enter_habit_description">Введіть опис звички</string>
-    <string name="habit_title">Назва звички</string>
-    <string name="habit_description">Опис звички</string>
+    <string name="enter_habit_title">Наприклад: Ранкова медитація</string>
+    <string name="enter_habit_description">Короткий опис звички та її переваг...</string>
+    <string name="habit_title">Назва звички *</string>
+    <string name="habit_description">Опис (необов'язково)</string>
     <string name="create_habit_question">Створити звичку?</string>
     <string name="create_habit_description">Ви впевнені, що хочете створити цю звичку? Ви зможете додати цю звичку до свого розкладу, редагувати або видалити її.</string>
     <string name="save_habit_error">Щось пішло не так! Спробуйте ще раз або пізніше</string>
@@ -480,6 +481,7 @@
     <string name="delete_data_question">Видалити всі дані?</string>
     <string name="delete_data_description">Це видалить усі ваші звички, дані відстеження та налаштування додатка. Додаток перезапуститься та повернеться до екрану вступу. Цю дію неможливо скасувати.</string>
 
+    <string name="choose_habit_icon">Виберіть іконку</string>
     <string name="habit_category_title">Виберіть категорію звички</string>
     <string name="habit_category_subtitle">Оберіть сферу життя для вашої нової звички</string>
 </resources>

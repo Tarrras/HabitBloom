@@ -5,19 +5,20 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.AddHabitCategoryChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.success.AddHabitSuccessScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary.AddHabitSummaryScreen
+import org.koin.compose.koinInject
 
 /**
  * Extension function for NavGraphBuilder to add routes defined in AddHabitFlowRoute
  */
 fun NavGraphBuilder.addHabitFlowGraph(
     navController: NavController,
-    onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
+    onNavigateToCreateCustomHabit: (String?) -> Unit
 ) {
     composable<AddHabitFlowGlobalNavEntryPoint> {
         AddHabitFlowNavHost(
@@ -34,7 +35,7 @@ fun NavGraphBuilder.addHabitFlowGraph(
 fun NavGraphBuilder.createHabitNestedFlowGraph(
     navController: NavController,
     viewModel: AddHabitFlowViewModel,
-    onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
+    onNavigateToCreateCustomHabit: (String?) -> Unit
 ) {
     navigation<AddHabitFlowGlobalNavEntryPoint>(
         startDestination = AddHabitFlowRoute.CategoryChoice
@@ -53,13 +54,16 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
 
         // Choose habit screen
         composable<AddHabitFlowRoute.HabitChoice> {
+            val addHabitStateUseCase: AddHabitStateUseCase = koinInject()
+            
             AddHabitChoiceScreen(
                 onHabitSelected = { habit ->
                     navController.navigate(AddHabitFlowRoute.DurationChoice)
                 },
-                onCreateCustomHabit = { timeOfDay ->
-                    // Navigate to the CreatePersonalHabit flow as a separate screen
-                    onNavigateToCreateCustomHabit(timeOfDay)
+                onCreateCustomHabit = {
+                    // Get category ID from UseCase and navigate to CreatePersonalHabit flow
+                    val categoryId = addHabitStateUseCase.getCurrentDraft().habitCategory?.id
+                    onNavigateToCreateCustomHabit(categoryId)
                 },
                 onBack = {
                     navController.popBackStack()

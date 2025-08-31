@@ -228,14 +228,15 @@
     <string name="total_done">Total done</string>
     <string name="overall_rate">Overall rate</string>
 
-    <string name="create_personal_habit">Create personal habit</string>
+    <string name="create_personal_habit">Create your own habit</string>
+    <string name="create_personal_habit_subtitle">Customize your unique habit to your needs</string>
     <string name="no_habits_found">No habits found!</string>
     <string name="add_your_own_personal_habit_to_start_tracking">No matching habits found for your search. Create your own custom habit to personalize your habit tracking experience!</string>
 
-    <string name="enter_habit_title">Enter habit title</string>
-    <string name="enter_habit_description">Enter habit description</string>
-    <string name="habit_title">Habit title</string>
-    <string name="habit_description">Habit description</string>
+    <string name="enter_habit_title">For example: Morning meditation</string>
+    <string name="enter_habit_description">A short description of the habit and its benefits...</string>
+    <string name="habit_title">Habit title *</string>
+    <string name="habit_description">Description (optional)</string>
     <string name="create_habit_question">Create Habit?</string>
     <string name="create_habit_description">Are you sure you want to create this habit? You will be able to add this habit to your schedule, edit or delete it.</string>
     <string name="save_habit_error">Something went wrong! Please try again or later</string>
@@ -478,6 +479,7 @@
     <string name="delete_data_question">Delete All Data?</string>
     <string name="delete_data_description">This will delete all your habits, tracking data, and app settings. The app will restart and return to the onboarding screen. This action cannot be undone.</string>
 
+    <string name="choose_habit_icon">Choose an icon</string>
     <string name="habit_category_title">Choose a habit category</string>
     <string name="habit_category_subtitle">Select a life area for your new habit</string>
 </resources>

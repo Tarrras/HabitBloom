@@ -29,8 +29,7 @@ class AddHabitSummaryViewModel(
                 updateState {
                     it.copy(
                         timeOfDay = draft.timeOfDay ?: TimeOfDay.Morning,
-                        habitInfo = draft.habitInfo
-                            ?: throw IllegalStateException("Habit info is null"),
+                        habitInfo = draft.habitInfo,
                         days = draft.selectedDays,
                         startDate = draft.startDate,
                         endDate = draft.endDate,

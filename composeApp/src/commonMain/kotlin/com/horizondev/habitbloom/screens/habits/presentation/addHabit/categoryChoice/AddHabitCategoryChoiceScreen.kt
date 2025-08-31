@@ -78,7 +78,7 @@ fun AddHabitCategoryChoiceScreenContent(
             item(key = "title") {
                 Text(
                     text = stringResource(Res.string.habit_category_title),
-                    style = BloomTheme.typography.title,
+                    style = BloomTheme.typography.headlineLarge,
                     color = BloomTheme.colors.foreground,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -88,7 +88,7 @@ fun AddHabitCategoryChoiceScreenContent(
             item(key = "subtitle") {
                 Text(
                     text = stringResource(Res.string.habit_category_subtitle),
-                    style = BloomTheme.typography.subheading,
+                    style = BloomTheme.typography.bodyLarge,
                     color = BloomTheme.colors.mutedForeground,
                 )
                 Spacer(modifier = Modifier.height(16.dp))
