@@ -7,6 +7,7 @@ import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.delete_custom_habit_success
 import habitbloom.composeapp.generated.resources.habit_already_added
@@ -21,7 +22,7 @@ import org.jetbrains.compose.resources.getString
  */
 class AddHabitChoiceViewModel(
     private val repository: HabitsRepository,
-    private val timeOfDay: TimeOfDay?
+    private val addHabitStateUseCase: AddHabitStateUseCase
 ) : BloomViewModel<AddHabitChoiceUiState, AddHabitChoiceUiIntent>(
     initialState = AddHabitChoiceUiState()
 ) {
@@ -49,13 +50,17 @@ class AddHabitChoiceViewModel(
             }
 
             is AddHabitChoiceUiEvent.SelectHabit -> {
+                // Update the UseCase with the selected habit
+                addHabitStateUseCase.updateHabitInfo(event.habit)
                 checkHabitAndProceed(event.habit)
             }
 
             AddHabitChoiceUiEvent.CreateCustomHabit -> {
+                val timeOfDay =
+                    addHabitStateUseCase.getCurrentDraft().timeOfDay ?: TimeOfDay.Morning
                 emitUiIntent(
                     AddHabitChoiceUiIntent.NavigateToCreateCustomHabit(
-                        timeOfDay = timeOfDay ?: TimeOfDay.Morning
+                        timeOfDay = timeOfDay
                     )
                 )
             }
@@ -130,7 +135,8 @@ class AddHabitChoiceViewModel(
             updateState { it.copy(isLoading = true) }
 
             runCatching {
-                repository.getHabits(query, timeOfDay = timeOfDay ?: TimeOfDay.Morning)
+                val categoryId = addHabitStateUseCase.getCurrentDraft().habitCategory?.id
+                repository.getHabits(query, categoryId = categoryId)
             }.onSuccess { habitsResult ->
                 habitsResult.onSuccess { habits ->
                     updateState { it.copy(habits = habits, isLoading = false) }

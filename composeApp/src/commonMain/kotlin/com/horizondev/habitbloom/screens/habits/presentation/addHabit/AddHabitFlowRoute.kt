@@ -1,7 +1,6 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit
 
 import com.horizondev.habitbloom.core.navigation.NavTarget
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -20,10 +19,10 @@ sealed class AddHabitFlowRoute : NavTarget {
     data object CategoryChoice : AddHabitFlowRoute()
 
     /**
-     * Habit choice screen with time of day parameter.
+     * Habit choice screen.
      */
     @Serializable
-    data class HabitChoice(val timeOfDay: TimeOfDay) : AddHabitFlowRoute()
+    data object HabitChoice : AddHabitFlowRoute()
 
     /**
      * Duration choice screen with initial duration parameter.
@@ -54,10 +53,7 @@ sealed class AddHabitFlowRoute : NavTarget {
             return when {
                 routeString.contains(CategoryChoice::class.qualifiedName.toString()) -> CategoryChoice
 
-                //in this case we don't need exact time of day
-                routeString.contains(HabitChoice::class.qualifiedName.toString()) -> HabitChoice(
-                    timeOfDay = TimeOfDay.Morning
-                )
+                routeString.contains(HabitChoice::class.qualifiedName.toString()) -> HabitChoice
 
                 routeString.contains(DurationChoice::class.qualifiedName.toString()) -> DurationChoice
                 routeString.contains(Summary::class.qualifiedName.toString()) -> Summary

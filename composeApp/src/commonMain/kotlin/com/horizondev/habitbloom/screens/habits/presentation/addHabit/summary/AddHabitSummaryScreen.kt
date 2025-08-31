@@ -32,7 +32,6 @@ import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowState
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.complete
@@ -44,11 +43,10 @@ import habitbloom.composeapp.generated.resources.start_date_display
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
+
 
 @Composable
 fun AddHabitSummaryScreen(
-    hostState: AddHabitFlowState,
     onSuccess: () -> Unit,
     onBack: () -> Unit,
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
@@ -56,9 +54,7 @@ fun AddHabitSummaryScreen(
 ) {
 
     // Create ViewModel using Koin
-    val viewModel = koinViewModel<AddHabitSummaryViewModel> {
-        parametersOf(hostState)
-    }
+    val viewModel = koinViewModel<AddHabitSummaryViewModel>()
 
     // Collect state and setup UI
     val uiState by viewModel.state.collectAsState()

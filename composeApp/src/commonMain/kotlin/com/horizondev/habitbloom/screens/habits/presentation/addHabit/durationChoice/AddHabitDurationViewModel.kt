@@ -6,6 +6,7 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import com.horizondev.habitbloom.utils.calculateEndOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.plusDays
@@ -31,7 +32,8 @@ import org.jetbrains.compose.resources.getString
  * Now focused on date range selection rather than explicit duration.
  */
 class AddHabitDurationViewModel(
-    private val permissionsManager: PermissionsManager
+    private val permissionsManager: PermissionsManager,
+    private val addHabitStateUseCase: AddHabitStateUseCase
 ) : BloomViewModel<AddHabitDurationUiState, AddHabitDurationUiIntent>(
     initialState = AddHabitDurationUiState(
         activeDays = DayOfWeek.entries,
@@ -327,6 +329,16 @@ class AddHabitDurationViewModel(
             }
 
             val calculatedStartedDate = currentState.startDate
+
+            // Update the UseCase with the duration data
+            addHabitStateUseCase.updateDuration(
+                startDate = calculatedStartedDate,
+                endDate = currentState.endDate,
+                selectedDays = currentState.activeDays,
+                durationInDays = currentState.durationInDays,
+                reminderEnabled = currentState.reminderEnabled,
+                reminderTime = currentState.reminderTime
+            )
 
             emitUiIntent(
                 AddHabitDurationUiIntent.NavigateNext(

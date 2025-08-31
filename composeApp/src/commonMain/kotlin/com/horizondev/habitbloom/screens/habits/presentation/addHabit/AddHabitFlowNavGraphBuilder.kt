@@ -1,13 +1,10 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import androidx.navigation.toRoute
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.AddHabitCategoryChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
@@ -42,38 +39,33 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
     navigation<AddHabitFlowGlobalNavEntryPoint>(
         startDestination = AddHabitFlowRoute.CategoryChoice
     ) {
-        // Time of Day choice screen
+        // Category choice screen
         composable<AddHabitFlowRoute.CategoryChoice> {
             AddHabitCategoryChoiceScreen(
-                onCategorySelected = { category ->
-                    //viewModel.handleUiEvent(AddHabitFlowUiEvent.UpdateTimeOfDay(selectedTimeOfDay))
-                    navController.navigate(AddHabitFlowRoute.HabitChoice(TimeOfDay.Morning))
+                onCategorySelected = {
+                    navController.navigate(AddHabitFlowRoute.HabitChoice)
                 },
                 onBack = {
-                    viewModel.handleUiEvent(AddHabitFlowUiEvent.CancelFlow)
+                    navController.popBackStack()
                 }
             )
         }
 
         // Choose habit screen
-        composable<AddHabitFlowRoute.HabitChoice> { entry ->
-            val timeOfDay = entry.toRoute<AddHabitFlowRoute.HabitChoice>().timeOfDay
-
+        composable<AddHabitFlowRoute.HabitChoice> {
             AddHabitChoiceScreen(
-                timeOfDay = timeOfDay,
                 onHabitSelected = { habit ->
-                    viewModel.handleUiEvent(AddHabitFlowUiEvent.UpdateHabit(habit))
                     navController.navigate(AddHabitFlowRoute.DurationChoice)
                 },
-                onCreateCustomHabit = { selectedTimeOfDay ->
+                onCreateCustomHabit = { timeOfDay ->
                     // Navigate to the CreatePersonalHabit flow as a separate screen
-                    onNavigateToCreateCustomHabit(selectedTimeOfDay)
+                    onNavigateToCreateCustomHabit(timeOfDay)
                 },
                 onBack = {
                     navController.popBackStack()
                 },
-                showSnackbar = {
-                    viewModel.handleUiEvent(AddHabitFlowUiEvent.ShowSnackbar(it))
+                showSnackbar = { snackbar ->
+                    viewModel.showSnackbar(snackbar)
                 }
             )
         }
@@ -82,41 +74,28 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
         composable<AddHabitFlowRoute.DurationChoice> {
             AddHabitDurationChoiceScreen(
                 onDurationSelected = { startDate, endDate, selectedDays, durationInDays, reminderEnabled, reminderTime ->
-                    viewModel.handleUiEvent(
-                        AddHabitFlowUiEvent.UpdateDuration(
-                            startDate = startDate,
-                            endDate = endDate,
-                            selectedDays = selectedDays,
-                            durationInDays = durationInDays,
-                            reminderEnabled = reminderEnabled,
-                            reminderTime = reminderTime
-                        )
-                    )
                     navController.navigate(AddHabitFlowRoute.Summary)
                 },
                 onBack = {
                     navController.popBackStack()
                 },
-                showSnackbar = {
-                    viewModel.handleUiEvent(AddHabitFlowUiEvent.ShowSnackbar(it))
+                showSnackbar = { snackbar ->
+                    viewModel.showSnackbar(snackbar)
                 }
             )
         }
 
         // Summary screen
         composable<AddHabitFlowRoute.Summary> {
-            val hostState by viewModel.state.collectAsState()
-
             AddHabitSummaryScreen(
-                hostState = hostState,
                 onSuccess = {
                     navController.navigate(AddHabitFlowRoute.Success)
                 },
                 onBack = {
                     navController.popBackStack()
                 },
-                showSnackbar = {
-                    viewModel.handleUiEvent(AddHabitFlowUiEvent.ShowSnackbar(it))
+                showSnackbar = { snackbar ->
+                    viewModel.showSnackbar(snackbar)
                 }
             )
         }
@@ -125,7 +104,7 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
         composable<AddHabitFlowRoute.Success> {
             AddHabitSuccessScreen(
                 onFinish = {
-                    viewModel.handleUiEvent(AddHabitFlowUiEvent.CancelFlow)
+                    navController.popBackStack()
                 }
             )
         }

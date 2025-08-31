@@ -56,6 +56,7 @@ class HabitsRemoteDataSource(
         timeOfDay: TimeOfDay,
         title: String,
         description: String,
+        categoryId: String? = null,
         icon: String = DEFAULT_PHOTO_URL
     ): Result<Boolean> {
         return runCatching {
@@ -66,7 +67,8 @@ class HabitsRemoteDataSource(
                     iconUrl = icon,
                     userId = userId,
                     shortInfo = "",
-                    timeOfDay = timeOfDay.toNetworkModel()
+                    timeOfDay = timeOfDay.toNetworkModel(),
+                    categoryId = categoryId
                 )
             ).id.isNotEmpty()
         }

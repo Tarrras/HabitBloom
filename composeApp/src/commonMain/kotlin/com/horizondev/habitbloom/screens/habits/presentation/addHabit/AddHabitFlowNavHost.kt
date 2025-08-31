@@ -22,7 +22,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,20 +59,11 @@ fun AddHabitFlowNavHost(
     val coroutineScope = rememberCoroutineScope()
     val snackBarState = remember { SnackbarHostState() }
 
-    // Create shared ViewModel for the entire flow
     val viewModel = koinViewModel<AddHabitFlowViewModel>()
 
-    // Observe the state
-    val flowState by viewModel.state.collectAsState()
-
-    // Handle UI intents
     LaunchedEffect(viewModel) {
         viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
-                AddHabitFlowUiIntent.ExitFlow -> {
-                    onFinishFlow()
-                }
-
                 is AddHabitFlowUiIntent.ShowShackbar -> {
                     coroutineScope.launch {
                         snackBarState.showSnackbar(uiIntent.visuals)

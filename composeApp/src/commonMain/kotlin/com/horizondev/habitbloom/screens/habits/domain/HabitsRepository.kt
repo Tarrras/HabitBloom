@@ -111,10 +111,13 @@ class HabitsRepository(
         }
     }
 
-    suspend fun getHabits(searchInput: String, timeOfDay: TimeOfDay): Result<List<HabitInfo>> {
+    suspend fun getHabits(
+        searchInput: String,
+        categoryId: String? = null
+    ): Result<List<HabitInfo>> {
         return getAllHabits().mapCatching { remoteHabits ->
-            remoteHabits.filter {
-                it.timeOfDay == timeOfDay
+            remoteHabits.filter { habit ->
+                categoryId == null || habit.categoryId == categoryId
             }.filter {
                 it.name.lowercase().contains(searchInput.lowercase())
             }

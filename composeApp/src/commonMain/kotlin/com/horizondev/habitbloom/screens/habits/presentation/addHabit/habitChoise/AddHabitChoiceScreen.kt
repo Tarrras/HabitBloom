@@ -51,23 +51,20 @@ import habitbloom.composeapp.generated.resources.or_create_your_own_habit
 import habitbloom.composeapp.generated.resources.search_habit
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.parameter.parametersOf
+
 
 /**
  * The first screen in the Add Habit flow where users select a habit.
  */
 @Composable
 fun AddHabitChoiceScreen(
-    timeOfDay: TimeOfDay?,
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
     onHabitSelected: (HabitInfo) -> Unit,
     onCreateCustomHabit: (TimeOfDay) -> Unit,
     onBack: () -> Unit,
 ) {
     // Create ViewModel using Koin
-    val viewModel = koinViewModel<AddHabitChoiceViewModel> {
-        parametersOf(timeOfDay)
-    }
+    val viewModel = koinViewModel<AddHabitChoiceViewModel>()
 
     // Collect state and setup UI
     val uiState by viewModel.state.collectAsState()

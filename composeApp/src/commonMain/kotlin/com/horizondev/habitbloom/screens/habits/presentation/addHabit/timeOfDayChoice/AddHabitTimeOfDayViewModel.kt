@@ -2,11 +2,14 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.timeOfDay
 
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 
 /**
  * ViewModel for the time of day choice screen.
  */
-class AddHabitTimeOfDayViewModel :
+class AddHabitTimeOfDayViewModel(
+    private val addHabitStateUseCase: AddHabitStateUseCase
+) :
     BloomViewModel<AddHabitTimeOfDayUiState, AddHabitTimeOfDayUiIntent>(
         initialState = AddHabitTimeOfDayUiState()
     ) {
@@ -16,6 +19,8 @@ class AddHabitTimeOfDayViewModel :
     fun handleUiEvent(event: AddHabitTimeOfDayUiEvent) {
         when (event) {
             is AddHabitTimeOfDayUiEvent.SelectTimeOfDay -> {
+                // Update the UseCase with the selected time of day
+                addHabitStateUseCase.updateTimeOfDay(event.timeOfDay)
                 emitUiIntent(AddHabitTimeOfDayUiIntent.NavigateWithTimeOfDay(event.timeOfDay))
             }
 

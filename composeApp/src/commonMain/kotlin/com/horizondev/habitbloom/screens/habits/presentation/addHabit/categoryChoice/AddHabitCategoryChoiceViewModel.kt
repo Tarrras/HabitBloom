@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.onStart
  * ViewModel for the category screen.
  */
 class AddHabitCategoryChoiceViewModel(
-    private val repository: HabitsRepository
+    private val repository: HabitsRepository,
+    private val addHabitStateUseCase: AddHabitStateUseCase
 ) :
     BloomViewModel<AddHabitCategoryUiState, AddHabitCategoryUiIntent>(
         initialState = AddHabitCategoryUiState()
@@ -38,7 +40,9 @@ class AddHabitCategoryChoiceViewModel(
     fun handleUiEvent(event: AddHabitCategoryUiEvent) {
         when (event) {
             is AddHabitCategoryUiEvent.SelectCategory -> {
-                emitUiIntent(AddHabitCategoryUiIntent.NavigateWithCategory(event.category))
+                // Update the UseCase with the selected category
+                addHabitStateUseCase.updateHabitCategory(event.category)
+                emitUiIntent(AddHabitCategoryUiIntent.NavigateToHabitChoice)
             }
 
             AddHabitCategoryUiEvent.NavigateBack -> {
@@ -68,6 +72,6 @@ sealed interface AddHabitCategoryUiEvent {
  * UI Intents emitted by the ViewModel.
  */
 sealed interface AddHabitCategoryUiIntent {
-    data class NavigateWithCategory(val category: HabitCategoryData) : AddHabitCategoryUiIntent
+    data object NavigateToHabitChoice : AddHabitCategoryUiIntent
     data object NavigateBack : AddHabitCategoryUiIntent
 } 

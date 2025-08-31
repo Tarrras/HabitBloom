@@ -19,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.component.CategoryCard
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.habit_category_subtitle
@@ -32,7 +31,7 @@ import org.koin.compose.viewmodel.koinViewModel
  */
 @Composable
 fun AddHabitCategoryChoiceScreen(
-    onCategorySelected: (HabitCategoryData) -> Unit,
+    onCategorySelected: () -> Unit,
     onBack: () -> Unit
 ) {
     // Create ViewModel using Koin
@@ -45,8 +44,8 @@ fun AddHabitCategoryChoiceScreen(
     LaunchedEffect(viewModel) {
         viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
-                is AddHabitCategoryUiIntent.NavigateWithCategory -> {
-                    onCategorySelected(uiIntent.category)
+                is AddHabitCategoryUiIntent.NavigateToHabitChoice -> {
+                    onCategorySelected()
                 }
 
                 AddHabitCategoryUiIntent.NavigateBack -> {

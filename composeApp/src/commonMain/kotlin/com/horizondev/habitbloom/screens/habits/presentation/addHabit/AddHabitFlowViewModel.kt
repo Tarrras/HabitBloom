@@ -2,76 +2,21 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit
 
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
-import com.horizondev.habitbloom.utils.calculateEndOfWeek
-import com.horizondev.habitbloom.utils.getCurrentDate
-import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalTime
 
 /**
- * ViewModel for the Add Habit flow that maintains state across the different steps.
+ * Minimal ViewModel for Add Habit flow that only handles snackbar display.
+ * This serves as the central point for snackbar management in the flow.
  */
-class AddHabitFlowViewModel : BloomViewModel<AddHabitFlowState, AddHabitFlowUiIntent>(
-    initialState = AddHabitFlowState()
+class AddHabitFlowViewModel : BloomViewModel<Unit, AddHabitFlowUiIntent>(
+    initialState = Unit
 ) {
 
     /**
-     * Single entry point for handling UI events.
+     * Shows a snackbar with the given visuals.
      */
-    fun handleUiEvent(event: AddHabitFlowUiEvent) {
-        when (event) {
-            is AddHabitFlowUiEvent.UpdateTimeOfDay -> {
-                updateState { it.copy(timeOfDay = event.timeOfDay) }
-            }
-
-            is AddHabitFlowUiEvent.UpdateHabit -> {
-                updateState { it.copy(habitInfo = event.habitInfo) }
-            }
-
-            is AddHabitFlowUiEvent.UpdateDuration -> {
-                updateState {
-                    it.copy(
-                        startDate = event.startDate,
-                        endDate = event.endDate,
-                        selectedDays = event.selectedDays,
-                        durationInDays = event.durationInDays,
-                        reminderEnabled = event.reminderEnabled,
-                        reminderTime = event.reminderTime
-                    )
-                }
-            }
-
-            AddHabitFlowUiEvent.CancelFlow -> {
-                emitUiIntent(AddHabitFlowUiIntent.ExitFlow)
-            }
-
-            is AddHabitFlowUiEvent.ShowSnackbar -> {
-                emitUiIntent(AddHabitFlowUiIntent.ShowShackbar(visuals = event.visuals))
-            }
-        }
+    fun showSnackbar(visuals: BloomSnackbarVisuals) {
+        emitUiIntent(AddHabitFlowUiIntent.ShowShackbar(visuals))
     }
-}
-
-/**
- * UI Events that can be triggered from the UI.
- */
-sealed interface AddHabitFlowUiEvent {
-    data class UpdateTimeOfDay(val timeOfDay: TimeOfDay) : AddHabitFlowUiEvent
-    data class UpdateHabit(val habitInfo: HabitInfo) : AddHabitFlowUiEvent
-    data class UpdateDuration(
-        val startDate: LocalDate,
-        val endDate: LocalDate,
-        val selectedDays: List<DayOfWeek>,
-        val durationInDays: Int,
-        val reminderEnabled: Boolean,
-        val reminderTime: LocalTime
-    ) : AddHabitFlowUiEvent
-
-    data class ShowSnackbar(val visuals: BloomSnackbarVisuals) : AddHabitFlowUiEvent
-
-    data object CancelFlow : AddHabitFlowUiEvent
 }
 
 /**
@@ -79,20 +24,4 @@ sealed interface AddHabitFlowUiEvent {
  */
 sealed interface AddHabitFlowUiIntent {
     data class ShowShackbar(val visuals: BloomSnackbarVisuals) : AddHabitFlowUiIntent
-    data object ExitFlow : AddHabitFlowUiIntent
 }
-
-/**
- * Extended state with submission status.
- */
-data class AddHabitFlowState(
-    val timeOfDay: TimeOfDay? = null,
-    val habitInfo: HabitInfo? = null,
-    val startDate: LocalDate = getCurrentDate(),
-    val endDate: LocalDate = getCurrentDate().calculateEndOfWeek(), // Default end date is the end of current week
-    val durationInDays: Int = 0, // Number of days the habit will take (only counting active days)
-    val isSubmitting: Boolean = false,
-    val selectedDays: List<DayOfWeek> = DayOfWeek.entries,
-    val reminderEnabled: Boolean = false,
-    val reminderTime: LocalTime = LocalTime(8, 0) // Default reminder time set to 8:00 AM
-) 
