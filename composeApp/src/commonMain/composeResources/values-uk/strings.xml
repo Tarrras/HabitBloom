@@ -73,6 +73,7 @@
     <string name="choose_habit_category">Виберіть категорію звички</string>
     <string name="choose_habit_to_acquire">Виберіть звичку для формування</string>
     <string name="or_create_your_own_habit">або створіть власну звичку</string>
+    <string name="choose_ready_or_create_own">Оберіть готову звичку або створіть власну</string>
     <string name="choose_habit_days_and_duration">Виберіть дні та тривалість</string>
     <string name="search_habit">Шукати звичку</string>
     <string name="select_days_for_habit">Виберіть дні для звички</string>
@@ -240,6 +241,15 @@
     <string name="create_personal_habit_subtitle">Налаштуйте свою унікальну звичку під ваші потреби</string>
     <string name="no_habits_found">Звичок не знайдено!</string>
     <string name="add_your_own_personal_habit_to_start_tracking">Не знайдено звичок, які відповідають вашому пошуку. Створіть власну звичку, щоб персоналізувати ваш досвід відстеження звичок!</string>
+    <string name="category_empty_title">Поки що тут пусто</string>
+    <string name="category_empty_description">Ми додаємо нові звички для категорії "%1$s". А поки що ви можете створити власну!</string>
+    <string name="tip">Підказка</string>
+    <string name="tip_suggestion_generic">Спробуйте створити власну звичку під ваші цілі та розпорядок</string>
+    <string name="nothing_found">Нічого не знайдено</string>
+    <string name="no_results_for_query">Не вдалося знайти звички за запитом "%1$s". Спробуйте інший пошук або створіть власну звичку.</string>
+    <string name="clear_search">Очистити пошук</string>
+    <string name="found_count">Знайдено: %1$d</string>
+    <string name="or_choose_ready_count">або виберіть готову (%1$d)</string>
 
     <string name="enter_habit_title">Наприклад: Ранкова медитація</string>
     <string name="enter_habit_description">Короткий опис звички та її переваг...</string>

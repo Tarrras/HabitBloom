@@ -128,11 +128,19 @@ class AddHabitChoiceViewModel(
             updateState { it.copy(isLoading = true) }
 
             runCatching {
-                val categoryId = addHabitStateUseCase.getCurrentDraft().habitCategory?.id
+                val category = addHabitStateUseCase.getCurrentDraft().habitCategory
+                val categoryId = category?.id
                 repository.getHabits(query, categoryId = categoryId)
             }.onSuccess { habitsResult ->
                 habitsResult.onSuccess { habits ->
-                    updateState { it.copy(habits = habits, isLoading = false) }
+                    val category = addHabitStateUseCase.getCurrentDraft().habitCategory
+                    updateState {
+                        it.copy(
+                            habits = habits,
+                            isLoading = false,
+                            currentCategory = category
+                        )
+                    }
                 }.onFailure {
                     Napier.e("Failed to search habits", it)
                     updateState { it.copy(isLoading = false) }

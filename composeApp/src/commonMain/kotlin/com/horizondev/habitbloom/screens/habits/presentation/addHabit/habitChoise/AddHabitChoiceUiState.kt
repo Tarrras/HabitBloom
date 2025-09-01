@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise
 
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
+import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 
 
@@ -9,7 +10,8 @@ data class AddHabitChoiceUiState(
     val searchInput: String = "",
     val isLoading: Boolean = true,
     val showDeleteDialog: Boolean = false,
-    val habitToDelete: HabitInfo? = null
+    val habitToDelete: HabitInfo? = null,
+    val currentCategory: HabitCategoryData? = null
 )
 
 sealed interface AddHabitChoiceUiEvent {

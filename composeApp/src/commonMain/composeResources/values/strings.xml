@@ -73,6 +73,7 @@
     <string name="choose_habit_category">Choose habit category</string>
     <string name="choose_habit_to_acquire">Choose habit to acquire</string>
     <string name="or_create_your_own_habit">or create your own habit</string>
+    <string name="choose_ready_or_create_own">Choose a ready-made habit or create your own</string>
     <string name="choose_habit_days_and_duration">Choose days and duration</string>
     <string name="search_habit">Search habit</string>
     <string name="select_days_for_habit">Select days for habit</string>
@@ -232,6 +233,15 @@
     <string name="create_personal_habit_subtitle">Customize your unique habit to your needs</string>
     <string name="no_habits_found">No habits found!</string>
     <string name="add_your_own_personal_habit_to_start_tracking">No matching habits found for your search. Create your own custom habit to personalize your habit tracking experience!</string>
+    <string name="nothing_found">Nothing found</string>
+    <string name="no_results_for_query">We couldn't find habits for "%1$s". Try another search or create your own.</string>
+    <string name="clear_search">Clear search</string>
+    <string name="found_count">Found: %1$d</string>
+    <string name="or_choose_ready_count">or choose ready (%1$d)</string>
+    <string name="category_empty_title">Nothing here yet</string>
+    <string name="category_empty_description">We are adding new habits for the "%1$s" category. In the meantime, you can create your own!</string>
+    <string name="tip">Tip</string>
+    <string name="tip_suggestion_generic">Try creating a custom habit that fits your goals and routine</string>
 
     <string name="enter_habit_title">For example: Morning meditation</string>
     <string name="enter_habit_description">A short description of the habit and its benefits...</string>
