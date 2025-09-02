@@ -2,8 +2,10 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationC
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,45 +30,44 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
-import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designComponents.dialogs.AddHabitDateRangePickerDialog
-import com.horizondev.habitbloom.core.designComponents.pickers.BloomSlider
-import com.horizondev.habitbloom.core.designComponents.pickers.DragSelectDayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
+import com.horizondev.habitbloom.core.designSystem.BloomStaticColors
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.models.getRangeLabel
 import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocale
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getIcon
+import com.horizondev.habitbloom.utils.getShortTitle
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.choose_duration
 import habitbloom.composeapp.generated.resources.custom_date_range
 import habitbloom.composeapp.generated.resources.days_count
+import habitbloom.composeapp.generated.resources.days_of_week
 import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.end_date_colon
 import habitbloom.composeapp.generated.resources.every_day
+import habitbloom.composeapp.generated.resources.execution_period
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_month
 import habitbloom.composeapp.generated.resources.one_week
 import habitbloom.composeapp.generated.resources.only_weekends
+import habitbloom.composeapp.generated.resources.period
 import habitbloom.composeapp.generated.resources.quick_selection
 import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.select_date_range_for_habit
 import habitbloom.composeapp.generated.resources.select_days_first
-import habitbloom.composeapp.generated.resources.select_days_for_habit
 import habitbloom.composeapp.generated.resources.select_reminder_time
-import habitbloom.composeapp.generated.resources.selected_repeats
 import habitbloom.composeapp.generated.resources.setup_schedule_for_your_habit
 import habitbloom.composeapp.generated.resources.start_date_colon
 import habitbloom.composeapp.generated.resources.tap_to_edit_dates
@@ -78,7 +80,6 @@ import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import kotlin.math.roundToInt
 
 
 @Composable
@@ -145,13 +146,13 @@ private fun AddHabitDurationChoiceScreenContent(
         Spacer(modifier = Modifier.height(12.dp))
         Text(
             text = stringResource(Res.string.choose_duration),
-            style = BloomTheme.typography.title,
+            style = BloomTheme.typography.headlineLarge,
             color = BloomTheme.colors.textColor.primary,
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = stringResource(Res.string.setup_schedule_for_your_habit),
-            style = BloomTheme.typography.body,
+            style = BloomTheme.typography.bodyLarge,
             color = BloomTheme.colors.textColor.secondary,
         )
         Spacer(modifier = Modifier.height(16.dp))
@@ -159,7 +160,7 @@ private fun AddHabitDurationChoiceScreenContent(
         // Section: Time of day
         Text(
             text = stringResource(Res.string.time_of_day),
-            style = BloomTheme.typography.heading,
+            style = BloomTheme.typography.titleMedium,
             color = BloomTheme.colors.textColor.primary,
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -173,9 +174,6 @@ private fun AddHabitDurationChoiceScreenContent(
         SelectDaysForHabitCard(
             modifier = Modifier.fillMaxWidth(),
             activeDays = uiState.activeDays,
-            onDaysChanged = { dayOfWeek, isActive ->
-                handleUiEvent(AddHabitDurationUiEvent.UpdateDayState(dayOfWeek, isActive))
-            },
             onGroupChanged = { days ->
                 handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
             }
@@ -185,12 +183,9 @@ private fun AddHabitDurationChoiceScreenContent(
             uiState.activeDays.isNotEmpty(),
             modifier = Modifier.padding(top = 16.dp)
         ) {
-            SelectDateRangeForHabitCard(
+            PeriodSectionCard(
                 modifier = Modifier.fillMaxWidth(),
                 uiState = uiState,
-                onDaysChanged = { days ->
-                    handleUiEvent(AddHabitDurationUiEvent.SelectGroupOfDays(days))
-                },
                 handleUiEvent = handleUiEvent,
                 isDatePickerVisible = uiState.isDatePickerVisible
             )
@@ -256,7 +251,7 @@ private fun TimeOfDayCards(
                     modifier = Modifier.padding(vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    androidx.compose.material3.Icon(
+                    Icon(
                         painter = period.getIcon(),
                         contentDescription = null,
                         tint = if (isSelected) BloomTheme.colors.textColor.white else getTimeOfDayIconColor(
@@ -266,13 +261,13 @@ private fun TimeOfDayCards(
                     Spacer(Modifier.height(8.dp))
                     Text(
                         text = period.getTitle(),
-                        style = BloomTheme.typography.body,
+                        style = BloomTheme.typography.labelMedium,
                         color = if (isSelected) BloomTheme.colors.textColor.white else BloomTheme.colors.textColor.primary
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(8.dp))
                     Text(
-                        text = period.getTitle(),
-                        style = BloomTheme.typography.small,
+                        text = period.getRangeLabel(),
+                        style = BloomTheme.typography.labelSmall,
                         color = if (isSelected) BloomTheme.colors.textColor.white.copy(alpha = 0.9f) else BloomTheme.colors.textColor.secondary
                     )
                 }
@@ -283,86 +278,81 @@ private fun TimeOfDayCards(
 
 @Composable
 private fun getTimeOfDayIconColor(period: TimeOfDay) = when (period) {
-    TimeOfDay.Morning -> Color(0xFFF59E0B) // amber-500
-    TimeOfDay.Afternoon -> Color(0xFFF97316) // orange-500
-    TimeOfDay.Evening -> Color(0xFFA855F7) // purple-500
+    TimeOfDay.Morning -> BloomStaticColors.Amber500
+    TimeOfDay.Afternoon -> BloomStaticColors.Orange500
+    TimeOfDay.Evening -> BloomStaticColors.Purple500
 }
 
 @Composable
 private fun SelectDaysForHabitCard(
     modifier: Modifier = Modifier,
     activeDays: List<DayOfWeek>,
-    onDaysChanged: (DayOfWeek, Boolean) -> Unit,
     onGroupChanged: (List<DayOfWeek>) -> Unit
 ) {
-    BloomCard(
-        modifier = modifier.fillMaxWidth(),
-        onClick = {}
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(16.dp)
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            text = stringResource(Res.string.days_of_week),
+            style = BloomTheme.typography.titleMedium,
+            color = BloomTheme.colors.textColor.primary
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        FlowRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = stringResource(Res.string.select_days_for_habit),
-                style = BloomTheme.typography.subheading,
-                color = BloomTheme.colors.textColor.primary
+            PresetChip(
+                text = stringResource(Res.string.every_day),
+                onClick = { onGroupChanged(DayOfWeek.entries) }
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Use drag select day picker
-            DragSelectDayPicker(
-                activeDays = activeDays,
-                onDaysChanged = onGroupChanged
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Add preset buttons in a row
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                // Everyday button
-                BloomSmallActionButton(
-                    text = stringResource(Res.string.every_day),
-                    modifier = Modifier.padding(4.dp),
-                    onClick = {
-                        onGroupChanged(DayOfWeek.entries)
-                    }
-                )
-
-                // Weekdays button
-                BloomSmallActionButton(
-                    text = stringResource(Res.string.weekdays),
-                    modifier = Modifier.padding(4.dp),
-                    onClick = {
-                        val weekdays = listOf(
+            PresetChip(
+                text = stringResource(Res.string.weekdays),
+                onClick = {
+                    onGroupChanged(
+                        listOf(
                             DayOfWeek.MONDAY,
                             DayOfWeek.TUESDAY,
                             DayOfWeek.WEDNESDAY,
                             DayOfWeek.THURSDAY,
                             DayOfWeek.FRIDAY
                         )
-                        onGroupChanged(weekdays)
-                    }
-                )
-
-                // Weekends button
-                BloomSmallActionButton(
-                    text = stringResource(Res.string.only_weekends),
-                    modifier = Modifier.padding(4.dp),
-                    onClick = {
-                        val weekends = listOf(
-                            DayOfWeek.SATURDAY,
-                            DayOfWeek.SUNDAY
-                        )
-                        onGroupChanged(weekends)
-                    }
-                )
-            }
+                    )
+                }
+            )
+            PresetChip(
+                text = stringResource(Res.string.only_weekends),
+                onClick = { onGroupChanged(listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY)) }
+            )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // New day pills row matching the design
+        DayPillsRow(
+            selectedDays = activeDays,
+            onSelectionChanged = onGroupChanged
+        )
+    }
+}
+
+@Composable
+private fun PresetChip(
+    text: String,
+    onClick: () -> Unit
+) {
+    Surface(
+        color = BloomTheme.colors.glassBackground,
+        shape = RoundedCornerShape(20.dp),
+        border = BorderStroke(1.dp, BloomTheme.colors.glassBorder),
+        modifier = Modifier.clickable(onClick = onClick)
+    ) {
+        Text(
+            text = text,
+            style = BloomTheme.typography.labelMedium,
+            color = BloomTheme.colors.textColor.secondary,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+        )
     }
 }
 
@@ -665,6 +655,124 @@ private fun SelectDateRangeForHabitCard(
 }
 
 @Composable
+private fun PeriodSectionCard(
+    modifier: Modifier = Modifier,
+    uiState: AddHabitDurationUiState,
+    handleUiEvent: (AddHabitDurationUiEvent) -> Unit,
+    isDatePickerVisible: Boolean = false
+) {
+    val activeDays = uiState.activeDays
+    val startDate = uiState.startDate
+    val endDate = uiState.endDate
+    val maxDurationDays = uiState.maxHabitDurationDays
+    val durationInDays = uiState.durationInDays
+
+    val currentDate = remember { getCurrentDate() }
+
+    val hasSelectedDays = activeDays.isNotEmpty()
+
+    val rangeText =
+        if (hasSelectedDays && startDate != null && endDate != null) {
+            "${startDate.formatToMmDdYyWithLocale()} - ${endDate.formatToMmDdYyWithLocale()}"
+        } else "—"
+
+    Column {
+        Text(
+            text = stringResource(Res.string.period),
+            style = BloomTheme.typography.titleMedium,
+            color = BloomTheme.colors.textColor.primary
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        val clickableModifier = if (hasSelectedDays) {
+            Modifier.clickable { handleUiEvent(AddHabitDurationUiEvent.SetDatePickerVisibility(true)) }
+        } else {
+            Modifier.alpha(0.6f)
+        }
+
+        Surface(
+            color = BloomTheme.colors.surface,
+            shape = RoundedCornerShape(16.dp),
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .then(clickableModifier)
+        ) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(32.dp)
+                            .height(32.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(BloomTheme.colors.primary.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = TimeOfDay.Morning.getIcon(),
+                            contentDescription = null,
+                            tint = BloomTheme.colors.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = stringResource(Res.string.execution_period),
+                            style = BloomTheme.typography.titleMedium,
+                            color = BloomTheme.colors.textColor.secondary
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = rangeText,
+                            style = BloomTheme.typography.titleMedium,
+                            color = BloomTheme.colors.textColor.primary
+                        )
+                    }
+                    if (hasSelectedDays && durationInDays > 0) {
+                        Text(
+                            text = pluralStringResource(
+                                Res.plurals.days_count,
+                                durationInDays,
+                                durationInDays
+                            ),
+                            style = BloomTheme.typography.labelMedium,
+                            color = BloomTheme.colors.primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(Res.string.tap_to_edit_dates),
+                    style = BloomTheme.typography.labelSmall,
+                    color = BloomTheme.colors.textColor.secondary,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
+            }
+        }
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    if (isDatePickerVisible && hasSelectedDays) {
+        AddHabitDateRangePickerDialog(
+            startDate = startDate,
+            endDate = endDate,
+            maxDurationDays = maxDurationDays,
+            onDatesSelected = { start, end ->
+                handleUiEvent(AddHabitDurationUiEvent.DateRangeChanged(start, end))
+                handleUiEvent(AddHabitDurationUiEvent.SetDatePickerVisibility(false))
+            },
+            onDismiss = { handleUiEvent(AddHabitDurationUiEvent.SetDatePickerVisibility(false)) },
+            minDate = currentDate
+        )
+    }
+}
+
+@Composable
 private fun DateRangeChip(
     text: String,
     isSelected: Boolean,
@@ -698,122 +806,55 @@ private fun DateRangeChip(
     }
 }
 
+@Composable
+private fun DayPillsRow(
+    selectedDays: List<DayOfWeek>,
+    onSelectionChanged: (List<DayOfWeek>) -> Unit
+) {
+    val selectedSet = remember(selectedDays) { selectedDays.toHashSet() }
+    val allDays = remember { DayOfWeek.entries }
+    val pillShape = remember { RoundedCornerShape(16.dp) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        allDays.forEach { day ->
+            val isSelected = selectedSet.contains(day)
+            Surface(
+                color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface,
+                shape = pillShape,
+                border = if (isSelected) null else BorderStroke(
+                    1.dp,
+                    BloomTheme.colors.glassBorder
+                ),
+                modifier = Modifier.weight(1f).clickable {
+                    val toggled = selectedSet.toMutableSet().apply {
+                        if (!add(day)) remove(day)
+                    }
+                    val updated = allDays.filter { toggled.contains(it) }
+                    onSelectionChanged(updated)
+                }
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = day.getShortTitle(),
+                        style = BloomTheme.typography.labelMedium,
+                        color = if (isSelected) BloomTheme.colors.textColor.white else BloomTheme.colors.textColor.primary,
+                    )
+                }
+            }
+        }
+    }
+}
+
 // Data class for preset date ranges
 private data class PresetRange(
     val days: Int,
     val label: String
 )
-
-@Composable
-fun DurationSlider(
-    modifier: Modifier = Modifier,
-    duration: Int,
-    onDurationChanged: (Int) -> Unit,
-    enabled: Boolean = true
-) {
-    Column {
-        BloomSlider(
-            value = duration.toFloat(),
-            onValueChange = { newValue -> onDurationChanged(newValue.roundToInt()) },
-            valueRange = 1f..12f, // Set the range from 1 to 12
-            steps = 11, // 11 steps because we start from 1
-            modifier = modifier,
-            enabled = enabled
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = pluralStringResource(
-                resource = Res.plurals.selected_repeats,
-                quantity = duration,
-                duration
-            ),
-            style = BloomTheme.typography.body,
-            color = BloomTheme.colors.textColor.primary,
-            textDecoration = TextDecoration.Underline,
-        )
-    }
-}
-
-/**
- * Visual representation of duration with chips and calendar-based explanation
- */
-/*@Composable
-fun VisualDurationSelector(
-    modifier: Modifier = Modifier,
-    durations: List<DurationOption>,
-    selectedDuration: Int,
-    onDurationSelected: (Int) -> Unit
-) {
-    Column(modifier = modifier) {
-        // Duration chips in a wrapped flow layout
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            durations.forEach { option ->
-                DurationChip(
-                    text = option.label,
-                    isSelected = selectedDuration == option.value,
-                    onClick = { onDurationSelected(option.value) },
-                    enabled = true
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Regular slider for fine-tuning
-        BloomSlider(
-            value = selectedDuration.toFloat(),
-            onValueChange = { newValue -> onDurationSelected(newValue.roundToInt()) },
-            valueRange = 1f..12f,
-            steps = 11,
-            modifier = Modifier.fillMaxWidth(),
-            enabled = true
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Show current duration with completion date
-        if (selectedDuration > 0) {
-            Text(
-                text = pluralStringResource(
-                    resource = Res.plurals.selected_repeats,
-                    quantity = selectedDuration,
-                    selectedDuration
-                ),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}*/
-
-@Composable
-private fun DurationChip(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    enabled: Boolean = true
-) {
-    Surface(
-        color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface,
-        shape = RoundedCornerShape(16.dp),
-        border = BorderStroke(
-            width = 1.dp,
-            color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface
-        ),
-        modifier = Modifier.clickable(enabled = enabled, onClick = onClick)
-    ) {
-        Text(
-            text = text,
-            style = BloomTheme.typography.body,
-            color = if (isSelected) BloomTheme.colors.textColor.white else BloomTheme.colors.textColor.primary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-    }
-}
 
 

@@ -69,6 +69,7 @@
     <string name="choose_duration">Вибрати тривалість</string>
     <string name="setup_schedule_for_your_habit">Налаштуйте розклад для вашої звички</string>
     <string name="time_of_day">Час дня</string>
+    <string name="days_of_week">Дні тижня</string>
     <string name="summary">Підсумок</string>
     <string name="success">Успіх</string>
 
@@ -446,6 +447,8 @@
 
     <string name="quick_selection">Швидкий вибір</string>
     <string name="custom_date_range">Власний діапазон дат</string>
+    <string name="period">Період</string>
+    <string name="execution_period">Період виконання</string>
     <plurals name="days_count">
         <item quantity="one">%1$d день</item>
         <item quantity="few">%1$d дні</item>

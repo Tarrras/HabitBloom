@@ -16,4 +16,10 @@ object TimeOfDayRange {
     )
 }
 
+fun TimeOfDay.getRangeLabel() = when (this) {
+    TimeOfDay.Morning -> TimeOfDayRange.MORNING
+    TimeOfDay.Afternoon -> TimeOfDayRange.AFTERNOON
+    TimeOfDay.Evening -> TimeOfDayRange.EVENING
+}.label
+
 
