@@ -67,6 +67,8 @@
     <string name="choose_habit">Choose habit</string>
     <string name="choose_days">Choose days</string>
     <string name="choose_duration">Choose duration</string>
+    <string name="setup_schedule_for_your_habit">Set up a schedule for your habit</string>
+    <string name="time_of_day">Time of day</string>
     <string name="summary">Summary</string>
     <string name="success">Success</string>
 

@@ -6,6 +6,7 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import com.horizondev.habitbloom.utils.calculateEndOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
@@ -39,7 +40,8 @@ class AddHabitDurationViewModel(
         activeDays = DayOfWeek.entries,
         startDate = getCurrentDate(),
         endDate = getCurrentDate().calculateEndOfWeek(),
-        durationInDays = getCurrentDate().daysUntil(getCurrentDate().calculateEndOfWeek())
+        durationInDays = getCurrentDate().daysUntil(getCurrentDate().calculateEndOfWeek()),
+        timeOfDay = addHabitStateUseCase.getCurrentDraft().timeOfDay ?: TimeOfDay.Morning
     )
 ) {
 
@@ -121,6 +123,9 @@ class AddHabitDurationViewModel(
      */
     fun handleUiEvent(event: AddHabitDurationUiEvent) {
         when (event) {
+            is AddHabitDurationUiEvent.SelectTimeOfDay -> {
+                updateState { it.copy(timeOfDay = event.timeOfDay) }
+            }
             is AddHabitDurationUiEvent.SelectGroupOfDays -> selectGroupOfDays(event.group)
             is AddHabitDurationUiEvent.UpdateDayState -> updateDayState(event.dayOfWeek)
             is AddHabitDurationUiEvent.SelectPresetDateRange -> selectPresetDateRange(event.daysAhead)
@@ -339,6 +344,9 @@ class AddHabitDurationViewModel(
                 reminderEnabled = currentState.reminderEnabled,
                 reminderTime = currentState.reminderTime
             )
+
+            // Persist selected time of day into the draft if changed here
+            addHabitStateUseCase.updateTimeOfDay(currentState.timeOfDay)
 
             emitUiIntent(
                 AddHabitDurationUiIntent.NavigateNext(

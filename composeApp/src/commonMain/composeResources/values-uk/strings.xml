@@ -67,6 +67,8 @@
     <string name="choose_habit">Вибрати звичку</string>
     <string name="choose_days">Вибрати дні</string>
     <string name="choose_duration">Вибрати тривалість</string>
+    <string name="setup_schedule_for_your_habit">Налаштуйте розклад для вашої звички</string>
+    <string name="time_of_day">Час дня</string>
     <string name="summary">Підсумок</string>
     <string name="success">Успіх</string>
 

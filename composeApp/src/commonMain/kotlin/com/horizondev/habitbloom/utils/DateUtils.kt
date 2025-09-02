@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.utils
 
 import androidx.compose.runtime.Composable
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDayRange
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.month_april
 import habitbloom.composeapp.generated.resources.month_april_short
@@ -77,9 +78,9 @@ fun getTimeOfDay(): TimeOfDay {
     val currentHour = currentDateTime.hour
 
     return when (currentHour) {
-        in 5..11 -> TimeOfDay.Morning
-        in 12..16 -> TimeOfDay.Afternoon
-        in 17..20 -> TimeOfDay.Evening
+        in TimeOfDayRange.MORNING.startHour..TimeOfDayRange.MORNING.endHour -> TimeOfDay.Morning
+        in TimeOfDayRange.AFTERNOON.startHour..TimeOfDayRange.AFTERNOON.endHour -> TimeOfDay.Afternoon
+        in TimeOfDayRange.EVENING.startHour..TimeOfDayRange.EVENING.endHour -> TimeOfDay.Evening
         else -> TimeOfDay.Evening
     }
 }

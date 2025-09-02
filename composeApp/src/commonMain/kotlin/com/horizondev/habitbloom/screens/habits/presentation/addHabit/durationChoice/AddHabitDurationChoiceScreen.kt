@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -41,11 +42,14 @@ import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocale
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getIcon
+import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
-import habitbloom.composeapp.generated.resources.choose_habit_days_and_duration
+import habitbloom.composeapp.generated.resources.choose_duration
 import habitbloom.composeapp.generated.resources.custom_date_range
 import habitbloom.composeapp.generated.resources.days_count
 import habitbloom.composeapp.generated.resources.enable_reminder
@@ -62,9 +66,11 @@ import habitbloom.composeapp.generated.resources.select_days_first
 import habitbloom.composeapp.generated.resources.select_days_for_habit
 import habitbloom.composeapp.generated.resources.select_reminder_time
 import habitbloom.composeapp.generated.resources.selected_repeats
+import habitbloom.composeapp.generated.resources.setup_schedule_for_your_habit
 import habitbloom.composeapp.generated.resources.start_date_colon
 import habitbloom.composeapp.generated.resources.tap_to_edit_dates
 import habitbloom.composeapp.generated.resources.three_months
+import habitbloom.composeapp.generated.resources.time_of_day
 import habitbloom.composeapp.generated.resources.weekdays
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -138,9 +144,29 @@ private fun AddHabitDurationChoiceScreenContent(
     ) {
         Spacer(modifier = Modifier.height(12.dp))
         Text(
-            text = stringResource(Res.string.choose_habit_days_and_duration),
+            text = stringResource(Res.string.choose_duration),
             style = BloomTheme.typography.title,
             color = BloomTheme.colors.textColor.primary,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(Res.string.setup_schedule_for_your_habit),
+            style = BloomTheme.typography.body,
+            color = BloomTheme.colors.textColor.secondary,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Section: Time of day
+        Text(
+            text = stringResource(Res.string.time_of_day),
+            style = BloomTheme.typography.heading,
+            color = BloomTheme.colors.textColor.primary,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        // Time of day selector like on the design: three cards
+        TimeOfDayCards(
+            selected = uiState.timeOfDay,
+            onSelected = { handleUiEvent(AddHabitDurationUiEvent.SelectTimeOfDay(it)) }
         )
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -207,6 +233,59 @@ private fun AddHabitDurationChoiceScreenContent(
 
         Spacer(modifier = Modifier.height(24.dp))
     }
+}
+
+@Composable
+private fun TimeOfDayCards(
+    selected: TimeOfDay,
+    onSelected: (TimeOfDay) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        TimeOfDay.entries.forEach { period ->
+            val isSelected = period == selected
+            Surface(
+                color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface,
+                shape = RoundedCornerShape(20.dp),
+                border = if (isSelected) null else BorderStroke(1.dp, BloomTheme.colors.background),
+                modifier = Modifier.weight(1f).clickable { onSelected(period) }
+            ) {
+                Column(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    androidx.compose.material3.Icon(
+                        painter = period.getIcon(),
+                        contentDescription = null,
+                        tint = if (isSelected) BloomTheme.colors.textColor.white else getTimeOfDayIconColor(
+                            period
+                        ).copy(alpha = 0.9f)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = period.getTitle(),
+                        style = BloomTheme.typography.body,
+                        color = if (isSelected) BloomTheme.colors.textColor.white else BloomTheme.colors.textColor.primary
+                    )
+                    Spacer(Modifier.height(4.dp))
+                    Text(
+                        text = period.getTitle(),
+                        style = BloomTheme.typography.small,
+                        color = if (isSelected) BloomTheme.colors.textColor.white.copy(alpha = 0.9f) else BloomTheme.colors.textColor.secondary
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun getTimeOfDayIconColor(period: TimeOfDay) = when (period) {
+    TimeOfDay.Morning -> Color(0xFFF59E0B) // amber-500
+    TimeOfDay.Afternoon -> Color(0xFFF97316) // orange-500
+    TimeOfDay.Evening -> Color(0xFFA855F7) // purple-500
 }
 
 @Composable
