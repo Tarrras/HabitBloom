@@ -5,30 +5,44 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getShortTitle
+import com.horizondev.habitbloom.utils.getTitle
 import com.horizondev.habitbloom.utils.plusDays
-import com.kizitonwose.calendar.compose.VerticalCalendar
+import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
-import com.kizitonwose.calendar.core.CalendarMonth
 import com.kizitonwose.calendar.core.DayPosition
 import com.kizitonwose.calendar.core.OutDateStyle
 import com.kizitonwose.calendar.core.daysOfWeek
 import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
+import com.kizitonwose.calendar.core.minusMonths
+import com.kizitonwose.calendar.core.plusMonths
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.YearMonth
 
@@ -73,34 +87,68 @@ fun DateRangeSelectionCalendar(
     }
     val firstDayOfWeek = remember { firstDayOfWeekFromLocale() }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        val state = rememberCalendarState(
-            startMonth = startMonth,
-            endMonth = endMonth,
-            firstVisibleMonth = currentMonth,
-            firstDayOfWeek = firstDayOfWeek,
-            outDateStyle = OutDateStyle.EndOfRow
-        )
+    val state = rememberCalendarState(
+        startMonth = startMonth,
+        endMonth = endMonth,
+        firstVisibleMonth = currentMonth,
+        firstDayOfWeek = firstDayOfWeek,
+        outDateStyle = OutDateStyle.EndOfRow
+    )
 
-        // Days of week header
+    Column(modifier = modifier.fillMaxWidth()) {
+        val coroutineScope = rememberCoroutineScope()
+
+        // Month title with arrows (compact header)
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = "prev",
+                tint = BloomTheme.colors.textColor.primary,
+                modifier = Modifier.clip(CircleShape).clickable {
+                    coroutineScope.launch {
+                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.minusMonths(1))
+                    }
+                }
+            )
+            Text(
+                modifier = Modifier.weight(1f),
+                textAlign = TextAlign.Center,
+                text = "${state.firstVisibleMonth.yearMonth.month.getTitle()} ${state.firstVisibleMonth.yearMonth.year}",
+                style = BloomTheme.typography.headlineSmall,
+                color = BloomTheme.colors.textColor.primary
+            )
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = "next",
+                tint = BloomTheme.colors.textColor.primary,
+                modifier = Modifier.clip(CircleShape).clickable {
+                    coroutineScope.launch {
+                        state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.plusMonths(1))
+                    }
+                }
+            )
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Days of week header (compact)
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 8.dp),
+                .padding(vertical = 12.dp),
         ) {
             for (dayOfWeek in daysOfWeek()) {
                 Text(
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
                     color = BloomTheme.colors.textColor.secondary,
-                    text = dayOfWeek.name.take(1),
-                    style = BloomTheme.typography.small
+                    text = dayOfWeek.getShortTitle(),
+                    style = BloomTheme.typography.labelMedium
                 )
             }
         }
 
-        // Calendar
-        VerticalCalendar(
+        HorizontalCalendar(
             state = state,
             dayContent = { day ->
                 Day(
@@ -115,7 +163,6 @@ fun DateRangeSelectionCalendar(
                                 day = clickedDay.date.day
                             )
 
-                            // Only allow selection of today or future dates
                             if (date >= today) {
                                 val newSelection = getUpdatedSelection(date, selection)
                                 onSelectionChanged(newSelection)
@@ -124,26 +171,6 @@ fun DateRangeSelectionCalendar(
                     }
                 )
             },
-            monthHeader = { month -> MonthHeader(month = month) }
-        )
-    }
-}
-
-@Composable
-private fun MonthHeader(month: CalendarMonth) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 12.dp, bottom = 8.dp, start = 16.dp, end = 16.dp),
-    ) {
-        Text(
-            textAlign = TextAlign.Center,
-            text = "${
-                month.yearMonth.month.name.lowercase().replaceFirstChar { it.uppercase() }
-            } ${month.yearMonth.year}",
-            style = BloomTheme.typography.body,
-            fontWeight = FontWeight.SemiBold,
-            color = BloomTheme.colors.textColor.primary
         )
     }
 }
@@ -169,11 +196,29 @@ private fun Day(
 
     val isSelectable = isInCurrentMonth && date >= today
 
+    val backgroundShape = when {
+        date == selection.startDate && selection.endDate == null -> CircleShape
+        date == selection.startDate -> RoundedCornerShape(
+            topStart = 16.dp,
+            bottomStart = 16.dp
+        )
+
+        date == selection.endDate -> {
+            RoundedCornerShape(
+                topEnd = 16.dp,
+                bottomEnd = 16.dp
+            )
+        }
+
+        isInRange -> RectangleShape
+        else -> RectangleShape
+    }
+
     // Background color
     val backgroundColor = when {
         isSelected -> BloomTheme.colors.primary
-        isInRange -> BloomTheme.colors.primary.copy(alpha = 0.2f)
-        else -> androidx.compose.ui.graphics.Color.Transparent
+        isInRange -> BloomTheme.colors.primary
+        else -> Color.Transparent
     }
 
     // Text color
@@ -188,8 +233,8 @@ private fun Day(
     Box(
         modifier = Modifier
             .aspectRatio(1f)
-            .padding(4.dp)
-            .clip(CircleShape)
+            .padding(vertical = 4.dp)
+            .clip(backgroundShape)
             .background(backgroundColor)
             .clickable(
                 enabled = isSelectable,

@@ -40,9 +40,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
+import com.horizondev.habitbloom.core.designComponents.components.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.containers.BloomGrid
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage

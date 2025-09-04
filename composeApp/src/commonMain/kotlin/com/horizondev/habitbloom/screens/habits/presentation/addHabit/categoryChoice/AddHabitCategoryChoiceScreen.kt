@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.horizondev.habitbloom.core.designComponents.BloomLoader
+import com.horizondev.habitbloom.core.designComponents.components.BloomLoader
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.component.CategoryCard
 import habitbloom.composeapp.generated.resources.Res
