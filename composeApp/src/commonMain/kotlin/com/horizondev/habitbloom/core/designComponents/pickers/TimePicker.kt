@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,8 +32,10 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_alarm_clock
+import habitbloom.composeapp.generated.resources.reminder_time_label
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A time picker component that shows a time field and opens a dialog for selection
@@ -59,25 +62,32 @@ fun TimePicker(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
-                .border(1.dp, BloomTheme.colors.primary, RoundedCornerShape(8.dp))
-                .background(BloomTheme.colors.surface)
+                .background(BloomTheme.colors.cardSecondary)
                 .clickable { showTimePicker = true }
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_alarm_clock),
                 contentDescription = "Time",
-                tint = BloomTheme.colors.primary
+                tint = BloomTheme.colors.primary,
+                modifier = Modifier.size(16.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = formatTime(time, use24HourFormat),
-                style = BloomTheme.typography.body,
+                text = stringResource(Res.string.reminder_time_label).dropLast(1),
+                style = BloomTheme.typography.bodyMedium,
                 color = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                text = formatTime(time, use24HourFormat),
+                style = BloomTheme.typography.titleMedium,
+                color = BloomTheme.colors.primary,
             )
         }
 
