@@ -82,7 +82,7 @@ fun TimePicker(
         }
 
         // Time picker dialog
-        TimePickerDialog(
+        WheelTimePickerDialog(
             isVisible = showTimePicker,
             onDismiss = { showTimePicker = false },
             time = time,
