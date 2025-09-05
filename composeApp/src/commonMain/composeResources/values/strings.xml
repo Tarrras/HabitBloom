@@ -273,6 +273,7 @@
     <string name="loading_habit_details">Loading habit details...</string>
 
     <!-- Reminder strings -->
+    <string name="reminder">Reminder</string>
     <string name="reminder_settings">Reminder Settings</string>
     <string name="enable_reminder">Enable Reminder</string>
     <string name="reminder_disabled">Reminder disabled</string>

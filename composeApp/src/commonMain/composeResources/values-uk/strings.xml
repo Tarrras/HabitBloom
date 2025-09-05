@@ -281,6 +281,7 @@
     <string name="loading_habit_details">Завантаження деталей звички...</string>
 
     <!-- Reminder strings -->
+    <string name="reminder">Нагадування</string>
     <string name="reminder_settings">Налаштування нагадувань</string>
     <string name="enable_reminder">Увімкнути нагадування</string>
     <string name="reminder_disabled">Нагадування вимкнено</string>

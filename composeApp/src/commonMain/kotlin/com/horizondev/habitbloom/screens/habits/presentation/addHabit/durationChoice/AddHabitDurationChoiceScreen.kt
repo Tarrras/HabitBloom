@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -34,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
+import com.horizondev.habitbloom.core.designComponents.components.BloomHorizontalDivider
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designComponents.dialogs.AddHabitDateRangePickerDialog
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
@@ -58,12 +60,14 @@ import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.end_date_colon
 import habitbloom.composeapp.generated.resources.every_day
 import habitbloom.composeapp.generated.resources.execution_period
+import habitbloom.composeapp.generated.resources.ic_lucid_calendar
 import habitbloom.composeapp.generated.resources.next
 import habitbloom.composeapp.generated.resources.one_month
 import habitbloom.composeapp.generated.resources.one_week
 import habitbloom.composeapp.generated.resources.only_weekends
 import habitbloom.composeapp.generated.resources.period
 import habitbloom.composeapp.generated.resources.quick_selection
+import habitbloom.composeapp.generated.resources.reminder
 import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.select_date_range_for_habit
 import habitbloom.composeapp.generated.resources.select_days_first
@@ -77,6 +81,7 @@ import habitbloom.composeapp.generated.resources.weekdays
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -124,16 +129,14 @@ fun AddHabitDurationChoiceScreen(
     // UI Content
     AddHabitDurationChoiceScreenContent(
         uiState = uiState,
-        handleUiEvent = viewModel::handleUiEvent,
-        modifier = modifier
+        handleUiEvent = viewModel::handleUiEvent
     )
 }
 
 @Composable
 private fun AddHabitDurationChoiceScreenContent(
     uiState: AddHabitDurationUiState,
-    handleUiEvent: (AddHabitDurationUiEvent) -> Unit,
-    modifier: Modifier = Modifier
+    handleUiEvent: (AddHabitDurationUiEvent) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -155,7 +158,7 @@ private fun AddHabitDurationChoiceScreenContent(
             style = BloomTheme.typography.bodyLarge,
             color = BloomTheme.colors.textColor.secondary,
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         // Section: Time of day
         Text(
@@ -169,7 +172,7 @@ private fun AddHabitDurationChoiceScreenContent(
             selected = uiState.timeOfDay,
             onSelected = { handleUiEvent(AddHabitDurationUiEvent.SelectTimeOfDay(it)) }
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         SelectDaysForHabitCard(
             modifier = Modifier.fillMaxWidth(),
@@ -181,7 +184,7 @@ private fun AddHabitDurationChoiceScreenContent(
 
         AnimatedVisibility(
             uiState.activeDays.isNotEmpty(),
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = 24.dp)
         ) {
             PeriodSectionCard(
                 modifier = Modifier.fillMaxWidth(),
@@ -191,7 +194,7 @@ private fun AddHabitDurationChoiceScreenContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(24.dp))
 
         ReminderSettingsCard(
             modifier = Modifier.fillMaxWidth(),
@@ -364,57 +367,78 @@ private fun ReminderSettingsCard(
     onReminderEnabledChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (LocalTime) -> Unit
 ) {
-    Surface(
-        color = BloomTheme.colors.surface,
-        shape = RoundedCornerShape(16.dp),
-        shadowElevation = 6.dp
-    ) {
-        Column(
-            modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
-            horizontalAlignment = Alignment.Start
+    Column {
+        Text(
+            text = stringResource(Res.string.reminder),
+            style = BloomTheme.typography.titleMedium,
+            color = BloomTheme.colors.textColor.primary
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Surface(
+            color = BloomTheme.colors.surface,
+            shape = RoundedCornerShape(16.dp),
+            shadowElevation = 6.dp
         ) {
-            Text(
-                text = stringResource(Res.string.reminder_settings),
-                style = BloomTheme.typography.heading,
-                color = BloomTheme.colors.textColor.primary
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = modifier.padding(horizontal = 12.dp, vertical = 16.dp),
+                horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = stringResource(Res.string.enable_reminder),
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.primary,
-                    modifier = Modifier.weight(1f)
+                    text = stringResource(Res.string.reminder_settings),
+                    style = BloomTheme.typography.titleMedium,
+                    color = BloomTheme.colors.textColor.primary
                 )
 
-                BloomSwitch(
-                    checked = reminderEnabled,
-                    onCheckedChange = onReminderEnabledChanged
-                )
-            }
+                Spacer(modifier = Modifier.height(8.dp))
 
-            AnimatedVisibility(visible = reminderEnabled) {
-                Column {
-                    Spacer(modifier = Modifier.height(16.dp))
-
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
-                        text = stringResource(Res.string.select_reminder_time),
-                        style = BloomTheme.typography.body,
-                        color = BloomTheme.colors.textColor.secondary
+                        text = stringResource(Res.string.enable_reminder),
+                        style = BloomTheme.typography.bodyMedium,
+                        color = BloomTheme.colors.textColor.secondary,
+                        modifier = Modifier.weight(1f)
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    TimePicker(
-                        time = reminderTime,
-                        onTimeSelected = onReminderTimeChanged,
-                        use24HourFormat = true
+                    BloomSwitch(
+                        checked = reminderEnabled,
+                        onCheckedChange = onReminderEnabledChanged
                     )
+                }
+
+                AnimatedVisibility(visible = reminderEnabled) {
+                    Column {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        BloomHorizontalDivider(modifier = Modifier.fillMaxWidth())
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        TimePicker(
+                            time = reminderTime,
+                            onTimeSelected = onReminderTimeChanged,
+                            use24HourFormat = true
+                        )
+
+                        Row(
+                            modifier = Modifier.background(
+                                color = BloomTheme.colors.glassBackground,
+                                shape = RoundedCornerShape(16.dp)
+                            ).padding(horizontal = 16.dp, vertical = 8.dp)
+                        ) {
+                            Text(
+                                text = stringResource(Res.string.select_reminder_time),
+                                style = BloomTheme.typography.body,
+                                color = BloomTheme.colors.textColor.secondary
+                            )
+
+                            Spacer(modifier = Modifier.width(8.dp))
+
+
+                        }
+                    }
                 }
             }
         }
@@ -703,28 +727,20 @@ private fun PeriodSectionCard(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .width(32.dp)
-                            .height(32.dp)
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(BloomTheme.colors.primary.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = TimeOfDay.Morning.getIcon(),
-                            contentDescription = null,
-                            tint = BloomTheme.colors.primary
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        painter = painterResource(Res.drawable.ic_lucid_calendar),
+                        contentDescription = null,
+                        tint = BloomTheme.colors.primary
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(Res.string.execution_period),
-                            style = BloomTheme.typography.titleMedium,
+                            style = BloomTheme.typography.bodyMedium,
                             color = BloomTheme.colors.textColor.secondary
                         )
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = rangeText,
                             style = BloomTheme.typography.titleMedium,
