@@ -17,12 +17,10 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
@@ -40,8 +38,8 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.horizondev.habitbloom.core.designComponents.bottomBar.BloomBottomActionButtonContainer
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
-import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.components.BloomLoader
 import com.horizondev.habitbloom.core.designComponents.containers.BloomGrid
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
@@ -53,7 +51,6 @@ import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
 import com.horizondev.habitbloom.utils.clippedShadow
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.choose_habit_icon
 import habitbloom.composeapp.generated.resources.create
 import habitbloom.composeapp.generated.resources.create_habit_description
@@ -67,7 +64,6 @@ import habitbloom.composeapp.generated.resources.habit_title
 import habitbloom.composeapp.generated.resources.ic_lucid_file_text
 import habitbloom.composeapp.generated.resources.ic_lucid_image
 import habitbloom.composeapp.generated.resources.ic_lucid_type
-import habitbloom.composeapp.generated.resources.next
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -122,38 +118,15 @@ fun CreatePersonalHabitScreenContent(
                 )
             },
             bottomBar = {
-                Column(
-                    modifier = Modifier.background(color = BloomTheme.colors.background)
-                ) {
-                    HorizontalDivider(color = BloomTheme.colors.border)
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        BloomPrimaryOutlinedButton(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(Res.string.back),
-                            onClick = {
-                                handleUiEvent(CreatePersonalHabitUiEvent.NavigateBack)
-                            },
-                        )
-                        Spacer(modifier = Modifier.width(12.dp))
-                        BloomPrimaryFilledButton(
-                            modifier = Modifier.weight(1f),
-                            text = stringResource(Res.string.next),
-                            onClick = {
-                                handleUiEvent(CreatePersonalHabitUiEvent.CreateHabit)
-                            },
-                            enabled = uiState.nextButtonEnabled
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Spacer(modifier = Modifier.navigationBarsPadding())
-
-                }
+                BloomBottomActionButtonContainer(
+                    onPrimaryButtonClicked = {
+                        handleUiEvent(CreatePersonalHabitUiEvent.NavigateBack)
+                    },
+                    onSecondaryButtonClicked = {
+                        handleUiEvent(CreatePersonalHabitUiEvent.CreateHabit)
+                    },
+                    primaryButtonEnabled = uiState.nextButtonEnabled
+                )
             },
             modifier = Modifier.imePadding()
         ) { paddingValues ->
