@@ -43,7 +43,7 @@ fun BloomBottomActionButtonContainer(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.back),
                 onClick = {
-                    onPrimaryButtonClicked()
+                    onSecondaryButtonClicked()
                 },
             )
             Spacer(modifier = Modifier.width(12.dp))
@@ -51,9 +51,10 @@ fun BloomBottomActionButtonContainer(
                 modifier = Modifier.weight(1f),
                 text = stringResource(Res.string.next),
                 onClick = {
-                    onSecondaryButtonClicked()
+                    onPrimaryButtonClicked()
                 },
                 enabled = primaryButtonEnabled
+
             )
         }
 

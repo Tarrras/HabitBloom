@@ -89,8 +89,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun AddHabitChoiceScreen(
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
-    onHabitSelected: (HabitInfo) -> Unit,
-    onCreateCustomHabit: () -> Unit,
+    onNext: () -> Unit,
+    onCreateCustomHabit: (String?) -> Unit,
     onBack: () -> Unit,
 ) {
     // Create ViewModel using Koin
@@ -108,11 +108,11 @@ fun AddHabitChoiceScreen(
                 }
 
                 is AddHabitChoiceUiIntent.NavigateNext -> {
-                    onHabitSelected(uiIntent.info)
+                    onNext()
                 }
 
                 is AddHabitChoiceUiIntent.NavigateToCreateCustomHabit -> {
-                    onCreateCustomHabit()
+                    onCreateCustomHabit(uiIntent.categoryId)
                 }
 
                 AddHabitChoiceUiIntent.NavigateBack -> {
@@ -125,7 +125,7 @@ fun AddHabitChoiceScreen(
     val currentState by LocalLifecycleOwner.current.lifecycle.currentStateFlow.collectAsState()
     LaunchedEffect(currentState) {
         if (currentState == Lifecycle.State.RESUMED) {
-            viewModel.handleUiEvent(AddHabitChoiceUiEvent.RefreshPage)
+            viewModel.handleScreenResumed()
         }
     }
 
@@ -142,7 +142,7 @@ fun AddHabitChoiceScreenContent(
     uiState: AddHabitChoiceUiState,
     handleUiEvent: (AddHabitChoiceUiEvent) -> Unit,
     currentCategory: HabitCategoryData?,
-    onCreateCustomHabit: () -> Unit,
+    onCreateCustomHabit: (String?) -> Unit,
 ) {
     // UI Content
     Box {
@@ -179,7 +179,7 @@ fun AddHabitChoiceScreenContent(
                 if (categoryDraft != null && uiState.habits.isEmpty() && uiState.searchInput.isBlank()) {
                     CategoryNoHabitsPlaceholder(
                         category = categoryDraft,
-                        onCreateCustomHabit = onCreateCustomHabit
+                        onCreateCustomHabit = { onCreateCustomHabit(categoryDraft?.id) }
                     )
                 } else {
                     // Create personal habit CTA card (dashed)
@@ -213,7 +213,7 @@ fun AddHabitChoiceScreenContent(
                                 description = stringResource(Res.string.add_your_own_personal_habit_to_start_tracking),
                                 buttonText = stringResource(Res.string.create_personal_habit),
                                 onButtonClick = {
-                                    handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit)
+                                    onCreateCustomHabit(currentCategory?.id)
                                 }
                             )
                         } else {
@@ -374,7 +374,7 @@ private fun HabitSearchNoResultsPlaceholder(
 @Composable
 private fun CategoryNoHabitsPlaceholder(
     category: HabitCategoryData,
-    onCreateCustomHabit: () -> Unit
+    onCreateCustomHabit: (String?) -> Unit
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -420,7 +420,7 @@ private fun CategoryNoHabitsPlaceholder(
         BloomPrimaryFilledButton(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(Res.string.create_personal_habit),
-            onClick = onCreateCustomHabit
+            onClick = { onCreateCustomHabit(category.id) }
         )
 
         Spacer(modifier = Modifier.height(16.dp))

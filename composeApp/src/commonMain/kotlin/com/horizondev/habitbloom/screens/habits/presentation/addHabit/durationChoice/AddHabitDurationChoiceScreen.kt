@@ -74,7 +74,7 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AddHabitDurationChoiceScreen(
-    onDurationSelected: (LocalDate, LocalDate, List<DayOfWeek>, Int, Boolean, LocalTime) -> Unit,
+    onNext: () -> Unit,
     onBack: () -> Unit,
     showSnackbar: (BloomSnackbarVisuals) -> Unit,
     modifier: Modifier = Modifier
@@ -90,14 +90,7 @@ fun AddHabitDurationChoiceScreen(
         viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
                 is AddHabitDurationUiIntent.NavigateNext -> {
-                    onDurationSelected(
-                        uiIntent.startDate,
-                        uiIntent.endDate,
-                        uiIntent.selectedDays,
-                        uiIntent.durationInDays,
-                        uiIntent.reminderEnabled,
-                        uiIntent.reminderTime
-                    )
+                    onNext()
                 }
 
                 AddHabitDurationUiIntent.NavigateBack -> {
@@ -393,7 +386,6 @@ private fun ReminderSettingsCard(
                         onCheckedChange = onReminderEnabledChanged
                     )
                 }
-
 
                 AnimatedVisibility(visible = reminderEnabled) {
                     Column {

@@ -28,7 +28,7 @@ sealed interface AddHabitChoiceUiEvent {
 
 sealed interface AddHabitChoiceUiIntent {
     data class NavigateNext(val info: HabitInfo): AddHabitChoiceUiIntent
-    data object NavigateToCreateCustomHabit : AddHabitChoiceUiIntent
+    data class NavigateToCreateCustomHabit(val categoryId: String?) : AddHabitChoiceUiIntent
     data class ShowSnackbar(val visuals: BloomSnackbarVisuals) : AddHabitChoiceUiIntent
 
     data object NavigateBack : AddHabitChoiceUiIntent

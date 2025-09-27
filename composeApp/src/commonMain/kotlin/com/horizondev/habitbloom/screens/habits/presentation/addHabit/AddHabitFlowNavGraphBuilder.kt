@@ -5,7 +5,6 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.AddHabitCategoryChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreen
@@ -54,15 +53,11 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
 
         // Choose habit screen
         composable<AddHabitFlowRoute.HabitChoice> {
-            val addHabitStateUseCase: AddHabitStateUseCase = koinInject()
-            
             AddHabitChoiceScreen(
-                onHabitSelected = { habit ->
+                onNext = {
                     navController.navigate(AddHabitFlowRoute.DurationChoice)
                 },
-                onCreateCustomHabit = {
-                    // Get category ID from UseCase and navigate to CreatePersonalHabit flow
-                    val categoryId = addHabitStateUseCase.getCurrentDraft().habitCategory?.id
+                onCreateCustomHabit = { categoryId ->
                     onNavigateToCreateCustomHabit(categoryId)
                 },
                 onBack = {
@@ -77,9 +72,7 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
         // Duration choice screen
         composable<AddHabitFlowRoute.DurationChoice> {
             AddHabitDurationChoiceScreen(
-                onDurationSelected = { startDate, endDate, selectedDays, durationInDays, reminderEnabled, reminderTime ->
-                    navController.navigate(AddHabitFlowRoute.Summary)
-                },
+                onNext = { navController.navigate(AddHabitFlowRoute.Summary) },
                 onBack = {
                     navController.popBackStack()
                 },
