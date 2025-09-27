@@ -84,6 +84,11 @@ class HabitFlowerDetailViewModel(
                 .any { it.date == today && it.isCompleted }
 
             // Create the flower detail model
+            // Use the vitality from levelProgress as the health value for consistency
+            // This ensures both health display and level progression use the same calculation
+            val consistentHealthValue = levelProgress.vitality
+            val updatedFlowerHealth = flowerHealth.copy(value = consistentHealthValue)
+
             HabitFlowerDetail(
                 habitId = habitInfo.userHabitId,
                 name = habitInfo.name,
@@ -97,7 +102,7 @@ class HabitFlowerDetailViewModel(
                 isCompletedToday = isCompletedToday,
                 flowerGrowthStage = growthStage,
                 flowerType = flowerType,
-                flowerHealth = flowerHealth.copy(value = levelProgress.vitality),
+                flowerHealth = updatedFlowerHealth,
                 level = levelProgress.level,
                 totalXp = levelProgress.totalXp,
                 xpInLevel = levelProgress.xpInLevel,
