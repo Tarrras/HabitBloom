@@ -38,18 +38,17 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import coil3.compose.rememberAsyncImagePainter
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
-import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.inputText.BloomSearchTextField
 import com.horizondev.habitbloom.core.designComponents.list.NoResultsPlaceholders
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
@@ -392,12 +391,11 @@ private fun CategoryNoHabitsPlaceholder(
                 .background(Brush.linearGradient(listOf(start, end))),
             contentAlignment = Alignment.Center
         ) {
-            // Use network image for the category icon
-            BloomNetworkImage(
-                size = 32.dp,
-                iconUrl = category.iconUrl,
-                contentDescription = category.title,
-                shape = RectangleShape
+            Icon(
+                painter = rememberAsyncImagePainter(category.iconUrl),
+                contentDescription = null,
+                tint = BloomTheme.colors.mutedForeground,
+                modifier = Modifier.size(32.dp)
             )
         }
 

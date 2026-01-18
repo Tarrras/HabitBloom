@@ -17,17 +17,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.getString
 
-/**
- * ViewModel for the first step in Add Habit flow - selecting a habit.
- *
- * Optimizations applied:
- * - Reduced search debounce from 500ms to 300ms for better UX
- * - Cached category lookup to avoid repeated calls to use case
- * - Simplified error handling with reusable helper methods
- * - Improved loading state management
- * - Optimized search logic to prevent unnecessary API calls
- * - Smart resume handling: only refreshes when returning from navigation, not on initial load
- */
 class AddHabitChoiceViewModel(
     private val repository: HabitsRepository,
     private val addHabitStateUseCase: AddHabitStateUseCase
@@ -38,10 +27,11 @@ class AddHabitChoiceViewModel(
     private val currentCategory: HabitCategoryData?
         get() = addHabitStateUseCase.getCurrentDraft().habitCategory
 
+    private var cachedHabits: List<HabitInfo> = emptyList()
     private var isInitialLoad = true
 
     init {
-        loadInitialData()
+        requestHabits(forceRefresh = true)
 
         launch {
             state
@@ -49,30 +39,11 @@ class AddHabitChoiceViewModel(
                 .distinctUntilChanged()
                 .debounce(300) // Reduced from 500ms for better UX
                 .collect { query ->
-                    if (query.isNotBlank() || state.value.habits.isEmpty()) {
-                        searchHabits(query)
-                    }
+                    applySearch(query)
                 }
         }
     }
 
-    /**
-     * Loads initial data when the ViewModel is created.
-     */
-    private fun loadInitialData() {
-        launch {
-            searchHabits("")
-            isInitialLoad = false
-        }
-    }
-
-    /**
-     * Handles screen resume events. Only refreshes if not initial load.
-     *
-     * This optimization prevents unnecessary API calls when the screen is first entered
-     * (since initial data is already loaded in init), but ensures the list is refreshed
-     * when returning from navigation (e.g., after creating a custom habit).
-     */
     fun handleScreenResumed() {
         if (!isInitialLoad) {
             // Only refresh if this is not the initial load
@@ -80,9 +51,6 @@ class AddHabitChoiceViewModel(
         }
     }
 
-    /**
-     * Single entry point for handling UI events.
-     */
     fun handleUiEvent(event: AddHabitChoiceUiEvent) {
         when (event) {
             is AddHabitChoiceUiEvent.UpdateSearchInput -> {
@@ -126,20 +94,11 @@ class AddHabitChoiceViewModel(
             }
 
             AddHabitChoiceUiEvent.RefreshPage -> {
-                // Refresh with current search query, maintaining loading state
-                val currentQuery = state.value.searchInput
-                if (currentQuery.isBlank()) {
-                    loadInitialData()
-                } else {
-                    searchHabits(currentQuery)
-                }
+                requestHabits(forceRefresh = true)
             }
         }
     }
 
-    /**
-     * Checks if a habit is already added before proceeding with selection
-     */
     private fun checkHabitAndProceed(habit: HabitInfo) {
         launch {
             runCatching {
@@ -158,41 +117,62 @@ class AddHabitChoiceViewModel(
         }
     }
 
-    /**
-     * Searches for habits based on the query.
-     */
-    private fun searchHabits(query: String) {
+    private fun requestHabits(forceRefresh: Boolean) {
         launch {
-            updateState { it.copy(isLoading = true) }
+            val selectedCategory = currentCategory
+
+            if (!forceRefresh && cachedHabits.isNotEmpty()) {
+                applySearch(state.value.searchInput, selectedCategory)
+                return@launch
+            }
+
+            updateState { it.copy(isLoading = true, currentCategory = selectedCategory) }
 
             runCatching {
-                repository.getHabits(query, categoryId = currentCategory?.id)
+                repository.getHabits(searchInput = "", categoryId = selectedCategory?.id)
             }.onSuccess { result ->
                 result.fold(
                     onSuccess = { habits ->
-                        updateState {
-                            it.copy(
-                                habits = habits,
-                                isLoading = false,
-                                currentCategory = currentCategory
-                            )
-                        }
+                        cachedHabits = habits
+                        isInitialLoad = false
+                        applySearch(state.value.searchInput, selectedCategory)
                     },
                     onFailure = {
-                        Napier.e("Failed to search habits", it)
+                        Napier.e("Failed to load habits", it)
                         updateState { state -> state.copy(isLoading = false) }
                     }
                 )
             }.onFailure {
-                Napier.e("Failed to search habits", it)
+                Napier.e("Failed to load habits", it)
                 updateState { state -> state.copy(isLoading = false) }
             }
         }
     }
 
-    /**
-     * Shows an error snackbar with the given message.
-     */
+
+    private fun applySearch(query: String, categoryOverride: HabitCategoryData? = null) {
+        val normalizedQuery = query.trim()
+        val selectedCategory = categoryOverride ?: currentCategory
+        val filteredHabits = if (cachedHabits.isEmpty()) {
+            emptyList()
+        } else if (normalizedQuery.isBlank()) {
+            cachedHabits
+        } else {
+            cachedHabits.filter { habit ->
+                habit.name.contains(normalizedQuery, ignoreCase = true)
+            }
+        }
+
+        updateState {
+            it.copy(
+                habits = filteredHabits,
+                isLoading = false,
+                currentCategory = selectedCategory
+            )
+        }
+    }
+
+
     private fun showErrorSnackbar(message: String) {
         emitUiIntent(
             AddHabitChoiceUiIntent.ShowSnackbar(
@@ -206,9 +186,7 @@ class AddHabitChoiceViewModel(
         )
     }
 
-    /**
-     * Confirms the deletion of a custom habit.
-     */
+
     private fun confirmDeleteHabit() {
         val habitToDelete = state.value.habitToDelete ?: return
 
@@ -220,8 +198,11 @@ class AddHabitChoiceViewModel(
             }.onSuccess { result ->
                 result.fold(
                     onSuccess = {
-                        // Refresh the list and show success message
-                        searchHabits(state.value.searchInput)
+                        // Remove from cache and update list without extra loading
+                        cachedHabits = cachedHabits.filterNot { habit ->
+                            habit.id == habitToDelete.id
+                        }
+                        applySearch(state.value.searchInput)
                         emitUiIntent(
                             AddHabitChoiceUiIntent.ShowSnackbar(
                                 BloomSnackbarVisuals(
