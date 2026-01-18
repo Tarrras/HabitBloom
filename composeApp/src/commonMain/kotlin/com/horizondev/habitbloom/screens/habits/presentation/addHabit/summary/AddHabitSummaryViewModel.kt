@@ -30,6 +30,7 @@ class AddHabitSummaryViewModel(
                     it.copy(
                         timeOfDay = draft.timeOfDay ?: TimeOfDay.Morning,
                         habitInfo = draft.habitInfo,
+                        habitCategory = draft.habitCategory,
                         days = draft.selectedDays,
                         startDate = draft.startDate,
                         endDate = draft.endDate,

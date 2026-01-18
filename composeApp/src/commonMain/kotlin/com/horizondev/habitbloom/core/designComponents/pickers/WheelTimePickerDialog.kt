@@ -35,6 +35,7 @@ import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFille
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.components.BloomHorizontalDivider
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.utils.formatTime
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.close

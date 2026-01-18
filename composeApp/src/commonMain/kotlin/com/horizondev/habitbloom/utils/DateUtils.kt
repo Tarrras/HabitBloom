@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDayRange
 import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.formatted_date
+import habitbloom.composeapp.generated.resources.formatted_date_range
 import habitbloom.composeapp.generated.resources.month_april
 import habitbloom.composeapp.generated.resources.month_april_short
 import habitbloom.composeapp.generated.resources.month_august
@@ -335,4 +337,37 @@ fun LocalDate.getEndOfMonth(): LocalDate {
 
         else -> LocalDate(this.year, this.month, 31)
     }
+}
+
+
+/**
+ * Formats a LocalDate for display.
+ *
+ * @param date The date to format
+ * @return Formatted date string (e.g., "March 15, 2023")
+ */
+@Composable
+fun formatDate(date: LocalDate): String {
+    val month = date.month.getTitle()
+
+    return stringResource(Res.string.formatted_date, month, date.day, date.year)
+}
+
+/**
+ * Formats a date range for display.
+ *
+ * @param startDate The start date
+ * @param endDate The end date
+ * @return Formatted date range string (e.g., "March 15, 2023 - April 15, 2023")
+ */
+@Composable
+fun formatDateRange(startDate: LocalDate, endDate: LocalDate): String {
+    val startMonth = startDate.month.getTitle()
+    val endMonth = endDate.month.getTitle()
+
+    return stringResource(
+        Res.string.formatted_date_range,
+        startMonth, startDate.day, startDate.year,
+        endMonth, endDate.day, endDate.year
+    )
 }

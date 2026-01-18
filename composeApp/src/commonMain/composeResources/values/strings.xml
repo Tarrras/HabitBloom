@@ -148,6 +148,10 @@
     <string name="twelve_repeats">12 repeats (≈3 months)</string>
 
     <string name="do_you_want_add_this_habit">Do you want to add this habit?</string>
+    <string name="add_habit_summary_subtitle">Review the settings before creating your habit.</string>
+    <string name="add_habit_summary_value_not_set">Not set</string>
+    <string name="add_habit_summary_cta_title">Ready to start your path to success?</string>
+    <string name="add_habit_summary_cta_message">Every day is a new step toward your goal.</string>
 
     <string name="monday">Monday</string>
     <string name="tuesday">Tuesday</string>

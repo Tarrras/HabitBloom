@@ -154,6 +154,10 @@
     <string name="twelve_repeats">12 повторень (≈3 місяці)</string>
 
     <string name="do_you_want_add_this_habit">Бажаєте додати цю звичку?</string>
+    <string name="add_habit_summary_subtitle">Перевірте налаштування перед створенням звички.</string>
+    <string name="add_habit_summary_value_not_set">Не вказано</string>
+    <string name="add_habit_summary_cta_title">Готові почати свій шлях до успіху?</string>
+    <string name="add_habit_summary_cta_message">Кожен день — це новий крок до вашої мети.</string>
 
     <string name="monday_short">Пн</string>
     <string name="tuesday_short">Вт</string>

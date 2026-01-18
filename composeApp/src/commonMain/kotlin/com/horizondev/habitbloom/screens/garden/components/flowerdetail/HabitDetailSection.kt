@@ -14,15 +14,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
-import com.horizondev.habitbloom.core.designComponents.pickers.formatTime
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
-import com.horizondev.habitbloom.utils.getTitle
+import com.horizondev.habitbloom.utils.formatDate
+import com.horizondev.habitbloom.utils.formatDateRange
+import com.horizondev.habitbloom.utils.formatTime
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.check_full_habit_info
 import habitbloom.composeapp.generated.resources.date_range_label
 import habitbloom.composeapp.generated.resources.description_label
-import habitbloom.composeapp.generated.resources.formatted_date
-import habitbloom.composeapp.generated.resources.formatted_date_range
 import habitbloom.composeapp.generated.resources.habit_detail_section_title
 import habitbloom.composeapp.generated.resources.reminder_time_label
 import habitbloom.composeapp.generated.resources.start_date_label
@@ -158,35 +157,3 @@ fun HabitDetailSection(
         }
     }
 }
-
-/**
- * Formats a LocalDate for display.
- *
- * @param date The date to format
- * @return Formatted date string (e.g., "March 15, 2023")
- */
-@Composable
-private fun formatDate(date: LocalDate): String {
-    val month = date.month.getTitle()
-
-    return stringResource(Res.string.formatted_date, month, date.day, date.year)
-}
-
-/**
- * Formats a date range for display.
- *
- * @param startDate The start date
- * @param endDate The end date
- * @return Formatted date range string (e.g., "March 15, 2023 - April 15, 2023")
- */
-@Composable
-private fun formatDateRange(startDate: LocalDate, endDate: LocalDate): String {
-    val startMonth = startDate.month.getTitle()
-    val endMonth = endDate.month.getTitle()
-
-    return stringResource(
-        Res.string.formatted_date_range,
-        startMonth, startDate.day, startDate.year,
-        endMonth, endDate.day, endDate.year
-    )
-} 
