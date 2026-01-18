@@ -73,9 +73,9 @@ import habitbloom.composeapp.generated.resources.weekly_completion_rate
 import habitbloom.composeapp.generated.resources.weekly_habit_tracking
 import habitbloom.composeapp.generated.resources.yearly_completion_rate
 import habitbloom.composeapp.generated.resources.yearly_habit_tracking
-import io.github.koalaplot.core.bar.DefaultVerticalBar
+import io.github.koalaplot.core.bar.DefaultBar
+import io.github.koalaplot.core.bar.DefaultBarPosition
 import io.github.koalaplot.core.bar.DefaultVerticalBarPlotEntry
-import io.github.koalaplot.core.bar.DefaultVerticalBarPosition
 import io.github.koalaplot.core.bar.VerticalBarPlot
 import io.github.koalaplot.core.pie.DefaultSlice
 import io.github.koalaplot.core.pie.PieChart
@@ -578,14 +578,14 @@ fun CombinedHabitStatisticsCard(
                                     data = categories.mapIndexed { index, category ->
                                         val value = scheduledData[category] ?: 0
                                         DefaultVerticalBarPlotEntry(
-                                            category, DefaultVerticalBarPosition(
-                                                yMax = value,
-                                                yMin = 0
+                                            category, DefaultBarPosition(
+                                                end = value,
+                                                start = 0
                                             )
                                         )
                                     },
-                                    bar = {
-                                        DefaultVerticalBar(
+                                    bar = { _, _, _ ->
+                                        DefaultBar(
                                             brush = SolidColor(scheduledColor),
                                             shape = RoundedCornerShape(
                                                 topStart = 4.dp,
@@ -603,14 +603,14 @@ fun CombinedHabitStatisticsCard(
                                     data = categories.mapIndexed { index, category ->
                                         val value = completedData[category] ?: 0
                                         DefaultVerticalBarPlotEntry(
-                                            category, DefaultVerticalBarPosition(
-                                                yMax = value,
-                                                yMin = 0
+                                            category, DefaultBarPosition(
+                                                end = value,
+                                                start = 0
                                             )
                                         )
                                     },
-                                    bar = {
-                                        DefaultVerticalBar(
+                                    bar = { _, _, _ ->
+                                        DefaultBar(
                                             brush = SolidColor(completedColor),
                                             shape = RoundedCornerShape(
                                                 topStart = 4.dp,
