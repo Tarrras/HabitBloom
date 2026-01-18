@@ -120,10 +120,10 @@ fun CreatePersonalHabitScreenContent(
             bottomBar = {
                 BloomBottomActionButtonContainer(
                     onPrimaryButtonClicked = {
-                        handleUiEvent(CreatePersonalHabitUiEvent.NavigateBack)
+                        handleUiEvent(CreatePersonalHabitUiEvent.CreateHabit)
                     },
                     onSecondaryButtonClicked = {
-                        handleUiEvent(CreatePersonalHabitUiEvent.CreateHabit)
+                        handleUiEvent(CreatePersonalHabitUiEvent.NavigateBack)
                     },
                     primaryButtonEnabled = uiState.nextButtonEnabled
                 )
