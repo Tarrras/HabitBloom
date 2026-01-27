@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
@@ -32,10 +32,8 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.DefaultShadowColor
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
+import coil3.compose.rememberAsyncImagePainter
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.utils.clippedShadow
@@ -112,15 +110,20 @@ fun UserHabitCard(
             // Icon container
             Box(
                 modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape),
+                    .size(40.dp)
+                    .background(
+                        color = if (completed) BloomTheme.colors.primary
+                        else BloomTheme.colors.cardSecondary,
+                        shape = RoundedCornerShape(12.dp)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                BloomNetworkImage(
-                    iconUrl = habitInfo.iconUrl,
-                    contentDescription = habitInfo.name,
-                    size = 56.dp,
-                    shape = CircleShape
+                Icon(
+                    painter = rememberAsyncImagePainter(habitInfo.iconUrl),
+                    contentDescription = null,
+                    tint = if (completed) BloomTheme.colors.foreground
+                    else BloomTheme.colors.mutedForeground,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
@@ -131,8 +134,7 @@ fun UserHabitCard(
                     text = habitInfo.name,
                     color = if (completed) BloomTheme.colors.foreground.copy(alpha = 0.75f)
                     else BloomTheme.colors.foreground,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                    style = BloomTheme.typography.titleMedium
                 )
             }
 
