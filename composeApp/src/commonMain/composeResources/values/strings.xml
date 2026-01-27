@@ -181,6 +181,13 @@
 
     <string name="habit_added_success">Great job! Your new habit is added!</string>
     <string name="habit_added_description">Stay consistent, and your goals are within reach!</string>
+    <string name="add_habit_success_title">Habit added!</string>
+    <string name="add_habit_success_message">You successfully added a new habit</string>
+    <string name="add_habit_success_habit_name_placeholder">&quot;New habit&quot;</string>
+    <string name="add_habit_success_tip_title">Now start building your habit!</string>
+    <string name="add_habit_success_tip_message">The first 21 days are the most important for forming a new habit</string>
+    <string name="add_habit_success_primary_action">Go to habits</string>
+    <string name="add_habit_success_add_another">Add another habit</string>
 
     <string name="competed_morning_habits">You've completed all your morning habits!</string>
     <string name="competed_afternoon_habits">Well done! All afternoon habits are completed!</string>

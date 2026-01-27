@@ -41,6 +41,7 @@ ktor = "3.3.3"
 google-services-plugin = "4.4.4"
 crashlitycs-plugin = "3.0.6"
 firebase-gitlive-sdk = "2.4.0"
+uiToolingPreview = "1.10.0"
 
 [libraries]
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "androidDriver" }
@@ -111,6 +112,7 @@ accompanist-systemUIController = { module = "com.google.accompanist:accompanist-
 calendar-compose-multiplatform = { module = "com.kizitonwose.calendar:compose-multiplatform", version.ref = "calendarComposeMultiplatform" }
 
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 
 [plugins]
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }

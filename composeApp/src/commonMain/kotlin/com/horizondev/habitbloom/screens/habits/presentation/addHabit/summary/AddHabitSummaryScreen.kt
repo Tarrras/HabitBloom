@@ -108,7 +108,7 @@ private fun AddHabitSummaryContent(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
-                .padding(top = 24.dp, bottom = 32.dp),
+                .padding(top = 12.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             SummaryHeader()
@@ -289,15 +289,15 @@ private fun SummaryInfoRow(
                 tint = BloomTheme.colors.primary
             )
         }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(
                 text = label,
-                style = BloomTheme.typography.labelSmall,
+                style = BloomTheme.typography.bodyMedium,
                 color = BloomTheme.colors.textColor.secondary
             )
             Text(
                 text = value,
-                style = BloomTheme.typography.bodyMedium,
+                style = BloomTheme.typography.titleMedium,
                 color = BloomTheme.colors.textColor.primary
             )
         }

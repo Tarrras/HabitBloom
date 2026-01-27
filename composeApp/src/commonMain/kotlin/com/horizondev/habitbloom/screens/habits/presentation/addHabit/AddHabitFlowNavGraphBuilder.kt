@@ -10,7 +10,6 @@ import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationCh
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.success.AddHabitSuccessScreen
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary.AddHabitSummaryScreen
-import org.koin.compose.koinInject
 
 /**
  * Extension function for NavGraphBuilder to add routes defined in AddHabitFlowRoute
@@ -102,6 +101,11 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
             AddHabitSuccessScreen(
                 onFinish = {
                     navController.popBackStack()
+                },
+                onAddAnother = {
+                    navController.navigate(AddHabitFlowRoute.CategoryChoice) {
+                        popUpTo(AddHabitFlowRoute.CategoryChoice) { inclusive = true }
+                    }
                 }
             )
         }

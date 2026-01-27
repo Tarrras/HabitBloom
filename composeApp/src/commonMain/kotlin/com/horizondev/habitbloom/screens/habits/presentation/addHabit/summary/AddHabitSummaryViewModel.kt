@@ -93,6 +93,9 @@ class AddHabitSummaryViewModel(
                             )
                         }
 
+                        // Cache the habit name for the success screen
+                        addHabitStateUseCase.setLastAddedHabitName(creationData.habitInfo.name)
+
                         // Reset the draft after successful creation
                         addHabitStateUseCase.resetDraft()
 

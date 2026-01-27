@@ -187,6 +187,13 @@
 
     <string name="habit_added_success">Чудова робота! Вашу нову звичку додано!</string>
     <string name="habit_added_description">Будьте послідовними, і ваші цілі досяжні!</string>
+    <string name="add_habit_success_title">Звичку додано!</string>
+    <string name="add_habit_success_message">Ви успішно додали нову звичку</string>
+    <string name="add_habit_success_habit_name_placeholder">&quot;Нова звичка&quot;</string>
+    <string name="add_habit_success_tip_title">Тепер почніть будувати свою звичку!</string>
+    <string name="add_habit_success_tip_message">Перші 21 день - найважливіші для формування нової звички</string>
+    <string name="add_habit_success_primary_action">Перейти до звичок</string>
+    <string name="add_habit_success_add_another">Додати ще одну звичку</string>
 
     <string name="competed_morning_habits">Ви виконали всі свої ранкові звички!</string>
     <string name="competed_afternoon_habits">Чудова робота! Всі денні звички виконані!</string>

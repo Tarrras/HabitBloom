@@ -21,6 +21,9 @@ class AddHabitStateUseCase {
     private val _draft = MutableStateFlow(AddHabitDraft.createDefault())
     val draft: StateFlow<AddHabitDraft> = _draft.asStateFlow()
 
+    private val _lastAddedHabitName = MutableStateFlow<String?>(null)
+    val lastAddedHabitName: StateFlow<String?> = _lastAddedHabitName.asStateFlow()
+
     /**
      * Updates the habit category.
      */
@@ -92,6 +95,20 @@ class AddHabitStateUseCase {
      */
     fun resetDraft() {
         _draft.value = AddHabitDraft.createDefault()
+    }
+
+    /**
+     * Stores the name of the last added habit for success UI.
+     */
+    fun setLastAddedHabitName(name: String?) {
+        _lastAddedHabitName.value = name
+    }
+
+    /**
+     * Clears the stored last added habit name.
+     */
+    fun clearLastAddedHabitName() {
+        _lastAddedHabitName.value = null
     }
 
     /**
