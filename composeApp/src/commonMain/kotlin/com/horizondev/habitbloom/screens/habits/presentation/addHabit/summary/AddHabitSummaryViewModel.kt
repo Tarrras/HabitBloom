@@ -23,7 +23,6 @@ class AddHabitSummaryViewModel(
 ) {
 
     init {
-        // Observe the UseCase state and update our UI state
         launch {
             addHabitStateUseCase.draft.collect { draft ->
                 updateState {
@@ -58,9 +57,7 @@ class AddHabitSummaryViewModel(
         }
     }
 
-    /**
-     * Submits the habit to the repository.
-     */
+
     private fun submitHabit() {
         val creationData = addHabitStateUseCase.getHabitCreationData() ?: return
         val currentState = state.value
@@ -75,7 +72,8 @@ class AddHabitSummaryViewModel(
                     endDate = creationData.endDate,
                     selectedDays = creationData.selectedDays,
                     reminderEnabled = currentState.reminderEnabled,
-                    reminderTime = currentState.reminderTime
+                    reminderTime = currentState.reminderTime,
+                    timeOfDay = creationData.timeOfDay
                 )
 
                 result.fold(

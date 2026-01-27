@@ -7,7 +7,6 @@ import com.horizondev.habitbloom.core.data.HABIT_ICONS_COLLECTION_ROUTE
 import com.horizondev.habitbloom.core.data.USER_HABITS_COLLECTION_ROUTE
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import dev.gitlive.firebase.firestore.FirebaseFirestore
 import kotlinx.serialization.Serializable
@@ -68,7 +67,6 @@ class HabitsRemoteDataSource(
                     userId = userId,
                     shortInfo = "",
                     categoryId = categoryId,
-                    timeOfDay = TimeOfDay.Morning.toNetworkModel() //todo remove
                 )
             ).id.isNotEmpty()
         }

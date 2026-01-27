@@ -277,9 +277,9 @@ class HabitsRepository(
                 description = habitDetailedInfo.description,
                 iconUrl = habitDetailedInfo.iconUrl,
                 name = habitDetailedInfo.name,
-                timeOfDay = habitDetailedInfo.timeOfDay,
                 daysStreak = currentStreak,
                 records = localHabitRecords,
+                timeOfDay = userHabitInfo.timeOfDay,
                 startDate = userHabitInfo.startDate,
                 days = userHabitInfo.daysOfWeek,
                 reminderTime = userHabitInfo.reminderTime,
@@ -296,10 +296,10 @@ class HabitsRepository(
     ): List<UserHabitRecordFullInfo> {
         return habitRecords.mapNotNull { habitRecord ->
             val userHabitId = habitRecord.userHabitId
-            val originHabitId = localDataSource.getHabitOriginId(userHabitId)
+            val localHabit = localDataSource.getUserHabitInfo(userHabitId) ?: return@mapNotNull null
 
             val habitDetailedInfo = detailedHabits.find {
-                it.id == originHabitId
+                it.id == localHabit?.habitId
             } ?: return@mapNotNull null
 
             UserHabitRecordFullInfo(
@@ -310,7 +310,7 @@ class HabitsRepository(
                 description = habitDetailedInfo.description,
                 iconUrl = habitDetailedInfo.iconUrl,
                 name = habitDetailedInfo.name,
-                timeOfDay = habitDetailedInfo.timeOfDay,
+                timeOfDay = localHabit.timeOfDay,
                 daysStreak = localDataSource.getHabitDayStreak(
                     userHabitId = userHabitId,
                     byDate = untilDate
@@ -404,6 +404,7 @@ class HabitsRepository(
      */
     suspend fun addUserHabit(
         habitInfo: HabitInfo,
+        timeOfDay: TimeOfDay,
         startDate: LocalDate,
         endDate: LocalDate,
         selectedDays: List<DayOfWeek> = emptyList(),
@@ -412,17 +413,15 @@ class HabitsRepository(
     ): Result<Long> {
         return withContext(Dispatchers.IO) {
             try {
-                // Use provided days or default to all days
                 val days = selectedDays.ifEmpty { DayOfWeek.entries }
 
-                // Create UserHabit object with reminder settings
                 val userHabit = UserHabit(
                     id = 0L,
                     habitId = habitInfo.id,
                     startDate = startDate,
                     endDate = endDate,
                     daysOfWeek = days,
-                    timeOfDay = habitInfo.timeOfDay,
+                    timeOfDay = timeOfDay,
                     reminderEnabled = reminderEnabled,
                     reminderTime = reminderTime
                 )
@@ -663,50 +662,6 @@ class HabitsRepository(
     }
 
     /**
-     * Gets all user habit records directly (non-reactive).
-     *
-     * @return List of all user habit records
-     */
-    suspend fun getListOfAllUserHabitRecords(): List<UserHabitRecordFullInfo> =
-        withContext(Dispatchers.IO) {
-            // Get basic record data from local source
-            val localRecords = localDataSource.getAllUserHabitRecordsWithInfo()
-
-            // Get remote habit data (should be cached)
-            val detailedHabits = remoteHabits.value
-
-            // Merge local and remote data
-            localRecords.mapNotNull { record ->
-                // Get the remote habit ID for this record
-                val originHabitId =
-                    localDataSource.getHabitOriginId(record.userHabitId) ?: return@mapNotNull null
-
-                // Find the detailed habit info
-                val habitDetailedInfo =
-                    detailedHabits.find { it.id == originHabitId } ?: return@mapNotNull null
-
-                // Calculate current streak
-                val streakDays = localDataSource.getHabitDayStreak(
-                    userHabitId = record.userHabitId,
-                    byDate = getCurrentDate()
-                )
-
-                // Create the full record with merged data
-                UserHabitRecordFullInfo(
-                    id = record.id,
-                    userHabitId = record.userHabitId,
-                    date = record.date,
-                    isCompleted = record.isCompleted,
-                    name = habitDetailedInfo.name,
-                    description = habitDetailedInfo.description,
-                    iconUrl = habitDetailedInfo.iconUrl,
-                    timeOfDay = habitDetailedInfo.timeOfDay,
-                    daysStreak = streakDays
-                )
-            }
-    }
-
-    /**
      * Gets all user habit records for a specific time of day (non-reactive).
      *
      * @param timeOfDay The time of day to filter by
@@ -716,6 +671,7 @@ class HabitsRepository(
         withContext(Dispatchers.IO) {
             // Get all habit records
             val records = localDataSource.getAllUserHabitRecords(getCurrentDate()).first()
+            val userHabits = localDataSource.getAllUserHabits()
 
             // Get all remote habit info (should be cached in remoteHabits)
             val detailedHabits = remoteHabits.value
@@ -728,15 +684,15 @@ class HabitsRepository(
 
             // Process each habit
             recordsByHabitId.forEach { (userHabitId, habitRecords) ->
-                // Get remote habit ID
-                val originHabitId = localDataSource.getHabitOriginId(userHabitId) ?: return@forEach
+                val userHabit = userHabits.find { it.id == userHabitId } ?: return@forEach
+                val originHabitId = userHabit.habitId
 
                 // Find detailed habit info
                 val habitDetailedInfo =
                     detailedHabits.find { it.id == originHabitId } ?: return@forEach
 
                 // Filter by time of day
-                if (habitDetailedInfo.timeOfDay != timeOfDay) return@forEach
+                if (userHabit.timeOfDay != timeOfDay) return@forEach
 
                 // Calculate streak
                 val streakDays = localDataSource.getHabitDayStreak(userHabitId, getCurrentDate())
@@ -752,7 +708,7 @@ class HabitsRepository(
                             name = habitDetailedInfo.name,
                             description = habitDetailedInfo.description,
                             iconUrl = habitDetailedInfo.iconUrl,
-                            timeOfDay = habitDetailedInfo.timeOfDay,
+                            timeOfDay = userHabit.timeOfDay,
                             daysStreak = streakDays
                         )
                     )

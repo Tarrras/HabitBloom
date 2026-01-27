@@ -38,10 +38,7 @@ data class AddHabitDraft(
     }
 }
 
-/**
- * Data class representing the complete habit creation data needed to create a new habit.
- * Updated to include habit category information.
- */
+
 data class HabitCreationData(
     val habitCategory: HabitCategoryData,
     val habitInfo: HabitInfo,

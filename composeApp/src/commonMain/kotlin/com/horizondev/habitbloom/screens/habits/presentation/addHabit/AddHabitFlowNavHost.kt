@@ -94,7 +94,6 @@ fun AddHabitFlowNavHost(
             }
         },
         content = { paddingValues ->
-            // Navigation host with type-safe routes
             NavigationComponent(
                 modifier = Modifier.padding(
                     if (currentRoute?.step != null) {
@@ -105,13 +104,13 @@ fun AddHabitFlowNavHost(
                 navigator = navigator,
                 startDestination = AddHabitFlowGlobalNavEntryPoint
             ) {
-                // Add all routes from our sealed class
                 createHabitNestedFlowGraph(
                     navController = navController,
                     viewModel = viewModel,
                     onNavigateToCreateCustomHabit = { timeOfDay ->
                         onNavigateToCreateCustomHabit(timeOfDay)
-                    }
+                    },
+                    onFinishFlow = onFinishFlow
                 )
             }
         },

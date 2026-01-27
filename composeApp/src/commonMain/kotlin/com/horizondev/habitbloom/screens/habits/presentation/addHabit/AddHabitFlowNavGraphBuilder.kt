@@ -33,7 +33,8 @@ fun NavGraphBuilder.addHabitFlowGraph(
 fun NavGraphBuilder.createHabitNestedFlowGraph(
     navController: NavController,
     viewModel: AddHabitFlowViewModel,
-    onNavigateToCreateCustomHabit: (String?) -> Unit
+    onNavigateToCreateCustomHabit: (String?) -> Unit,
+    onFinishFlow: () -> Unit
 ) {
     navigation<AddHabitFlowGlobalNavEntryPoint>(
         startDestination = AddHabitFlowRoute.CategoryChoice
@@ -100,7 +101,7 @@ fun NavGraphBuilder.createHabitNestedFlowGraph(
         composable<AddHabitFlowRoute.Success> {
             AddHabitSuccessScreen(
                 onFinish = {
-                    navController.popBackStack()
+                    onFinishFlow()
                 },
                 onAddAnother = {
                     navController.navigate(AddHabitFlowRoute.CategoryChoice) {
