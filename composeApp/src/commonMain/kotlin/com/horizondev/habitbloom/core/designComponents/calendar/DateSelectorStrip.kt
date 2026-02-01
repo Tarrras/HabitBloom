@@ -174,7 +174,7 @@ private fun RowScope.DateItem(
             // Day number (e.g., "3")
             Text(
                 text = date.day.toString(),
-                style = BloomTheme.typography.h6.copy(
+                style = BloomTheme.typography.titleMedium.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                 ),
                 color = textColor,
@@ -186,7 +186,7 @@ private fun RowScope.DateItem(
             // Day name (e.g., "SAT")
             Text(
                 text = date.dayOfWeek.getShortTitle().take(2),
-                style = BloomTheme.typography.caption.copy(
+                style = BloomTheme.typography.labelSmall.copy(
                     fontWeight = if (isSelected) FontWeight.Medium else FontWeight.Normal
                 ),
                 color = textColor,

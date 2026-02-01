@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice
 
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
@@ -18,6 +19,7 @@ data class AddHabitDurationUiState(
     val reminderTime: LocalTime = LocalTime(8, 0), // Default reminder time set to 8:00 AM
     val maxHabitDurationDays: Int = 90, // Maximum allowed habit duration in days
     val isDatePickerVisible: Boolean = false, // Control dialog visibility from ViewModel
+    val timeOfDay: TimeOfDay = TimeOfDay.Morning,
 ) {
     val nextButtonEnabled: Boolean = activeDays.isNotEmpty() && startDate != null && endDate != null
 }
@@ -57,6 +59,9 @@ sealed interface AddHabitDurationUiEvent {
 
     // Date picker visibility events
     data class SetDatePickerVisibility(val isVisible: Boolean) : AddHabitDurationUiEvent
+
+    // Time of day selection
+    data class SelectTimeOfDay(val timeOfDay: TimeOfDay) : AddHabitDurationUiEvent
 
     data object OnNext : AddHabitDurationUiEvent
     data object Cancel : AddHabitDurationUiEvent

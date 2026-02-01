@@ -20,14 +20,14 @@ fun NavGraphBuilder.createPersonalHabitFlowGraph(
     navController: NavController,
 ) {
     navigation<CreatePersonalHabitFlowGlobalNavEntryPoint>(
-        startDestination = CreatePersonalHabitFlowRoute.CreateHabit()
+        startDestination = CreatePersonalHabitFlowRoute.CreateHabit("")
     ) {
         // Create Personal Habit Screen
         composable<CreatePersonalHabitFlowRoute.CreateHabit> { entry ->
-            val timeOfDay = entry.toRoute<CreatePersonalHabitFlowRoute.CreateHabit>().timeOfDay
+            val categoryId = entry.toRoute<CreatePersonalHabitFlowRoute.CreateHabit>().categoryId
 
             val createPersonalHabitViewModel = koinViewModel<CreatePersonalHabitViewModel> {
-                parametersOf(timeOfDay)
+                parametersOf(categoryId)
             }
 
             CreatePersonalHabitScreen(

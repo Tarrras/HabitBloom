@@ -5,8 +5,9 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
+import com.horizondev.habitbloom.screens.habits.domain.models.HabitCategoryData
 import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.delete_custom_habit_success
 import habitbloom.composeapp.generated.resources.habit_already_added
@@ -16,32 +17,40 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.getString
 
-/**
- * ViewModel for the first step in Add Habit flow - selecting a habit.
- */
 class AddHabitChoiceViewModel(
     private val repository: HabitsRepository,
-    private val timeOfDay: TimeOfDay?
+    private val addHabitStateUseCase: AddHabitStateUseCase
 ) : BloomViewModel<AddHabitChoiceUiState, AddHabitChoiceUiIntent>(
     initialState = AddHabitChoiceUiState()
 ) {
 
+    private val currentCategory: HabitCategoryData?
+        get() = addHabitStateUseCase.getCurrentDraft().habitCategory
+
+    private var cachedHabits: List<HabitInfo> = emptyList()
+    private var isInitialLoad = true
+
     init {
-        // Set up search debounce
+        requestHabits(forceRefresh = true)
+
         launch {
             state
                 .map { it.searchInput }
                 .distinctUntilChanged()
-                .debounce(500)
+                .debounce(300) // Reduced from 500ms for better UX
                 .collect { query ->
-                    searchHabits(query)
+                    applySearch(query)
                 }
         }
     }
 
-    /**
-     * Single entry point for handling UI events.
-     */
+    fun handleScreenResumed() {
+        if (!isInitialLoad) {
+            // Only refresh if this is not the initial load
+            handleUiEvent(AddHabitChoiceUiEvent.RefreshPage)
+        }
+    }
+
     fun handleUiEvent(event: AddHabitChoiceUiEvent) {
         when (event) {
             is AddHabitChoiceUiEvent.UpdateSearchInput -> {
@@ -49,15 +58,13 @@ class AddHabitChoiceViewModel(
             }
 
             is AddHabitChoiceUiEvent.SelectHabit -> {
+                // Update the UseCase with the selected habit
+                addHabitStateUseCase.updateHabitInfo(event.habit)
                 checkHabitAndProceed(event.habit)
             }
 
             AddHabitChoiceUiEvent.CreateCustomHabit -> {
-                emitUiIntent(
-                    AddHabitChoiceUiIntent.NavigateToCreateCustomHabit(
-                        timeOfDay = timeOfDay ?: TimeOfDay.Morning
-                    )
-                )
+                emitUiIntent(AddHabitChoiceUiIntent.NavigateToCreateCustomHabit(currentCategory?.id))
             }
 
             is AddHabitChoiceUiEvent.DeleteHabit -> {
@@ -87,30 +94,18 @@ class AddHabitChoiceViewModel(
             }
 
             AddHabitChoiceUiEvent.RefreshPage -> {
-                searchHabits(state.value.searchInput)
+                requestHabits(forceRefresh = true)
             }
         }
     }
 
-    /**
-     * Checks if a habit is already added before proceeding with selection
-     */
     private fun checkHabitAndProceed(habit: HabitInfo) {
         launch {
             runCatching {
-                val isAlreadyAdded = repository.isHabitAlreadyAdded(habit.id)
-
+                repository.isHabitAlreadyAdded(habit.id)
+            }.onSuccess { isAlreadyAdded ->
                 if (isAlreadyAdded) {
-                    emitUiIntent(
-                        AddHabitChoiceUiIntent.ShowSnackbar(
-                            BloomSnackbarVisuals(
-                                message = getString(Res.string.habit_already_added),
-                                state = BloomSnackbarState.Error,
-                                withDismissAction = true,
-                                duration = SnackbarDuration.Short
-                            )
-                        )
-                    )
+                    showErrorSnackbar(getString(Res.string.habit_already_added))
                 } else {
                     emitUiIntent(AddHabitChoiceUiIntent.NavigateNext(habit))
                 }
@@ -122,84 +117,112 @@ class AddHabitChoiceViewModel(
         }
     }
 
-    /**
-     * Searches for habits based on the query.
-     */
-    private fun searchHabits(query: String) {
+    private fun requestHabits(forceRefresh: Boolean) {
         launch {
-            updateState { it.copy(isLoading = true) }
+            val selectedCategory = currentCategory
+
+            if (!forceRefresh && cachedHabits.isNotEmpty()) {
+                applySearch(state.value.searchInput, selectedCategory)
+                return@launch
+            }
+
+            updateState { it.copy(isLoading = true, currentCategory = selectedCategory) }
 
             runCatching {
-                repository.getHabits(query, timeOfDay = timeOfDay ?: TimeOfDay.Morning)
-            }.onSuccess { habitsResult ->
-                habitsResult.onSuccess { habits ->
-                    updateState { it.copy(habits = habits, isLoading = false) }
-                }.onFailure {
-                    Napier.e("Failed to search habits", it)
-                    updateState { it.copy(isLoading = false) }
-                }
+                repository.getHabits(searchInput = "", categoryId = selectedCategory?.id)
+            }.onSuccess { result ->
+                result.fold(
+                    onSuccess = { habits ->
+                        cachedHabits = habits
+                        isInitialLoad = false
+                        applySearch(state.value.searchInput, selectedCategory)
+                    },
+                    onFailure = {
+                        Napier.e("Failed to load habits", it)
+                        updateState { state -> state.copy(isLoading = false) }
+                    }
+                )
             }.onFailure {
-                Napier.e("Failed to search habits", it)
-                updateState { it.copy(isLoading = false) }
+                Napier.e("Failed to load habits", it)
+                updateState { state -> state.copy(isLoading = false) }
             }
         }
     }
 
-    /**
-     * Confirms the deletion of a custom habit.
-     */
+
+    private fun applySearch(query: String, categoryOverride: HabitCategoryData? = null) {
+        val normalizedQuery = query.trim()
+        val selectedCategory = categoryOverride ?: currentCategory
+        val filteredHabits = if (cachedHabits.isEmpty()) {
+            emptyList()
+        } else if (normalizedQuery.isBlank()) {
+            cachedHabits
+        } else {
+            cachedHabits.filter { habit ->
+                habit.name.contains(normalizedQuery, ignoreCase = true)
+            }
+        }
+
+        updateState {
+            it.copy(
+                habits = filteredHabits,
+                isLoading = false,
+                currentCategory = selectedCategory
+            )
+        }
+    }
+
+
+    private fun showErrorSnackbar(message: String) {
+        emitUiIntent(
+            AddHabitChoiceUiIntent.ShowSnackbar(
+                BloomSnackbarVisuals(
+                    message = message,
+                    state = BloomSnackbarState.Error,
+                    withDismissAction = true,
+                    duration = SnackbarDuration.Short
+                )
+            )
+        )
+    }
+
+
     private fun confirmDeleteHabit() {
         val habitToDelete = state.value.habitToDelete ?: return
 
         launch {
             updateState { it.copy(isLoading = true, showDeleteDialog = false) }
 
-            try {
-                val result = repository.deleteCustomHabit(habitToDelete.id)
-
-                result.onSuccess {
-                    // Refresh the list
-                    searchHabits(query = state.value.searchInput)
-
-                    // Show success message
-                    emitUiIntent(
-                        AddHabitChoiceUiIntent.ShowSnackbar(
-                            BloomSnackbarVisuals(
-                                message = getString(Res.string.delete_custom_habit_success),
-                                state = BloomSnackbarState.Success,
-                                withDismissAction = true,
-                                duration = SnackbarDuration.Short
+            runCatching {
+                repository.deleteCustomHabit(habitToDelete.id)
+            }.onSuccess { result ->
+                result.fold(
+                    onSuccess = {
+                        // Remove from cache and update list without extra loading
+                        cachedHabits = cachedHabits.filterNot { habit ->
+                            habit.id == habitToDelete.id
+                        }
+                        applySearch(state.value.searchInput)
+                        emitUiIntent(
+                            AddHabitChoiceUiIntent.ShowSnackbar(
+                                BloomSnackbarVisuals(
+                                    message = getString(Res.string.delete_custom_habit_success),
+                                    state = BloomSnackbarState.Success,
+                                    withDismissAction = true,
+                                    duration = SnackbarDuration.Short
+                                )
                             )
                         )
-                    )
-                }
-
-                result.onFailure { error ->
-                    updateState { it.copy(isLoading = false) }
-                    emitUiIntent(
-                        AddHabitChoiceUiIntent.ShowSnackbar(
-                            BloomSnackbarVisuals(
-                                message = "Failed to delete habit: ${error.message}",
-                                state = BloomSnackbarState.Error,
-                                withDismissAction = true,
-                                duration = SnackbarDuration.Short
-                            )
-                        )
-                    )
-                }
-            } catch (e: Exception) {
-                Napier.e("Error deleting habit", e)
-                updateState { it.copy(isLoading = false) }
-                emitUiIntent(
-                    AddHabitChoiceUiIntent.ShowSnackbar(
-                        BloomSnackbarVisuals(
-                            message = "Error deleting habit: ${e.message}",
-                            state = BloomSnackbarState.Error,
-                            withDismissAction = true,
-                            duration = SnackbarDuration.Short
-                        )
-                    )
+                    },
+                    onFailure = { error ->
+                        updateState { state -> state.copy(isLoading = false) }
+                        showErrorSnackbar("Failed to delete habit: ${error.message}")
+                    }
                 )
+            }.onFailure { exception ->
+                Napier.e("Error deleting habit", exception)
+                updateState { state -> state.copy(isLoading = false) }
+                showErrorSnackbar("Error deleting habit: ${exception.message}")
             }
         }
     }

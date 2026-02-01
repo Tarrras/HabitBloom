@@ -2,13 +2,13 @@ package com.horizondev.habitbloom.screens.habits.presentation.habitDetails
 
 import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
-import com.horizondev.habitbloom.core.designComponents.pickers.formatTime
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
+import com.horizondev.habitbloom.utils.formatTime
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getFirstDateAfterStartDateOrNextWeek
 import habitbloom.composeapp.generated.resources.Res

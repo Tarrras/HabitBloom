@@ -42,7 +42,7 @@ fun BloomSearchTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = RoundedCornerShape(6.dp)
+    shape: Shape = RoundedCornerShape(12.dp)
 ) {
     val clearButtonInteractionSource = remember { MutableInteractionSource() }
 

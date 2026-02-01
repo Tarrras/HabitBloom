@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.core.designSystem
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -45,6 +46,21 @@ fun BloomTheme(
         MaterialTheme(
             content = content
         )
+    }
+}
+
+
+@Composable
+fun BloomThemePreview(
+    content: @Composable () -> Unit
+) {
+    CompositionLocalProvider(
+        LocalBloomColorScheme provides lightColorScheme,
+        LocalBloomTypography provides bloomTypography()
+    ) {
+        MaterialTheme {
+            Scaffold(containerColor = BloomTheme.colors.background) { paddingValues -> content() }
+        }
     }
 }
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,10 +30,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import com.horizondev.habitbloom.utils.formatTime
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_alarm_clock
+import habitbloom.composeapp.generated.resources.reminder_time_label
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 
 /**
  * A time picker component that shows a time field and opens a dialog for selection
@@ -59,57 +63,43 @@ fun TimePicker(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
-                .border(1.dp, BloomTheme.colors.primary, RoundedCornerShape(8.dp))
-                .background(BloomTheme.colors.surface)
+                .background(BloomTheme.colors.cardSecondary)
                 .clickable { showTimePicker = true }
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = painterResource(Res.drawable.ic_alarm_clock),
                 contentDescription = "Time",
-                tint = BloomTheme.colors.primary
+                tint = BloomTheme.colors.primary,
+                modifier = Modifier.size(16.dp)
             )
 
             Spacer(modifier = Modifier.width(12.dp))
 
             Text(
-                text = formatTime(time, use24HourFormat),
-                style = BloomTheme.typography.body,
+                text = stringResource(Res.string.reminder_time_label).dropLast(1),
+                style = BloomTheme.typography.bodyMedium,
                 color = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.weight(1f)
+            )
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Text(
+                text = formatTime(time, use24HourFormat),
+                style = BloomTheme.typography.titleMedium,
+                color = BloomTheme.colors.primary,
             )
         }
 
         // Time picker dialog
-        TimePickerDialog(
+        WheelTimePickerDialog(
             isVisible = showTimePicker,
             onDismiss = { showTimePicker = false },
             time = time,
             onTimeSelected = onTimeSelected,
             use24HourFormat = use24HourFormat
         )
-    }
-}
-
-/**
- * Formats a LocalTime into a readable string based on the specified format.
- *
- * @param time The time to format
- * @param use24HourFormat Whether to use 24-hour format (true) or 12-hour format with AM/PM (false)
- * @return A formatted time string
- */
-fun formatTime(time: LocalTime, use24HourFormat: Boolean): String {
-    return if (use24HourFormat) {
-        "${time.hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')}"
-    } else {
-        val hour = when {
-            time.hour == 0 -> 12
-            time.hour > 12 -> time.hour - 12
-            else -> time.hour
-        }
-        val amPm = if (time.hour >= 12) "PM" else "AM"
-        "${hour.toString().padStart(2, '0')}:${time.minute.toString().padStart(2, '0')} $amPm"
     }
 }
 

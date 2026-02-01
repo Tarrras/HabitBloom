@@ -190,37 +190,32 @@ data class BloomTypography(
     val button: TextStyle,
     val formLabel: TextStyle,
 
-    // Display styles - for hero content and large headers
+    // New styles
+
+    // Display
     val displayLarge: TextStyle,
     val displayMedium: TextStyle,
     val displaySmall: TextStyle,
 
-    // Heading hierarchy - H1 through H6
-    val h1: TextStyle,
-    val h2: TextStyle,
-    val h3: TextStyle,
-    val h4: TextStyle,
-    val h5: TextStyle,
-    val h6: TextStyle,
+    // Headline
+    val headlineLarge: TextStyle,
+    val headlineMedium: TextStyle,
+    val headlineSmall: TextStyle,
 
-    // Body text variants
+    // Body
     val bodyLarge: TextStyle,
     val bodyMedium: TextStyle,
     val bodySmall: TextStyle,
 
-    // UI component text
+    // Label
     val labelLarge: TextStyle,
     val labelMedium: TextStyle,
     val labelSmall: TextStyle,
 
-    // Utility text styles
-    val caption: TextStyle,
-    val overline: TextStyle,
-
-    // Button variants
-    val buttonLarge: TextStyle,
-    val buttonMedium: TextStyle,
-    val buttonSmall: TextStyle
+    // Title
+    val titleLarge: TextStyle,
+    val titleMedium: TextStyle,
+    val titleSmall: TextStyle
 )
 
 @Composable
@@ -271,156 +266,101 @@ fun bloomTypography(): BloomTypography {
             fontWeight = FontWeight.Normal
         ),
 
-        // Display styles - for hero content and large headers
+        // Display
         displayLarge = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 57.sp,
-            lineHeight = 64.sp,
+            fontSize = 36.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.25).sp
+            lineHeight = 43.sp,
+            letterSpacing = (-0.4).sp
         ),
         displayMedium = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 45.sp,
-            lineHeight = 52.sp,
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.2).sp
+            lineHeight = 39.sp,
+            letterSpacing = (-0.32).sp
         ),
         displaySmall = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 36.sp,
-            lineHeight = 44.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.15).sp
-        ),
-
-        // Heading hierarchy - H1 through H6
-        h1 = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 32.sp,
-            lineHeight = 40.sp,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = (-0.1).sp
-        ),
-        h2 = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 28.sp,
-            lineHeight = 36.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = (-0.05).sp
-        ),
-        h3 = TextStyle(
-            fontFamily = fontFamily,
             fontSize = 24.sp,
-            lineHeight = 32.sp,
             fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.sp
-        ),
-        h4 = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 20.sp,
-            lineHeight = 28.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.sp
-        ),
-        h5 = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 18.sp,
-            lineHeight = 26.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = 0.sp
-        ),
-        h6 = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = 0.sp
+            lineHeight = 34.sp,
+            letterSpacing = (-0.4).sp
         ),
 
-        // Body text variants
-        bodyLarge = TextStyle(
-            fontFamily = fontFamily,
+        // Headline
+        headlineLarge = TextStyle(
+            fontSize = 20.sp,
+            fontWeight = FontWeight.SemiBold,
+            lineHeight = 28.sp,
+            letterSpacing = (-0.32).sp
+        ),
+        headlineMedium = TextStyle(
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Medium,
+            lineHeight = 27.sp,
+            letterSpacing = (-0.24).sp
+        ),
+        headlineSmall = TextStyle(
             fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
             lineHeight = 24.sp,
+            letterSpacing = (-0.18).sp
+        ),
+
+        // Body
+        bodyLarge = TextStyle(
+            fontSize = 16.sp,
             fontWeight = FontWeight.Normal,
-            letterSpacing = 0.sp
+            lineHeight = 26.sp,
+            letterSpacing = (-0.18).sp
         ),
         bodyMedium = TextStyle(
-            fontFamily = fontFamily,
             fontSize = 14.sp,
-            lineHeight = 20.sp,
             fontWeight = FontWeight.Normal,
-            letterSpacing = 0.1.sp
+            lineHeight = 22.sp,
+            letterSpacing = (-0.18).sp
         ),
         bodySmall = TextStyle(
-            fontFamily = fontFamily,
             fontSize = 12.sp,
-            lineHeight = 16.sp,
             fontWeight = FontWeight.Normal,
-            letterSpacing = 0.2.sp
+            lineHeight = 17.sp
         ),
 
-        // UI component text
+        // Label
         labelLarge = TextStyle(
-            fontFamily = fontFamily,
             fontSize = 14.sp,
-            lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.1.sp
+            lineHeight = 21.sp,
+            letterSpacing = (-0.18).sp
         ),
         labelMedium = TextStyle(
-            fontFamily = fontFamily,
             fontSize = 12.sp,
-            lineHeight = 16.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.5.sp
+            lineHeight = 17.sp
         ),
         labelSmall = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 11.sp,
-            lineHeight = 16.sp,
+            fontSize = 10.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.5.sp
+            lineHeight = 13.sp
         ),
 
-        // Utility text styles
-        caption = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            fontWeight = FontWeight.Normal,
-            letterSpacing = 0.4.sp
-        ),
-        overline = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
+        // Title
+        titleLarge = TextStyle(
+            fontSize = 20.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 1.5.sp
+            lineHeight = 28.sp,
+            letterSpacing = (-0.32).sp
         ),
-
-        // Button variants
-        buttonLarge = TextStyle(
-            fontFamily = fontFamily,
+        titleMedium = TextStyle(
             fontSize = 16.sp,
+            fontWeight = FontWeight.Medium,
             lineHeight = 24.sp,
-            fontWeight = FontWeight.SemiBold,
-            letterSpacing = 0.1.sp
+            letterSpacing = (-0.18).sp
         ),
-        buttonMedium = TextStyle(
-            fontFamily = fontFamily,
+        titleSmall = TextStyle(
             fontSize = 14.sp,
-            lineHeight = 20.sp,
             fontWeight = FontWeight.Medium,
-            letterSpacing = 0.2.sp
-        ),
-        buttonSmall = TextStyle(
-            fontFamily = fontFamily,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = 0.3.sp
+            lineHeight = 21.sp,
+            letterSpacing = (-0.18).sp
         )
     )
 }
@@ -437,36 +377,29 @@ val LocalBloomTypography = staticCompositionLocalOf {
         button = TextStyle.Default,
         formLabel = TextStyle.Default,
 
-        // Display styles
+        // Display
         displayLarge = TextStyle.Default,
         displayMedium = TextStyle.Default,
         displaySmall = TextStyle.Default,
 
-        // Heading hierarchy
-        h1 = TextStyle.Default,
-        h2 = TextStyle.Default,
-        h3 = TextStyle.Default,
-        h4 = TextStyle.Default,
-        h5 = TextStyle.Default,
-        h6 = TextStyle.Default,
+        // Headline
+        headlineLarge = TextStyle.Default,
+        headlineMedium = TextStyle.Default,
+        headlineSmall = TextStyle.Default,
 
-        // Body variants
+        // Body
         bodyLarge = TextStyle.Default,
         bodyMedium = TextStyle.Default,
         bodySmall = TextStyle.Default,
 
-        // Labels
+        // Label
         labelLarge = TextStyle.Default,
         labelMedium = TextStyle.Default,
         labelSmall = TextStyle.Default,
 
-        // Utility
-        caption = TextStyle.Default,
-        overline = TextStyle.Default,
-
-        // Button variants
-        buttonLarge = TextStyle.Default,
-        buttonMedium = TextStyle.Default,
-        buttonSmall = TextStyle.Default
+        // Title
+        titleLarge = TextStyle.Default,
+        titleMedium = TextStyle.Default,
+        titleSmall = TextStyle.Default
     )
 }

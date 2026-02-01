@@ -1,20 +1,39 @@
 package com.horizondev.habitbloom.screens.habits.presentation.addHabit.success
 
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 
 /**
  * ViewModel for the habit addition success screen.
  */
-class AddHabitSuccessViewModel : BloomViewModel<AddHabitSuccessUiState, AddHabitSuccessUiIntent>(
-    initialState = AddHabitSuccessUiState()
+class AddHabitSuccessViewModel(
+    private val addHabitStateUseCase: AddHabitStateUseCase
+) : BloomViewModel<AddHabitSuccessUiState, AddHabitSuccessUiIntent>(
+    initialState = AddHabitSuccessUiState(
+        habitName = addHabitStateUseCase.lastAddedHabitName.value
+    )
 ) {
+    init {
+        launch {
+            addHabitStateUseCase.lastAddedHabitName.collect { habitName ->
+                updateState { it.copy(habitName = habitName) }
+            }
+        }
+    }
+
     /**
      * Single entry point for handling UI events.
      */
     fun handleUiEvent(event: AddHabitSuccessUiEvent) {
         when (event) {
             AddHabitSuccessUiEvent.FinishFlow -> {
+                addHabitStateUseCase.clearLastAddedHabitName()
                 emitUiIntent(AddHabitSuccessUiIntent.FinishFlow)
+            }
+
+            AddHabitSuccessUiEvent.AddAnotherHabit -> {
+                addHabitStateUseCase.clearLastAddedHabitName()
+                emitUiIntent(AddHabitSuccessUiIntent.AddAnotherHabit)
             }
         }
     }
@@ -24,8 +43,7 @@ class AddHabitSuccessViewModel : BloomViewModel<AddHabitSuccessUiState, AddHabit
  * UI State for the success screen.
  */
 data class AddHabitSuccessUiState(
-    // Currently an empty state as we don't need to track any state for this screen
-    val placeholder: Boolean = true
+    val habitName: String? = null
 )
 
 /**
@@ -33,6 +51,7 @@ data class AddHabitSuccessUiState(
  */
 sealed interface AddHabitSuccessUiEvent {
     data object FinishFlow : AddHabitSuccessUiEvent
+    data object AddAnotherHabit : AddHabitSuccessUiEvent
 }
 
 /**
@@ -40,4 +59,5 @@ sealed interface AddHabitSuccessUiEvent {
  */
 sealed interface AddHabitSuccessUiIntent {
     data object FinishFlow : AddHabitSuccessUiIntent
+    data object AddAnotherHabit : AddHabitSuccessUiIntent
 } 

@@ -7,7 +7,7 @@ data class HabitInfo(
     val description: String,
     val iconUrl: String,
     val name: String,
-    val timeOfDay: TimeOfDay,
+    val categoryId: String? = null,
     val isCustomHabit: Boolean = false
 )
 

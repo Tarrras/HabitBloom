@@ -3,12 +3,16 @@ package com.horizondev.habitbloom.core.designComponents.inputText
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
@@ -22,6 +26,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.inputText.base.BloomBaseOutlinedTextField
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
+import org.jetbrains.compose.resources.DrawableResource
+import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun BloomTextField(
@@ -33,6 +39,7 @@ fun BloomTextField(
     textStyle: TextStyle = BloomTheme.typography.formLabel,
     placeholderText: String? = null,
     title: String? = null,
+    titleIcon: DrawableResource? = null,
     maxSymbols: Int? = null,
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -47,7 +54,7 @@ fun BloomTextField(
     maxLines: Int = if (singleLine) 1 else Int.MAX_VALUE,
     minLines: Int = 1,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
-    shape: Shape = RoundedCornerShape(6.dp),
+    shape: Shape = RoundedCornerShape(12.dp),
     colors: TextFieldColors = OutlinedTextFieldDefaults.colors(
         unfocusedBorderColor = BloomTheme.colors.textColor.disabled,
         focusedBorderColor = BloomTheme.colors.primary,
@@ -64,12 +71,25 @@ fun BloomTextField(
     )
 ) {
     Column {
-        title?.let {
-            Text(
-                text = title,
-                style = BloomTheme.typography.heading,
-                color = BloomTheme.colors.textColor.primary
-            )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            titleIcon?.let {
+                Icon(
+                    painter = painterResource(titleIcon),
+                    contentDescription = null,
+                    tint = BloomTheme.colors.primary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(Modifier.width(8.dp))
+            }
+            title?.let {
+                Text(
+                    text = title,
+                    style = BloomTheme.typography.titleMedium,
+                    color = BloomTheme.colors.textColor.primary
+                )
+            }
+        }
+        if (title != null || titleIcon != null) {
             Spacer(modifier = Modifier.height(8.dp))
         }
         BloomBaseOutlinedTextField(
@@ -83,7 +103,7 @@ fun BloomTextField(
                 {
                     Text(
                         text = it,
-                        style = BloomTheme.typography.formLabel,
+                        style = BloomTheme.typography.bodyLarge,
                         color = BloomTheme.colors.textColor.secondary
                     )
                 }
@@ -102,16 +122,16 @@ fun BloomTextField(
             minLines = minLines,
             keyboardActions = keyboardActions,
             keyboardOptions = keyboardOptions,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
         )
 
         maxSymbols?.let {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "${value.length}/$maxSymbols",
-                style = BloomTheme.typography.small,
+                style = BloomTheme.typography.labelMedium,
                 color = BloomTheme.colors.textColor.secondary,
-                modifier = Modifier.align(Alignment.End)
+                modifier = Modifier.align(Alignment.Start)
             )
         }
     }

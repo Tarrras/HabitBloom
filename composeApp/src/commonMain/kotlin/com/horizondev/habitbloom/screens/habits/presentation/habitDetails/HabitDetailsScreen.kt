@@ -55,12 +55,12 @@ import com.horizondev.habitbloom.core.designComponents.dialogs.AddHabitDateRange
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
 import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
-import com.horizondev.habitbloom.core.designComponents.pickers.formatTime
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.formatTime
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState

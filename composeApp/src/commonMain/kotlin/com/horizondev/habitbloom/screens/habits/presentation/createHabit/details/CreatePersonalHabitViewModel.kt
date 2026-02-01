@@ -1,24 +1,18 @@
-
 import androidx.compose.material3.SnackbarDuration
-import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.platform.ImagePicker
-import com.horizondev.habitbloom.platform.ImagePickerResult
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiEvent
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiIntent
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiState
 import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
+import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.save_habit_error
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import org.jetbrains.compose.resources.getString
 
 /**
@@ -27,45 +21,13 @@ import org.jetbrains.compose.resources.getString
 class CreatePersonalHabitViewModel(
     private val habitRepository: HabitsRepository,
     private val profileRepository: ProfileRepository,
-    private val imagePicker: ImagePicker,
-    timeOfDay: TimeOfDay?
+    private val categoryId: String
 ) : BloomViewModel<CreatePersonalHabitUiState, CreatePersonalHabitUiIntent>(
-    initialState = CreatePersonalHabitUiState(
-        timeOfDay = timeOfDay ?: TimeOfDay.Morning
-    )
+    initialState = CreatePersonalHabitUiState()
 ) {
     init {
-        // Observe image picker results
-        imagePicker.imagePickerResult
-            .onEach { result ->
-                updateState {
-                    it.copy(imagePickerState = result)
-                }
-
-                when (result) {
-                    is ImagePickerResult.Success -> {
-                        Napier.d("Image picked: ${result.imageUrl}")
-                        updateState {
-                            it.copy(selectedImageUrl = result.imageUrl)
-                        }
-                    }
-                    is ImagePickerResult.Error -> {
-                        emitUiIntent(
-                            CreatePersonalHabitUiIntent.ShowSnackbar(
-                                visuals = BloomSnackbarVisuals(
-                                    message = "Failed to pick image: ${result.message}",
-                                    state = BloomSnackbarState.Error,
-                                    duration = SnackbarDuration.Short,
-                                    withDismissAction = true
-                                )
-                            )
-                        )
-                    }
-
-                    else -> { /* Do nothing for other states */
-                    }
-                }
-            }.launchIn(viewModelScope)
+        // Load available icons from Firebase
+        loadHabitIcons()
     }
 
     /**
@@ -87,8 +49,8 @@ class CreatePersonalHabitViewModel(
                 }
             }
 
-            is CreatePersonalHabitUiEvent.UpdateTimeOfDay -> {
-                updateState { it.copy(timeOfDay = uiEvent.timeOfDay) }
+            is CreatePersonalHabitUiEvent.SelectIcon -> {
+                updateState { it.copy(selectedImageUrl = uiEvent.iconUrl) }
             }
 
             is CreatePersonalHabitUiEvent.UpdateTitle -> {
@@ -112,12 +74,6 @@ class CreatePersonalHabitViewModel(
             CreatePersonalHabitUiEvent.SubmitHabitCreation -> {
                 saveUserHabit()
             }
-
-            CreatePersonalHabitUiEvent.PickImage -> {
-                launch {
-                    imagePicker.pickImage()
-                }
-            }
         }
     }
 
@@ -135,10 +91,10 @@ class CreatePersonalHabitViewModel(
 
             habitRepository.createPersonalHabit(
                 userId = userId,
-                timeOfDay = uiState.timeOfDay,
                 title = uiState.title,
                 description = uiState.description,
-                icon = uiState.selectedImageUrl ?: ""
+                categoryId = categoryId,
+                icon = uiState.selectedImageUrl
             ).onSuccess {
                 updateState { it.copy(isLoading = false) }
                 emitUiIntent(CreatePersonalHabitUiIntent.OpenSuccessScreen)
@@ -156,6 +112,40 @@ class CreatePersonalHabitViewModel(
                     )
                 )
             }
+        }
+    }
+
+    /**
+     * Load available habit icons from Firebase.
+     */
+    private fun loadHabitIcons() {
+        launch {
+            updateState { it.copy(isLoadingIcons = true) }
+
+            habitRepository.getHabitIcons()
+                .onSuccess { icons ->
+                    updateState {
+                        it.copy(
+                            availableIcons = icons,
+                            isLoadingIcons = false,
+                            selectedImageUrl = icons.firstOrNull() ?: DEFAULT_PHOTO_URL
+                        )
+                    }
+                }
+                .onFailure { error ->
+                    Napier.e("Failed to load habit icons", error)
+                    updateState { it.copy(isLoadingIcons = false) }
+                    emitUiIntent(
+                        CreatePersonalHabitUiIntent.ShowSnackbar(
+                            visuals = BloomSnackbarVisuals(
+                                message = "Failed to load icons",
+                                state = BloomSnackbarState.Error,
+                                duration = SnackbarDuration.Short,
+                                withDismissAction = true
+                            )
+                        )
+                    )
+                }
         }
     }
 }

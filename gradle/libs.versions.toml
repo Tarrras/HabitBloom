@@ -1,31 +1,31 @@
 [versions]
 androidDriver = "2.1.0"
-calendarComposeMultiplatform = "2.8.0"
+calendarComposeMultiplatform = "2.10.0"
 coilCompose = "3.3.0"
-haze = "1.6.10"
-lifecycleCommon = "2.9.2"
+haze = "1.7.1"
+lifecycleCommon = "2.9.6"
 materialIconsExtended = "1.7.3"
 multiplatformSettingsCoroutines = "1.3.0"
 multiplatformSettingsVersion = "1.3.0"
-navigationCompose = "2.9.0-beta05"
-permissions = "0.20.0"
-sqlDelight = "2.1.0"
-firebaseBom = "34.1.0"
-supabaseBom = "3.2.2"
+navigationCompose = "2.9.1"
+permissions = "0.20.1"
+sqlDelight = "2.2.1"
+firebaseBom = "34.8.0"
+supabaseBom = "3.3.0"
 firebaseCommonKtx = "20.3.3"
-kotlin = "2.2.10"
-compose = "1.8.2"
-koinCore = "4.1.0"
-koinAndroid = "4.1.0"
+kotlin = "2.3.0"
+compose = "1.10.0"
+koinCore = "4.1.1"
+koinAndroid = "4.1.1"
 gradle = "8.9.1"
 statelyCommon = "2.1.0"
 statelyIsoCollections = "2.1.0"
 statelyIsolate = "2.1.0"
 multiplatformSettings = "1.3.0"
-koin-compose = "4.1.0"
+koin-compose = "4.1.1"
 core = "1.17.0"
 jna = "5.17.0"
-koalaplotCore = "0.9.1"
+koalaplotCore = "0.10.4"
 kotlinxCoroutinesSwing = "1.10.2"
 kotlinxSerializationJson = "1.9.0"
 kotlinxDateTime = "0.7.1"
@@ -33,18 +33,20 @@ material3WindowSizeClassMultiplatform = "0.5.0"
 napier = "2.7.1"
 core-library-desugaring = "2.1.5"
 toast4j = "0.2.0"
-compose-activity = "1.10.1"
-spotless = "7.2.1"
+compose-activity = "1.12.2"
+spotless = "8.1.0"
 accompanist-systemUIController = "0.36.0"
-ktor = "3.2.3"
+ktor = "3.3.3"
 
-google-services-plugin = "4.4.3"
+google-services-plugin = "4.4.4"
 crashlitycs-plugin = "3.0.6"
-firebase-gitlive-sdk = "2.3.0"
+firebase-gitlive-sdk = "2.4.0"
+uiToolingPreview = "1.10.0"
 
 [libraries]
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "androidDriver" }
 coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coilCompose" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }
 coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
@@ -110,6 +112,7 @@ accompanist-systemUIController = { module = "com.google.accompanist:accompanist-
 calendar-compose-multiplatform = { module = "com.kizitonwose.calendar:compose-multiplatform", version.ref = "calendarComposeMultiplatform" }
 
 stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "uiToolingPreview" }
 
 [plugins]
 compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "compose" }

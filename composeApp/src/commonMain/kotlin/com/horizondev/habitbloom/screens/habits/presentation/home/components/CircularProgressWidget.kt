@@ -122,7 +122,7 @@ fun ProgressSection(
                 // Progress title
                 Text(
                     text = selectedPeriod.getProgressTitle(),
-                    style = BloomTheme.typography.h5,
+                    style = BloomTheme.typography.headlineMedium,
                     color = BloomTheme.colors.textColor.primary
                 )
 

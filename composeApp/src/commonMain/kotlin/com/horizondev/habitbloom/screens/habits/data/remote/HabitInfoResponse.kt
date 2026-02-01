@@ -14,7 +14,7 @@ data class HabitLocalizationResponse(
 data class OfficialHabitInfoResponse(
     val id: String?,
     val iconUrl: String,
-    val timeOfDay: TimeOfDayResponse,
+    val categoryId: String? = null,
     val localizations: Map<String, HabitLocalizationResponse>
 )
 
@@ -30,7 +30,7 @@ fun OfficialHabitInfoResponse.toDomainModel(
         description = localization.description,
         iconUrl = iconUrl,
         name = localization.name,
-        timeOfDay = timeOfDay.toDomainModel(),
+        categoryId = categoryId,
         isCustomHabit = false
     )
 }
@@ -42,7 +42,7 @@ data class HabitInfoResponse(
     val iconUrl: String,
     val name: String,
     val shortInfo: String,
-    val timeOfDay: TimeOfDayResponse,
+    val categoryId: String? = null,
     val userId: String? = null
 )
 
@@ -58,7 +58,7 @@ fun HabitInfoResponse.toDomainModel() = HabitInfo(
     description = description,
     iconUrl = iconUrl,
     name = name,
-    timeOfDay = timeOfDay.toDomainModel(),
+    categoryId = categoryId,
     isCustomHabit = userId != null || id?.startsWith("user_") == true
 )
 

@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
+import kotlin.math.max
 
 /**
  * Data structure to hold flower health along with its last updated date.
@@ -56,16 +57,22 @@ class FlowerHealthDataSource(
             val alpha = selectAlpha(userHabit.daysOfWeek.size)
             var vitality = 0.6f
             var consecutiveMissedDays = 0
+            var currentConsecutiveMisses = 0
 
             for (record in records) {
                 val x = if (record.isCompleted) 1f else 0f
                 vitality = alpha * x + (1 - alpha) * vitality
+
                 if (record.isCompleted) {
-                    consecutiveMissedDays = 0
+                    consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
+                    currentConsecutiveMisses = 0
                 } else {
-                    consecutiveMissedDays++
+                    currentConsecutiveMisses++
                 }
             }
+
+            // Don't forget the final streak of misses at the end
+            consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
 
             // If brand-new (no records), show full vitality; if all completed so far, also full
             vitality = when {
@@ -135,16 +142,22 @@ class FlowerHealthDataSource(
 
         var vitality = 0.6f
         var consecutiveMissedDays = 0
+        var currentConsecutiveMisses = 0
 
         for (record in filteredRecords) {
             val x = if (record.isCompleted) 1f else 0f
             vitality = alpha * x + (1 - alpha) * vitality
+
             if (record.isCompleted) {
-                consecutiveMissedDays = 0
+                consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
+                currentConsecutiveMisses = 0
             } else {
-                consecutiveMissedDays++
+                currentConsecutiveMisses++
             }
         }
+
+        // Don't forget the final streak of misses at the end
+        consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
 
         vitality = vitality.roundToDecimal(2)
 

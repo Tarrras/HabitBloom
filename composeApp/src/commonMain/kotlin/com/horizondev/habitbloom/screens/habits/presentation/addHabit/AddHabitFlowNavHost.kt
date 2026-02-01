@@ -22,7 +22,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -38,7 +37,7 @@ import com.horizondev.habitbloom.core.designComponents.stepper.BloomStepper
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.core.navigation.CommonNavigator
 import com.horizondev.habitbloom.core.navigation.NavigationComponent
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_new_habit
 import kotlinx.coroutines.launch
@@ -54,26 +53,17 @@ fun AddHabitFlowNavHost(
     modifier: Modifier = Modifier,
     navigator: CommonNavigator = koinInject(),
     onFinishFlow: () -> Unit,
-    onNavigateToCreateCustomHabit: (TimeOfDay?) -> Unit
+    onNavigateToCreateCustomHabit: (String?) -> Unit
 ) {
     val navController = rememberNavController()
     val coroutineScope = rememberCoroutineScope()
     val snackBarState = remember { SnackbarHostState() }
 
-    // Create shared ViewModel for the entire flow
     val viewModel = koinViewModel<AddHabitFlowViewModel>()
 
-    // Observe the state
-    val flowState by viewModel.state.collectAsState()
-
-    // Handle UI intents
     LaunchedEffect(viewModel) {
         viewModel.uiIntents.collect { uiIntent ->
             when (uiIntent) {
-                AddHabitFlowUiIntent.ExitFlow -> {
-                    onFinishFlow()
-                }
-
                 is AddHabitFlowUiIntent.ShowShackbar -> {
                     coroutineScope.launch {
                         snackBarState.showSnackbar(uiIntent.visuals)
@@ -104,7 +94,6 @@ fun AddHabitFlowNavHost(
             }
         },
         content = { paddingValues ->
-            // Navigation host with type-safe routes
             NavigationComponent(
                 modifier = Modifier.padding(
                     if (currentRoute?.step != null) {
@@ -115,13 +104,13 @@ fun AddHabitFlowNavHost(
                 navigator = navigator,
                 startDestination = AddHabitFlowGlobalNavEntryPoint
             ) {
-                // Add all routes from our sealed class
                 createHabitNestedFlowGraph(
                     navController = navController,
                     viewModel = viewModel,
                     onNavigateToCreateCustomHabit = { timeOfDay ->
                         onNavigateToCreateCustomHabit(timeOfDay)
-                    }
+                    },
+                    onFinishFlow = onFinishFlow
                 )
             }
         },

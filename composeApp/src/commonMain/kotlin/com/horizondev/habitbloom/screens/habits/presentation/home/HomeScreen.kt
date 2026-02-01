@@ -154,7 +154,7 @@ private fun LazyListScope.greeting(timeOfDay: TimeOfDay) {
         ) {
             Text(
                 text = stringResource(greetingRes),
-                style = BloomTheme.typography.h2,
+                style = BloomTheme.typography.displaySmall,
                 color = BloomTheme.colors.textColor.primary
             )
             Spacer(modifier = Modifier.height(6.dp))
@@ -234,7 +234,7 @@ private fun LazyListScope.habitsList(
                     TimeOfDay.Evening -> Res.string.evening_habits
                 }
             ),
-            style = BloomTheme.typography.h3,
+            style = BloomTheme.typography.headlineMedium,
             color = BloomTheme.colors.textColor.primary
         )
         Spacer(modifier = Modifier.height(16.dp))

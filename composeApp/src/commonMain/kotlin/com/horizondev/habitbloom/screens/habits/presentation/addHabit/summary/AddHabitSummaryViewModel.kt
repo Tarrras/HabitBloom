@@ -6,8 +6,9 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVis
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
-import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowState
+
 import io.github.aakira.napier.Napier
 
 /**
@@ -15,20 +16,31 @@ import io.github.aakira.napier.Napier
  */
 class AddHabitSummaryViewModel(
     private val repository: HabitsRepository,
-    private val addHabitState: AddHabitFlowState,
+    private val addHabitStateUseCase: AddHabitStateUseCase,
     private val enableNotificationsUseCase: EnableNotificationsForReminderUseCase
 ) : BloomViewModel<AddHabitSummaryUiState, AddHabitSummaryUiIntent>(
-    initialState = AddHabitSummaryUiState(
-        timeOfDay = addHabitState.timeOfDay ?: TimeOfDay.Morning,
-        habitInfo = addHabitState.habitInfo ?: throw IllegalStateException("Habit info is null"),
-        days = addHabitState.selectedDays,
-        startDate = addHabitState.startDate,
-        endDate = addHabitState.endDate,
-        durationInDays = addHabitState.durationInDays,
-        reminderEnabled = addHabitState.reminderEnabled,
-        reminderTime = addHabitState.reminderTime
-    )
+    initialState = AddHabitSummaryUiState()
 ) {
+
+    init {
+        launch {
+            addHabitStateUseCase.draft.collect { draft ->
+                updateState {
+                    it.copy(
+                        timeOfDay = draft.timeOfDay ?: TimeOfDay.Morning,
+                        habitInfo = draft.habitInfo,
+                        habitCategory = draft.habitCategory,
+                        days = draft.selectedDays,
+                        startDate = draft.startDate,
+                        endDate = draft.endDate,
+                        durationInDays = draft.durationInDays,
+                        reminderEnabled = draft.reminderEnabled,
+                        reminderTime = draft.reminderTime
+                    )
+                }
+            }
+        }
+    }
 
     /**
      * Single entry point for handling UI events.
@@ -45,11 +57,9 @@ class AddHabitSummaryViewModel(
         }
     }
 
-    /**
-     * Submits the habit to the repository.
-     */
+
     private fun submitHabit() {
-        val info = addHabitState.habitInfo ?: return
+        val creationData = addHabitStateUseCase.getHabitCreationData() ?: return
         val currentState = state.value
 
         launch {
@@ -57,12 +67,13 @@ class AddHabitSummaryViewModel(
 
             runCatching {
                 val result = repository.addUserHabit(
-                    habitInfo = info,
-                    startDate = addHabitState.startDate,
-                    endDate = addHabitState.endDate,
-                    selectedDays = addHabitState.selectedDays,
+                    habitInfo = creationData.habitInfo,
+                    startDate = creationData.startDate,
+                    endDate = creationData.endDate,
+                    selectedDays = creationData.selectedDays,
                     reminderEnabled = currentState.reminderEnabled,
-                    reminderTime = currentState.reminderTime
+                    reminderTime = currentState.reminderTime,
+                    timeOfDay = creationData.timeOfDay
                 )
 
                 result.fold(
@@ -73,12 +84,18 @@ class AddHabitSummaryViewModel(
                         if (currentState.reminderEnabled && currentState.reminderTime != null) {
                             // Enable notifications if this is the first reminder
                             enableNotificationsUseCase.execute()
-                            
+
                             repository.scheduleReminderForHabit(
                                 habitId = habitId,
                                 reminderTime = currentState.reminderTime
                             )
                         }
+
+                        // Cache the habit name for the success screen
+                        addHabitStateUseCase.setLastAddedHabitName(creationData.habitInfo.name)
+
+                        // Reset the draft after successful creation
+                        addHabitStateUseCase.resetDraft()
 
                         // Navigate to the success screen
                         emitUiIntent(AddHabitSummaryUiIntent.NavigateToSuccess)

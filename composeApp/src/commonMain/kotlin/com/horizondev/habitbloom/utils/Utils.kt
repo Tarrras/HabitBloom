@@ -211,7 +211,6 @@ fun DayOfWeek.getTitle(): String {
         DayOfWeek.FRIDAY -> stringResource(Res.string.friday)
         DayOfWeek.SATURDAY -> stringResource(Res.string.saturday)
         DayOfWeek.SUNDAY -> stringResource(Res.string.sunday)
-        else -> stringResource(Res.string.sunday)
     }
 }
 
@@ -225,7 +224,6 @@ fun DayOfWeek.getShortTitle(): String {
         DayOfWeek.FRIDAY -> stringResource(Res.string.friday_short)
         DayOfWeek.SATURDAY -> stringResource(Res.string.saturday_short)
         DayOfWeek.SUNDAY -> stringResource(Res.string.sunday_short)
-        else -> stringResource(Res.string.sunday_short)
     }
 }
 

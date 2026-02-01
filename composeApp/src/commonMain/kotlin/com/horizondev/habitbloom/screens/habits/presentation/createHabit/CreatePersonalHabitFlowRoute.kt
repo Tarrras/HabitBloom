@@ -1,7 +1,7 @@
 package com.horizondev.habitbloom.screens.habits.presentation.createHabit
 
 import com.horizondev.habitbloom.core.navigation.NavTarget
-import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+
 import kotlinx.serialization.Serializable
 
 /**
@@ -17,10 +17,10 @@ object CreatePersonalHabitFlowGlobalNavEntryPoint : NavTarget
 sealed class CreatePersonalHabitFlowRoute : NavTarget {
 
     /**
-     * Create personal habit screen with optional time of day parameter.
+     * Create personal habit screen with category ID parameter.
      */
     @Serializable
-    data class CreateHabit(val timeOfDay: TimeOfDay? = null) : CreatePersonalHabitFlowRoute()
+    data class CreateHabit(val categoryId: String) : CreatePersonalHabitFlowRoute()
 
     /**
      * Success screen showing habit created successfully.
@@ -36,7 +36,7 @@ sealed class CreatePersonalHabitFlowRoute : NavTarget {
             if (routeString.isNullOrBlank()) return null
 
             return when {
-                routeString.contains(CreateHabit::class.qualifiedName.toString()) -> CreateHabit()
+                routeString.contains(CreateHabit::class.qualifiedName.toString()) -> CreateHabit("")
                 routeString.contains(Success::class.qualifiedName.toString()) -> Success
                 else -> null
             }

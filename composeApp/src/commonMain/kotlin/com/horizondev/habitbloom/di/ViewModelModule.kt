@@ -6,11 +6,11 @@ import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.flowerdetail.HabitFlowerDetailViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.AddHabitFlowViewModel
+import com.horizondev.habitbloom.screens.habits.presentation.addHabit.categoryChoice.AddHabitCategoryChoiceViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.durationChoice.AddHabitDurationViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.habitChoise.AddHabitChoiceViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.success.AddHabitSuccessViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary.AddHabitSummaryViewModel
-import com.horizondev.habitbloom.screens.habits.presentation.addHabit.timeOfDayChoice.AddHabitTimeOfDayViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.habitDetails.HabitDetailsViewModel
 import com.horizondev.habitbloom.screens.habits.presentation.home.HomeViewModel
 import com.horizondev.habitbloom.screens.onboarding.OnboardingViewModel
@@ -37,7 +37,8 @@ val viewModelModule: Module = module {
 
     // Add Habit flow ViewModels
     viewModelOf(::AddHabitFlowViewModel)
-    viewModelOf(::AddHabitTimeOfDayViewModel)
+    viewModelOf(::AddHabitCategoryChoiceViewModel)
+
     viewModelOf(::AddHabitChoiceViewModel)
     viewModelOf(::AddHabitDurationViewModel)
     viewModelOf(::AddHabitSummaryViewModel)

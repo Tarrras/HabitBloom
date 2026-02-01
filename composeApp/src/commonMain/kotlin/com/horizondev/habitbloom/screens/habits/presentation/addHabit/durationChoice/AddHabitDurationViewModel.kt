@@ -6,6 +6,8 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarSta
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import com.horizondev.habitbloom.utils.calculateEndOfWeek
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.plusDays
@@ -31,13 +33,15 @@ import org.jetbrains.compose.resources.getString
  * Now focused on date range selection rather than explicit duration.
  */
 class AddHabitDurationViewModel(
-    private val permissionsManager: PermissionsManager
+    private val permissionsManager: PermissionsManager,
+    private val addHabitStateUseCase: AddHabitStateUseCase
 ) : BloomViewModel<AddHabitDurationUiState, AddHabitDurationUiIntent>(
     initialState = AddHabitDurationUiState(
         activeDays = DayOfWeek.entries,
         startDate = getCurrentDate(),
         endDate = getCurrentDate().calculateEndOfWeek(),
-        durationInDays = getCurrentDate().daysUntil(getCurrentDate().calculateEndOfWeek())
+        durationInDays = getCurrentDate().daysUntil(getCurrentDate().calculateEndOfWeek()),
+        timeOfDay = addHabitStateUseCase.getCurrentDraft().timeOfDay ?: TimeOfDay.Morning
     )
 ) {
 
@@ -119,6 +123,9 @@ class AddHabitDurationViewModel(
      */
     fun handleUiEvent(event: AddHabitDurationUiEvent) {
         when (event) {
+            is AddHabitDurationUiEvent.SelectTimeOfDay -> {
+                updateState { it.copy(timeOfDay = event.timeOfDay) }
+            }
             is AddHabitDurationUiEvent.SelectGroupOfDays -> selectGroupOfDays(event.group)
             is AddHabitDurationUiEvent.UpdateDayState -> updateDayState(event.dayOfWeek)
             is AddHabitDurationUiEvent.SelectPresetDateRange -> selectPresetDateRange(event.daysAhead)
@@ -327,6 +334,19 @@ class AddHabitDurationViewModel(
             }
 
             val calculatedStartedDate = currentState.startDate
+
+            // Update the UseCase with the duration data
+            addHabitStateUseCase.updateDuration(
+                startDate = calculatedStartedDate,
+                endDate = currentState.endDate,
+                selectedDays = currentState.activeDays,
+                durationInDays = currentState.durationInDays,
+                reminderEnabled = currentState.reminderEnabled,
+                reminderTime = currentState.reminderTime
+            )
+
+            // Persist selected time of day into the draft if changed here
+            addHabitStateUseCase.updateTimeOfDay(currentState.timeOfDay)
 
             emitUiIntent(
                 AddHabitDurationUiIntent.NavigateNext(

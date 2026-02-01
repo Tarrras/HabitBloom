@@ -79,6 +79,7 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.ui.tooling.preview)
 
             implementation(libs.kotlinX.serializationJson)
 
@@ -107,6 +108,7 @@ kotlin {
             implementation(libs.stately.common)
 
             implementation(libs.coil.compose)
+            implementation(libs.coil.svg)
             implementation(libs.coil.gif)
             implementation(libs.coil.network.ktor3)
 
