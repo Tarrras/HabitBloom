@@ -1,9 +1,9 @@
 package com.horizondev.habitbloom.core.designComponents.dialog
 
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
@@ -18,7 +18,7 @@ fun BloomAlertDialog(
     modifier: Modifier = Modifier,
     isShown: Boolean = false,
     onDismiss: () -> Unit,
-    content: @Composable () -> Unit
+    content: @Composable BoxScope.() -> Unit
 ) {
     if (isShown) {
         BasicAlertDialog(
@@ -29,7 +29,6 @@ fun BloomAlertDialog(
             BloomSurface(
                 modifier = Modifier.wrapContentWidth().wrapContentHeight(),
                 shape = RoundedCornerShape(24.dp),
-                tonalElevation = AlertDialogDefaults.TonalElevation,
                 shadowElevation = 0.dp,
                 content = content
             )

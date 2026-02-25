@@ -9,7 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -59,6 +58,7 @@ import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHos
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
+import com.horizondev.habitbloom.screens.habits.domain.models.getRangeLabel
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.formatTime
 import com.horizondev.habitbloom.utils.getCurrentDate
@@ -148,7 +148,7 @@ fun HabitDetailsScreenContent(
         topBar = {
             BloomToolbar(
                 modifier = Modifier.fillMaxWidth().statusBarsPadding(),
-                title = uiState.habitInfo?.name.orEmpty(),
+                title = "",
                 onBackPressed = {
                     handleUiEvent(HabitScreenDetailsUiEvent.BackPressed)
                 },
@@ -172,129 +172,122 @@ fun HabitDetailsScreenContent(
         Box(
             modifier = Modifier.fillMaxSize().background(
                 color = BloomTheme.colors.background
-            )
+            ).padding(paddingValues)
         ) {
             if (uiState.habitInfo != null) {
                 Column(
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(
+                            rememberScrollState()
+                        )
                 ) {
                     UserHabitFullInfoCard(
                         modifier = Modifier.fillMaxWidth(),
                         habitInfo = uiState.habitInfo,
-                        paddingValues = paddingValues
                     )
 
-                    Column(
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    UserHabitProgressCard(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        uiState = uiState.progressUiState
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    HabitDurationEditor(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .verticalScroll(
-                                rememberScrollState()
-                            )
-                    ) {
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        UserHabitProgressCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            uiState = uiState.progressUiState
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        HabitDurationEditor(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            editMode = uiState.habitDurationEditMode,
-                            startDate = uiState.startDate,
-                            endDate = uiState.endDate,
-                            activeDays = uiState.habitDays,
-                            onEditModeChanged = {
-                                handleUiEvent(HabitScreenDetailsUiEvent.DurationEditModeChanged)
-                            },
-                            onDayStateChanged = { dayOfWeek, isActive ->
-                                handleUiEvent(
-                                    HabitScreenDetailsUiEvent.DayStateChanged(
-                                        dayOfWeek, isActive
-                                    )
-                                )
-                            },
-                            onDateRangeEditorRequest = {
-                                handleUiEvent(HabitScreenDetailsUiEvent.ShowDatePickerDialog)
-                            },
-                            onUpdateHabitDuration = {
-                                handleUiEvent(HabitScreenDetailsUiEvent.UpdateHabitDuration)
-                            },
-                            updateButtonEnabled = uiState.durationUpdateButtonEnabled
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        UserHabitScheduleCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            habitInfo = uiState.habitInfo
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        ReminderSettingsCard(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            reminderEnabled = uiState.reminderEnabled,
-                            reminderTime = uiState.reminderTime,
-                            onShowReminderDialog = {
-                                handleUiEvent(HabitScreenDetailsUiEvent.ShowReminderDialog)
-                            }
-                        )
-
-                        Spacer(modifier = Modifier.height(32.dp))
-                        Spacer(modifier = Modifier.navigationBarsPadding())
-                    }
-
-                    // Date Range Picker Dialog
-                    DateRangePickerDialog(
-                        isVisible = uiState.showDatePickerDialog,
+                            .padding(horizontal = 16.dp),
+                        editMode = uiState.habitDurationEditMode,
                         startDate = uiState.startDate,
                         endDate = uiState.endDate,
-                        onDismiss = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.DismissDatePickerDialog)
+                        activeDays = uiState.habitDays,
+                        onEditModeChanged = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DurationEditModeChanged)
                         },
-                        onDateRangeSelected = { startDate, endDate ->
+                        onDayStateChanged = { dayOfWeek, isActive ->
                             handleUiEvent(
-                                HabitScreenDetailsUiEvent.DateRangeChanged(
-                                    startDate,
-                                    endDate
+                                HabitScreenDetailsUiEvent.DayStateChanged(
+                                    dayOfWeek, isActive
                                 )
                             )
+                        },
+                        onDateRangeEditorRequest = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.ShowDatePickerDialog)
+                        },
+                        onUpdateHabitDuration = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.UpdateHabitDuration)
+                        },
+                        updateButtonEnabled = uiState.durationUpdateButtonEnabled
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    UserHabitScheduleCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        habitInfo = uiState.habitInfo
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    ReminderSettingsCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        reminderEnabled = uiState.reminderEnabled,
+                        reminderTime = uiState.reminderTime,
+                        onShowReminderDialog = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.ShowReminderDialog)
                         }
                     )
 
-                    // Delete Habit Confirmation Dialog
-                    DeleteHabitDialog(
-                        showDeleteDialog = uiState.showDeleteDialog,
-                        onDismiss = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.DismissHabitDeletion)
-                        },
-                        onDelete = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.DeleteHabit)
-                        }
-                    )
-
-                    // Clear History Confirmation Dialog
-                    ClearHistoryDialog(
-                        showClearDialog = uiState.showClearHistoryDialog,
-                        onDismiss = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.DismissClearHistory)
-                        },
-                        onClear = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.ClearHistory)
-                        }
-                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.navigationBarsPadding())
                 }
+
+                // Date Range Picker Dialog
+                DateRangePickerDialog(
+                    isVisible = uiState.showDatePickerDialog,
+                    startDate = uiState.startDate,
+                    endDate = uiState.endDate,
+                    onDismiss = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.DismissDatePickerDialog)
+                    },
+                    onDateRangeSelected = { startDate, endDate ->
+                        handleUiEvent(
+                            HabitScreenDetailsUiEvent.DateRangeChanged(
+                                startDate,
+                                endDate
+                            )
+                        )
+                    }
+                )
+
+                // Delete Habit Confirmation Dialog
+                DeleteHabitDialog(
+                    showDeleteDialog = uiState.showDeleteDialog,
+                    onDismiss = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.DismissHabitDeletion)
+                    },
+                    onDelete = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.DeleteHabit)
+                    }
+                )
+
+                // Clear History Confirmation Dialog
+                ClearHistoryDialog(
+                    showClearDialog = uiState.showClearHistoryDialog,
+                    onDismiss = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.DismissClearHistory)
+                    },
+                    onClear = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.ClearHistory)
+                    }
+                )
 
                 ReminderDialog(
                     showDialog = uiState.showReminderDialog,
@@ -327,30 +320,41 @@ fun HabitDetailsScreenContent(
 private fun UserHabitFullInfoCard(
     modifier: Modifier = Modifier,
     habitInfo: UserHabitFullInfo,
-    paddingValues: PaddingValues
 ) {
-    BloomSurface(
-        modifier = modifier
+    Column(
+        modifier = modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = Modifier.padding(top = paddingValues.calculateTopPadding()))
-            BloomNetworkImage(
-                contentDescription = "logo",
-                iconUrl = habitInfo.iconUrl,
-                size = 96.dp
-            )
+        BloomNetworkImage(
+            contentDescription = "logo",
+            iconUrl = habitInfo.iconUrl,
+            size = 96.dp
+        )
 
-            Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
+        Text(
+            text = habitInfo.name,
+            style = BloomTheme.typography.displaySmall,
+            color = BloomTheme.colors.textColor.primary,
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        habitInfo.description.takeIf { it.isNotEmpty() }?.let { description ->
             Text(
-                text = habitInfo.description,
-                style = BloomTheme.typography.body,
+                text = description,
+                style = BloomTheme.typography.bodyMedium,
                 color = BloomTheme.colors.textColor.primary,
             )
+            Spacer(modifier = Modifier.height(8.dp))
         }
+
+        Text(
+            text = habitInfo.timeOfDay.getRangeLabel(),
+            style = BloomTheme.typography.bodyMedium,
+            color = BloomTheme.colors.textColor.primary,
+        )
     }
 }
 

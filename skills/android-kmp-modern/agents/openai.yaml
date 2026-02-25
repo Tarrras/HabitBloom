@@ -1,0 +1,4 @@
+interface:
+  display_name: "Android KMP Modern"
+  short_description: "Modern Android and KMP dev helper"
+  default_prompt: "Use $android-kmp-modern to implement or review this feature with Kotlin 2.x, Compose, Koin, coroutines, and tests."
