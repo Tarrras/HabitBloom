@@ -25,11 +25,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -38,6 +40,8 @@ import kotlinx.datetime.LocalTime
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import org.koin.core.component.KoinComponent
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class HabitsRepository(
     private val remoteDataSource: HabitsRemoteDataSource,
@@ -50,6 +54,13 @@ class HabitsRepository(
 ) : KoinComponent {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
+    private val remoteHabitsLoaded = MutableStateFlow(false)
+    private val remoteHabitsMutex = Mutex()
+    private var remoteHabitsLastSyncMs: Long = 0L
+
+    companion object {
+        private const val REMOTE_HABITS_CACHE_TTL_MS = 60_000L
+    }
 
     suspend fun initData(): Result<Boolean> {
         return withContext(Dispatchers.IO) {
@@ -57,27 +68,7 @@ class HabitsRepository(
                 // Initialize Supabase storage bucket
                 storageService.initializeBucket()
 
-                // Wait for the user to be authenticated first
-                val authResult = profileRemoteDataSource.isUserAuthenticated().getOrNull() ?: false
-
-                if (!authResult) {
-                    // If not authenticated, wait for authentication to complete
-                    Napier.d("User not authenticated, authenticating...", tag = TAG)
-                    val authSuccess =
-                        profileRemoteDataSource.authenticateUser().getOrNull() ?: false
-
-                    if (!authSuccess) {
-                        Napier.e("Failed to authenticate user", tag = TAG)
-                        return@withContext Result.failure(Exception("Authentication failed"))
-                    }
-                }
-
-                // Now that we're authenticated, fetch habits
-                Napier.d("User authenticated, fetching habits...", tag = TAG)
-
-                getAllHabits().onSuccess { habits ->
-                    remoteHabits.update { habits }
-                }.map { true }
+                loadRemoteHabits(forceRefresh = true).map { true }
             } catch (e: Exception) {
                 Napier.e("Error in initData", e, tag = TAG)
                 Result.failure(e)
@@ -85,29 +76,66 @@ class HabitsRepository(
         }
     }
 
-    private suspend fun getAllHabits(): Result<List<HabitInfo>> {
+    private fun remoteHabitsFlow(): Flow<List<HabitInfo>> {
+        return combine(remoteHabits, remoteHabitsLoaded) { habits, loaded ->
+            if (loaded) habits else null
+        }.filterNotNull()
+    }
+
+    private fun isRemoteHabitsCacheValid(nowMs: Long): Boolean {
+        if (!remoteHabitsLoaded.value) return false
+        return nowMs - remoteHabitsLastSyncMs < REMOTE_HABITS_CACHE_TTL_MS
+    }
+
+    @OptIn(ExperimentalTime::class)
+    private fun nowEpochMilliseconds(): Long {
+        return Clock.System.now().toEpochMilliseconds()
+    }
+
+    private suspend fun getAuthenticatedUserId(): Result<String> {
+        return withContext(Dispatchers.IO) {
+            profileRemoteDataSource.getUser()
+                .mapCatching { it.id }
+                .recoverCatching {
+                    Napier.d("User not authenticated, trying anonymous sign-in...", tag = TAG)
+                    val authSuccess = profileRemoteDataSource.authenticateUser().getOrThrow()
+                    if (!authSuccess) {
+                        throw IllegalStateException("Authentication failed")
+                    }
+                    profileRemoteDataSource.getUser().getOrThrow().id
+                }
+        }
+    }
+
+    private suspend fun fetchRemoteHabitsFromNetwork(): Result<List<HabitInfo>> {
         return withContext(Dispatchers.IO) {
             Napier.d("Fetching network habits...", tag = TAG)
+            val userId = getAuthenticatedUserId().getOrElse { error ->
+                Napier.e("Failed to get user ID for habits", error, tag = TAG)
+                return@withContext Result.failure(error)
+            }
+            remoteDataSource.getHabits(userId)
+        }
+    }
 
-            // Get user ID, with retry mechanism if needed
-            val userId = runCatching {
-                val user = profileRemoteDataSource.getUser().getOrNull()
+    private suspend fun loadRemoteHabits(forceRefresh: Boolean = false): Result<List<HabitInfo>> {
+        val nowMs = nowEpochMilliseconds()
 
-                if (user == null) {
-                    // If no user found, try one more authentication attempt
-                    profileRemoteDataSource.authenticateUser()
-                    profileRemoteDataSource.getUser().getOrNull()?.id
-                } else {
-                    user.id
-                }
-            }.getOrNull()
+        if (!forceRefresh && isRemoteHabitsCacheValid(nowMs)) {
+            return Result.success(remoteHabits.value)
+        }
 
-            if (userId == null) {
-                Napier.e("Failed to get user ID for habits", tag = TAG)
-                return@withContext Result.failure(Exception("User ID is null"))
+        return remoteHabitsMutex.withLock {
+            val lockNowMs = nowEpochMilliseconds()
+            if (!forceRefresh && isRemoteHabitsCacheValid(lockNowMs)) {
+                return@withLock Result.success(remoteHabits.value)
             }
 
-            remoteDataSource.getHabits(userId)
+            fetchRemoteHabitsFromNetwork().onSuccess { habits ->
+                remoteHabits.value = habits
+                remoteHabitsLoaded.value = true
+                remoteHabitsLastSyncMs = nowEpochMilliseconds()
+            }
         }
     }
 
@@ -115,8 +143,8 @@ class HabitsRepository(
         searchInput: String,
         categoryId: String? = null
     ): Result<List<HabitInfo>> {
-        return getAllHabits().mapCatching { remoteHabits ->
-            remoteHabits.filter { habit ->
+        return loadRemoteHabits().mapCatching { habits ->
+            habits.filter { habit ->
                 categoryId == null || habit.categoryId == categoryId
             }.filter {
                 it.name.lowercase().contains(searchInput.lowercase())
@@ -134,7 +162,7 @@ class HabitsRepository(
 
     fun getUserHabitsByDayFlow(day: LocalDate): Flow<List<UserHabitRecordFullInfo>> {
         return combine(
-            remoteHabits.filter { it.isEmpty().not() },
+            remoteHabitsFlow(),
             localDataSource.getUserHabitsByDateFlow(day)
         ) { detailedHabits, habitRecords ->
             Napier.d("getUserHabitsByDayFlow $habitRecords", tag = TAG)
@@ -144,6 +172,10 @@ class HabitsRepository(
                 detailedHabits = detailedHabits,
                 untilDate = day
             )
+        }.onStart {
+            loadRemoteHabits().onFailure { error ->
+                Napier.e("Failed to load remote habits for day flow", error, tag = TAG)
+            }
         }.flowOn(Dispatchers.IO).distinctUntilChanged()
     }
 
@@ -228,9 +260,9 @@ class HabitsRepository(
                 categoryId = categoryId,
                 icon = icon
             ).onSuccess {
-                getAllHabits().onSuccess { habits ->
-                    remoteHabits.update { habits }
-                }.map { true }
+                loadRemoteHabits(forceRefresh = true).onFailure { error ->
+                    Napier.e("Failed to refresh habits cache after creating personal habit", error, tag = TAG)
+                }
             }
         }
     }
@@ -239,26 +271,28 @@ class HabitsRepository(
         untilDate: LocalDate = getCurrentDate()
     ): Flow<List<UserHabitRecordFullInfo>> {
         return combine(
-            flow { emit(getAllHabits()) },
+            remoteHabitsFlow(),
             localDataSource.getAllUserHabitRecords(untilDate)
-        ) { allHabitsResult, localHabitRecords ->
-            val allHabits = allHabitsResult.getOrThrow()
+        ) { allHabits, localHabitRecords ->
             mergeLocalHabitRecordsWithRemote(
                 detailedHabits = allHabits,
                 habitRecords = localHabitRecords,
                 untilDate = untilDate
             )
-        }
+        }.onStart {
+            loadRemoteHabits().onFailure { error ->
+                Napier.e("Failed to load remote habits for all-records flow", error, tag = TAG)
+            }
+        }.flowOn(Dispatchers.IO).distinctUntilChanged()
     }
 
     fun getUserHabitWithAllRecordsFlow(
         userHabitId: Long
     ): Flow<UserHabitFullInfo?> {
         return combine(
-            flow { emit(getAllHabits()) },
+            remoteHabitsFlow(),
             localDataSource.getAllUserHabitRecordsForHabitId(userHabitId)
-        ) { allHabitsResult, localHabitRecords ->
-            val allHabits = allHabitsResult.getOrNull() ?: emptyList()
+        ) { allHabits, localHabitRecords ->
             val userHabitInfo = localDataSource.getUserHabitInfo(userHabitId) ?: return@combine null
             val originId = localDataSource.getHabitOriginId(userHabitId)
 
@@ -286,7 +320,11 @@ class HabitsRepository(
                 reminderEnabled = userHabitInfo.reminderEnabled,
                 endDate = userHabitInfo.endDate
             )
-        }.flowOn(Dispatchers.IO)
+        }.onStart {
+            loadRemoteHabits().onFailure { error ->
+                Napier.e("Failed to load remote habits for habit details flow", error, tag = TAG)
+            }
+        }.flowOn(Dispatchers.IO).distinctUntilChanged()
     }
 
     private suspend fun mergeLocalHabitRecordsWithRemote(
@@ -374,9 +412,13 @@ class HabitsRepository(
                 // First try to delete from remote storage
                 remoteDataSource.deleteCustomHabit(habitId).fold(
                     onSuccess = {
-                        // If successful, update the cached habits list
-                        val updatedHabits = remoteHabits.value.filter { it.id != habitId }
-                        remoteHabits.update { updatedHabits }
+                        // If successful, update in-memory cache if it has already been loaded
+                        if (remoteHabitsLoaded.value) {
+                            remoteHabits.update { habits ->
+                                habits.filter { it.id != habitId }
+                            }
+                            remoteHabitsLastSyncMs = nowEpochMilliseconds()
+                        }
                         Result.success(true)
                     },
                     onFailure = { error ->
@@ -532,7 +574,11 @@ class HabitsRepository(
             try {
                 val userHabit = localDataSource.getUserHabitInfo(habitId) ?: return@withContext null
                 val originId = localDataSource.getHabitOriginId(habitId)
-                val habitInfo = remoteHabits.value.find { it.id == originId }
+                val detailedHabits = loadRemoteHabits().getOrElse { error ->
+                    Napier.e("Failed to load habits cache for habit details", error, tag = TAG)
+                    remoteHabits.value
+                }
+                val habitInfo = detailedHabits.find { it.id == originId }
 
                 HabitNotificationDetails(
                     id = habitId,
@@ -674,7 +720,10 @@ class HabitsRepository(
             val userHabits = localDataSource.getAllUserHabits()
 
             // Get all remote habit info (should be cached in remoteHabits)
-            val detailedHabits = remoteHabits.value
+            val detailedHabits = loadRemoteHabits().getOrElse { error ->
+                Napier.e("Failed to load habits cache for time-of-day query", error, tag = TAG)
+                remoteHabits.value
+            }
 
             // Filter and merge with remote data
             val resultList = mutableListOf<UserHabitRecordFullInfo>()

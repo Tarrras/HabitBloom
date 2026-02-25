@@ -84,16 +84,16 @@ private fun HomeScreenContent(
     handleUiEvent: (HomeScreenUiEvent) -> Unit
 ) {
     val currentTimeOfDay = remember { getTimeOfDay() }
+    val backgroundColors = uiState.selectedTimeOfDay.getBackgroundGradientColors()
+    val backgroundBrush = remember(backgroundColors) {
+        Brush.verticalGradient(colors = backgroundColors)
+    }
 
     Box(Modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = uiState.selectedTimeOfDay.getBackgroundGradientColors()
-                    )
-                )
+                .background(brush = backgroundBrush)
                 .statusBarsPadding()
         ) {
             greeting(currentTimeOfDay)

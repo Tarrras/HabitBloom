@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -100,14 +101,14 @@ class HomeViewModel(
             .map { allHabits ->
                 // Filter habits by time of day
                 val filteredHabits = allHabits.filter { it.timeOfDay == timeOfDay }
+                val completedCount = filteredHabits.count { it.isCompleted }
 
                 // Create a state object with all the calculated values
                 FilteredHabitState(
                     habits = filteredHabits,
-                    totalHabitsCountForTimeOfDay = filteredHabits.count(),
-                    completedHabitsCountForTimeOfDay = filteredHabits.count { it.isCompleted },
-                    allCompleted = filteredHabits.isNotEmpty() &&
-                            filteredHabits.all { it.isCompleted }
+                    totalHabitsCountForTimeOfDay = filteredHabits.size,
+                    completedHabitsCountForTimeOfDay = completedCount,
+                    allCompleted = filteredHabits.isNotEmpty() && completedCount == filteredHabits.size
                 )
             }
             .catch { error ->
