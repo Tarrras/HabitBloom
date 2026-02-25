@@ -1,6 +1,5 @@
 package com.horizondev.habitbloom.screens.habits.presentation.home
 
-import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.utils.getCurrentDate
@@ -14,10 +13,7 @@ data class HomeScreenUiState(
     val completedHabitsCountForTimeOfDay: Int = 0,
     val userCompletedAllHabitsForTimeOfDay: Boolean = false,
     val userHabits: List<UserHabitRecordFullInfo> = emptyList(),
-    val habitStatusEditMode: Boolean = true,
-    val habitHealthMap: Map<Long, FlowerHealth> = emptyMap(),
-    val habitVitalityPercent: Map<Long, Int> = emptyMap(),
-    val habitDueInMinutes: Map<Long, Int?> = emptyMap()
+    val habitStatusEditMode: Boolean = true
 )
 
 sealed interface HomeScreenUiEvent {
