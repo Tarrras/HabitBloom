@@ -696,22 +696,6 @@ class HabitsRepository(
         val reminderTime: LocalTime?
     )
 
-    /**
-     * Calculates the number of days between two dates, inclusive.
-     */
-    private fun calculateDaysBetween(startDate: LocalDate, endDate: LocalDate): Int {
-        if (endDate < startDate) return 0
-
-        var days = 0
-        var currentDate = startDate
-
-        while (currentDate <= endDate) {
-            days++
-            currentDate = currentDate.plus(1, DateTimeUnit.DAY)
-        }
-
-        return days
-    }
 
     /**
      * Gets all user habit records for a specific time of day (non-reactive).

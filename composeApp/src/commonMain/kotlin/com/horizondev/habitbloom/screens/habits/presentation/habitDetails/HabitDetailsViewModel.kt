@@ -88,79 +88,64 @@ class HabitDetailsViewModel(
             }
 
             HabitScreenDetailsUiEvent.DurationEditModeChanged -> {
-                updateState {
-                    it.copy(
-                        habitDurationEditMode = it.habitDurationEditMode.not(),
-                        habitDays = it.habitInfo?.days ?: emptyList(),
-                        startDate = it.habitInfo?.startDate,
-                        endDate = it.habitInfo?.endDate ?: it.habitInfo?.startDate
-                    )
-                }
+                updateState(::reduceDurationEditModeChanged)
             }
 
             HabitScreenDetailsUiEvent.UpdateHabitDuration -> {
                 viewModelScope.launch {
                     val uiState = state.value
 
-                    val habitOriginalInfo = uiState.habitInfo ?: return@launch
-                    val habitNewDays = uiState.habitDays
-                    val newStartDate = uiState.startDate ?: return@launch
-                    val newEndDate = uiState.endDate ?: return@launch
+                    when (val validation = validateHabitDurationUpdate(uiState)) {
+                        HabitDurationUpdateValidation.MissingData -> return@launch
+                        HabitDurationUpdateValidation.NoChanges -> {
+                            updateState(::reduceDurationUpdatedSuccessfully)
+                            return@launch
+                        }
 
-                    if (newStartDate == habitOriginalInfo.startDate &&
-                        newEndDate == habitOriginalInfo.endDate &&
-                        habitNewDays == habitOriginalInfo.days
-                    ) {
-                        updateState { it.copy(habitDurationEditMode = false) }
-                        return@launch
-                    }
-
-                    val startDateOfWithNewFlow = getFirstDateAfterStartDateOrNextWeek(
-                        startDate = getCurrentDate(),
-                        daysList = uiState.habitDays
-                    )
-
-                    if (startDateOfWithNewFlow == null) {
-                        emitUiIntent(
-                            HabitScreenDetailsUiIntent.ShowSnackbar(
-                                visuals = BloomSnackbarVisuals(
-                                    message = getString(Res.string.update_habit_error),
-                                    state = BloomSnackbarState.Error,
-                                    duration = SnackbarDuration.Short,
-                                    withDismissAction = true
+                        HabitDurationUpdateValidation.InvalidDays -> {
+                            emitUiIntent(
+                                HabitScreenDetailsUiIntent.ShowSnackbar(
+                                    visuals = BloomSnackbarVisuals(
+                                        message = getString(Res.string.update_habit_error),
+                                        state = BloomSnackbarState.Error,
+                                        duration = SnackbarDuration.Short,
+                                        withDismissAction = true
+                                    )
                                 )
                             )
-                        )
-                        return@launch
-                    }
+                            return@launch
+                        }
 
-                    repository.updateExistingHabit(
-                        userHabitId = uiState.habitInfo.userHabitId,
-                        endDate = newEndDate,
-                        days = habitNewDays
-                    ).onSuccess {
-                        emitUiIntent(
-                            HabitScreenDetailsUiIntent.ShowSnackbar(
-                                visuals = BloomSnackbarVisuals(
-                                    message = getString(Res.string.update_habit_success),
-                                    state = BloomSnackbarState.Success,
-                                    duration = SnackbarDuration.Short,
-                                    withDismissAction = true
+                        is HabitDurationUpdateValidation.Ready -> {
+                            repository.updateExistingHabit(
+                                userHabitId = validation.payload.userHabitId,
+                                endDate = validation.payload.endDate,
+                                days = validation.payload.days
+                            ).onSuccess {
+                                emitUiIntent(
+                                    HabitScreenDetailsUiIntent.ShowSnackbar(
+                                        visuals = BloomSnackbarVisuals(
+                                            message = getString(Res.string.update_habit_success),
+                                            state = BloomSnackbarState.Success,
+                                            duration = SnackbarDuration.Short,
+                                            withDismissAction = true
+                                        )
+                                    )
                                 )
-                            )
-                        )
-                        updateState { it.copy(habitDurationEditMode = false) }
-                    }.onFailure {
-                        emitUiIntent(
-                            HabitScreenDetailsUiIntent.ShowSnackbar(
-                                visuals = BloomSnackbarVisuals(
-                                    message = getString(Res.string.update_habit_error),
-                                    state = BloomSnackbarState.Error,
-                                    duration = SnackbarDuration.Short,
-                                    withDismissAction = true
+                                updateState(::reduceDurationUpdatedSuccessfully)
+                            }.onFailure {
+                                emitUiIntent(
+                                    HabitScreenDetailsUiIntent.ShowSnackbar(
+                                        visuals = BloomSnackbarVisuals(
+                                            message = getString(Res.string.update_habit_error),
+                                            state = BloomSnackbarState.Error,
+                                            duration = SnackbarDuration.Short,
+                                            withDismissAction = true
+                                        )
+                                    )
                                 )
-                            )
-                        )
+                            }
+                        }
                     }
                 }
             }
@@ -321,24 +306,17 @@ class HabitDetailsViewModel(
                 }
             }
 
-            // Date range dialog events
-            HabitScreenDetailsUiEvent.ShowDatePickerDialog -> {
-                updateState { it.copy(showDatePickerDialog = true) }
+            // End date dialog events
+            HabitScreenDetailsUiEvent.ShowEndDatePickerDialog -> {
+                updateState { it.copy(showEndDatePickerDialog = true) }
             }
 
-            HabitScreenDetailsUiEvent.DismissDatePickerDialog -> {
-                updateState { it.copy(showDatePickerDialog = false) }
+            HabitScreenDetailsUiEvent.DismissEndDatePickerDialog -> {
+                updateState { it.copy(showEndDatePickerDialog = false) }
             }
 
-            is HabitScreenDetailsUiEvent.DateRangeChanged -> {
-                updateState {
-                    it.copy(
-                        startDate = event.startDate,
-                        endDate = event.endDate,
-                        showDatePickerDialog = false,
-                        durationUpdateButtonEnabled = true
-                    )
-                }
+            is HabitScreenDetailsUiEvent.EndDateChanged -> {
+                updateState { reduceEndDateChanged(it, event.endDate) }
             }
         }
     }
@@ -378,4 +356,75 @@ class HabitDetailsViewModel(
             overallRate = overallRate
         )
     }
+}
+
+internal data class HabitDurationUpdatePayload(
+    val userHabitId: Long,
+    val endDate: kotlinx.datetime.LocalDate,
+    val days: List<kotlinx.datetime.DayOfWeek>
+)
+
+internal sealed interface HabitDurationUpdateValidation {
+    data object MissingData : HabitDurationUpdateValidation
+    data object NoChanges : HabitDurationUpdateValidation
+    data object InvalidDays : HabitDurationUpdateValidation
+    data class Ready(val payload: HabitDurationUpdatePayload) : HabitDurationUpdateValidation
+}
+
+internal fun reduceDurationEditModeChanged(
+    state: HabitScreenDetailsUiState
+): HabitScreenDetailsUiState {
+    return state.copy(
+        habitDurationEditMode = state.habitDurationEditMode.not(),
+        habitDays = state.habitInfo?.days ?: emptyList(),
+        startDate = state.habitInfo?.startDate,
+        endDate = state.habitInfo?.endDate ?: state.habitInfo?.startDate
+    )
+}
+
+internal fun reduceEndDateChanged(
+    state: HabitScreenDetailsUiState,
+    endDate: kotlinx.datetime.LocalDate
+): HabitScreenDetailsUiState {
+    return state.copy(
+        endDate = endDate,
+        showEndDatePickerDialog = false,
+        durationUpdateButtonEnabled = true
+    )
+}
+
+internal fun reduceDurationUpdatedSuccessfully(
+    state: HabitScreenDetailsUiState
+): HabitScreenDetailsUiState = state.copy(habitDurationEditMode = false)
+
+internal fun validateHabitDurationUpdate(
+    state: HabitScreenDetailsUiState
+): HabitDurationUpdateValidation {
+    val habitInfo = state.habitInfo ?: return HabitDurationUpdateValidation.MissingData
+    val startDate = state.startDate ?: return HabitDurationUpdateValidation.MissingData
+    val endDate = state.endDate ?: return HabitDurationUpdateValidation.MissingData
+
+    if (startDate == habitInfo.startDate &&
+        endDate == habitInfo.endDate &&
+        state.habitDays == habitInfo.days
+    ) {
+        return HabitDurationUpdateValidation.NoChanges
+    }
+
+    val startDateOfWithNewFlow = getFirstDateAfterStartDateOrNextWeek(
+        startDate = getCurrentDate(),
+        daysList = state.habitDays
+    )
+
+    if (startDateOfWithNewFlow == null) {
+        return HabitDurationUpdateValidation.InvalidDays
+    }
+
+    return HabitDurationUpdateValidation.Ready(
+        payload = HabitDurationUpdatePayload(
+            userHabitId = habitInfo.userHabitId,
+            endDate = endDate,
+            days = state.habitDays
+        )
+    )
 }

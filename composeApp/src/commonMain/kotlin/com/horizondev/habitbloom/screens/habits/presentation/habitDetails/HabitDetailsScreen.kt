@@ -6,6 +6,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
@@ -46,13 +49,11 @@ import com.horizondev.habitbloom.core.designComponents.calendar.CalendarTitle
 import com.horizondev.habitbloom.core.designComponents.calendar.Day
 import com.horizondev.habitbloom.core.designComponents.calendar.HabitDayState
 import com.horizondev.habitbloom.core.designComponents.calendar.MonthHeader
-import com.horizondev.habitbloom.core.designComponents.containers.BloomCard
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
-import com.horizondev.habitbloom.core.designComponents.dialogs.AddHabitDateRangePickerDialog
+import com.horizondev.habitbloom.core.designComponents.dialogs.HabitEndDatePickerDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
-import com.horizondev.habitbloom.core.designComponents.pickers.DayPicker
 import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
@@ -60,8 +61,11 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.getRangeLabel
 import com.horizondev.habitbloom.utils.collectAsEffect
+import com.horizondev.habitbloom.utils.formatDate
 import com.horizondev.habitbloom.utils.formatTime
 import com.horizondev.habitbloom.utils.getCurrentDate
+import com.horizondev.habitbloom.utils.getShortTitle
+import com.horizondev.habitbloom.utils.getTitle
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.OutDateStyle
@@ -75,15 +79,22 @@ import habitbloom.composeapp.generated.resources.cancel
 import habitbloom.composeapp.generated.resources.clear
 import habitbloom.composeapp.generated.resources.clear_history_description
 import habitbloom.composeapp.generated.resources.clear_history_question
-import habitbloom.composeapp.generated.resources.date_range
 import habitbloom.composeapp.generated.resources.delete
 import habitbloom.composeapp.generated.resources.delete_habit_description
 import habitbloom.composeapp.generated.resources.delete_habit_question
-import habitbloom.composeapp.generated.resources.duration_and_days
 import habitbloom.composeapp.generated.resources.edit
-import habitbloom.composeapp.generated.resources.edit_dates
 import habitbloom.composeapp.generated.resources.enable_reminder
+import habitbloom.composeapp.generated.resources.end_date_colon
+import habitbloom.composeapp.generated.resources.every_day_label
 import habitbloom.composeapp.generated.resources.habit_schedule
+import habitbloom.composeapp.generated.resources.habit_schedule_active_daily_footer
+import habitbloom.composeapp.generated.resources.habit_schedule_card_subtitle
+import habitbloom.composeapp.generated.resources.habit_schedule_card_title
+import habitbloom.composeapp.generated.resources.habit_schedule_dates_title
+import habitbloom.composeapp.generated.resources.habit_schedule_fixed_label
+import habitbloom.composeapp.generated.resources.habit_schedule_start_date_hint
+import habitbloom.composeapp.generated.resources.ic_edit
+import habitbloom.composeapp.generated.resources.ic_lucid_calendar
 import habitbloom.composeapp.generated.resources.ic_warning_filled
 import habitbloom.composeapp.generated.resources.no_reminder_set
 import habitbloom.composeapp.generated.resources.reminder_set_for
@@ -91,11 +102,11 @@ import habitbloom.composeapp.generated.resources.reminder_settings
 import habitbloom.composeapp.generated.resources.save
 import habitbloom.composeapp.generated.resources.save_changes
 import habitbloom.composeapp.generated.resources.select_reminder_time
+import habitbloom.composeapp.generated.resources.start_date_colon
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.plus
 import kotlinx.datetime.yearMonth
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -214,8 +225,8 @@ fun HabitDetailsScreenContent(
                                 )
                             )
                         },
-                        onDateRangeEditorRequest = {
-                            handleUiEvent(HabitScreenDetailsUiEvent.ShowDatePickerDialog)
+                        onEndDateEditorRequest = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.ShowEndDatePickerDialog)
                         },
                         onUpdateHabitDuration = {
                             handleUiEvent(HabitScreenDetailsUiEvent.UpdateHabitDuration)
@@ -249,23 +260,18 @@ fun HabitDetailsScreenContent(
                     Spacer(modifier = Modifier.navigationBarsPadding())
                 }
 
-                // Date Range Picker Dialog
-                DateRangePickerDialog(
-                    isVisible = uiState.showDatePickerDialog,
-                    startDate = uiState.startDate,
-                    endDate = uiState.endDate,
-                    onDismiss = {
-                        handleUiEvent(HabitScreenDetailsUiEvent.DismissDatePickerDialog)
-                    },
-                    onDateRangeSelected = { startDate, endDate ->
-                        handleUiEvent(
-                            HabitScreenDetailsUiEvent.DateRangeChanged(
-                                startDate,
-                                endDate
-                            )
-                        )
-                    }
-                )
+                if (uiState.showEndDatePickerDialog) {
+                    HabitEndDatePickerDialog(
+                        startDate = uiState.startDate,
+                        endDate = uiState.endDate,
+                        onDismiss = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.DismissEndDatePickerDialog)
+                        },
+                        onEndDateSelected = { endDate ->
+                            handleUiEvent(HabitScreenDetailsUiEvent.EndDateChanged(endDate))
+                        }
+                    )
+                }
 
                 // Delete Habit Confirmation Dialog
                 DeleteHabitDialog(
@@ -367,101 +373,193 @@ fun HabitDurationEditor(
     activeDays: List<DayOfWeek>,
     onEditModeChanged: () -> Unit,
     onDayStateChanged: (DayOfWeek, Boolean) -> Unit,
-    onDateRangeEditorRequest: () -> Unit,
+    onEndDateEditorRequest: () -> Unit,
     onUpdateHabitDuration: () -> Unit,
     updateButtonEnabled: Boolean
 ) {
-    val editButtonText = if (editMode) {
-        stringResource(Res.string.cancel)
-    } else {
-        stringResource(Res.string.edit)
-    }
+    val isDailyActive = activeDays.size == DayOfWeek.entries.size
 
-    BloomCard(
+    BloomSurface(
         modifier = modifier,
-        onClick = {}
+        border = BorderStroke(1.dp, BloomTheme.colors.glassBorder)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(Res.string.duration_and_days),
-                    style = BloomTheme.typography.heading,
-                    color = BloomTheme.colors.textColor.primary
-                )
+                Row(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .background(
+                                color = BloomTheme.colors.primary.copy(alpha = 0.15f),
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_lucid_calendar),
+                            contentDescription = null,
+                            tint = BloomTheme.colors.primary,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
 
-                BloomSmallActionButton(
-                    text = editButtonText,
-                    onClick = onEditModeChanged
-                )
+                    Column {
+                        Text(
+                            text = stringResource(Res.string.habit_schedule_card_title),
+                            style = BloomTheme.typography.headlineSmall,
+                            color = BloomTheme.colors.textColor.primary
+                        )
+                        Text(
+                            text = stringResource(Res.string.habit_schedule_card_subtitle),
+                            style = BloomTheme.typography.bodyMedium,
+                            color = BloomTheme.colors.textColor.secondary
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .background(
+                            color = BloomTheme.colors.cardSecondary,
+                            shape = androidx.compose.foundation.shape.CircleShape
+                        )
+                        .clickable(onClick = onEditModeChanged),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(Res.drawable.ic_edit),
+                        contentDescription = if (editMode) {
+                            stringResource(Res.string.cancel)
+                        } else {
+                            stringResource(Res.string.edit)
+                        },
+                        tint = BloomTheme.colors.textColor.secondary,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
 
-            // Date Range Section (only editable in edit mode)
-            if (startDate != null && endDate != null) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Column(
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Text(
-                            text = stringResource(Res.string.date_range),
-                            style = BloomTheme.typography.body,
-                            color = BloomTheme.colors.textColor.secondary
-                        )
+                    Text(
+                        text = stringResource(Res.string.active_days),
+                        style = BloomTheme.typography.titleMedium,
+                        color = BloomTheme.colors.textColor.primary
+                    )
 
+                    if (isDailyActive) {
                         Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(10.dp)
+                                    .background(
+                                        color = BloomTheme.colors.primary,
+                                        shape = CircleShape
+                                    )
+                            )
                             Text(
-                                text = "$startDate - $endDate",
-                                style = BloomTheme.typography.body,
-                                color = BloomTheme.colors.textColor.primary
+                                text = stringResource(Res.string.every_day_label),
+                                style = BloomTheme.typography.bodyMedium,
+                                color = BloomTheme.colors.textColor.secondary
                             )
                         }
                     }
+                }
 
-                    if (editMode) {
-                        BloomSmallActionButton(
-                            text = stringResource(Res.string.edit_dates),
-                            onClick = onDateRangeEditorRequest
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    DayOfWeek.entries.forEach { dayOfWeek ->
+                        HabitDurationDayPill(
+                            modifier = Modifier.weight(1f),
+                            dayOfWeek = dayOfWeek,
+                            isSelected = dayOfWeek in activeDays,
+                            enabled = editMode,
+                            onClick = {
+                                onDayStateChanged(dayOfWeek, dayOfWeek !in activeDays)
+                            }
                         )
                     }
                 }
             }
 
-            // Active Days Section
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = stringResource(Res.string.active_days),
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.secondary
-                )
+            if (startDate != null && endDate != null) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = stringResource(Res.string.habit_schedule_dates_title),
+                        style = BloomTheme.typography.titleMedium,
+                        color = BloomTheme.colors.textColor.primary
+                    )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.start_date_colon),
+                            style = BloomTheme.typography.bodyLarge,
+                            color = BloomTheme.colors.textColor.secondary
+                        )
+                        Text(
+                            text = stringResource(Res.string.habit_schedule_fixed_label),
+                            style = BloomTheme.typography.bodyLarge,
+                            color = BloomTheme.colors.textColor.secondary
+                        )
+                    }
 
-                DayPicker(
-                    activeDays = activeDays,
-                    dayStateChanged = { day, selected ->
-                        onDayStateChanged(day, selected)
-                    },
-                    enabled = editMode
-                )
+                    HabitDurationDateField(
+                        text = formatDate(startDate),
+                        enabled = false,
+                        onClick = {}
+                    )
+
+                    Text(
+                        text = stringResource(Res.string.habit_schedule_start_date_hint),
+                        style = BloomTheme.typography.bodyMedium,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+
+                    Text(
+                        text = stringResource(Res.string.end_date_colon),
+                        style = BloomTheme.typography.bodyLarge,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+
+                    HabitDurationDateField(
+                        text = formatDate(endDate),
+                        enabled = editMode,
+                        onClick = onEndDateEditorRequest
+                    )
+                }
             }
 
-            // Update Button (only shown in edit mode)
             if (editMode) {
                 BloomPrimaryFilledButton(
                     modifier = Modifier.fillMaxWidth(),
@@ -470,43 +568,120 @@ fun HabitDurationEditor(
                     onClick = onUpdateHabitDuration
                 )
             }
+
+            if (isDailyActive) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(BloomTheme.colors.border.copy(alpha = 0.4f))
+                )
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .background(
+                                color = BloomTheme.colors.primary,
+                                shape = androidx.compose.foundation.shape.CircleShape
+                            )
+                    )
+                    Text(
+                        text = stringResource(Res.string.habit_schedule_active_daily_footer),
+                        style = BloomTheme.typography.headlineSmall,
+                        color = BloomTheme.colors.textColor.secondary
+                    )
+                }
+            }
         }
     }
 }
 
-// Helper to capitalize the first letter of a string
-fun String.capitalize(): String {
-    return this.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+@Composable
+private fun HabitDurationDayPill(
+    modifier: Modifier = Modifier,
+    dayOfWeek: DayOfWeek,
+    isSelected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    BloomSurface(
+        modifier = modifier.let {
+            if (enabled) it.clickable(onClick = onClick) else it
+        },
+        color = if (isSelected) {
+            BloomTheme.colors.primary.copy(alpha = 0.18f)
+        } else {
+            BloomTheme.colors.inputBackground.copy(alpha = 0.35f)
+        },
+        shape = RoundedCornerShape(20.dp),
+        shadowElevation = 0.dp,
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isSelected) {
+                BloomTheme.colors.primary.copy(alpha = 0.55f)
+            } else {
+                BloomTheme.colors.border.copy(alpha = 0.3f)
+            }
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = dayOfWeek.getShortTitle(),
+                style = BloomTheme.typography.headlineSmall,
+                color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.textColor.secondary
+            )
+            Text(
+                text = dayOfWeek.getTitle().take(3),
+                style = BloomTheme.typography.bodyMedium,
+                color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.textColor.secondary
+            )
+        }
+    }
 }
 
-// Add the DateRangePickerDialog component
 @Composable
-fun DateRangePickerDialog(
-    isVisible: Boolean,
-    startDate: LocalDate?,
-    endDate: LocalDate?,
-    onDismiss: () -> Unit,
-    onDateRangeSelected: (startDate: LocalDate, endDate: LocalDate) -> Unit
+private fun HabitDurationDateField(
+    text: String,
+    enabled: Boolean,
+    onClick: () -> Unit
 ) {
-    if (!isVisible) return
+    val fieldModifier = Modifier
+        .fillMaxWidth()
+        .background(
+            color = BloomTheme.colors.inputBackground.copy(alpha = 0.4f),
+            shape = RoundedCornerShape(18.dp)
+        )
+        .padding(horizontal = 14.dp, vertical = 12.dp)
 
-    // Use the existing AddHabitDateRangePickerDialog component
-    val minimumStartDate = getCurrentDate()
-    val initialStartDate = startDate ?: minimumStartDate
-    val initialEndDate = endDate ?: initialStartDate.plus(30, kotlinx.datetime.DateTimeUnit.DAY)
-
-    AddHabitDateRangePickerDialog(
-        startDate = initialStartDate,
-        endDate = initialEndDate,
-        maxDurationDays = 90, // Maximum 3 months
-        onDatesSelected = { newStartDate, newEndDate ->
-            if (newEndDate != null) {
-                onDateRangeSelected(newStartDate, newEndDate)
-            }
+    Row(
+        modifier = if (enabled) {
+            fieldModifier.clickable(onClick = onClick)
+        } else {
+            fieldModifier
         },
-        onDismiss = onDismiss,
-        minDate = minimumStartDate
-    )
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            painter = painterResource(Res.drawable.ic_lucid_calendar),
+            contentDescription = null,
+            tint = BloomTheme.colors.textColor.secondary,
+            modifier = Modifier.size(18.dp)
+        )
+        Text(
+            text = text,
+            style = BloomTheme.typography.headlineSmall,
+            color = BloomTheme.colors.textColor.primary
+        )
+    }
 }
 
 @Composable

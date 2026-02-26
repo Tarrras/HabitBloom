@@ -373,6 +373,14 @@
 
     <!-- Habit Detail Section -->
     <string name="habit_detail_section_title">Деталі звички</string>
+    <string name="habit_schedule_card_title">Розклад звички</string>
+    <string name="habit_schedule_card_subtitle">Активні дні та дата завершення</string>
+    <string name="habit_schedule_dates_title">Дати</string>
+    <string name="habit_schedule_fixed_label">фіксована</string>
+    <string name="habit_schedule_start_date_hint">Дата початку зберігає цілісність вашого прогресу та статистики</string>
+    <string name="habit_schedule_active_daily_footer">Активна щодня</string>
+    <string name="habit_schedule_end_date_picker_title">Оберіть дату завершення</string>
+    <string name="habit_schedule_fixed_start_title">Дата початку фіксована: %1$s</string>
     <string name="description_label">Опис:</string>
     <string name="repeat_schedule_label">Розклад повторень:</string>
     <string name="every_day_label">Щодня</string>

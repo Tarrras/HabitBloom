@@ -381,6 +381,14 @@
 
     <!-- Habit Detail Section -->
     <string name="habit_detail_section_title">Habit Details</string>
+    <string name="habit_schedule_card_title">Habit Schedule</string>
+    <string name="habit_schedule_card_subtitle">Active days and end date</string>
+    <string name="habit_schedule_dates_title">Dates</string>
+    <string name="habit_schedule_fixed_label">fixed</string>
+    <string name="habit_schedule_start_date_hint">The start date preserves the integrity of your progress and statistics</string>
+    <string name="habit_schedule_active_daily_footer">Active every day</string>
+    <string name="habit_schedule_end_date_picker_title">Select end date</string>
+    <string name="habit_schedule_fixed_start_title">Start date is fixed: %1$s</string>
     <string name="description_label">Description:</string>
     <string name="repeat_schedule_label">Repeat Schedule:</string>
     <string name="every_day_label">Every day</string>

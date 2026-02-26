@@ -18,7 +18,7 @@ data class HabitScreenDetailsUiState(
     val showDeleteDialog: Boolean = false,
     val showClearHistoryDialog: Boolean = false,
     val showReminderDialog: Boolean = false,
-    val showDatePickerDialog: Boolean = false,
+    val showEndDatePickerDialog: Boolean = false,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0), // Default to 8:00 AM
     val progressUiState: UserHabitProgressUiState? = null
@@ -51,11 +51,10 @@ sealed interface HabitScreenDetailsUiEvent {
     data class ReminderEnabledChanged(val enabled: Boolean) : HabitScreenDetailsUiEvent
     data object SaveReminderSettings : HabitScreenDetailsUiEvent
 
-    // Date range events
-    data object ShowDatePickerDialog : HabitScreenDetailsUiEvent
-    data object DismissDatePickerDialog : HabitScreenDetailsUiEvent
-    data class DateRangeChanged(val startDate: LocalDate, val endDate: LocalDate) :
-        HabitScreenDetailsUiEvent
+    // End date events
+    data object ShowEndDatePickerDialog : HabitScreenDetailsUiEvent
+    data object DismissEndDatePickerDialog : HabitScreenDetailsUiEvent
+    data class EndDateChanged(val endDate: LocalDate) : HabitScreenDetailsUiEvent
 
     data class DayStateChanged(
         val dayOfWeek: DayOfWeek,
