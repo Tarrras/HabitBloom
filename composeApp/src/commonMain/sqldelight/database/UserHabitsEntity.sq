@@ -30,6 +30,11 @@ selectUserHabitByRemoteId:
 SELECT * FROM UserHabitsEntity
 WHERE habitId = ?;
 
+-- Select all user habits by remote ID
+selectUserHabitsByRemoteId:
+SELECT * FROM UserHabitsEntity
+WHERE habitId = ?;
+
 -- Update a user habit by ID
 updateUserHabitById:
 UPDATE UserHabitsEntity SET

@@ -51,7 +51,7 @@ class HabitsRepository(
     private val notificationManager: NotificationScheduler,
     private val permissionsManager: PermissionsManager,
     private val flowerHealthRepository: FlowerHealthRepository
-) : KoinComponent {
+) {
     private val TAG = "HabitsRepository"
     private val remoteHabits = MutableStateFlow<List<HabitInfo>>(emptyList())
     private val remoteHabitsLoaded = MutableStateFlow(false)
@@ -455,6 +455,12 @@ class HabitsRepository(
     ): Result<Long> {
         return withContext(Dispatchers.IO) {
             try {
+                if (hasActiveHabitInstance(habitInfo.id)) {
+                    return@withContext Result.failure(
+                        ActiveHabitAlreadyExistsException(habitInfo.id)
+                    )
+                }
+
                 val days = selectedDays.ifEmpty { DayOfWeek.entries }
 
                 val userHabit = UserHabit(
@@ -768,15 +774,27 @@ class HabitsRepository(
         }
 
     /**
-     * Checks if a habit is already added by the user
+     * Checks if an active instance of a habit is already added by the user.
      *
      * @param habitId The ID of the habit to check
-     * @return True if the habit is already added, false otherwise
+     * @return True if any instance has records for today or a future day, false otherwise
      */
     suspend fun isHabitAlreadyAdded(habitId: String): Boolean {
         return withContext(Dispatchers.IO) {
-            val existingHabit = localDataSource.getUserHabitByRemoteId(habitId)
-            existingHabit != null
+            hasActiveHabitInstance(habitId)
+        }
+    }
+
+    private suspend fun hasActiveHabitInstance(
+        habitId: String,
+        fromDate: LocalDate = getCurrentDate()
+    ): Boolean {
+        val habitInstances = localDataSource.getUserHabitsByRemoteId(habitId)
+        return habitInstances.any { habit ->
+            localDataSource.hasRecordsFromDate(
+                userHabitId = habit.id,
+                fromDate = fromDate
+            )
         }
     }
 

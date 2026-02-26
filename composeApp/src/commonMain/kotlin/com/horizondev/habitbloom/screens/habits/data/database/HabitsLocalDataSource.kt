@@ -174,57 +174,21 @@ class HabitsLocalDataSource(
     }
 
     suspend fun insertUserHabit(userHabit: UserHabit) = withContext(Dispatchers.IO) {
-        val existingHabit = userHabitsQueries.selectUserHabitByRemoteId(
-            userHabit.habitId
-        ).executeAsOneOrNull()
-
         val effectiveEndDate = userHabit.endDate
 
-        val localHabitId = if (existingHabit != null) {
-            val existingStartDate = LocalDate.parse(existingHabit.startDate)
-            val existingEndDate = existingHabit.endDate.let { LocalDate.parse(it) }
-            
-            val mergedStartDay = when {
-                existingStartDate < userHabit.startDate -> existingStartDate
-                else -> userHabit.startDate
-            }
+        userHabitsQueries.insertUserHabit(
+            habitId = userHabit.habitId,
+            startDate = userHabit.startDate.toString(),
+            endDate = effectiveEndDate.toString(),
+            daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
+            timeOfDay = userHabit.timeOfDay.ordinal.toLong(),
+            reminderEnabled = if (userHabit.reminderEnabled) 1L else 0L,
+            reminderTime = userHabit.reminderTime?.toTimeString()
+        )
 
-            val mergedEndDate = when {
-                existingEndDate != null && existingEndDate > effectiveEndDate -> existingEndDate
-                else -> effectiveEndDate
-            }
-            
-            val existingDays = existingHabit.daysOfWeek.split(",").map {
-                DayOfWeek.valueOf(it)
-            }
-            val mergedDays = (existingDays + userHabit.daysOfWeek).mapToString()
+        val localHabitId = userHabitsQueries.lastInsertRowId().executeAsOne()
+        Napier.d("lastInsertRowId $localHabitId for userHabit $userHabit", tag = "TAG")
 
-            userHabitsQueries.updateUserHabitById(
-                startDate = mergedStartDay.toString(),
-                endDate = mergedEndDate.toString(),
-                daysOfWeek = mergedDays,
-                id = existingHabit.id
-            )
-            existingHabit.id
-        } else {
-            userHabitsQueries.insertUserHabit(
-                habitId = userHabit.habitId,
-                startDate = userHabit.startDate.toString(),
-                endDate = effectiveEndDate.toString(),
-                daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
-                timeOfDay = userHabit.timeOfDay.ordinal.toLong(),
-                reminderEnabled = if (userHabit.reminderEnabled) 1L else 0L,
-                reminderTime = userHabit.reminderTime?.toTimeString()
-            )
-            val lastInsertRowId = userHabitsQueries
-                .selectUserHabitByRemoteId(userHabit.habitId)
-                .executeAsOneOrNull()?.id ?: 0
-
-            Napier.d("lastInsertRowId $lastInsertRowId for userHabit $userHabit", tag = "TAG")
-            lastInsertRowId
-        }
-
-        // Generate habit records
         return@withContext generateHabitRecords(localHabitId, userHabit, effectiveEndDate)
     }
 
@@ -233,11 +197,6 @@ class HabitsLocalDataSource(
         userHabit: UserHabit,
         effectiveEndDate: LocalDate
     ) = withContext(Dispatchers.IO) {
-        val existingHabitRecords =
-            userHabitRecordsQueries.selectUserHabitRecordsEntityByUserHabitId(
-                userHabitId = userHabitId
-            ).executeAsList()
-
         val habitDates = generateHabitDates(
             startDate = userHabit.startDate,
             endDate = effectiveEndDate,
@@ -245,15 +204,11 @@ class HabitsLocalDataSource(
         )
 
         habitDates.forEach { date ->
-            val isRecordExistAlready = existingHabitRecords.any { it.date == date.toString() }
-
-            if (isRecordExistAlready.not()) {
-                userHabitRecordsQueries.insertOrReplaceUserHabitRecord(
-                    userHabitId = userHabitId,
-                    date = date.toString(),
-                    isCompleted = 0  // Not completed by default
-                )
-            }
+            userHabitRecordsQueries.insertOrReplaceUserHabitRecord(
+                userHabitId = userHabitId,
+                date = date.toString(),
+                isCompleted = 0  // Not completed by default
+            )
         }
 
         return@withContext userHabitId
@@ -477,18 +432,19 @@ class HabitsLocalDataSource(
             }
     }
 
-    /**
-     * Gets a user habit by its remote ID
-     *
-     * @param habitId The remote ID of the habit
-     * @return The user habit or null if not found
-     */
-    suspend fun getUserHabitByRemoteId(habitId: String): UserHabit? = withContext(Dispatchers.IO) {
+    suspend fun getUserHabitsByRemoteId(habitId: String): List<UserHabit> =
+        withContext(Dispatchers.IO) {
         userHabitsQueries
-            .selectUserHabitByRemoteId(habitId)
-            .executeAsOneOrNull()
-            ?.let { entity ->
-                entity.toDomainModel()
-            }
+            .selectUserHabitsByRemoteId(habitId)
+            .executeAsList()
+            .map { it.toDomainModel() }
+    }
+
+    suspend fun hasRecordsFromDate(userHabitId: Long, fromDate: LocalDate): Boolean =
+        withContext(Dispatchers.IO) {
+            userHabitRecordsQueries.hasUserHabitRecordsFromDate(
+                userHabitId = userHabitId,
+                fromDate = fromDate.toString()
+            ).executeAsOne()
     }
 }

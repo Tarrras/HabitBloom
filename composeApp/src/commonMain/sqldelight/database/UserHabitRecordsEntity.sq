@@ -26,6 +26,14 @@ selectUserHabitRecordsEntityByUserHabitId:
 SELECT * FROM UserHabitRecordsEntity
 WHERE userHabitId = ?;
 
+-- Check whether a habit has at least one record from a specific date
+hasUserHabitRecordsFromDate:
+SELECT EXISTS(
+    SELECT 1 FROM UserHabitRecordsEntity
+    WHERE userHabitId = :userHabitId AND date >= :fromDate
+    LIMIT 1
+);
+
 -- Select habit records for a specific user habit record
 selectUserHabitRecordsEntityByUserHabitRecordId:
 SELECT * FROM UserHabitRecordsEntity
@@ -62,4 +70,3 @@ selectUserHabitRecordsEntityByUserHabitIdAndDateRange:
 SELECT * FROM UserHabitRecordsEntity
 WHERE userHabitId = ? AND date >= ? AND date <= ?
 ORDER BY date;
-

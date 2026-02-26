@@ -4,12 +4,15 @@ import androidx.compose.material3.SnackbarDuration
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
+import com.horizondev.habitbloom.screens.habits.domain.ActiveHabitAlreadyExistsException
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
 import com.horizondev.habitbloom.screens.habits.domain.usecases.EnableNotificationsForReminderUseCase
-
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.habit_already_added
 import io.github.aakira.napier.Napier
+import org.jetbrains.compose.resources.getString
 
 /**
  * ViewModel for the summary step in the Add Habit flow.
@@ -65,7 +68,7 @@ class AddHabitSummaryViewModel(
         launch {
             updateState { it.copy(isLoading = true) }
 
-            runCatching {
+            try {
                 val result = repository.addUserHabit(
                     habitInfo = creationData.habitInfo,
                     startDate = creationData.startDate,
@@ -76,54 +79,52 @@ class AddHabitSummaryViewModel(
                     timeOfDay = creationData.timeOfDay
                 )
 
-                result.fold(
-                    onSuccess = { habitId ->
-                        updateState { it.copy(isLoading = false) }
+                val habitId = result.getOrElse { error ->
+                    Napier.e("Failed to add habit", error)
+                    updateState { it.copy(isLoading = false) }
 
-                        // Schedule reminder if enabled
-                        if (currentState.reminderEnabled && currentState.reminderTime != null) {
-                            // Enable notifications if this is the first reminder
-                            enableNotificationsUseCase.execute()
-
-                            repository.scheduleReminderForHabit(
-                                habitId = habitId,
-                                reminderTime = currentState.reminderTime
-                            )
-                        }
-
-                        // Cache the habit name for the success screen
-                        addHabitStateUseCase.setLastAddedHabitName(creationData.habitInfo.name)
-
-                        // Reset the draft after successful creation
-                        addHabitStateUseCase.resetDraft()
-
-                        // Navigate to the success screen
-                        emitUiIntent(AddHabitSummaryUiIntent.NavigateToSuccess)
-                    },
-                    onFailure = { error ->
-                        Napier.e("Failed to add habit", error)
-                        updateState { it.copy(isLoading = false) }
-
-                        emitUiIntent(
-                            AddHabitSummaryUiIntent.ShowSnackBar(
-                                BloomSnackbarVisuals(
-                                    message = "Failed to add habit: ${error.message}",
-                                    state = BloomSnackbarState.Error,
-                                    duration = SnackbarDuration.Short,
-                                    withDismissAction = true
-                                )
+                    emitUiIntent(
+                        AddHabitSummaryUiIntent.ShowSnackBar(
+                            BloomSnackbarVisuals(
+                                message = resolveErrorMessage(error),
+                                state = BloomSnackbarState.Error,
+                                duration = SnackbarDuration.Short,
+                                withDismissAction = true
                             )
                         )
-                    }
-                )
-            }.onFailure {
-                Napier.e("Error adding habit", it)
+                    )
+                    return@launch
+                }
+
+                updateState { it.copy(isLoading = false) }
+
+                // Schedule reminder if enabled
+                if (currentState.reminderEnabled && currentState.reminderTime != null) {
+                    // Enable notifications if this is the first reminder
+                    enableNotificationsUseCase.execute()
+
+                    repository.scheduleReminderForHabit(
+                        habitId = habitId,
+                        reminderTime = currentState.reminderTime
+                    )
+                }
+
+                // Cache the habit name for the success screen
+                addHabitStateUseCase.setLastAddedHabitName(creationData.habitInfo.name)
+
+                // Reset the draft after successful creation
+                addHabitStateUseCase.resetDraft()
+
+                // Navigate to the success screen
+                emitUiIntent(AddHabitSummaryUiIntent.NavigateToSuccess)
+            } catch (error: Exception) {
+                Napier.e("Error adding habit", error)
                 updateState { it.copy(isLoading = false) }
 
                 emitUiIntent(
                     AddHabitSummaryUiIntent.ShowSnackBar(
                         BloomSnackbarVisuals(
-                            message = "Failed to add habit: ${it.message}",
+                            message = resolveErrorMessage(error),
                             state = BloomSnackbarState.Error,
                             duration = SnackbarDuration.Short,
                             withDismissAction = true
@@ -131,6 +132,13 @@ class AddHabitSummaryViewModel(
                     )
                 )
             }
+        }
+    }
+
+    private suspend fun resolveErrorMessage(error: Throwable): String {
+        return when (error) {
+            is ActiveHabitAlreadyExistsException -> getString(Res.string.habit_already_added)
+            else -> "Failed to add habit: ${error.message}"
         }
     }
 }
