@@ -41,6 +41,7 @@ import com.horizondev.habitbloom.core.designSystem.BloomStaticColors
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.getRangeLabel
+import com.horizondev.habitbloom.utils.clippedShadow
 import com.horizondev.habitbloom.utils.formatToMmDdYyWithLocale
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getIcon
@@ -64,7 +65,6 @@ import habitbloom.composeapp.generated.resources.tap_to_edit_dates
 import habitbloom.composeapp.generated.resources.time_of_day
 import habitbloom.composeapp.generated.resources.weekdays
 import kotlinx.datetime.DayOfWeek
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -214,11 +214,18 @@ private fun TimeOfDayCards(
     ) {
         TimeOfDay.entries.forEach { period ->
             val isSelected = period == selected
+            val shape = RoundedCornerShape(20.dp)
             Surface(
                 color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface,
-                shape = RoundedCornerShape(20.dp),
+                shape = shape,
                 border = if (isSelected) null else BorderStroke(1.dp, BloomTheme.colors.background),
-                modifier = Modifier.weight(1f).clickable { onSelected(period) }
+                modifier = Modifier
+                    .weight(1f)
+                    .clippedShadow(
+                        elevation = if (isSelected) 6.dp else 4.dp,
+                        shape = shape
+                    )
+                    .clickable { onSelected(period) }
             ) {
                 Column(
                     modifier = Modifier.padding(vertical = 16.dp),
@@ -314,11 +321,17 @@ private fun PresetChip(
     text: String,
     onClick: () -> Unit
 ) {
+    val shape = RoundedCornerShape(20.dp)
     Surface(
         color = BloomTheme.colors.glassBackground,
-        shape = RoundedCornerShape(20.dp),
+        shape = shape,
         border = BorderStroke(1.dp, BloomTheme.colors.glassBorder),
-        modifier = Modifier.clickable(onClick = onClick)
+        modifier = Modifier
+            .clippedShadow(
+                elevation = 2.dp,
+                shape = shape
+            )
+            .clickable(onClick = onClick)
     ) {
         Text(
             text = text,
@@ -337,6 +350,7 @@ private fun ReminderSettingsCard(
     onReminderEnabledChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (LocalTime) -> Unit
 ) {
+    val cardShape = RoundedCornerShape(16.dp)
     Column {
         Text(
             text = stringResource(Res.string.reminder),
@@ -346,8 +360,13 @@ private fun ReminderSettingsCard(
         Spacer(modifier = Modifier.height(12.dp))
         Surface(
             color = BloomTheme.colors.surface,
-            shape = RoundedCornerShape(16.dp),
-            shadowElevation = 6.dp
+            shape = cardShape,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clippedShadow(
+                    elevation = 6.dp,
+                    shape = cardShape
+                )
         ) {
             Column(
                 modifier = modifier.padding(horizontal = 16.dp, vertical = 16.dp),
@@ -442,13 +461,18 @@ private fun PeriodSectionCard(
         } else {
             Modifier.alpha(0.6f)
         }
+        val cardShape = RoundedCornerShape(16.dp)
 
         Surface(
             color = BloomTheme.colors.surface,
-            shape = RoundedCornerShape(16.dp),
+            shape = cardShape,
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clippedShadow(
+                    elevation = 6.dp,
+                    shape = cardShape
+                )
+                .clip(cardShape)
                 .then(clickableModifier)
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -524,6 +548,7 @@ private fun DateRangeChip(
     onClick: () -> Unit,
     enabled: Boolean = true
 ) {
+    val shape = RoundedCornerShape(16.dp)
     val backgroundColor = if (isSelected) {
         BloomTheme.colors.primary
     } else {
@@ -538,9 +563,14 @@ private fun DateRangeChip(
 
     Surface(
         color = backgroundColor,
-        shape = RoundedCornerShape(16.dp),
+        shape = shape,
         border = if (!isSelected) BorderStroke(1.dp, BloomTheme.colors.background) else null,
-        modifier = Modifier.clickable(enabled = enabled, onClick = onClick)
+        modifier = Modifier
+            .clippedShadow(
+                elevation = 2.dp,
+                shape = shape
+            )
+            .clickable(enabled = enabled, onClick = onClick)
     ) {
         Text(
             text = text,
@@ -558,7 +588,6 @@ private fun DayPillsRow(
 ) {
     val selectedSet = remember(selectedDays) { selectedDays.toHashSet() }
     val allDays = remember { DayOfWeek.entries }
-    val pillShape = remember { RoundedCornerShape(16.dp) }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -566,20 +595,27 @@ private fun DayPillsRow(
     ) {
         allDays.forEach { day ->
             val isSelected = selectedSet.contains(day)
+            val shape = RoundedCornerShape(16.dp)
             Surface(
                 color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.surface,
-                shape = pillShape,
+                shape = shape,
                 border = if (isSelected) null else BorderStroke(
                     1.dp,
                     BloomTheme.colors.glassBorder
                 ),
-                modifier = Modifier.weight(1f).clickable {
-                    val toggled = selectedSet.toMutableSet().apply {
-                        if (!add(day)) remove(day)
+                modifier = Modifier
+                    .weight(1f)
+                    .clippedShadow(
+                        elevation = if (isSelected) 4.dp else 2.dp,
+                        shape = shape
+                    )
+                    .clickable {
+                        val toggled = selectedSet.toMutableSet().apply {
+                            if (!add(day)) remove(day)
+                        }
+                        val updated = allDays.filter { toggled.contains(it) }
+                        onSelectionChanged(updated)
                     }
-                    val updated = allDays.filter { toggled.contains(it) }
-                    onSelectionChanged(updated)
-                }
             ) {
                 Box(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
@@ -595,5 +631,3 @@ private fun DayPillsRow(
         }
     }
 }
-
-
