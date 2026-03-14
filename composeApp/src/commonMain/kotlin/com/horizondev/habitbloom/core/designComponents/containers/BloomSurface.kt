@@ -33,13 +33,13 @@ fun BloomSurface(
                 elevation = shadowElevation,
                 shape = shape
             )
-            .clip(shape)
             .background(color)
             .let {
                 border?.let { stroke ->
                     it.border(shape = shape, border = stroke)
                 } ?: it
             }
+            .clip(shape)
             .let {
                 onClick?.let { onClickLambda ->
                     it.clickable {

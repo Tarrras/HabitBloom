@@ -38,6 +38,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
@@ -65,7 +66,6 @@ import com.horizondev.habitbloom.utils.formatDate
 import com.horizondev.habitbloom.utils.formatTime
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getShortTitle
-import com.horizondev.habitbloom.utils.getTitle
 import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.OutDateStyle
@@ -435,8 +435,9 @@ fun HabitDurationEditor(
                         .size(36.dp)
                         .background(
                             color = BloomTheme.colors.cardSecondary,
-                            shape = androidx.compose.foundation.shape.CircleShape
+                            shape = CircleShape
                         )
+                        .clip(CircleShape)
                         .clickable(onClick = onEditModeChanged),
                     contentAlignment = Alignment.Center
                 ) {
@@ -608,16 +609,14 @@ private fun HabitDurationDayPill(
     onClick: () -> Unit
 ) {
     BloomSurface(
-        modifier = modifier.let {
-            if (enabled) it.clickable(onClick = onClick) else it
-        },
+        modifier = modifier,
         color = if (isSelected) {
             BloomTheme.colors.primary.copy(alpha = 0.18f)
         } else {
             BloomTheme.colors.inputBackground.copy(alpha = 0.35f)
         },
         shape = RoundedCornerShape(20.dp),
-        shadowElevation = 0.dp,
+        shadowElevation = if (isSelected) 4.dp else 2.dp,
         border = BorderStroke(
             width = 1.dp,
             color = if (isSelected) {
@@ -625,7 +624,8 @@ private fun HabitDurationDayPill(
             } else {
                 BloomTheme.colors.border.copy(alpha = 0.3f)
             }
-        )
+        ),
+        onClick = onClick.takeIf { enabled }
     ) {
         Column(
             modifier = Modifier
@@ -636,11 +636,6 @@ private fun HabitDurationDayPill(
             Text(
                 text = dayOfWeek.getShortTitle(),
                 style = BloomTheme.typography.headlineSmall,
-                color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.textColor.secondary
-            )
-            Text(
-                text = dayOfWeek.getTitle().take(3),
-                style = BloomTheme.typography.bodyMedium,
                 color = if (isSelected) BloomTheme.colors.primary else BloomTheme.colors.textColor.secondary
             )
         }

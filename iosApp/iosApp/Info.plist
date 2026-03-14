@@ -41,17 +41,15 @@
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationPortraitUpsideDown</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<array>
-        <key>CFBundleLocalizations</key>
-        <array>
-            <string>en</string>
-            <string>uk</string>
-        </array>
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>uk</string>
     </array>
 </dict>
 </plist>

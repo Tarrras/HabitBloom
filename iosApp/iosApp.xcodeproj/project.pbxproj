@@ -14,13 +14,13 @@
 		245614372D77683E00BFEF11 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 245614362D77683E00BFEF11 /* FirebaseAuth */; };
 		245614392D77683E00BFEF11 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 245614382D77683E00BFEF11 /* FirebaseMessaging */; };
 		2456143B2D77683E00BFEF11 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2456143A2D77683E00BFEF11 /* FirebaseStorage */; };
-		24BEB9482C93554300F30F5C /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 24BEB9472C93554300F30F5C /* GoogleService-Info.plist */; };
 		24BEB94B2C93562900F30F5C /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB94A2C93562900F30F5C /* FirebaseAnalytics */; };
 		24BEB94D2C93562900F30F5C /* FirebaseAnalyticsOnDeviceConversion in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB94C2C93562900F30F5C /* FirebaseAnalyticsOnDeviceConversion */; };
 		24BEB94F2C93562900F30F5C /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB94E2C93562900F30F5C /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		24BEB9512C93562900F30F5C /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB9502C93562900F30F5C /* FirebaseCrashlytics */; };
 		24BEB9532C93562900F30F5C /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB9522C93562900F30F5C /* FirebaseDatabase */; };
 		24BEB9552C93562900F30F5C /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 24BEB9542C93562900F30F5C /* FirebaseFirestore */; };
+		24E2A23A2F5F779D0005C955 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 24BEB9472C93554300F30F5C /* GoogleService-Info.plist */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
@@ -200,9 +200,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				24E2A23A2F5F779D0005C955 /* GoogleService-Info.plist in Resources */,
 				058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */,
 				058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */,
-				24BEB9482C93554300F30F5C /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -239,9 +239,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-iosApp/Pods-iosApp-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -415,7 +419,7 @@
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
-				INFOPLIST_FILE = iosApp/Info.plist;
+				"INFOPLIST_FILE[sdk=*]" = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -446,7 +450,7 @@
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
-				INFOPLIST_FILE = iosApp/Info.plist;
+				"INFOPLIST_FILE[sdk=*]" = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
