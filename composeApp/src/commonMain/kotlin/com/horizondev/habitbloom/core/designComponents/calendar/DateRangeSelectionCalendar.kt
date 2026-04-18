@@ -100,16 +100,19 @@ fun DateRangeSelectionCalendar(
 
         // Month title with arrows (compact header)
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = "prev",
-                tint = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.clip(CircleShape).clickable {
+            CalendarControlButton(
+                onClick = {
                     coroutineScope.launch {
                         state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.minusMonths(1))
                     }
-                }
-            )
+                },
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    contentDescription = "prev",
+                    tint = BloomTheme.colors.textColor.primary
+                )
+            }
             Text(
                 modifier = Modifier.weight(1f),
                 textAlign = TextAlign.Center,
@@ -117,16 +120,19 @@ fun DateRangeSelectionCalendar(
                 style = BloomTheme.typography.headlineSmall,
                 color = BloomTheme.colors.textColor.primary
             )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = "next",
-                tint = BloomTheme.colors.textColor.primary,
-                modifier = Modifier.clip(CircleShape).clickable {
+            CalendarControlButton(
+                onClick = {
                     coroutineScope.launch {
                         state.animateScrollToMonth(state.firstVisibleMonth.yearMonth.plusMonths(1))
                     }
                 }
-            )
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = "next",
+                    tint = BloomTheme.colors.textColor.primary
+                )
+            }
         }
 
         Spacer(Modifier.height(12.dp))

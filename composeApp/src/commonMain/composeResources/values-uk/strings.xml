@@ -381,6 +381,10 @@
     <string name="habit_schedule_active_daily_footer">Активна щодня</string>
     <string name="habit_schedule_end_date_picker_title">Оберіть дату завершення</string>
     <string name="habit_schedule_fixed_start_title">Дата початку фіксована: %1$s</string>
+    <string name="weekly_progress_title">Тижневий прогрес</string>
+    <string name="view_full_calendar">Переглянути повний календар</string>
+    <string name="habit_calendar_sheet_title">Календар звички</string>
+    <string name="this_week_short_label">Цей тиждень</string>
     <string name="description_label">Опис:</string>
     <string name="repeat_schedule_label">Розклад повторень:</string>
     <string name="every_day_label">Щодня</string>

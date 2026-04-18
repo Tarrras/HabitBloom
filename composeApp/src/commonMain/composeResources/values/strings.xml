@@ -389,6 +389,10 @@
     <string name="habit_schedule_active_daily_footer">Active every day</string>
     <string name="habit_schedule_end_date_picker_title">Select end date</string>
     <string name="habit_schedule_fixed_start_title">Start date is fixed: %1$s</string>
+    <string name="weekly_progress_title">Weekly progress</string>
+    <string name="view_full_calendar">View full calendar</string>
+    <string name="habit_calendar_sheet_title">Habit calendar</string>
+    <string name="this_week_short_label">This week</string>
     <string name="description_label">Description:</string>
     <string name="repeat_schedule_label">Repeat Schedule:</string>
     <string name="every_day_label">Every day</string>

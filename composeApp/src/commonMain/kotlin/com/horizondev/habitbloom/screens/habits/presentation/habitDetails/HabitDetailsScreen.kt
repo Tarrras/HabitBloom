@@ -2,7 +2,6 @@
 
 package com.horizondev.habitbloom.screens.habits.presentation.habitDetails
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,11 +44,6 @@ import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAni
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
-import com.horizondev.habitbloom.core.designComponents.calendar.CalendarDayStatusColors
-import com.horizondev.habitbloom.core.designComponents.calendar.CalendarTitle
-import com.horizondev.habitbloom.core.designComponents.calendar.Day
-import com.horizondev.habitbloom.core.designComponents.calendar.HabitDayState
-import com.horizondev.habitbloom.core.designComponents.calendar.MonthHeader
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
@@ -61,17 +55,11 @@ import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.getRangeLabel
+import com.horizondev.habitbloom.screens.habits.presentation.components.calendar.UserHabitScheduleCard
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.formatDate
 import com.horizondev.habitbloom.utils.formatTime
-import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getShortTitle
-import com.kizitonwose.calendar.compose.HorizontalCalendar
-import com.kizitonwose.calendar.compose.rememberCalendarState
-import com.kizitonwose.calendar.core.OutDateStyle
-import com.kizitonwose.calendar.core.firstDayOfWeekFromLocale
-import com.kizitonwose.calendar.core.minusMonths
-import com.kizitonwose.calendar.core.plusMonths
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.active_days
 import habitbloom.composeapp.generated.resources.add
@@ -86,7 +74,6 @@ import habitbloom.composeapp.generated.resources.edit
 import habitbloom.composeapp.generated.resources.enable_reminder
 import habitbloom.composeapp.generated.resources.end_date_colon
 import habitbloom.composeapp.generated.resources.every_day_label
-import habitbloom.composeapp.generated.resources.habit_schedule
 import habitbloom.composeapp.generated.resources.habit_schedule_active_daily_footer
 import habitbloom.composeapp.generated.resources.habit_schedule_card_subtitle
 import habitbloom.composeapp.generated.resources.habit_schedule_card_title
@@ -107,7 +94,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.yearMonth
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -676,87 +662,6 @@ private fun HabitDurationDateField(
             style = BloomTheme.typography.headlineSmall,
             color = BloomTheme.colors.textColor.primary
         )
-    }
-}
-
-@Composable
-private fun UserHabitScheduleCard(
-    modifier: Modifier = Modifier,
-    habitInfo: UserHabitFullInfo
-) {
-    val currentMonth = remember { getCurrentDate().yearMonth }
-    val currentDate = remember { getCurrentDate() }
-    val startMonth = remember { currentMonth.minusMonths(100) } // Adjust as needed
-    val endMonth = remember { currentMonth.plusMonths(3) } // Adjust as needed
-    val firstDayOfWeek = remember { firstDayOfWeekFromLocale() } // Available from the library
-    val state = rememberCalendarState(
-        startMonth = startMonth,
-        endMonth = endMonth,
-        firstVisibleMonth = currentMonth,
-        firstDayOfWeek = firstDayOfWeek,
-        outDateStyle = OutDateStyle.EndOfRow
-    )
-    val coroutineScope = rememberCoroutineScope()
-    val visibleMonth = state.firstVisibleMonth
-
-    BloomSurface(
-        modifier = modifier
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().animateContentSize().padding(16.dp)) {
-            Text(
-                text = stringResource(Res.string.habit_schedule),
-                style = BloomTheme.typography.heading,
-                color = BloomTheme.colors.textColor.primary,
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            CalendarDayStatusColors(modifier = Modifier.fillMaxWidth())
-            Spacer(modifier = Modifier.height(24.dp))
-
-            CalendarTitle(
-                modifier = Modifier.fillMaxWidth(),
-                currentMonth = visibleMonth.yearMonth,
-                goToNext = {
-                    coroutineScope.launch {
-                        state.animateScrollToMonth(visibleMonth.yearMonth.plusMonths(1))
-                    }
-                },
-                goToPrevious = {
-                    coroutineScope.launch {
-                        state.animateScrollToMonth(visibleMonth.yearMonth.minusMonths(1))
-                    }
-                }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
-            HorizontalCalendar(
-                state = state,
-                dayContent = { calendarDay ->
-                    val date = calendarDay.date
-                    val existingHabitRecord = habitInfo.records.find {
-                        it.date == date
-                    }
-
-                    Day(
-                        day = calendarDay,
-                        state = when {
-                            existingHabitRecord == null -> HabitDayState.None
-                            existingHabitRecord.isCompleted -> HabitDayState.Completed
-                            existingHabitRecord.isCompleted.not() && date < currentDate -> {
-                                HabitDayState.Missed
-                            }
-
-                            else -> HabitDayState.Future
-                        },
-                        selected = date == currentDate
-                    )
-                },
-                monthHeader = { month ->
-                    val daysOfWeek = month.weekDays.first().map { it.date.dayOfWeek }
-                    MonthHeader(daysOfWeek = daysOfWeek, modifier = Modifier.fillMaxWidth())
-                }
-            )
-        }
     }
 }
 

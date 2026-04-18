@@ -48,7 +48,7 @@ fun UserHabitProgressCard(
         ) {
             Text(
                 text = stringResource(Res.string.habit_records),
-                style = BloomTheme.typography.heading,
+                style = BloomTheme.typography.headlineMedium,
                 color = BloomTheme.colors.textColor.primary,
                 modifier = Modifier.align(Alignment.Start)
             )
