@@ -5,6 +5,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -92,10 +93,140 @@ class HabitDetailsViewModelTest {
         assertFalse(stateAfterSuccess.habitDurationEditMode)
     }
 
+    @Test
+    fun showReminderDialog_initializesDraftFromCommittedReminderState() {
+        val committedTime = LocalTime(9, 15)
+        val initialState = HabitScreenDetailsUiState(
+            habitInfo = createHabitInfo(
+                startDate = LocalDate(2026, 2, 1),
+                endDate = LocalDate(2026, 2, 20),
+                reminderEnabled = true,
+                reminderTime = committedTime
+            ),
+            reminderEnabled = true,
+            reminderTime = committedTime,
+            reminderDraftEnabled = false,
+            reminderDraftTime = LocalTime(7, 0)
+        )
+
+        val updatedState = reduceReminderDialogShown(initialState)
+
+        assertTrue(updatedState.showReminderDialog)
+        assertTrue(updatedState.reminderDraftEnabled)
+        assertEquals(committedTime, updatedState.reminderDraftTime)
+    }
+
+    @Test
+    fun dismissReminderDialog_discardsDraftEdits() {
+        val committedTime = LocalTime(8, 0)
+        val initialState = HabitScreenDetailsUiState(
+            habitInfo = createHabitInfo(
+                startDate = LocalDate(2026, 2, 1),
+                endDate = LocalDate(2026, 2, 20),
+                reminderEnabled = false,
+                reminderTime = null
+            ),
+            showReminderDialog = true,
+            showReminderTimePicker = true,
+            reminderEnabled = false,
+            reminderTime = committedTime,
+            reminderDraftEnabled = true,
+            reminderDraftTime = LocalTime(21, 45)
+        )
+
+        val updatedState = reduceReminderDialogDismissed(initialState)
+
+        assertFalse(updatedState.showReminderDialog)
+        assertFalse(updatedState.showReminderTimePicker)
+        assertFalse(updatedState.reminderDraftEnabled)
+        assertEquals(committedTime, updatedState.reminderDraftTime)
+        assertFalse(updatedState.reminderEnabled)
+        assertEquals(committedTime, updatedState.reminderTime)
+    }
+
+    @Test
+    fun saveReminderSettings_commitsDraftValues() {
+        val committedTime = LocalTime(8, 0)
+        val draftTime = LocalTime(20, 30)
+        val initialState = HabitScreenDetailsUiState(
+            habitInfo = createHabitInfo(
+                startDate = LocalDate(2026, 2, 1),
+                endDate = LocalDate(2026, 2, 20),
+                reminderEnabled = false,
+                reminderTime = null
+            ),
+            showReminderDialog = true,
+            showReminderTimePicker = true,
+            reminderEnabled = false,
+            reminderTime = committedTime,
+            reminderDraftEnabled = true,
+            reminderDraftTime = draftTime
+        )
+
+        val updatedState = reduceReminderSettingsSaved(initialState)
+
+        assertFalse(updatedState.showReminderDialog)
+        assertFalse(updatedState.showReminderTimePicker)
+        assertTrue(updatedState.reminderEnabled)
+        assertEquals(draftTime, updatedState.reminderTime)
+        assertTrue(updatedState.reminderDraftEnabled)
+        assertEquals(draftTime, updatedState.reminderDraftTime)
+        val updatedHabitInfo = requireNotNull(updatedState.habitInfo)
+        assertTrue(updatedHabitInfo.reminderEnabled)
+        assertEquals(draftTime, updatedHabitInfo.reminderTime)
+    }
+
+    @Test
+    fun showReminderTimePicker_fromDialog_closesDialogAndPreservesDraft() {
+        val initialState = HabitScreenDetailsUiState(
+            habitInfo = createHabitInfo(
+                startDate = LocalDate(2026, 2, 1),
+                endDate = LocalDate(2026, 2, 20),
+                reminderEnabled = false,
+                reminderTime = null
+            ),
+            showReminderDialog = true,
+            reminderEnabled = false,
+            reminderTime = LocalTime(8, 0),
+            reminderDraftEnabled = true,
+            reminderDraftTime = LocalTime(8, 0)
+        )
+
+        val updatedState = reduceReminderTimePickerShown(initialState)
+
+        assertFalse(updatedState.showReminderDialog)
+        assertTrue(updatedState.showReminderTimePicker)
+        assertTrue(updatedState.returnToReminderDialogAfterTimePicker)
+        assertTrue(updatedState.reminderDraftEnabled)
+        assertEquals(LocalTime(8, 0), updatedState.reminderDraftTime)
+        assertFalse(updatedState.reminderEnabled)
+    }
+
+    @Test
+    fun dismissReminderTimePicker_reopensDialogWhenLaunchedFromDialog() {
+        val initialState = HabitScreenDetailsUiState(
+            showReminderDialog = false,
+            showReminderTimePicker = true,
+            returnToReminderDialogAfterTimePicker = true,
+            reminderDraftEnabled = true,
+            reminderDraftTime = LocalTime(9, 30)
+        )
+
+        val updatedState = reduceReminderTimePickerDismissed(initialState)
+
+        assertTrue(updatedState.showReminderDialog)
+        assertFalse(updatedState.showReminderTimePicker)
+        assertFalse(updatedState.returnToReminderDialogAfterTimePicker)
+        assertTrue(updatedState.reminderDraftEnabled)
+        assertEquals(LocalTime(9, 30), updatedState.reminderDraftTime)
+    }
+
     private fun createHabitInfo(
         startDate: LocalDate,
         endDate: LocalDate,
-        days: List<DayOfWeek> = listOf(DayOfWeek.MONDAY)
+        days: List<DayOfWeek> = listOf(DayOfWeek.MONDAY),
+        reminderEnabled: Boolean = false,
+        reminderTime: LocalTime? = null
     ): UserHabitFullInfo {
         return UserHabitFullInfo(
             userHabitId = 100L,
@@ -108,8 +239,8 @@ class HabitDetailsViewModelTest {
             daysStreak = 0,
             records = listOf(UserHabitRecord(1L, 100L, startDate, false)),
             days = days,
-            reminderEnabled = false,
-            reminderTime = null
+            reminderEnabled = reminderEnabled,
+            reminderTime = reminderTime
         )
     }
 }

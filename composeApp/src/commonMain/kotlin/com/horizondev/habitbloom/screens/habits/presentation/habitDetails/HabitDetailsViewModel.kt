@@ -43,7 +43,10 @@ class HabitDetailsViewModel(
     ).catch {
         updateState { it.copy(isLoading = false) }
     }.onEach { userHabitFullInfo ->
+        val committedReminderEnabled = userHabitFullInfo?.reminderEnabled ?: false
+        val committedReminderTime = userHabitFullInfo?.reminderTime ?: LocalTime(8, 0)
         updateState {
+            val reminderEditorVisible = it.showReminderDialog || it.showReminderTimePicker
             it.copy(
                 habitInfo = userHabitFullInfo,
                 isLoading = false,
@@ -52,8 +55,10 @@ class HabitDetailsViewModel(
                 endDate = userHabitFullInfo?.endDate ?: userHabitFullInfo?.startDate,
                 habitDurationEditMode = false,
                 habitDurationEditEnabled = true,
-                reminderEnabled = userHabitFullInfo?.reminderEnabled ?: false,
-                reminderTime = userHabitFullInfo?.reminderTime ?: LocalTime(8, 0),
+                reminderEnabled = committedReminderEnabled,
+                reminderTime = committedReminderTime,
+                reminderDraftEnabled = if (reminderEditorVisible) it.reminderDraftEnabled else committedReminderEnabled,
+                reminderDraftTime = if (reminderEditorVisible) it.reminderDraftTime else committedReminderTime,
                 progressUiState = userHabitFullInfo?.let { info -> calculateHabitProgress(info) }
             )
         }
@@ -228,27 +233,35 @@ class HabitDetailsViewModel(
 
             // New reminder-related event handlers
             HabitScreenDetailsUiEvent.ShowReminderDialog -> {
-                updateState { it.copy(showReminderDialog = true) }
+                updateState(::reduceReminderDialogShown)
             }
 
             HabitScreenDetailsUiEvent.DismissReminderDialog -> {
-                updateState { it.copy(showReminderDialog = false) }
+                updateState(::reduceReminderDialogDismissed)
+            }
+
+            HabitScreenDetailsUiEvent.ShowReminderTimePicker -> {
+                updateState(::reduceReminderTimePickerShown)
+            }
+
+            HabitScreenDetailsUiEvent.DismissReminderTimePicker -> {
+                updateState(::reduceReminderTimePickerDismissed)
             }
 
             is HabitScreenDetailsUiEvent.ReminderTimeChanged -> {
-                updateState { it.copy(reminderTime = event.time) }
+                updateState { reduceReminderTimeChanged(it, event.time) }
             }
 
             is HabitScreenDetailsUiEvent.ReminderEnabledChanged -> {
-                updateState { it.copy(reminderEnabled = event.enabled) }
+                updateState { reduceReminderEnabledChanged(it, event.enabled) }
             }
 
             HabitScreenDetailsUiEvent.SaveReminderSettings -> {
                 viewModelScope.launch {
                     val currentState = state.value
                     val habitId = currentState.habitInfo?.userHabitId ?: return@launch
-                    val enabled = currentState.reminderEnabled
-                    val time = if (enabled) currentState.reminderTime else null
+                    val enabled = currentState.reminderDraftEnabled
+                    val time = if (enabled) currentState.reminderDraftTime else null
 
                     // If enabling reminder, try to enable notifications if needed
                     if (enabled && !currentState.habitInfo.reminderEnabled) {
@@ -261,7 +274,7 @@ class HabitDetailsViewModel(
                         reminderTime = time
                     ).onSuccess { success ->
                         if (success) {
-                            updateState { it.copy(showReminderDialog = false) }
+                            updateState(::reduceReminderSettingsSaved)
                             emitUiIntent(
                                 HabitScreenDetailsUiIntent.ShowSnackbar(
                                     visuals = BloomSnackbarVisuals(
@@ -396,6 +409,89 @@ internal fun reduceEndDateChanged(
 internal fun reduceDurationUpdatedSuccessfully(
     state: HabitScreenDetailsUiState
 ): HabitScreenDetailsUiState = state.copy(habitDurationEditMode = false)
+
+internal fun reduceReminderDialogShown(
+    state: HabitScreenDetailsUiState
+): HabitScreenDetailsUiState {
+    return state.copy(
+        showReminderDialog = true,
+        showReminderTimePicker = false,
+        returnToReminderDialogAfterTimePicker = false,
+        reminderDraftEnabled = state.reminderEnabled,
+        reminderDraftTime = state.reminderTime
+    )
+}
+
+internal fun reduceReminderDialogDismissed(
+    state: HabitScreenDetailsUiState
+): HabitScreenDetailsUiState {
+    return state.copy(
+        showReminderDialog = false,
+        showReminderTimePicker = false,
+        returnToReminderDialogAfterTimePicker = false,
+        reminderDraftEnabled = state.reminderEnabled,
+        reminderDraftTime = state.reminderTime
+    )
+}
+
+internal fun reduceReminderEnabledChanged(
+    state: HabitScreenDetailsUiState,
+    enabled: Boolean
+): HabitScreenDetailsUiState {
+    return state.copy(reminderDraftEnabled = enabled)
+}
+
+internal fun reduceReminderTimeChanged(
+    state: HabitScreenDetailsUiState,
+    time: LocalTime
+): HabitScreenDetailsUiState {
+    return state.copy(reminderDraftTime = time)
+}
+
+internal fun reduceReminderTimePickerShown(
+    state: HabitScreenDetailsUiState
+): HabitScreenDetailsUiState {
+    return if (state.showReminderDialog) {
+        state.copy(
+            showReminderDialog = false,
+            showReminderTimePicker = true,
+            returnToReminderDialogAfterTimePicker = true
+        )
+    } else {
+        state.copy(
+            showReminderTimePicker = true,
+            returnToReminderDialogAfterTimePicker = false,
+            reminderDraftEnabled = state.reminderEnabled,
+            reminderDraftTime = state.reminderTime
+        )
+    }
+}
+
+internal fun reduceReminderTimePickerDismissed(
+    state: HabitScreenDetailsUiState
+): HabitScreenDetailsUiState = state.copy(
+    showReminderDialog = state.returnToReminderDialogAfterTimePicker,
+    showReminderTimePicker = false,
+    returnToReminderDialogAfterTimePicker = false
+)
+
+internal fun reduceReminderSettingsSaved(
+    state: HabitScreenDetailsUiState
+): HabitScreenDetailsUiState {
+    val committedTime =
+        if (state.reminderDraftEnabled) state.reminderDraftTime else state.reminderTime
+    return state.copy(
+        showReminderDialog = false,
+        showReminderTimePicker = false,
+        returnToReminderDialogAfterTimePicker = false,
+        reminderEnabled = state.reminderDraftEnabled,
+        reminderTime = committedTime,
+        habitInfo = state.habitInfo?.copy(
+            reminderEnabled = state.reminderDraftEnabled,
+            reminderTime = if (state.reminderDraftEnabled) state.reminderDraftTime else null
+        )
+    )
+}
 
 internal fun validateHabitDurationUpdate(
     state: HabitScreenDetailsUiState

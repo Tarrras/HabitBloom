@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,13 +44,12 @@ import androidx.compose.ui.unit.dp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
-import com.horizondev.habitbloom.core.designComponents.buttons.BloomSmallActionButton
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.containers.BloomToolbar
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
 import com.horizondev.habitbloom.core.designComponents.dialogs.HabitEndDatePickerDialog
 import com.horizondev.habitbloom.core.designComponents.image.BloomNetworkImage
-import com.horizondev.habitbloom.core.designComponents.pickers.TimePicker
+import com.horizondev.habitbloom.core.designComponents.pickers.WheelTimePickerDialog
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarHost
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
@@ -239,6 +239,9 @@ fun HabitDetailsScreenContent(
                         reminderTime = uiState.reminderTime,
                         onShowReminderDialog = {
                             handleUiEvent(HabitScreenDetailsUiEvent.ShowReminderDialog)
+                        },
+                        onShowReminderTimePicker = {
+                            handleUiEvent(HabitScreenDetailsUiEvent.ShowReminderTimePicker)
                         }
                     )
 
@@ -283,19 +286,33 @@ fun HabitDetailsScreenContent(
 
                 ReminderDialog(
                     showDialog = uiState.showReminderDialog,
-                    reminderEnabled = uiState.reminderEnabled,
-                    reminderTime = uiState.reminderTime,
+                    reminderEnabled = uiState.reminderDraftEnabled,
+                    reminderTime = uiState.reminderDraftTime,
                     onDismiss = {
                         handleUiEvent(HabitScreenDetailsUiEvent.DismissReminderDialog)
                     },
                     onReminderEnabledChanged = { enabled ->
                         handleUiEvent(HabitScreenDetailsUiEvent.ReminderEnabledChanged(enabled))
                     },
-                    onReminderTimeChanged = { time ->
-                        handleUiEvent(HabitScreenDetailsUiEvent.ReminderTimeChanged(time))
+                    onShowReminderTimePicker = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.ShowReminderTimePicker)
                     },
                     onSave = {
                         handleUiEvent(HabitScreenDetailsUiEvent.SaveReminderSettings)
+                    }
+                )
+
+                WheelTimePickerDialog(
+                    isVisible = uiState.showReminderTimePicker,
+                    onDismiss = {
+                        handleUiEvent(HabitScreenDetailsUiEvent.DismissReminderTimePicker)
+                    },
+                    time = uiState.reminderDraftTime,
+                    onTimeSelected = { time ->
+                        handleUiEvent(HabitScreenDetailsUiEvent.ReminderTimeChanged(time))
+                        if (!uiState.returnToReminderDialogAfterTimePicker) {
+                            handleUiEvent(HabitScreenDetailsUiEvent.SaveReminderSettings)
+                        }
                     }
                 )
             } else {
@@ -792,7 +809,8 @@ private fun ReminderSettingsCard(
     modifier: Modifier = Modifier,
     reminderEnabled: Boolean,
     reminderTime: LocalTime,
-    onShowReminderDialog: () -> Unit
+    onShowReminderDialog: () -> Unit,
+    onShowReminderTimePicker: () -> Unit
 ) {
     BloomSurface(modifier = modifier) {
         Column(
@@ -821,7 +839,6 @@ private fun ReminderSettingsCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Reminder status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -836,7 +853,9 @@ private fun ReminderSettingsCard(
                         ),
                         style = BloomTheme.typography.body,
                         color = BloomTheme.colors.textColor.primary,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable(onClick = onShowReminderTimePicker)
                     )
                 } else {
                     Text(
@@ -849,14 +868,17 @@ private fun ReminderSettingsCard(
                     )
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
-
-                BloomSmallActionButton(
-                    text = if (reminderEnabled) stringResource(Res.string.edit)
-                    else stringResource(Res.string.add),
-                    onClick = onShowReminderDialog
-                )
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            BloomPrimaryFilledButton(
+                modifier = Modifier.align(Alignment.End),
+                text = if (reminderEnabled) stringResource(Res.string.edit)
+                else stringResource(Res.string.add),
+                onClick = onShowReminderDialog,
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
+            )
         }
     }
 }
@@ -868,7 +890,7 @@ private fun ReminderDialog(
     reminderTime: LocalTime,
     onDismiss: () -> Unit,
     onReminderEnabledChanged: (Boolean) -> Unit,
-    onReminderTimeChanged: (LocalTime) -> Unit,
+    onShowReminderTimePicker: () -> Unit,
     onSave: () -> Unit
 ) {
     BloomAlertDialog(
@@ -911,7 +933,6 @@ private fun ReminderDialog(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Time picker (only enabled if reminders are enabled)
             if (reminderEnabled) {
                 Text(
                     text = stringResource(Res.string.select_reminder_time),
@@ -920,12 +941,15 @@ private fun ReminderDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                TimePicker(
-                    time = reminderTime,
-                    onTimeSelected = onReminderTimeChanged
+                BloomPrimaryOutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = formatTime(reminderTime, use24HourFormat = true),
+                    onClick = onShowReminderTimePicker
                 )
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
             Spacer(modifier = Modifier.height(32.dp))

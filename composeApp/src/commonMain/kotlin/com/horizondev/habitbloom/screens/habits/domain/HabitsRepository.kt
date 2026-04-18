@@ -39,7 +39,6 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
-import org.koin.core.component.KoinComponent
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
@@ -546,23 +545,23 @@ class HabitsRepository(
     ): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             runCatching {
-                localDataSource.updateHabitReminder(
-                    habitId = habitId,
+                applyHabitReminderUpdate(
                     enabled = enabled,
-                    reminderTime = reminderTime
-                )
-
-                when {
-                    enabled && reminderTime != null -> {
-                        scheduleReminderForHabit(habitId, reminderTime).getOrThrow()
-                    }
-
-                    else -> {
+                    reminderTime = reminderTime,
+                    persistReminder = { updatedEnabled, updatedTime ->
+                        localDataSource.updateHabitReminder(
+                            habitId = habitId,
+                            enabled = updatedEnabled,
+                            reminderTime = updatedTime
+                        )
+                    },
+                    scheduleReminder = { time ->
+                        scheduleReminderForHabit(habitId, time)
+                    },
+                    cancelReminder = {
                         notificationManager.cancelHabitReminder(habitId)
-                        true
                     }
-                }
-
+                )
             }.onFailure {
                 Napier.e("Error updating habit reminder", it, tag = TAG)
             }
@@ -791,6 +790,32 @@ class HabitsRepository(
     suspend fun getUserHabitsWithoutDetails(): List<UserHabit> {
         return withContext(Dispatchers.IO) {
             localDataSource.getAllUserHabits()
+        }
+    }
+}
+
+internal suspend fun applyHabitReminderUpdate(
+    enabled: Boolean,
+    reminderTime: LocalTime?,
+    persistReminder: suspend (Boolean, LocalTime?) -> Unit,
+    scheduleReminder: suspend (LocalTime) -> Result<Boolean>,
+    cancelReminder: suspend () -> Unit
+): Boolean {
+    return when {
+        enabled && reminderTime != null -> {
+            val scheduled = scheduleReminder(reminderTime).getOrThrow()
+            if (!scheduled) {
+                false
+            } else {
+                persistReminder(true, reminderTime)
+                true
+            }
+        }
+
+        else -> {
+            cancelReminder()
+            persistReminder(false, null)
+            true
         }
     }
 }
