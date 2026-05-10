@@ -4,7 +4,6 @@ import io.github.aakira.napier.Napier
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import org.koin.core.component.KoinComponent
 import platform.Foundation.NSDateComponents
 import platform.UserNotifications.UNCalendarNotificationTrigger
 import platform.UserNotifications.UNMutableNotificationContent
@@ -12,8 +11,8 @@ import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNNotificationSound
 
 class IOSNotificationScheduler(
-    private val notificationManager: IOSNotificationManager
-) : NotificationScheduler, KoinComponent {
+    private val notificationCenterService: IOSNotificationCenterService
+) : NotificationScheduler {
 
     companion object {
         private const val CATEGORY_ID = "habit_reminders"
@@ -29,7 +28,7 @@ class IOSNotificationScheduler(
             generateNotificationIdentifier(habitId, dayOfWeek)
         }
 
-        notificationManager.removeNotificationsById(identifiers)
+        notificationCenterService.removeNotificationsById(identifiers)
     }
 
     override suspend fun cancelHabitReminder(habitId: Long) {
@@ -97,7 +96,7 @@ class IOSNotificationScheduler(
             trigger
         )
 
-        notificationManager.makeNotificationRequest(request)
+        notificationCenterService.makeNotificationRequest(request)
     }.getOrElse { throwable ->
         Napier.e(throwable = throwable, message = "scheduleHabitReminder error")
         false
