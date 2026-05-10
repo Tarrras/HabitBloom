@@ -23,8 +23,8 @@ import platform.darwin.dispatch_time
 import kotlin.time.Duration.Companion.seconds
 
 class IOSNotificationDelegate(
-    private val notificationScheduler: NotificationScheduler,
-    private val habitsRepository: HabitsRepository
+    private val notificationSchedulerProvider: () -> NotificationScheduler,
+    private val habitsRepositoryProvider: () -> HabitsRepository
 ) : NSObject(), UNUserNotificationCenterDelegateProtocol {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
@@ -60,6 +60,8 @@ class IOSNotificationDelegate(
     }
 
     private fun handleNotificationDelivery(notification: UNNotification) {
+        val notificationScheduler = notificationSchedulerProvider()
+        val habitsRepository = habitsRepositoryProvider()
         val userInfo = notification.request.content.userInfo
 
         // Extract the habit ID and date information

@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.core.notifications
 
+import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import io.github.aakira.napier.Napier
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNUserNotificationCenter
@@ -7,9 +8,14 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class IOSNotificationManager(
-    delegate: IOSNotificationDelegate
+    notificationSchedulerProvider: () -> NotificationScheduler,
+    habitsRepositoryProvider: () -> HabitsRepository
 ) {
     private val notificationCenter = UNUserNotificationCenter.currentNotificationCenter()
+    private val delegate = IOSNotificationDelegate(
+        notificationSchedulerProvider = notificationSchedulerProvider,
+        habitsRepositoryProvider = habitsRepositoryProvider
+    )
 
     init {
         notificationCenter.delegate = delegate
