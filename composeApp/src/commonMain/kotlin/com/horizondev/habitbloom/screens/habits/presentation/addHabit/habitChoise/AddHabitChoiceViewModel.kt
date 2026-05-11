@@ -12,8 +12,10 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.delete_custom_habit_success
 import habitbloom.composeapp.generated.resources.habit_already_added
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.getString
 
@@ -27,7 +29,6 @@ class AddHabitChoiceViewModel(
     private val currentCategory: HabitCategoryData?
         get() = addHabitStateUseCase.getCurrentDraft().habitCategory
 
-    private var cachedHabits: List<HabitInfo> = emptyList()
     private var isInitialLoad = true
 
     init {
@@ -37,9 +38,10 @@ class AddHabitChoiceViewModel(
             state
                 .map { it.searchInput }
                 .distinctUntilChanged()
+                .drop(1)
                 .debounce(300) // Reduced from 500ms for better UX
-                .collect { query ->
-                    applySearch(query)
+                .collectLatest {
+                    loadHabits(forceRefresh = false)
                 }
         }
     }
@@ -119,56 +121,44 @@ class AddHabitChoiceViewModel(
 
     private fun requestHabits(forceRefresh: Boolean) {
         launch {
-            val selectedCategory = currentCategory
-
-            if (!forceRefresh && cachedHabits.isNotEmpty()) {
-                applySearch(state.value.searchInput, selectedCategory)
-                return@launch
-            }
-
-            updateState { it.copy(isLoading = true, currentCategory = selectedCategory) }
-
-            runCatching {
-                repository.getHabits(searchInput = "", categoryId = selectedCategory?.id)
-            }.onSuccess { result ->
-                result.fold(
-                    onSuccess = { habits ->
-                        cachedHabits = habits
-                        isInitialLoad = false
-                        applySearch(state.value.searchInput, selectedCategory)
-                    },
-                    onFailure = {
-                        Napier.e("Failed to load habits", it)
-                        updateState { state -> state.copy(isLoading = false) }
-                    }
-                )
-            }.onFailure {
-                Napier.e("Failed to load habits", it)
-                updateState { state -> state.copy(isLoading = false) }
-            }
+            loadHabits(forceRefresh = forceRefresh)
         }
     }
 
-
-    private fun applySearch(query: String, categoryOverride: HabitCategoryData? = null) {
-        val normalizedQuery = query.trim()
-        val selectedCategory = categoryOverride ?: currentCategory
-        val filteredHabits = if (cachedHabits.isEmpty()) {
-            emptyList()
-        } else if (normalizedQuery.isBlank()) {
-            cachedHabits
-        } else {
-            cachedHabits.filter { habit ->
-                habit.name.contains(normalizedQuery, ignoreCase = true)
-            }
-        }
+    private suspend fun loadHabits(forceRefresh: Boolean) {
+        val selectedCategory = currentCategory
+        val query = state.value.searchInput.trim()
 
         updateState {
-            it.copy(
-                habits = filteredHabits,
-                isLoading = false,
-                currentCategory = selectedCategory
+            it.copy(isLoading = true, currentCategory = selectedCategory)
+        }
+
+        runCatching {
+            repository.getHabits(
+                searchInput = query,
+                categoryId = selectedCategory?.id,
+                forceRefresh = forceRefresh
             )
+        }.onSuccess { result ->
+            result.fold(
+                onSuccess = { habits ->
+                    isInitialLoad = false
+                    updateState {
+                        it.copy(
+                            habits = habits,
+                            isLoading = false,
+                            currentCategory = selectedCategory
+                        )
+                    }
+                },
+                onFailure = {
+                    Napier.e("Failed to load habits", it)
+                    updateState { state -> state.copy(isLoading = false) }
+                }
+            )
+        }.onFailure {
+            Napier.e("Failed to load habits", it)
+            updateState { state -> state.copy(isLoading = false) }
         }
     }
 
@@ -198,11 +188,7 @@ class AddHabitChoiceViewModel(
             }.onSuccess { result ->
                 result.fold(
                     onSuccess = {
-                        // Remove from cache and update list without extra loading
-                        cachedHabits = cachedHabits.filterNot { habit ->
-                            habit.id == habitToDelete.id
-                        }
-                        applySearch(state.value.searchInput)
+                        loadHabits(forceRefresh = false)
                         emitUiIntent(
                             AddHabitChoiceUiIntent.ShowSnackbar(
                                 BloomSnackbarVisuals(
@@ -227,4 +213,3 @@ class AddHabitChoiceViewModel(
         }
     }
 }
-

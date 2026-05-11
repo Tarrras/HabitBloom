@@ -1,9 +1,11 @@
 package com.horizondev.habitbloom.screens.habits.data.database
 
+import com.horizondev.habitbloom.screens.habits.domain.models.HabitInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.toLocalTimeOrNull
+import database.HabitCatalogEntity
 import database.UserHabitRecordsEntity
 import database.UserHabitsEntity
 import kotlinx.datetime.DayOfWeek
@@ -25,4 +27,13 @@ fun UserHabitsEntity.toDomainModel() = UserHabit(
     timeOfDay = TimeOfDay.entries[timeOfDay.toInt()],
     reminderEnabled = reminderEnabled == 1L,
     reminderTime = reminderTime?.toLocalTimeOrNull()
+)
+
+fun HabitCatalogEntity.toDomainModel() = HabitInfo(
+    id = id,
+    description = description,
+    iconUrl = iconUrl,
+    name = name,
+    categoryId = categoryId,
+    isCustomHabit = isCustomHabit == 1L
 )

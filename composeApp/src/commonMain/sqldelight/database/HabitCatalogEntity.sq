@@ -1,0 +1,34 @@
+CREATE TABLE HabitCatalogEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    description TEXT NOT NULL,
+    iconUrl TEXT NOT NULL,
+    name TEXT NOT NULL,
+    categoryId TEXT,
+    isCustomHabit INTEGER NOT NULL
+);
+
+upsertHabitCatalogItem:
+INSERT OR REPLACE INTO HabitCatalogEntity (
+    id,
+    description,
+    iconUrl,
+    name,
+    categoryId,
+    isCustomHabit
+)
+VALUES (?, ?, ?, ?, ?, ?);
+
+selectAllHabitCatalogItems:
+SELECT * FROM HabitCatalogEntity
+ORDER BY name;
+
+selectHabitCatalogItemById:
+SELECT * FROM HabitCatalogEntity
+WHERE id = ?;
+
+deleteHabitCatalogItemById:
+DELETE FROM HabitCatalogEntity
+WHERE id = ?;
+
+deleteAllHabitCatalogItems:
+DELETE FROM HabitCatalogEntity;

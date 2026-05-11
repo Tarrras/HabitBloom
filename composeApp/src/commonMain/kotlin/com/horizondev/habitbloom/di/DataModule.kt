@@ -30,6 +30,7 @@ val dataModule = module {
             remoteDataSource = get(),
             profileRemoteDataSource = get(),
             localDataSource = get(),
+            habitCatalogLocalDataSource = get(),
             storageService = get(),
             notificationManager = get(),
             permissionsManager = get(),

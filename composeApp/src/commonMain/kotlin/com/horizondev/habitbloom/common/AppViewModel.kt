@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.common
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.auth.domain.AuthRepository
+import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.onboarding.domain.OnboardingRepository
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ data class AppUiState(
 
 class AppViewModel(
     private val authRepository: AuthRepository,
+    private val habitsRepository: HabitsRepository,
     private val onboardingRepository: OnboardingRepository
 ) : ViewModel() {
     private val TAG = "AppViewModel"
@@ -38,6 +40,12 @@ class AppViewModel(
             authRepository.initUser()
         }.onFailure {
             Napier.e("Failed to initialize user", it, tag = TAG)
+        }
+
+        launch {
+            habitsRepository.initData().onFailure {
+                Napier.e("Failed to initialize habits catalog", it, tag = TAG)
+            }
         }
 
         // Check if onboarding is needed

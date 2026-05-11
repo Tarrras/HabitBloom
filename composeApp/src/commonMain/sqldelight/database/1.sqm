@@ -1,0 +1,8 @@
+CREATE TABLE HabitCatalogEntity (
+    id TEXT PRIMARY KEY NOT NULL,
+    description TEXT NOT NULL,
+    iconUrl TEXT NOT NULL,
+    name TEXT NOT NULL,
+    categoryId TEXT,
+    isCustomHabit INTEGER NOT NULL
+);

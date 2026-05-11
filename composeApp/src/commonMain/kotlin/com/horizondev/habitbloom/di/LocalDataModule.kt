@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.di
 import com.horizondev.habitbloom.database.HabitBloomDatabase
 import com.horizondev.habitbloom.platform.DatabaseDriverFactory
 import com.horizondev.habitbloom.screens.garden.data.FlowerHealthDataSource
+import com.horizondev.habitbloom.screens.habits.data.database.HabitCatalogLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import org.koin.dsl.module
 
@@ -19,6 +20,14 @@ val localDataModule = module {
             userHabitsQueries = database.userHabitsEntityQueries,
             userHabitRecordsQueries = database.userHabitRecordsEntityQueries,
             database = database
+        )
+    }
+
+    single {
+        val database = get<HabitBloomDatabase>()
+        HabitCatalogLocalDataSource(
+            database = database,
+            habitCatalogQueries = database.habitCatalogEntityQueries
         )
     }
 

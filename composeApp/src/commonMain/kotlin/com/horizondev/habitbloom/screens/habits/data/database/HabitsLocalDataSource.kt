@@ -105,6 +105,43 @@ class HabitsLocalDataSource(
         }
     }
 
+    suspend fun getHabitDayStreaks(
+        userHabitIds: Set<Long>,
+        byDate: LocalDate,
+        includingToday: Boolean = true
+    ): Map<Long, Int> {
+        if (userHabitIds.isEmpty()) return emptyMap()
+
+        val recordsByHabitId = withContext(Dispatchers.IO) {
+            userHabitRecordsQueries
+                .selectAllUserHabitRecords()
+                .executeAsList()
+                .asSequence()
+                .filter { it.userHabitId in userHabitIds }
+                .map { it.toDomainModel() }
+                .groupBy { it.userHabitId }
+        }
+
+        return userHabitIds.associateWith { userHabitId ->
+            val records = recordsByHabitId[userHabitId].orEmpty()
+            val isCompletedToday = records.find {
+                it.date == getCurrentDate()
+            }?.isCompleted ?: false
+
+            val completedBefore = records
+                .asSequence()
+                .filter { it.date < byDate }
+                .sortedByDescending { it.date }
+                .takeWhile { it.isCompleted }
+                .count()
+
+            completedBefore + when {
+                includingToday -> if (isCompletedToday) 1 else 0
+                else -> 0
+            }
+        }
+    }
+
     suspend fun updateUserHabit(
         userHabitId: Long,
         endDate: LocalDate,
@@ -383,8 +420,8 @@ class HabitsLocalDataSource(
     /**
      * Gets all user habit records with their local data in a non-reactive way.
      *
-     * Note: This doesn't include remote habit details (name, description, etc.)
-     * which need to be merged at the repository level with data from remoteHabits.
+     * Note: This doesn't include catalog habit details (name, description, etc.)
+     * which need to be merged at the repository level with HabitCatalogEntity data.
      *
      * @return List of all user habit records with basic information
      */
