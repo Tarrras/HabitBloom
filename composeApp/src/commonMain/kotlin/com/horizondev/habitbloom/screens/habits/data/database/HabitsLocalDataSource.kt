@@ -176,27 +176,29 @@ class HabitsLocalDataSource(
     suspend fun insertUserHabit(userHabit: UserHabit) = withContext(Dispatchers.IO) {
         val effectiveEndDate = userHabit.endDate
 
-        userHabitsQueries.insertUserHabit(
-            habitId = userHabit.habitId,
-            startDate = userHabit.startDate.toString(),
-            endDate = effectiveEndDate.toString(),
-            daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
-            timeOfDay = userHabit.timeOfDay.ordinal.toLong(),
-            reminderEnabled = if (userHabit.reminderEnabled) 1L else 0L,
-            reminderTime = userHabit.reminderTime?.toTimeString()
-        )
+        return@withContext database.transactionWithResult {
+            userHabitsQueries.insertUserHabit(
+                habitId = userHabit.habitId,
+                startDate = userHabit.startDate.toString(),
+                endDate = effectiveEndDate.toString(),
+                daysOfWeek = userHabit.daysOfWeek.joinToString(",") { it.name },
+                timeOfDay = userHabit.timeOfDay.ordinal.toLong(),
+                reminderEnabled = if (userHabit.reminderEnabled) 1L else 0L,
+                reminderTime = userHabit.reminderTime?.toTimeString()
+            )
 
-        val localHabitId = userHabitsQueries.lastInsertRowId().executeAsOne()
-        Napier.d("lastInsertRowId $localHabitId for userHabit $userHabit", tag = "TAG")
+            val localHabitId = userHabitsQueries.lastInsertRowId().executeAsOne()
+            Napier.d("lastInsertRowId $localHabitId for userHabit $userHabit", tag = "TAG")
 
-        return@withContext generateHabitRecords(localHabitId, userHabit, effectiveEndDate)
+            generateHabitRecords(localHabitId, userHabit, effectiveEndDate)
+        }
     }
 
-    private suspend fun generateHabitRecords(
+    private fun generateHabitRecords(
         userHabitId: Long,
         userHabit: UserHabit,
         effectiveEndDate: LocalDate
-    ) = withContext(Dispatchers.IO) {
+    ): Long {
         val habitDates = generateHabitDates(
             startDate = userHabit.startDate,
             endDate = effectiveEndDate,
@@ -211,7 +213,7 @@ class HabitsLocalDataSource(
             )
         }
 
-        return@withContext userHabitId
+        return userHabitId
     }
 
     /**
