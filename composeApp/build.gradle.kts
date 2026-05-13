@@ -48,9 +48,6 @@ kotlin {
             implementation(libs.firebase.android.crashlytics.ktx)
 
             implementation(libs.ktor.client.okhttp)
-
-            // Add Lottie dependency for Android
-            implementation("com.airbnb.android:lottie-compose:6.1.0")
         }
 
         iosMain.dependencies {
@@ -136,6 +133,7 @@ kotlin {
 
             implementation(libs.material.icons.extended)
 
+            implementation(libs.compottie)
 
         }
 
@@ -224,4 +222,3 @@ sqldelight {
         }
     }
 }
-

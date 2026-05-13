@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
@@ -35,32 +34,10 @@ class HomeViewModel(
     private val selectedDateFlow = MutableStateFlow(getCurrentDate())
 
     init {
-        // Initialize repository data
-        initializeData()
-
-        // Set up the main data observation flow
         observeHabitData()
     }
 
-    /**
-     * Initialize repository data and prepare for habit loading
-     */
-    private fun initializeData() {
-        launch {
-            updateState { it.copy(isLoading = true) }
-            repository.initData()
-                .onFailure { error ->
-                    Napier.e("Failed to initialize data", error, tag = TAG)
-                    updateState { it.copy(isLoading = false) }
-                }
-        }
-    }
-
-    /**
-     * Set up the main flow to observe habits based on selected date and time of day
-     */
     private fun observeHabitData() {
-        // Combine the date and time of day flows to reload habits when either changes
         combine(
             selectedDateFlow,
             selectedTimeOfDayFlow
@@ -69,7 +46,6 @@ class HomeViewModel(
         }.flatMapLatest { (date, timeOfDay) ->
             loadHabitsForDateAndTimeOfDay(date, timeOfDay)
         }.onEach { filteredState ->
-            // Update the UI state with the filtered habits
             updateState { currentState ->
                 currentState.copy(
                     userHabits = filteredState.habits,
@@ -82,6 +58,8 @@ class HomeViewModel(
         }.catch { error ->
             Napier.e("Error loading habits", error, tag = TAG)
             updateState { it.copy(isLoading = false) }
+        }.onStart {
+            updateState { it.copy(isLoading = true) }
         }.launchIn(viewModelScope)
     }
 
@@ -99,11 +77,9 @@ class HomeViewModel(
         return repository.getUserHabitsByDayFlow(date)
             .onStart { updateState { it.copy(isLoading = true) } }
             .map { allHabits ->
-                // Filter habits by time of day
                 val filteredHabits = allHabits.filter { it.timeOfDay == timeOfDay }
                 val completedCount = filteredHabits.count { it.isCompleted }
 
-                // Create a state object with all the calculated values
                 FilteredHabitState(
                     habits = filteredHabits,
                     totalHabitsCountForTimeOfDay = filteredHabits.size,
@@ -125,7 +101,6 @@ class HomeViewModel(
         when (event) {
             is HomeScreenUiEvent.SelectTimeOfDay -> {
                 if (state.value.selectedTimeOfDay == event.timeOfDay) return
-                // Update the time of day in both state and flow
                 updateState { it.copy(selectedTimeOfDay = event.timeOfDay) }
                 selectedTimeOfDayFlow.value = event.timeOfDay
             }
@@ -140,7 +115,6 @@ class HomeViewModel(
                     return
                 }
 
-                // Update the date in both state and flow
                 updateState { it.copy(selectedDate = newDate, habitStatusEditMode = editMode) }
                 selectedDateFlow.value = newDate
             }
@@ -172,7 +146,6 @@ class HomeViewModel(
                 )
             } catch (e: Exception) {
                 Napier.e("Failed to update habit completion status", e, tag = TAG)
-                // You could emit a UI event here to show an error message if needed
             }
         }
     }

@@ -130,7 +130,7 @@ private fun HomeScreenContent(
 
         if (uiState.isLoading) {
             BloomLoadingAnimation(
-                modifier = Modifier.align(Alignment.Center).size(150.dp),
+                modifier = Modifier.align(Alignment.Center).size(250.dp),
             )
         }
     }

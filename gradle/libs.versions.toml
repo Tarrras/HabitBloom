@@ -15,6 +15,7 @@ supabaseBom = "3.3.0"
 firebaseCommonKtx = "20.3.3"
 kotlin = "2.3.0"
 compose = "1.10.0"
+compottie = "2.1.0"
 koinCore = "4.2.1"
 koinAndroid = "4.2.1"
 koin-compose = "4.2.1"
@@ -50,6 +51,7 @@ coil-svg = { module = "io.coil-kt.coil3:coil-svg", version.ref = "coilCompose" }
 coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }
 coil-compose-core = { module = "io.coil-kt.coil3:coil-compose-core", version.ref = "coilCompose" }
 coil-network-ktor3 = { module = "io.coil-kt.coil3:coil-network-ktor3", version.ref = "coilCompose" }
+compottie = { module = "io.github.alexzhirkevich:compottie", version.ref = "compottie" }
 core = { module = "androidx.core:core", version.ref = "core" }
 coroutines-extensions = { module = "app.cash.sqldelight:coroutines-extensions", version.ref = "androidDriver" }
 haze = { module = "dev.chrisbanes.haze:haze", version.ref = "haze" }
