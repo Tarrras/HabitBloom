@@ -113,12 +113,9 @@ fun CalendarScreen(
 ) {
     val uiState by viewModel.state.collectAsState()
 
-    // Handle navigation
     viewModel.uiIntents.collectAsEffect { intent ->
         when (intent) {
-            is CalendarUiIntent.OpenHabitDetails -> {
-                // Navigation will be handled by parent NavHost
-            }
+            is CalendarUiIntent.OpenHabitDetails -> {}
         }
     }
 
@@ -151,7 +148,6 @@ private fun CalendarScreenContent(
     )
     val coroutineScope = rememberCoroutineScope()
 
-    // Collapsible statistics card state
     var statsCardExpanded by remember { mutableStateOf(true) }
     val rotationState by animateFloatAsState(
         targetValue = if (statsCardExpanded) 0f else 180f
@@ -185,7 +181,6 @@ private fun CalendarScreenContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Collapsible Monthly Statistics Card
         BloomSurface(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp)
@@ -194,7 +189,6 @@ private fun CalendarScreenContent(
                 modifier = Modifier.padding(12.dp)
                     .animateContentSize()
             ) {
-                // Header with expand/collapse button
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -218,7 +212,6 @@ private fun CalendarScreenContent(
                     )
                 }
 
-                // Content that expands/collapses
                 AnimatedVisibility(visible = statsCardExpanded) {
                     Column {
                         Spacer(modifier = Modifier.height(16.dp))
@@ -227,21 +220,18 @@ private fun CalendarScreenContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            // Total Habits
                             StatisticItem(
                                 label = stringResource(Res.string.calendar_statistics_total),
                                 value = uiState.monthlyStats.totalHabits.toString(),
                                 modifier = Modifier.weight(1f)
                             )
 
-                            // Completed Habits
                             StatisticItem(
                                 label = stringResource(Res.string.calendar_statistics_completed),
                                 value = uiState.monthlyStats.completedHabits.toString(),
                                 modifier = Modifier.weight(1f)
                             )
 
-                            // Longest Streak
                             StatisticItem(
                                 label = stringResource(Res.string.calendar_statistics_longest_streak),
                                 value = uiState.monthlyStats.longestStreak.toString(),
@@ -251,7 +241,6 @@ private fun CalendarScreenContent(
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Completion Rate
                         Column(
                             modifier = Modifier.fillMaxWidth()
                         ) {
@@ -286,14 +275,12 @@ private fun CalendarScreenContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Calendar Legend
         CalendarDayStatusColors(
             modifier = Modifier.fillMaxWidth()
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Calendar
         FullScreenCalendar(
             uiState = uiState,
             onDateSelected = { date ->
@@ -308,7 +295,6 @@ private fun CalendarScreenContent(
 
     }
 
-    // Bottom sheet for habit details
     if (uiState.showBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = {
