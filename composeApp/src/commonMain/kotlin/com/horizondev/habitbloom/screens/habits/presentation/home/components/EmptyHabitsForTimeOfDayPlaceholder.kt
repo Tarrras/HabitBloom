@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,9 +19,7 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.add_afternoon_habit
 import habitbloom.composeapp.generated.resources.add_evening_habit
 import habitbloom.composeapp.generated.resources.add_morning_habit
-import habitbloom.composeapp.generated.resources.afternoon_habits_image
-import habitbloom.composeapp.generated.resources.evening_habits_image
-import habitbloom.composeapp.generated.resources.morning_habits_image
+import habitbloom.composeapp.generated.resources.empty_state
 import habitbloom.composeapp.generated.resources.no_afternoon_habits
 import habitbloom.composeapp.generated.resources.no_evening_habits
 import habitbloom.composeapp.generated.resources.no_morning_habits
@@ -43,10 +40,8 @@ fun EmptyHabitsForTimeOfDayPlaceholder(
         Image(
             painter = selectTimeOfDay.placeholderImage(),
             contentDescription = selectTimeOfDay.name,
-            modifier = Modifier.size(150.dp),
             contentScale = ContentScale.FillBounds
         )
-        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = selectTimeOfDay.placeholderTitle(),
             style = BloomTheme.typography.heading,
@@ -65,9 +60,9 @@ fun EmptyHabitsForTimeOfDayPlaceholder(
 @Composable
 fun TimeOfDay.placeholderImage(): Painter {
     return when (this) {
-        TimeOfDay.Morning -> painterResource(Res.drawable.morning_habits_image)
-        TimeOfDay.Afternoon -> painterResource(Res.drawable.afternoon_habits_image)
-        TimeOfDay.Evening -> painterResource(Res.drawable.evening_habits_image)
+        TimeOfDay.Morning -> painterResource(Res.drawable.empty_state)
+        TimeOfDay.Afternoon -> painterResource(Res.drawable.empty_state)
+        TimeOfDay.Evening -> painterResource(Res.drawable.empty_state)
     }
 }
 
