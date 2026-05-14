@@ -335,9 +335,21 @@
     <string name="theme_dark">Dark</string>
     <string name="theme_device">System</string>
     <string name="appearance">Appearance</string>
-    <string name="settings_appearance_theme">App Theme</string>
+    <string name="settings_appearance_theme">Theme appearance</string>
     <string name="notifications">Notifications</string>
     <string name="enable_notifications">Enable notifications</string>
+    <string name="settings_personalize_experience">Personalize your experience</string>
+    <string name="settings_profile">My Profile</string>
+    <string name="settings_profile_subtitle">Configure account</string>
+    <string name="settings_reminders_subtitle">Habit reminders</string>
+    <string name="settings_delete_data_description_short">Reset the app to its initial state</string>
+    <string name="settings_about_app">About App</string>
+    <string name="settings_rate_app">Rate App</string>
+    <string name="settings_app_store">App Store</string>
+    <string name="settings_privacy">Privacy</string>
+    <string name="settings_privacy_subtitle">Data policy</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_version_number">1.0.0</string>
 
     <string name="weekly_habit_tracking">Weekly Habit Tracking</string>
     <string name="monthly_habit_tracking">Monthly Habit Tracking</string>

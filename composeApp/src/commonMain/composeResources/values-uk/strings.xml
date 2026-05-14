@@ -327,9 +327,22 @@
     <string name="theme_dark">Темна</string>
     <string name="theme_device">Системна</string>
     <string name="appearance">Зовнішній вигляд</string>
-    <string name="settings_appearance_theme">Тема додатку</string>
+    <string name="settings_appearance_theme">Тема оформлення</string>
     <string name="notifications">Сповіщення</string>
     <string name="enable_notifications">Увімкнути сповіщення</string>
+    <string name="settings_personalize_experience">Персоналізуйте свій досвід</string>
+    <string name="settings_profile">Мій профіль</string>
+    <string name="settings_profile_subtitle">Налаштуйте обліковий запис</string>
+    <string name="settings_reminders_subtitle">Нагадування про звички</string>
+    <string name="settings_delete_data_description_short">Скинути додаток до початкового стану</string>
+    <string name="settings_about_app">Про додаток</string>
+    <string name="settings_rate_app">Оцінити додаток</string>
+    <string name="settings_app_store">App Store</string>
+    <string name="settings_privacy">Конфіденційність</string>
+    <string name="settings_privacy_subtitle">Політика даних</string>
+    <string name="settings_version">Версія</string>
+    <string name="settings_version_number">1.0.0</string>
+    <string name="data_management">Керування даними</string>
 
     <string name="weekly_habit_tracking">Тижневе відстеження звичок</string>
     <string name="monthly_habit_tracking">Місячне відстеження звичок</string>
