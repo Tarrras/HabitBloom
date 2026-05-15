@@ -19,6 +19,11 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import org.jetbrains.compose.resources.getString
 
+internal enum class HabitCatalogLoadMode(val forceRefresh: Boolean) {
+    LocalFirst(forceRefresh = false),
+    RemoteRefresh(forceRefresh = true)
+}
+
 class AddHabitChoiceViewModel(
     private val repository: HabitsRepository,
     private val addHabitStateUseCase: AddHabitStateUseCase
@@ -32,7 +37,7 @@ class AddHabitChoiceViewModel(
     private var isInitialLoad = true
 
     init {
-        requestHabits(forceRefresh = true)
+        requestHabits(HabitCatalogLoadMode.LocalFirst)
 
         launch {
             state
@@ -41,15 +46,14 @@ class AddHabitChoiceViewModel(
                 .drop(1)
                 .debounce(300) // Reduced from 500ms for better UX
                 .collectLatest {
-                    loadHabits(forceRefresh = false)
+                    loadHabits(HabitCatalogLoadMode.LocalFirst)
                 }
         }
     }
 
     fun handleScreenResumed() {
         if (!isInitialLoad) {
-            // Only refresh if this is not the initial load
-            handleUiEvent(AddHabitChoiceUiEvent.RefreshPage)
+            requestHabits(HabitCatalogLoadMode.LocalFirst)
         }
     }
 
@@ -96,7 +100,7 @@ class AddHabitChoiceViewModel(
             }
 
             AddHabitChoiceUiEvent.RefreshPage -> {
-                requestHabits(forceRefresh = true)
+                requestHabits(HabitCatalogLoadMode.RemoteRefresh)
             }
         }
     }
@@ -119,13 +123,13 @@ class AddHabitChoiceViewModel(
         }
     }
 
-    private fun requestHabits(forceRefresh: Boolean) {
+    private fun requestHabits(loadMode: HabitCatalogLoadMode) {
         launch {
-            loadHabits(forceRefresh = forceRefresh)
+            loadHabits(loadMode)
         }
     }
 
-    private suspend fun loadHabits(forceRefresh: Boolean) {
+    private suspend fun loadHabits(loadMode: HabitCatalogLoadMode) {
         val selectedCategory = currentCategory
         val query = state.value.searchInput.trim()
 
@@ -137,7 +141,7 @@ class AddHabitChoiceViewModel(
             repository.getHabits(
                 searchInput = query,
                 categoryId = selectedCategory?.id,
-                forceRefresh = forceRefresh
+                forceRefresh = loadMode.forceRefresh
             )
         }.onSuccess { result ->
             result.fold(
@@ -188,7 +192,7 @@ class AddHabitChoiceViewModel(
             }.onSuccess { result ->
                 result.fold(
                     onSuccess = {
-                        loadHabits(forceRefresh = false)
+                        loadHabits(HabitCatalogLoadMode.LocalFirst)
                         emitUiIntent(
                             AddHabitChoiceUiIntent.ShowSnackbar(
                                 BloomSnackbarVisuals(

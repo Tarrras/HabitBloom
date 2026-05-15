@@ -20,16 +20,15 @@ class HabitCatalogLocalDataSource(
             database.transaction {
                 habitCatalogQueries.deleteAllHabitCatalogItems()
                 habits.forEach { habit ->
-                    habitCatalogQueries.upsertHabitCatalogItem(
-                        id = habit.id,
-                        description = habit.description,
-                        iconUrl = habit.iconUrl,
-                        name = habit.name,
-                        categoryId = habit.categoryId,
-                        isCustomHabit = if (habit.isCustomHabit) 1L else 0L
-                    )
+                    upsertHabitCatalogItem(habit)
                 }
             }
+        }
+    }
+
+    suspend fun upsertHabit(habit: HabitInfo) {
+        withContext(Dispatchers.IO) {
+            upsertHabitCatalogItem(habit)
         }
     }
 
@@ -54,5 +53,16 @@ class HabitCatalogLocalDataSource(
         withContext(Dispatchers.IO) {
             habitCatalogQueries.deleteHabitCatalogItemById(habitId)
         }
+    }
+
+    private fun upsertHabitCatalogItem(habit: HabitInfo) {
+        habitCatalogQueries.upsertHabitCatalogItem(
+            id = habit.id,
+            description = habit.description,
+            iconUrl = habit.iconUrl,
+            name = habit.name,
+            categoryId = habit.categoryId,
+            isCustomHabit = if (habit.isCustomHabit) 1L else 0L
+        )
     }
 }

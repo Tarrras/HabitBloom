@@ -6,7 +6,6 @@ import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiEvent
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiIntent
 import com.horizondev.habitbloom.screens.habits.presentation.createHabit.details.CreatePersonalHabitUiState
-import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.HABIT_DESCRIPTION_MAX_LENGTH
 import com.horizondev.habitbloom.utils.HABIT_TITLE_MAX_LENGTH
@@ -20,7 +19,6 @@ import org.jetbrains.compose.resources.getString
  */
 class CreatePersonalHabitViewModel(
     private val habitRepository: HabitsRepository,
-    private val profileRepository: ProfileRepository,
     private val categoryId: String
 ) : BloomViewModel<CreatePersonalHabitUiState, CreatePersonalHabitUiIntent>(
     initialState = CreatePersonalHabitUiState()
@@ -85,12 +83,10 @@ class CreatePersonalHabitViewModel(
             updateState { it.copy(showCreateHabitDialog = false, isLoading = true) }
 
             val uiState = state.value
-            val userId = profileRepository.getUserInfo().getOrNull()?.id ?: return@launch
 
-            Napier.d("Creating habit with image: ${uiState.selectedImageUrl ?: "No image"}")
+            Napier.d("Creating local habit with image: ${uiState.selectedImageUrl}")
 
             habitRepository.createPersonalHabit(
-                userId = userId,
                 title = uiState.title,
                 description = uiState.description,
                 categoryId = categoryId,

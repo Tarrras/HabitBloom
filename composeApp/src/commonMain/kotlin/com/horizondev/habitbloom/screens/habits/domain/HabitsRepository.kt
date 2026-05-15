@@ -15,7 +15,6 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
-import com.horizondev.habitbloom.screens.settings.data.ProfileRemoteDataSource
 import com.horizondev.habitbloom.utils.DEFAULT_PHOTO_URL
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getNearestDateForNotification
@@ -37,10 +36,10 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.minus
 import kotlinx.datetime.plus
+import kotlin.random.Random
 
 class HabitsRepository(
     private val remoteDataSource: HabitsRemoteDataSource,
-    private val profileRemoteDataSource: ProfileRemoteDataSource,
     private val localDataSource: HabitsLocalDataSource,
     private val habitCatalogLocalDataSource: HabitCatalogLocalDataSource,
     private val storageService: SupabaseStorageService,
@@ -65,29 +64,10 @@ class HabitsRepository(
         }
     }
 
-    private suspend fun getAuthenticatedUserId(): Result<String> {
-        return withContext(Dispatchers.IO) {
-            profileRemoteDataSource.getUser()
-                .mapCatching { it.id }
-                .recoverCatching {
-                    Napier.d("User not authenticated, trying anonymous sign-in...", tag = TAG)
-                    val authSuccess = profileRemoteDataSource.authenticateUser().getOrThrow()
-                    if (!authSuccess) {
-                        throw IllegalStateException("Authentication failed")
-                    }
-                    profileRemoteDataSource.getUser().getOrThrow().id
-                }
-        }
-    }
-
     private suspend fun fetchRemoteHabitsFromNetwork(): Result<List<HabitInfo>> {
         return withContext(Dispatchers.IO) {
             Napier.d("Fetching network habits...", tag = TAG)
-            val userId = getAuthenticatedUserId().getOrElse { error ->
-                Napier.e("Failed to get user ID for habits", error, tag = TAG)
-                return@withContext Result.failure(error)
-            }
-            remoteDataSource.getHabits(userId)
+            remoteDataSource.getHabits()
         }
     }
 
@@ -122,7 +102,12 @@ class HabitsRepository(
                 remoteResult = remoteResult
             ).onSuccess { habits ->
                 if (remoteResult.isSuccess) {
-                    habitCatalogLocalDataSource.replaceHabits(habits)
+                    habitCatalogLocalDataSource.replaceHabits(
+                        mergeRemoteCatalogWithLocalCustomHabits(
+                            remoteHabits = habits,
+                            cachedHabits = cachedHabits
+                        )
+                    )
                 }
             }
         }
@@ -240,27 +225,23 @@ class HabitsRepository(
     }
 
     suspend fun createPersonalHabit(
-        userId: String,
         title: String,
         description: String,
         categoryId: String? = null,
         icon: String = DEFAULT_PHOTO_URL
     ): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            remoteDataSource.savePersonalHabit(
-                userId = userId,
-                title = title,
-                description = description,
-                categoryId = categoryId,
-                icon = icon
-            ).onSuccess {
-                refreshHabitCatalog().onFailure { error ->
-                    Napier.e(
-                        "Failed to refresh habits catalog after creating personal habit",
-                        error,
-                        tag = TAG
+            runCatching {
+                habitCatalogLocalDataSource.upsertHabit(
+                    buildLocalCustomHabitInfo(
+                        id = generateLocalCustomHabitId(title),
+                        title = title,
+                        description = description,
+                        categoryId = categoryId,
+                        icon = icon
                     )
-                }
+                )
+                true
             }
         }
     }
@@ -427,12 +408,12 @@ class HabitsRepository(
      */
     suspend fun deleteCustomHabit(habitId: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
-            remoteDataSource.deleteCustomHabit(habitId)
-                .onSuccess {
-                    habitCatalogLocalDataSource.deleteHabit(habitId)
-                }.onFailure { error ->
-                    Napier.e("Failed to delete custom habit: ${error.message}", error, tag = TAG)
-                }
+            runCatching {
+                habitCatalogLocalDataSource.deleteHabit(habitId)
+                true
+            }.onFailure { error ->
+                Napier.e("Failed to delete local custom habit: ${error.message}", error, tag = TAG)
+            }
         }
     }
 
@@ -865,4 +846,34 @@ internal fun resolveCatalogRefreshResult(
             throw error
         }
     }
+}
+
+internal fun buildLocalCustomHabitInfo(
+    id: String,
+    title: String,
+    description: String,
+    categoryId: String?,
+    icon: String
+): HabitInfo {
+    return HabitInfo(
+        id = id,
+        description = description.trim(),
+        iconUrl = icon,
+        name = title.trim(),
+        categoryId = categoryId?.takeIf { it.isNotBlank() },
+        isCustomHabit = true
+    )
+}
+
+internal fun mergeRemoteCatalogWithLocalCustomHabits(
+    remoteHabits: List<HabitInfo>,
+    cachedHabits: List<HabitInfo>
+): List<HabitInfo> {
+    return remoteHabits + cachedHabits.filter { it.isCustomHabit }
+}
+
+private fun generateLocalCustomHabitId(title: String): String {
+    val titleHash = title.hashCode().toString().replace("-", "n")
+    val randomSuffix = Random.nextLong().toString().replace("-", "n")
+    return "local_custom_${randomSuffix}_$titleHash"
 }

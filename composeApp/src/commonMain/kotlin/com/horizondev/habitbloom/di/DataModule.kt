@@ -28,7 +28,6 @@ val dataModule = module {
     single {
         HabitsRepository(
             remoteDataSource = get(),
-            profileRemoteDataSource = get(),
             localDataSource = get(),
             habitCatalogLocalDataSource = get(),
             storageService = get(),
