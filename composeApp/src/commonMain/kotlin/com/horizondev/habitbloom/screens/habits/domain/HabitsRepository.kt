@@ -417,6 +417,17 @@ class HabitsRepository(
         }
     }
 
+    suspend fun deleteAllLocalUserHabitData(): Result<Unit> {
+        return withContext(Dispatchers.IO) {
+            runCatching {
+                localDataSource.deleteAllUserHabitData()
+                habitCatalogLocalDataSource.deleteCustomHabits()
+            }.onFailure { error ->
+                Napier.e("Failed to delete local user habit data", error, tag = TAG)
+            }
+        }
+    }
+
     /**
      * Adds a new habit with the specified details.
      *

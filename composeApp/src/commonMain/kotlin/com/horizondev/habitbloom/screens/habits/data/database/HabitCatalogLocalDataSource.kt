@@ -55,6 +55,12 @@ class HabitCatalogLocalDataSource(
         }
     }
 
+    suspend fun deleteCustomHabits() {
+        withContext(Dispatchers.IO) {
+            habitCatalogQueries.deleteCustomHabitCatalogItems()
+        }
+    }
+
     private fun upsertHabitCatalogItem(habit: HabitInfo) {
         habitCatalogQueries.upsertHabitCatalogItem(
             id = habit.id,

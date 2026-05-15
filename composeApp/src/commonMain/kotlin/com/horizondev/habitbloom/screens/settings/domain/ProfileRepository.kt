@@ -167,6 +167,8 @@ class ProfileRepository(
      * Resets all app data, effectively resetting the app to a clean slate.
      * This includes:
      * - Deleting all habits and habit records
+     * - Deleting local custom habit catalog items
+     * - Deleting stored flower health data
      * - Clearing user preferences and settings
      * - Resetting onboarding status
      *
@@ -177,17 +179,17 @@ class ProfileRepository(
             // Cancel all notifications
             cancelAllHabitReminders()
 
-            // Reset onboarding completed status
-            onboardingRepository.setOnboardingCompleted(false)
+            // Delete all local user-owned habit data.
+            habitsRepository.deleteAllLocalUserHabitData().getOrThrow()
 
-            // Delete all habits (which should cascade to habit records)
-            val userHabits = habitsRepository.getUserHabitsWithoutDetails()
-            userHabits.forEach { habit ->
-                habitsRepository.deleteUserHabit(habit.id)
-            }
+            // Clear legacy stored flower health rows, if present.
+            flowerHealthRepository.deleteAllFlowerHealth()
 
             // Clear all settings
             settings.clear()
+
+            // Reset onboarding completed status after clearing settings.
+            onboardingRepository.setOnboardingCompleted(false)
         }
     }
 }

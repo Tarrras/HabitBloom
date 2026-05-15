@@ -50,6 +50,10 @@ deleteUserHabitRecordsEntityByUserHabitId:
 DELETE FROM UserHabitRecordsEntity
 WHERE userHabitId = ?;
 
+-- Delete all habit records
+deleteAllUserHabitRecords:
+DELETE FROM UserHabitRecordsEntity;
+
 -- Delete habit records for a specific user habit and date
 deleteUserHabitRecordsEntityByUserHabitIdAndDate:
 DELETE FROM UserHabitRecordsEntity

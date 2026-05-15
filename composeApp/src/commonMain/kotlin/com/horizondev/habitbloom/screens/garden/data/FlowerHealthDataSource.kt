@@ -27,7 +27,7 @@ data class FlowerHealthRecord(
  * Data source for managing flower health calculations based on habit completion history.
  */
 class FlowerHealthDataSource(
-    database: HabitBloomDatabase,
+    private val database: HabitBloomDatabase,
     private val localDataSource: HabitsLocalDataSource
 ) {
     private val TAG = "FlowerHealthDataSource"
@@ -213,6 +213,10 @@ class FlowerHealthDataSource(
         updateDate: LocalDate = getCurrentDate()
     ) = withContext(Dispatchers.IO) {
         // No-op in runtime calculation approach
+    }
+
+    suspend fun deleteAllFlowerHealth() = withContext(Dispatchers.IO) {
+        database.flowerHealthEntityQueries.deleteAllFlowerHealth()
     }
 
     private fun selectAlpha(daysPerWeek: Int): Float {

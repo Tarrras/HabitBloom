@@ -55,6 +55,10 @@ deleteUserHabitById:
 DELETE FROM UserHabitsEntity
 WHERE id = ?;
 
+-- Delete all user habits
+deleteAllUserHabits:
+DELETE FROM UserHabitsEntity;
+
 -- Get the last inserted row ID
 lastInsertRowId:
 SELECT last_insert_rowid();

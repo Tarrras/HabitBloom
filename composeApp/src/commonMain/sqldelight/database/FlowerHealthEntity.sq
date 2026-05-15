@@ -29,6 +29,10 @@ deleteFlowerHealthByUserHabitId:
 DELETE FROM FlowerHealthEntity
 WHERE userHabitId = ?;
 
+-- Delete all flower health records
+deleteAllFlowerHealth:
+DELETE FROM FlowerHealthEntity;
+
 -- Update only the last updated date for a flower health record
 updateFlowerHealthLastUpdatedDate:
 UPDATE FlowerHealthEntity

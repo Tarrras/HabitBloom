@@ -76,4 +76,8 @@ class FlowerHealthRepository(
             }
         }
     }
+
+    suspend fun deleteAllFlowerHealth() {
+        flowerHealthDataSource.deleteAllFlowerHealth()
+    }
 } 
