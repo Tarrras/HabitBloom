@@ -6,19 +6,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -144,58 +143,69 @@ fun AddHabitChoiceScreenContent(
     onCreateCustomHabit: (String?) -> Unit,
 ) {
     // UI Content
-    Box {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+    val headerText = if (uiState.searchInput.isBlank())
+        stringResource(Res.string.or_choose_ready_count, uiState.habits.size)
+    else stringResource(Res.string.found_count, uiState.habits.size)
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .imePadding()
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(Res.string.choose_habit_to_acquire),
-                style = BloomTheme.typography.title,
-                color = BloomTheme.colors.textColor.primary,
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(Res.string.choose_ready_or_create_own),
-                style = BloomTheme.typography.body,
-                color = BloomTheme.colors.textColor.secondary,
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-            if (uiState.isLoading.not()) {
-                BloomSearchTextField(
-                    value = uiState.searchInput,
-                    onValueChange = {
-                        handleUiEvent(AddHabitChoiceUiEvent.UpdateSearchInput(it))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholderText = stringResource(Res.string.search_habit)
+            item(key = "title") {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(Res.string.choose_habit_to_acquire),
+                    style = BloomTheme.typography.title,
+                    color = BloomTheme.colors.textColor.primary,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(Res.string.choose_ready_or_create_own),
+                    style = BloomTheme.typography.body,
+                    color = BloomTheme.colors.textColor.secondary,
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+            }
 
-                // Category-specific empty placeholder when no habits and search is empty
+            if (uiState.isLoading.not()) {
+                item(key = "search") {
+                    BloomSearchTextField(
+                        value = uiState.searchInput,
+                        onValueChange = {
+                            handleUiEvent(AddHabitChoiceUiEvent.UpdateSearchInput(it))
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholderText = stringResource(Res.string.search_habit)
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
                 val categoryDraft = currentCategory
                 if (categoryDraft != null && uiState.habits.isEmpty() && uiState.searchInput.isBlank()) {
-                    CategoryNoHabitsPlaceholder(
-                        category = categoryDraft,
-                        onCreateCustomHabit = { onCreateCustomHabit(categoryDraft?.id) }
-                    )
+                    item(key = "category_empty") {
+                        CategoryNoHabitsPlaceholder(
+                            category = categoryDraft,
+                            onCreateCustomHabit = { onCreateCustomHabit(categoryDraft.id) }
+                        )
+                    }
                 } else {
-                    // Create personal habit CTA card (dashed)
-                    CreatePersonalHabitCard(
-                        onClick = { handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit) }
-                    )
+                    item(key = "create_personal_habit") {
+                        CreatePersonalHabitCard(
+                            onClick = { handleUiEvent(AddHabitChoiceUiEvent.CreateCustomHabit) }
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        SectionHeader(text = headerText)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    val headerText = if (uiState.searchInput.isBlank())
-                        stringResource(Res.string.or_choose_ready_count, uiState.habits.size)
-                    else stringResource(Res.string.found_count, uiState.habits.size)
-
-                    SectionHeader(text = headerText)
-                    Spacer(modifier = Modifier.height(8.dp))
                     if (uiState.habits.isNotEmpty()) {
-                        HabitsList(
+                        habits(
                             habits = uiState.habits,
                             onHabitClicked = {
                                 handleUiEvent(AddHabitChoiceUiEvent.SelectHabit(it))
@@ -206,25 +216,33 @@ fun AddHabitChoiceScreenContent(
                         )
                     } else {
                         if (uiState.searchInput.isBlank()) {
-                            NoResultsPlaceholders(
-                                modifier = Modifier.fillMaxWidth(),
-                                title = stringResource(Res.string.no_habits_found),
-                                description = stringResource(Res.string.add_your_own_personal_habit_to_start_tracking),
-                                buttonText = stringResource(Res.string.create_personal_habit),
-                                onButtonClick = {
-                                    onCreateCustomHabit(currentCategory?.id)
-                                }
-                            )
+                            item(key = "no_habits") {
+                                NoResultsPlaceholders(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    title = stringResource(Res.string.no_habits_found),
+                                    description = stringResource(Res.string.add_your_own_personal_habit_to_start_tracking),
+                                    buttonText = stringResource(Res.string.create_personal_habit),
+                                    onButtonClick = {
+                                        onCreateCustomHabit(currentCategory?.id)
+                                    }
+                                )
+                            }
                         } else {
-                            HabitSearchNoResultsPlaceholder(
-                                query = uiState.searchInput,
-                                onClearSearch = {
-                                    handleUiEvent(AddHabitChoiceUiEvent.UpdateSearchInput(""))
-                                }
-                            )
+                            item(key = "search_empty") {
+                                HabitSearchNoResultsPlaceholder(
+                                    query = uiState.searchInput,
+                                    onClearSearch = {
+                                        handleUiEvent(AddHabitChoiceUiEvent.UpdateSearchInput(""))
+                                    }
+                                )
+                            }
                         }
                     }
                 }
+            }
+
+            item(key = "bottom_padding") {
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
 
@@ -462,31 +480,6 @@ private fun CategoryNoHabitsPlaceholder(
             }
         }
     }
-}
-
-/**
- * Displays the list of habits.
- */
-@Composable
-private fun HabitsList(
-    habits: List<HabitInfo>,
-    onHabitClicked: (HabitInfo) -> Unit,
-    onHabitDelete: (HabitInfo) -> Unit
-) {
-    val lazyListState = rememberLazyListState()
-
-    LazyColumn(
-        state = lazyListState,
-        contentPadding = PaddingValues(top = 12.dp, bottom = 24.dp)
-    ) {
-        habits(
-            habits = habits,
-            onHabitClicked = onHabitClicked,
-            onHabitDelete = onHabitDelete
-        )
-    }
-
-    // Removed the floating "create personal habit" button that appears when scrolling
 }
 
 @Composable

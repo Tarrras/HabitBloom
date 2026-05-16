@@ -314,6 +314,7 @@
     <string name="calendar_filter_all_habits">Всі звички</string>
     <string name="calendar_habit_detail_date">Звички на %1$s</string>
     <string name="calendar_no_habits">Немає запланованих звичок на цей день</string>
+    <string name="calendar_week_no_habits">Немає запланованих звичок на цей тиждень</string>
     <string name="calendar_streak_current">Поточна серія</string>
     <string name="calendar_streak_longest">Найдовша серія</string>
     <string name="calendar_today_button">Перейти до сьогодні</string>

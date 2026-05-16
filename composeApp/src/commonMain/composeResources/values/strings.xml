@@ -322,6 +322,7 @@
     <string name="calendar_filter_all_habits">All Habits</string>
     <string name="calendar_habit_detail_date">Habits on %1$s</string>
     <string name="calendar_no_habits">No habits scheduled for this day</string>
+    <string name="calendar_week_no_habits">No habits scheduled for this week</string>
     <string name="calendar_streak_current">Current Streak</string>
     <string name="calendar_streak_longest">Longest Streak</string>
     <string name="calendar_today_button">Jump to today</string>
