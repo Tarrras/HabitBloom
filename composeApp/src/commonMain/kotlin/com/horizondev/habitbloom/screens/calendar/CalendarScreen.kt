@@ -797,11 +797,11 @@ private fun WeeklyHabitsContainer(
                     userHabitId = records.first().userHabitId,
                     name = records.first().name,
                     timeOfDay = records.first().timeOfDay,
-                    daysStreak = records.maxOfOrNull { it.daysStreak } ?: 0,
+                    completedDays = records.count { it.isCompleted },
                     recordsByDate = records.associateBy { it.date }
                 )
             }
-            .sortedWith(compareBy<WeeklyHabitRowData> { it.timeOfDay.ordinal }.thenBy { it.name })
+            .sortedWith(compareBy<WeeklyHabitRowData> { it.completedDays }.thenBy { it.name })
     }
     val weeklyTotalHabits = remember(filteredHabitsByDate) {
         filteredHabitsByDate.values.sumOf { it.size }
@@ -880,7 +880,7 @@ private data class WeeklyHabitRowData(
     val userHabitId: Long,
     val name: String,
     val timeOfDay: TimeOfDay,
-    val daysStreak: Int,
+    val completedDays: Int,
     val recordsByDate: Map<LocalDate, UserHabitRecordFullInfo>
 )
 
@@ -1093,7 +1093,7 @@ private fun WeeklyHabitMatrixRow(
                     maxLines = 1
                 )
                 Text(
-                    text = "${row.daysStreak} ${stringResource(Res.string.days)}",
+                    text = "${row.completedDays} ${stringResource(Res.string.days)}",
                     style = BloomTheme.typography.small,
                     color = BloomTheme.colors.textColor.secondary
                 )
