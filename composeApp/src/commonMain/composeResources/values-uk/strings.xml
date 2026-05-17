@@ -228,6 +228,18 @@
     <string name="monthly_completion_rate">Місячна частота виконання</string>
     <string name="yearly_completion_rate">Річна частота виконання</string>
     <string name="no_data_available">Немає доступних даних</string>
+    <string name="statistics_subtitle">Ваш прогрес та досягнення</string>
+    <string name="period_dynamics">Динаміка за період</string>
+    <string name="best_time_of_day">Найкращий час дня</string>
+    <string name="general_statistics">Загальна статистика</string>
+    <string name="completed_habits_count">Виконано звичок</string>
+    <string name="longest_streak">Найдовший streak</string>
+    <string name="average_completion">Середнє виконання</string>
+    <string name="best_habit">Найкраща звичка</string>
+    <string name="completion_percent">%1$d%% виконання</string>
+    <string name="days_count">%1$d днів</string>
+    <string name="great_work">Чудова робота!</string>
+    <string name="keep_it_up">Продовжуйте в тому ж дусі!</string>
 
     <string name="habit_details">Деталі звички</string>
     <string name="habit_category">Категорія звички</string>

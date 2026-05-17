@@ -2,6 +2,9 @@ package com.horizondev.habitbloom.screens.statistic
 
 import com.horizondev.habitbloom.core.designComponents.pickers.TimeUnit
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
+import kotlinx.datetime.LocalDate
+import kotlin.math.roundToInt
 
 /**
  * Represents the UI state for the Statistics screen.
@@ -19,8 +22,62 @@ data class StatisticUiState(
     val selectedPeriodLabel: String = "", // Label for the current selected period (week, month, year)
 
     // Formatted chart data (populated by ViewModel)
-    val formattedChartData: ChartData = ChartData.WeekData(emptyList(), emptyMap(), emptyMap())
+    val formattedChartData: ChartData = ChartData.WeekData(emptyList(), emptyMap(), emptyMap()),
+    val summary: StatisticSummary = StatisticSummary()
 )
+
+data class StatisticSummary(
+    val completedHabits: Int = 0,
+    val longestStreak: Int = 0,
+    val averageCompletionRate: Int = 0,
+    val bestHabitName: String = "",
+    val bestHabitCompletionRate: Int = 0,
+    val timeOfDayCompletionRates: Map<TimeOfDay, Int> = TimeOfDay.entries.associateWith { 0 }
+)
+
+internal fun buildStatisticSummary(
+    periodHabitRecords: List<UserHabitRecordFullInfo>,
+    completedByTimeOfDay: Map<TimeOfDay, Int>,
+    completedByPeriod: Map<String, Int>,
+    scheduledByPeriod: Map<String, Int>
+): StatisticSummary {
+    val completedRecords = periodHabitRecords.filter { it.isCompleted }
+    val totalCompleted = completedRecords.size
+    val totalScheduled = scheduledByPeriod.values.sum()
+    val averageCompletionRate = if (totalScheduled == 0) {
+        0
+    } else {
+        (completedByPeriod.values.sum().toFloat() / totalScheduled * 100).roundToInt()
+    }
+
+    val bestHabit = completedRecords
+        .groupBy { it.name }
+        .maxByOrNull { (_, records) -> records.size }
+
+    val bestHabitCompletionRate = bestHabit
+        ?.let { (_, records) ->
+            val scheduledForHabit = periodHabitRecords.count { it.name == records.first().name }
+            if (scheduledForHabit == 0) 0 else (records.size.toFloat() / scheduledForHabit * 100).roundToInt()
+        }
+        ?: 0
+
+    val timeOfDayCompletionRates = TimeOfDay.entries.associateWith { timeOfDay ->
+        if (totalCompleted == 0) {
+            0
+        } else {
+            ((completedByTimeOfDay[timeOfDay] ?: 0).toFloat() / totalCompleted * 100).roundToInt()
+        }
+    }
+
+    return StatisticSummary(
+        completedHabits = totalCompleted,
+        longestStreak = periodHabitRecords.maxOfOrNull { it.daysStreak } ?: 0,
+        averageCompletionRate = averageCompletionRate.coerceIn(0, 100),
+        bestHabitName = bestHabit?.key.orEmpty(),
+        bestHabitCompletionRate = bestHabitCompletionRate.coerceIn(0, 100),
+        timeOfDayCompletionRates = timeOfDayCompletionRates
+    )
+}
 
 /**
  * Represents formatted chart data for different time units in a type-safe way.
@@ -49,7 +106,10 @@ sealed class ChartData {
     data class MonthData(
         val monthlyCategories: List<String>,
         val monthlyCompletedData: Map<String, Int>,
-        val monthlyScheduledData: Map<String, Int>
+        val monthlyScheduledData: Map<String, Int>,
+        val monthLabel: String,
+        val xAxisStartLabel: String,
+        val xAxisEndLabel: String
     ) : ChartData()
 
     /**
@@ -91,6 +151,46 @@ sealed class ChartData {
         is MonthData -> monthlyScheduledData
         is YearData -> yearlyScheduledData
     }
+
+    fun getStartLabel(): String = when (this) {
+        is MonthData -> xAxisStartLabel
+        else -> getCategories().firstOrNull().orEmpty()
+    }
+
+    fun getEndLabel(): String = when (this) {
+        is MonthData -> xAxisEndLabel
+        else -> getCategories().lastOrNull().orEmpty()
+    }
+}
+
+internal fun buildMonthlyChartData(
+    habitRecords: List<UserHabitRecordFullInfo>,
+    startOfMonth: LocalDate,
+    endOfMonth: LocalDate,
+    monthLabel: String,
+    monthShortLabel: String
+): ChartData.MonthData {
+    val days = startOfMonth.day..endOfMonth.day
+    val categories = days.map { it.toString() }
+    val completedData = mutableMapOf<String, Int>()
+    val scheduledData = mutableMapOf<String, Int>()
+
+    for (day in days) {
+        val date = LocalDate(startOfMonth.year, startOfMonth.month, day)
+        val key = day.toString()
+        val recordsForDay = habitRecords.filter { it.date == date }
+        completedData[key] = recordsForDay.count { it.isCompleted }
+        scheduledData[key] = recordsForDay.size
+    }
+
+    return ChartData.MonthData(
+        monthlyCategories = categories,
+        monthlyCompletedData = completedData,
+        monthlyScheduledData = scheduledData,
+        monthLabel = monthLabel,
+        xAxisStartLabel = "${startOfMonth.day} $monthShortLabel",
+        xAxisEndLabel = "${endOfMonth.day} $monthShortLabel"
+    )
 }
 
 /**

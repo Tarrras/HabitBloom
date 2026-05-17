@@ -53,7 +53,7 @@ import com.horizondev.habitbloom.screens.settings.presentation.SettingsViewModel
 import com.horizondev.habitbloom.screens.statistic.StatisticScreen
 import com.horizondev.habitbloom.screens.statistic.StatisticViewModel
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.flower_garden_round_icon
+import habitbloom.composeapp.generated.resources.ic_lucid_sprout
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -175,10 +175,10 @@ fun MainScreen(
                     shape = CircleShape,
                 ) {
                     Icon(
-                        painter = painterResource(Res.drawable.flower_garden_round_icon),
+                        painter = painterResource(Res.drawable.ic_lucid_sprout),
                         contentDescription = "Add Habit",
                         tint = BloomTheme.colors.surface,
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(24.dp),
                     )
                 }
             }

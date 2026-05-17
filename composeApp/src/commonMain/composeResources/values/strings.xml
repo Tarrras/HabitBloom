@@ -220,6 +220,18 @@
     <string name="monthly_completion_rate">Monthly completion rate</string>
     <string name="yearly_completion_rate">Yearly completion rate</string>
     <string name="no_data_available">No data available</string>
+    <string name="statistics_subtitle">Your progress and achievements</string>
+    <string name="period_dynamics">Period dynamics</string>
+    <string name="best_time_of_day">Best time of day</string>
+    <string name="general_statistics">General statistics</string>
+    <string name="completed_habits_count">Completed habits</string>
+    <string name="longest_streak">Longest streak</string>
+    <string name="average_completion">Average completion</string>
+    <string name="best_habit">Best habit</string>
+    <string name="completion_percent">%1$d%% completion</string>
+    <string name="days_count">%1$d days</string>
+    <string name="great_work">Great work!</string>
+    <string name="keep_it_up">Keep going like this!</string>
 
     <string name="habit_details">Habit details</string>
     <string name="habit_category">Habit category</string>

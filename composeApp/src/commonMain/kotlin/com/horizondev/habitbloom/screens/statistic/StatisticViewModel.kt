@@ -149,6 +149,11 @@ class StatisticViewModel(
         selectedPeriodOffset: Int
     ) = viewModelScope.launch {
         val completedHabits = habitRecords.filter { it.isCompleted }
+        val (periodStartDate, periodEndDate) = getPeriodRange(
+            selectedTimeUnit = selectedTimeUnit,
+            periodOffset = selectedPeriodOffset
+        )
+        val periodHabitRecords = habitRecords.filter { it.date in periodStartDate..periodEndDate }
         val completeHabitsByTimeOfDay = handleGeneralHabitStatistic(
             completedHabits = completedHabits,
             selectedTimeUnit = selectedTimeUnit,
@@ -188,19 +193,11 @@ class StatisticViewModel(
                     monthOffset = selectedPeriodOffset
                 )
 
-                // Prepare formatted chart data for monthly view
-                val categories = monthlyResult.first.keys.toList()
-                val formattedChartData = ChartData.MonthData(
-                    monthlyCategories = categories,
-                    monthlyCompletedData = monthlyResult.first,
-                    monthlyScheduledData = monthlyResult.second
-                )
-
                 Quadruple(
                     monthlyResult.first,
                     monthlyResult.second,
                     monthlyResult.third,
-                    formattedChartData
+                    monthlyResult.fourth
                 )
             }
 
@@ -235,6 +232,12 @@ class StatisticViewModel(
                 scheduledHabitsByPeriod = scheduledHabitsByPeriod,
                 selectedPeriodLabel = periodLabel,
                 formattedChartData = formattedChartData,
+                summary = buildStatisticSummary(
+                    periodHabitRecords = periodHabitRecords,
+                    completedByTimeOfDay = completeHabitsByTimeOfDay,
+                    completedByPeriod = completedHabitsByPeriod,
+                    scheduledByPeriod = scheduledHabitsByPeriod
+                ),
                 userHasAnyCompleted = completedHabits.isNotEmpty()
             )
         }
@@ -283,6 +286,31 @@ class StatisticViewModel(
             .associateWith { completedHabitsFiltered[it] ?: 0 }
 
         return result
+    }
+
+    private fun getPeriodRange(
+        selectedTimeUnit: TimeUnit,
+        periodOffset: Int
+    ): Pair<LocalDate, LocalDate> {
+        val currentDate = getCurrentDate()
+        return when (selectedTimeUnit) {
+            TimeUnit.WEEK -> {
+                val startOfCurrentWeek = currentDate.calculateStartOfWeek()
+                val startDate = startOfCurrentWeek.minusDays((-periodOffset * 7).toLong())
+                startDate to startDate.plusDays(6)
+            }
+
+            TimeUnit.MONTH -> {
+                val targetMonth = currentDate.minusMonths(-periodOffset.toLong())
+                val startDate = LocalDate(targetMonth.year, targetMonth.month, 1)
+                startDate to startDate.getEndOfMonth()
+            }
+
+            TimeUnit.YEAR -> {
+                val targetYear = currentDate.year + periodOffset
+                LocalDate(targetYear, Month.JANUARY, 1) to LocalDate(targetYear, Month.DECEMBER, 31)
+            }
+        }
     }
 
     /**
@@ -350,7 +378,7 @@ class StatisticViewModel(
     private suspend fun handleMonthlyHabitStatistic(
         habitRecords: List<UserHabitRecordFullInfo>,
         monthOffset: Int = 0
-    ): Triple<Map<String, Int>, Map<String, Int>, String> {
+    ): Quadruple<Map<String, Int>, Map<String, Int>, String, ChartData.MonthData> {
         val currentDate = getCurrentDate()
         val targetMonthDate = currentDate.minusMonths(-monthOffset.toLong())
 
@@ -359,30 +387,25 @@ class StatisticViewModel(
         val endOfMonth = targetMonthDate.getEndOfMonth()
 
         val monthName = targetMonthDate.month.getTitleSuspend()
+        val monthShortName = targetMonthDate.month.getShortTitleSuspend()
 
         // Filter habits for this month
         val habitsFilteredForGivenMonth = habitRecords
             .filter { it.date in startOfMonth..endOfMonth }
 
-        val completedHabitsFilteredForGivenMonth =
-            habitsFilteredForGivenMonth.filter { it.isCompleted }
+        val formattedChartData = buildMonthlyChartData(
+            habitRecords = habitsFilteredForGivenMonth,
+            startOfMonth = startOfMonth,
+            endOfMonth = endOfMonth,
+            monthLabel = monthName,
+            monthShortLabel = monthShortName
+        )
 
-        // Create day-based maps instead of week-based
-        val monthlyCompletedHabits = mutableMapOf<String, Int>()
-        val monthlyScheduledHabits = mutableMapOf<String, Int>()
-
-        // Count scheduled habits for this month
-        val scheduledCount = habitsFilteredForGivenMonth.count()
-        monthlyScheduledHabits[monthName] = scheduledCount
-
-        // Count completed habits for this month
-        val completedCount = completedHabitsFilteredForGivenMonth.count()
-        monthlyCompletedHabits[monthName] = completedCount
-
-        return Triple(
-            monthlyCompletedHabits,
-            monthlyScheduledHabits,
-            monthName
+        return Quadruple(
+            formattedChartData.monthlyCompletedData,
+            formattedChartData.monthlyScheduledData,
+            monthName,
+            formattedChartData
         )
     }
 

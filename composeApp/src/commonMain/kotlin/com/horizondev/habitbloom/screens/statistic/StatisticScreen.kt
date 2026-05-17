@@ -1,9 +1,19 @@
 package com.horizondev.habitbloom.screens.statistic
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,26 +31,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.containers.BloomSurface
 import com.horizondev.habitbloom.core.designComponents.pickers.TimeUnit
@@ -50,46 +58,42 @@ import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.statistic.components.NoCompletedHabitsPlaceholder
 import com.horizondev.habitbloom.utils.collectAsEffect
-import com.horizondev.habitbloom.utils.getChartBorder
 import com.horizondev.habitbloom.utils.getTitle
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.completed
-import habitbloom.composeapp.generated.resources.completed_habit_statistic
-import habitbloom.composeapp.generated.resources.completed_n_times
-import habitbloom.composeapp.generated.resources.current_month
-import habitbloom.composeapp.generated.resources.current_week
-import habitbloom.composeapp.generated.resources.current_year
+import habitbloom.composeapp.generated.resources.average_completion
+import habitbloom.composeapp.generated.resources.best_completion_streak
+import habitbloom.composeapp.generated.resources.best_habit
+import habitbloom.composeapp.generated.resources.best_time_of_day
+import habitbloom.composeapp.generated.resources.completed_habits_count
+import habitbloom.composeapp.generated.resources.completion_percent
+import habitbloom.composeapp.generated.resources.days_count
+import habitbloom.composeapp.generated.resources.general_statistics
+import habitbloom.composeapp.generated.resources.great_work
 import habitbloom.composeapp.generated.resources.habit_statistic
-import habitbloom.composeapp.generated.resources.monthly_completion_rate
-import habitbloom.composeapp.generated.resources.monthly_habit_tracking
-import habitbloom.composeapp.generated.resources.next
-import habitbloom.composeapp.generated.resources.no_completed_habits_in_this_unit_title
+import habitbloom.composeapp.generated.resources.ic_chart_proportion_filled
+import habitbloom.composeapp.generated.resources.ic_lucid_chart_column
+import habitbloom.composeapp.generated.resources.ic_lucid_clock
+import habitbloom.composeapp.generated.resources.ic_overall_rate
+import habitbloom.composeapp.generated.resources.ic_solid_water_drop
+import habitbloom.composeapp.generated.resources.ic_total_successfully_completed
+import habitbloom.composeapp.generated.resources.keep_it_up
+import habitbloom.composeapp.generated.resources.longest_streak
 import habitbloom.composeapp.generated.resources.no_data_available
-import habitbloom.composeapp.generated.resources.no_habits_found
-import habitbloom.composeapp.generated.resources.previous
-import habitbloom.composeapp.generated.resources.scheduled
-import habitbloom.composeapp.generated.resources.total_habits_done
-import habitbloom.composeapp.generated.resources.weekly_completion_rate
-import habitbloom.composeapp.generated.resources.weekly_habit_tracking
-import habitbloom.composeapp.generated.resources.yearly_completion_rate
-import habitbloom.composeapp.generated.resources.yearly_habit_tracking
-import io.github.koalaplot.core.bar.DefaultBar
-import io.github.koalaplot.core.bar.DefaultBarPosition
-import io.github.koalaplot.core.bar.DefaultVerticalBarPlotEntry
-import io.github.koalaplot.core.bar.VerticalBarPlot
-import io.github.koalaplot.core.pie.DefaultSlice
-import io.github.koalaplot.core.pie.PieChart
+import habitbloom.composeapp.generated.resources.period_dynamics
+import habitbloom.composeapp.generated.resources.statistics_subtitle
+import io.github.koalaplot.core.line.AreaBaseline
+import io.github.koalaplot.core.line.AreaPlot2
+import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
+import io.github.koalaplot.core.style.LineStyle
 import io.github.koalaplot.core.util.ExperimentalKoalaPlotApi
-import io.github.koalaplot.core.xygraph.CategoryAxisModel
+import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraph
-import io.github.koalaplot.core.xygraph.rememberIntLinearAxisModel
+import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
-import kotlin.math.roundToInt
+import kotlin.math.floor
 
-/**
- * Statistics screen composable that displays habit statistics.
- */
 @Composable
 fun StatisticScreen(
     viewModel: StatisticViewModel,
@@ -97,15 +101,10 @@ fun StatisticScreen(
 ) {
     val uiState by viewModel.state.collectAsState()
 
-    // Handle navigation
     viewModel.uiIntents.collectAsEffect { intent ->
         when (intent) {
-            is StatisticUiIntent.OpenHabitDetails -> {
-                // Navigation will be handled by parent NavHost
-            }
-            is StatisticUiIntent.NavigateToAddHabit -> {
-                onNavigateToAddHabit()
-            }
+            is StatisticUiIntent.OpenHabitDetails -> Unit
+            is StatisticUiIntent.NavigateToAddHabit -> onNavigateToAddHabit()
         }
     }
 
@@ -120,15 +119,20 @@ fun StatisticScreenContent(
     uiState: StatisticUiState,
     handleUiEvent: (StatisticUiEvent) -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(BloomTheme.colors.background)
+    ) {
         if (uiState.isLoading.not()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 16.dp)
+                    .padding(horizontal = 21.dp)
                     .verticalScroll(rememberScrollState())
             ) {
                 Spacer(Modifier.statusBarsPadding())
+                Spacer(modifier = Modifier.height(28.dp))
 
                 if (!uiState.userHasAnyCompleted) {
                     NoCompletedHabitsPlaceholder(
@@ -157,532 +161,595 @@ fun ColumnScope.StatisticScreenColumnContent(
     uiState: StatisticUiState,
     handleUiEvent: (StatisticUiEvent) -> Unit
 ) {
-    CombinedHabitStatisticsCard(
+    StatisticsHeader()
+
+    Spacer(modifier = Modifier.height(18.dp))
+
+    TimeUnitOptionPicker(
         modifier = Modifier.fillMaxWidth(),
-        uiState = uiState,
-        handleUiEvent = handleUiEvent
+        selectedOption = uiState.selectedTimeUnit,
+        options = TimeUnit.entries,
+        onOptionSelected = {
+            handleUiEvent(StatisticUiEvent.SelectTimeUnit(it))
+        }
     )
 
+    Spacer(modifier = Modifier.height(18.dp))
+
+    HabitDynamicsCard(uiState = uiState)
+    Spacer(modifier = Modifier.height(18.dp))
+    BestTimeOfDayCard(
+        summary = uiState.summary,
+        periodLabel = uiState.selectedPeriodLabel
+    )
+    Spacer(modifier = Modifier.height(18.dp))
+    GeneralStatisticsCard(
+        summary = uiState.summary,
+        periodLabel = uiState.selectedPeriodLabel
+    )
+    Spacer(modifier = Modifier.height(18.dp))
+    BestHabitCard(
+        summary = uiState.summary,
+        periodLabel = uiState.selectedPeriodLabel
+    )
+    Spacer(modifier = Modifier.height(18.dp))
+    EncouragementCard()
     Spacer(modifier = Modifier.height(54.dp))
+}
+
+@Composable
+private fun StatisticsHeader() {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_chart_proportion_filled),
+                contentDescription = null,
+                tint = BloomTheme.colors.primary,
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = stringResource(Res.string.habit_statistic),
+                style = BloomTheme.typography.headlineLarge.copy(fontSize = 21.sp),
+                color = BloomTheme.colors.foreground,
+            )
+        }
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = stringResource(Res.string.statistics_subtitle),
+            style = BloomTheme.typography.bodyMedium,
+            color = BloomTheme.colors.mutedForeground,
+        )
+    }
 }
 
 @OptIn(ExperimentalKoalaPlotApi::class)
 @Composable
-fun CombinedHabitStatisticsCard(
-    modifier: Modifier = Modifier,
-    uiState: StatisticUiState,
-    handleUiEvent: (StatisticUiEvent) -> Unit
-) {
-    BloomSurface(modifier = modifier) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-                .animateContentSize()
-        ) {
-            // Title
-            Text(
-                text = stringResource(Res.string.habit_statistic),
-                style = BloomTheme.typography.title,
-                color = BloomTheme.colors.textColor.primary,
-            )
+private fun HabitDynamicsCard(uiState: StatisticUiState) {
+    StatisticCard {
+        SectionHeader(
+            icon = painterResource(Res.drawable.ic_lucid_chart_column),
+            title = uiState.selectedPeriodLabel.ifBlank { uiState.selectedTimeUnit.getTitle() },
+            subtitle = stringResource(Res.string.period_dynamics)
+        )
 
-            Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(18.dp))
 
-            // Time unit picker
-            TimeUnitOptionPicker(
-                modifier = Modifier.fillMaxWidth(),
-                selectedOption = uiState.selectedTimeUnit,
-                options = TimeUnit.entries,
-                onOptionSelected = {
-                    handleUiEvent(StatisticUiEvent.SelectTimeUnit(it))
-                }
-            )
+        val chartData = uiState.formattedChartData
+        val categories = chartData.getCategories()
+        val completedData = chartData.getCompletedData()
+        val scheduledData = chartData.getScheduledData()
+        val points = remember(categories, completedData, scheduledData) {
+            categories.mapIndexed { index, category ->
+                val scheduled = scheduledData[category] ?: 0
+                val completed = completedData[category] ?: 0
+                val rate = if (scheduled == 0) 0f else completed.toFloat() / scheduled * 100f
+                Point(index.toFloat(), rate.coerceIn(0f, 100f))
+            }
+        }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Period Navigation Controls
-            val timeUnit = uiState.selectedTimeUnit
-
-            // Period label
-            if (uiState.selectedPeriodLabel.isNotEmpty()) {
-                Text(
-                    text = uiState.selectedPeriodLabel,
-                    style = BloomTheme.typography.body,
-                    color = BloomTheme.colors.textColor.primary,
-                    fontWeight = FontWeight.Medium
+        if (points.isNotEmpty()) {
+            val revealProgress = remember(points) { Animatable(0f) }
+            LaunchedEffect(points) {
+                revealProgress.snapTo(0f)
+                revealProgress.animateTo(
+                    targetValue = points.lastIndex.toFloat(),
+                    animationSpec = tween(
+                        durationMillis = 700,
+                        easing = FastOutSlowInEasing
+                    )
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+            }
+            val visiblePoints = remember(points, revealProgress.value) {
+                points.revealUntil(revealProgress.value)
             }
 
-            // Period navigation row
+            KoalaPlotTheme(
+                axis = KoalaPlotTheme.axis.copy(
+                    color = Color.Transparent,
+                    majorGridlineStyle = null,
+                    minorGridlineStyle = null
+                )
+            ) {
+                XYGraph(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(146.dp),
+                    xAxisModel = rememberFloatLinearAxisModel(
+                        range = 0f..points.last().x.coerceAtLeast(1f)
+                    ),
+                    yAxisModel = rememberFloatLinearAxisModel(range = 0f..100f),
+                    xAxisTitle = {},
+                    yAxisTitle = {},
+                    xAxisLabels = { _: Float -> },
+                    yAxisLabels = { _: Float -> },
+                    horizontalMajorGridLineStyle = null,
+                    horizontalMinorGridLineStyle = null,
+                    verticalMajorGridLineStyle = null,
+                    verticalMinorGridLineStyle = null
+                ) {
+                    AreaPlot2(
+                        data = visiblePoints,
+                        areaBaseline = AreaBaseline.HorizontalLine(0f),
+                        areaStyle = AreaStyle(
+                            brush = Brush.verticalGradient(
+                                colors = listOf(
+                                    BloomTheme.colors.primary.copy(alpha = 0.28f),
+                                    BloomTheme.colors.primary.copy(alpha = 0.03f)
+                                )
+                            )
+                        ),
+                        lineStyle = LineStyle(
+                            brush = SolidColor(BloomTheme.colors.primary),
+                            strokeWidth = 3.dp
+                        )
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Previous period button with text
-                val previousLabel = stringResource(Res.string.previous)
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .background(
-                            color = BloomTheme.colors.background.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = BloomTheme.colors.disabled,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable { handleUiEvent(StatisticUiEvent.PreviousPeriod) }
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = previousLabel,
-                        tint = BloomTheme.colors.textColor.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = previousLabel,
-                        style = BloomTheme.typography.small,
-                        color = BloomTheme.colors.textColor.primary
-                    )
-                }
-
-                // Current period button (centered) - only shown when needed
-                if (uiState.selectedPeriodOffset != 0) {
-                    val currentLabel = when (timeUnit) {
-                        TimeUnit.WEEK -> stringResource(Res.string.current_week)
-                        TimeUnit.MONTH -> stringResource(Res.string.current_month)
-                        TimeUnit.YEAR -> stringResource(Res.string.current_year)
-                    }
-
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .background(
-                                color = BloomTheme.colors.primary.copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(12.dp)
-                            )
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { handleUiEvent(StatisticUiEvent.CurrentPeriod) }
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Star,
-                            contentDescription = currentLabel,
-                            tint = BloomTheme.colors.primary,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = currentLabel,
-                            style = BloomTheme.typography.small,
-                            color = BloomTheme.colors.primary,
-                            fontWeight = FontWeight.Medium
-                        )
-                    }
-                } else {
-                    // Empty spacer when we're at current period
-                    Spacer(modifier = Modifier.width(8.dp))
-                }
-
-                // Next period button with text
-                val nextLabel = stringResource(Res.string.next)
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .background(
-                            color = BloomTheme.colors.background.copy(alpha = 0.3f),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = BloomTheme.colors.disabled,
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                        .clip(RoundedCornerShape(12.dp))
-                        .clickable(enabled = uiState.selectedPeriodOffset < 0) {
-                            handleUiEvent(StatisticUiEvent.NextPeriod)
-                        }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    Text(
-                        text = nextLabel,
-                        style = BloomTheme.typography.small,
-                        color = if (uiState.selectedPeriodOffset < 0)
-                            BloomTheme.colors.textColor.primary
-                        else BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = nextLabel,
-                        tint = if (uiState.selectedPeriodOffset < 0)
-                            BloomTheme.colors.textColor.primary
-                        else BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+                ChartDateLabel(text = chartData.getStartLabel())
+                ChartDateLabel(text = chartData.getEndLabel())
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // SECTION 1: Pie Chart of Habits by Time of Day
-            Text(
-                text = stringResource(Res.string.completed_habit_statistic),
-                style = BloomTheme.typography.subheading,
-                color = BloomTheme.colors.textColor.primary,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Pie Chart Section
-            val pieChartData = remember(uiState.completeHabitsByTimeOfDay) {
-                uiState.completeHabitsByTimeOfDay.filter { it.value > 0 }
-            }
-            val pieChartValues = pieChartData.values.map { it.toFloat() }
-
-            if (pieChartValues.sum() > 0) {
-                PieChart(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    values = pieChartValues,
-                    slice = { index ->
-                        val color = pieChartData.entries.elementAt(index).key.getChartBorder()
-                        DefaultSlice(color = color, gap = 2f)
-                    },
-                    maxPieDiameter = 220.dp,
-                    minPieDiameter = 220.dp,
-                    labelConnector = {},
-                    holeSize = 0.75f,
-                    holeContent = {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.align(Alignment.Center)
-                            ) {
-                                Text(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    style = BloomTheme.typography.body,
-                                    color = BloomTheme.colors.textColor.secondary,
-                                    text = stringResource(Res.string.total_habits_done),
-                                    textAlign = TextAlign.Center
-                                )
-                                Text(
-                                    style = BloomTheme.typography.title,
-                                    color = BloomTheme.colors.textColor.primary,
-                                    text = pieChartValues.sum().roundToInt().toString()
-                                )
-                            }
-                        }
-                    }
-                )
-            } else {
-                Box(modifier = Modifier.height(220.dp).fillMaxWidth()) {
-                    Text(
-                        text = stringResource(
-                            Res.string.no_completed_habits_in_this_unit_title,
-                            uiState.selectedTimeUnit.getTitle().lowercase()
-                        ),
-                        style = BloomTheme.typography.heading,
-                        color = BloomTheme.colors.textColor.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().align(Alignment.Center)
-                    )
-                }
-            }
-
-            // Time of Day Legend
-            if (pieChartValues.sum() > 0) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceAround,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    TimeOfDay.entries.forEach { timeOfDay ->
-                        val completed = uiState.completeHabitsByTimeOfDay[timeOfDay] ?: 0
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .background(
-                                        color = timeOfDay.getChartBorder(),
-                                        shape = CircleShape
-                                    )
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = timeOfDay.getTitle(),
-                                style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.textColor.primary
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = buildAnnotatedString {
-                                    append(stringResource(Res.string.completed_n_times))
-                                    append(" ")
-                                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                        append(completed.toString())
-                                    }
-                                },
-                                style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.textColor.secondary
-                            )
-                        }
-                    }
-                }
-            }
-
-            // Divider
-            Spacer(modifier = Modifier.height(32.dp))
+        } else {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(1.dp)
-                    .background(BloomTheme.colors.disabled.copy(alpha = 0.3f))
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // SECTION 2: Bar Chart of Habit Completion By Period
-            // Chart title based on time unit
-            val chartTitle = when (timeUnit) {
-                TimeUnit.WEEK -> stringResource(Res.string.weekly_habit_tracking)
-                TimeUnit.MONTH -> stringResource(Res.string.monthly_habit_tracking)
-                TimeUnit.YEAR -> stringResource(Res.string.yearly_habit_tracking)
-            }
-
-            Text(
-                text = chartTitle,
-                style = BloomTheme.typography.subheading,
-                color = BloomTheme.colors.textColor.primary,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Get the formatted chart data from the ViewModel
-            val chartData = uiState.formattedChartData
-            val categories = chartData.getCategories()
-            val completedData = chartData.getCompletedData()
-            val scheduledData = chartData.getScheduledData()
-
-            // Calculate the maximum value for the Y-axis
-            val maxCompletedValue = completedData.values.maxOrNull() ?: 0
-            val maxScheduledValue = scheduledData.values.maxOrNull() ?: 0
-            val yAxisMaxValue = maxOf(maxCompletedValue, maxScheduledValue) + 2
-
-            // Define colors with better visual hierarchy
-            val scheduledColor = BloomTheme.colors.primary.copy(alpha = 0.2f)
-            val completedColor = BloomTheme.colors.primary
-
-            // Bar Chart Legend
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Start,
-                verticalAlignment = Alignment.CenterVertically
+                    .height(146.dp),
+                contentAlignment = Alignment.Center
             ) {
-                // Legend item for scheduled habits
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(end = 20.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(
-                                color = scheduledColor,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(Res.string.scheduled),
-                        style = BloomTheme.typography.small,
-                        color = BloomTheme.colors.textColor.secondary
-                    )
-                }
-
-                // Legend item for completed habits
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(
-                                color = completedColor,
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(Res.string.completed),
-                        style = BloomTheme.typography.small,
-                        color = BloomTheme.colors.textColor.secondary
-                    )
-                }
-            }
-
-            // Bar Chart
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (categories.isNotEmpty()) {
-                KoalaPlotTheme(
-                    axis = KoalaPlotTheme.axis.copy(
-                        color = BloomTheme.colors.textColor.secondary.copy(alpha = 0.5f),
-                        minorGridlineStyle = null,
-                        majorGridlineStyle = null
-                    )
-                ) {
-                    XYGraph(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(280.dp),
-                        xAxisModel = CategoryAxisModel(categories = categories),
-                        yAxisModel = rememberIntLinearAxisModel(
-                            range = 0..yAxisMaxValue
-                        ),
-                        xAxisTitle = {},
-                        xAxisLabels = { label: String ->
-                            Text(
-                                text = label,
-                                style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.textColor.primary
-                            )
-                        },
-                        yAxisLabels = { number: Int ->
-                            Text(
-                                text = number.toString(),
-                                style = BloomTheme.typography.small,
-                                color = BloomTheme.colors.textColor.secondary
-                            )
-                        }
-                    ) {
-                        // If we have data to display for this time unit
-                        if (completedData.isNotEmpty() || scheduledData.isNotEmpty()) {
-                            // All scheduled habits (lighter bars in the background)
-                            if (scheduledData.isNotEmpty()) {
-                                VerticalBarPlot(
-                                    data = categories.mapIndexed { index, category ->
-                                        val value = scheduledData[category] ?: 0
-                                        DefaultVerticalBarPlotEntry(
-                                            category, DefaultBarPosition(
-                                                end = value,
-                                                start = 0
-                                            )
-                                        )
-                                    },
-                                    bar = { _, _, _ ->
-                                        DefaultBar(
-                                            brush = SolidColor(scheduledColor),
-                                            shape = RoundedCornerShape(
-                                                topStart = 4.dp,
-                                                topEnd = 4.dp
-                                            ),
-                                        )
-                                    },
-                                    barWidth = 0.6f
-                                )
-                            }
-
-                            // Completed habits (darker bars in the foreground)
-                            if (completedData.isNotEmpty()) {
-                                VerticalBarPlot(
-                                    data = categories.mapIndexed { index, category ->
-                                        val value = completedData[category] ?: 0
-                                        DefaultVerticalBarPlotEntry(
-                                            category, DefaultBarPosition(
-                                                end = value,
-                                                start = 0
-                                            )
-                                        )
-                                    },
-                                    bar = { _, _, _ ->
-                                        DefaultBar(
-                                            brush = SolidColor(completedColor),
-                                            shape = RoundedCornerShape(
-                                                topStart = 4.dp,
-                                                topEnd = 4.dp
-                                            ),
-                                        )
-                                    },
-                                    barWidth = 0.6f
-                                )
-                            }
-                        } else {
-                            // No data available message
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(Res.string.no_habits_found),
-                                    style = BloomTheme.typography.body,
-                                    color = BloomTheme.colors.textColor.secondary,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Add completion rate summary at the bottom
-                Spacer(modifier = Modifier.height(16.dp))
-                val totalCompletedThisPeriod = completedData.values.sum()
-                val totalScheduledThisPeriod = scheduledData.values.sum()
-
-                if (totalScheduledThisPeriod > 0) {
-                    val completionRate =
-                        (totalCompletedThisPeriod.toFloat() / totalScheduledThisPeriod * 100).roundToInt()
-
-                    val completionText = when (timeUnit) {
-                        TimeUnit.WEEK -> stringResource(Res.string.weekly_completion_rate)
-                        TimeUnit.MONTH -> stringResource(Res.string.monthly_completion_rate)
-                        TimeUnit.YEAR -> stringResource(Res.string.yearly_completion_rate)
-                    }
-
-                    Text(
-                        text = buildAnnotatedString {
-                            append(completionText)
-                            append(": ")
-                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                append("$completionRate%")
-                            }
-                        },
-                        style = BloomTheme.typography.body,
-                        color = BloomTheme.colors.textColor.primary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-            } else {
-                // Empty state when no categories are available
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(280.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = stringResource(Res.string.no_data_available),
-                        style = BloomTheme.typography.body,
-                        color = BloomTheme.colors.textColor.secondary,
-                        textAlign = TextAlign.Center
-                    )
-                }
+                Text(
+                    text = stringResource(Res.string.no_data_available),
+                    style = BloomTheme.typography.bodyMedium,
+                    color = BloomTheme.colors.mutedForeground,
+                    textAlign = TextAlign.Center
+                )
             }
         }
     }
+}
+
+private fun List<Point<Float, Float>>.revealUntil(progress: Float): List<Point<Float, Float>> {
+    if (isEmpty()) return emptyList()
+    if (size == 1 || progress <= 0f) return listOf(first())
+    if (progress >= lastIndex) return this
+
+    val lowerIndex = floor(progress).toInt().coerceIn(0, lastIndex)
+    val upperIndex = (lowerIndex + 1).coerceAtMost(lastIndex)
+    val fraction = progress - lowerIndex
+    val lowerPoint = this[lowerIndex]
+    val upperPoint = this[upperIndex]
+    val interpolatedPoint = Point(
+        x = lowerPoint.x + (upperPoint.x - lowerPoint.x) * fraction,
+        y = lowerPoint.y + (upperPoint.y - lowerPoint.y) * fraction
+    )
+
+    return take(lowerIndex + 1) + interpolatedPoint
+}
+
+@Composable
+private fun BestTimeOfDayCard(
+    summary: StatisticSummary,
+    periodLabel: String
+) {
+    StatisticCard {
+        SectionHeader(
+            icon = painterResource(Res.drawable.ic_lucid_clock),
+            title = stringResource(Res.string.best_time_of_day),
+            subtitle = periodLabel
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        TimeOfDay.entries.forEachIndexed { index, timeOfDay ->
+            TimeOfDayProgressRow(
+                title = timeOfDay.getTitle(),
+                rate = summary.timeOfDayCompletionRates[timeOfDay] ?: 0
+            )
+            if (index != TimeOfDay.entries.lastIndex) {
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun GeneralStatisticsCard(
+    summary: StatisticSummary,
+    periodLabel: String
+) {
+    StatisticCard {
+        SectionHeader(
+            icon = painterResource(Res.drawable.ic_lucid_chart_column),
+            title = stringResource(Res.string.general_statistics),
+            subtitle = periodLabel
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        StatisticMetricRow(
+            icon = painterResource(Res.drawable.ic_total_successfully_completed),
+            iconTint = BloomTheme.colors.success,
+            label = stringResource(Res.string.completed_habits_count),
+            value = summary.completedHabits.toString()
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        StatisticMetricRow(
+            icon = painterResource(Res.drawable.best_completion_streak),
+            iconTint = BloomTheme.colors.warning,
+            label = stringResource(Res.string.longest_streak),
+            value = stringResource(Res.string.days_count, summary.longestStreak)
+        )
+        Spacer(modifier = Modifier.height(14.dp))
+        StatisticMetricRow(
+            icon = painterResource(Res.drawable.ic_overall_rate),
+            iconTint = BloomTheme.colors.primary,
+            label = stringResource(Res.string.average_completion),
+            value = "${summary.averageCompletionRate}%"
+        )
+    }
+}
+
+@Composable
+private fun BestHabitCard(
+    summary: StatisticSummary,
+    periodLabel: String
+) {
+    StatisticCard(
+        modifier = Modifier.background(
+            brush = Brush.radialGradient(
+                colors = listOf(
+                    BloomTheme.colors.primary.copy(alpha = 0.1f),
+                    Color.Transparent
+                )
+            )
+        )
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .background(
+                        color = BloomTheme.colors.primary.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(18.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = BloomTheme.colors.primary.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(18.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_solid_water_drop),
+                    contentDescription = null,
+                    tint = BloomTheme.colors.primary,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+            Text(
+                text = stringResource(Res.string.best_habit),
+                style = BloomTheme.typography.labelSmall.copy(letterSpacing = 0.5.sp),
+                color = BloomTheme.colors.mutedForeground,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center
+            )
+            if (periodLabel.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = periodLabel,
+                    style = BloomTheme.typography.labelSmall,
+                    color = BloomTheme.colors.mutedForeground,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            AnimatedValueText(
+                text = summary.bestHabitName.ifBlank { stringResource(Res.string.no_data_available) },
+                style = BloomTheme.typography.headlineMedium,
+                color = BloomTheme.colors.foreground,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .background(BloomTheme.colors.primary.copy(alpha = 0.1f))
+                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_solid_water_drop),
+                    contentDescription = null,
+                    tint = BloomTheme.colors.primary,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                AnimatedValueText(
+                    text = stringResource(
+                        Res.string.completion_percent,
+                        summary.bestHabitCompletionRate
+                    ),
+                    style = BloomTheme.typography.labelSmall,
+                    color = BloomTheme.colors.primary
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EncouragementCard() {
+    StatisticCard {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "🌟",
+                fontSize = 32.sp,
+                lineHeight = 36.sp,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(Res.string.great_work),
+                style = BloomTheme.typography.headlineMedium,
+                color = BloomTheme.colors.foreground,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = stringResource(Res.string.keep_it_up),
+                style = BloomTheme.typography.bodySmall,
+                color = BloomTheme.colors.mutedForeground,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatisticCard(
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    BloomSurface(
+        modifier = modifier.fillMaxWidth(),
+        color = BloomTheme.colors.glassBackgroundStrong,
+        shape = RoundedCornerShape(21.dp),
+        shadowElevation = 8.dp,
+        border = BorderStroke(
+            width = 0.6.dp,
+            color = BloomTheme.colors.border.copy(alpha = 0.3f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp)
+                .animateContentSize(),
+            content = content
+        )
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    icon: Painter,
+    title: String,
+    subtitle: String? = null
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(39.dp)
+                .background(
+                    color = BloomTheme.colors.primary.copy(alpha = 0.1f),
+                    shape = RoundedCornerShape(14.dp)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = icon,
+                contentDescription = null,
+                tint = BloomTheme.colors.primary,
+                modifier = Modifier.size(21.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Column {
+            Text(
+                text = title,
+                style = BloomTheme.typography.titleMedium,
+                color = BloomTheme.colors.foreground,
+                fontWeight = FontWeight.Medium
+            )
+            if (subtitle != null) {
+                AnimatedValueText(
+                    text = subtitle,
+                    style = BloomTheme.typography.labelSmall,
+                    color = BloomTheme.colors.mutedForeground
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TimeOfDayProgressRow(
+    title: String,
+    rate: Int
+) {
+    val animatedRate by animateFloatAsState(
+        targetValue = rate.coerceIn(0, 100) / 100f,
+        animationSpec = tween(durationMillis = 450),
+        label = "TimeOfDayProgress"
+    )
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = title,
+                style = BloomTheme.typography.labelMedium,
+                color = BloomTheme.colors.foreground
+            )
+            AnimatedValueText(
+                text = "$rate%",
+                style = BloomTheme.typography.labelMedium,
+                color = BloomTheme.colors.primary
+            )
+        }
+
+        Spacer(modifier = Modifier.height(6.dp))
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(9.dp)
+                .clip(CircleShape)
+                .background(BloomTheme.colors.inputBackground.copy(alpha = 0.8f))
+                .border(
+                    width = 0.6.dp,
+                    color = BloomTheme.colors.border.copy(alpha = 0.2f),
+                    shape = CircleShape
+                )
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(animatedRate)
+                    .height(9.dp)
+                    .clip(CircleShape)
+                    .background(BloomTheme.colors.primary)
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatisticMetricRow(
+    icon: Painter,
+    iconTint: Color,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = BloomTheme.colors.inputBackground.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(14.dp)
+            )
+            .padding(horizontal = 10.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(
+                        color = iconTint.copy(alpha = 0.15f),
+                        shape = RoundedCornerShape(13.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = icon,
+                    contentDescription = null,
+                    tint = iconTint,
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                text = label,
+                style = BloomTheme.typography.labelMedium,
+                color = BloomTheme.colors.foreground
+            )
+        }
+
+        AnimatedValueText(
+            text = value,
+            style = BloomTheme.typography.bodyMedium,
+            color = BloomTheme.colors.foreground,
+            fontWeight = FontWeight.Medium
+        )
+    }
+}
+
+@Composable
+private fun AnimatedValueText(
+    text: String,
+    style: androidx.compose.ui.text.TextStyle,
+    color: Color,
+    modifier: Modifier = Modifier,
+    fontWeight: FontWeight? = null,
+    textAlign: TextAlign? = null
+) {
+    AnimatedContent(
+        targetState = text,
+        transitionSpec = {
+            (fadeIn(animationSpec = tween(180)) + slideInVertically { it / 3 }) togetherWith
+                    (fadeOut(animationSpec = tween(120)) + slideOutVertically { -it / 3 })
+        },
+        label = "AnimatedValueText"
+    ) { targetText ->
+        Text(
+            modifier = modifier,
+            text = targetText,
+            style = style,
+            color = color,
+            fontWeight = fontWeight,
+            textAlign = textAlign
+        )
+    }
+}
+
+@Composable
+private fun ChartDateLabel(text: String) {
+    Text(
+        text = text,
+        style = BloomTheme.typography.labelSmall,
+        color = BloomTheme.colors.mutedForeground.copy(alpha = 0.6f)
+    )
 }
