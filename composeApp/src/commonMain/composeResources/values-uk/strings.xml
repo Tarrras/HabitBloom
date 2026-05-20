@@ -366,8 +366,6 @@
     <string name="no_habits_for_time_of_day_in_garden">Немає звичок для показу в %1$d час.\nДодайте звички, щоб побачити, як росте ваш сад!</string>
     <string name="habit_flower">Квітка звички</string>
     <string name="habit_flower_details">Деталі квітки звички</string>
-    <string name="water_today_habit">💧 Полити сьогоднішню звичку</string>
-    <string name="watered_today">Полито сьогодні</string>
     <string name="current_stage">Поточна стадія:</string>
     <string name="progress_to_next_stage">Прогрес до наступної стадії:</string>
     <string name="vitality">Життєва сила</string>
@@ -381,7 +379,7 @@
     <string name="level_label">Рівень %1$d</string>
     <string name="level_progress">Прогрес рівня</string>
     <string name="streak_boost">Бонус серії</string>
-    <string name="needs_urgent_watering">Потрібен терміновий полив</string>
+    <string name="needs_consistency_boost">Потрібно відновити послідовність</string>
     <string name="background">фон</string>
     <string name="how_xp_works_title">Як працює XP</string>
     <string name="how_xp_works_body">Виконуйте заплановані дні, щоб отримувати базовий XP. Життєва сила підсилює XP. Підтримуйте послідовність, щоб швидше підвищувати рівень!</string>
@@ -441,20 +439,17 @@
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>
 
-    <string name="already_watered_habit_today">Ви вже полили цю звичку сьогодні</string>
-    <string name="habit_watered_successfully">Звичка успішно полита!</string>
-    <string name="failed_to_water_habit">Не вдалося полити звичку</string>
     <string name="show_bloom_progress">Показати прогрес цвітіння</string>
     <string name="full_growth_path">Повний шлях росту</string>
     <string name="stage_progress_info">Етап %1$d з %2$d: %3$s</string>
     <string name="days_to_next_stage">%1$d днів до наступного етапу</string>
     <string name="xp_system_title">Система XP</string>
-    <string name="xp_system_explanation">Отримуйте XP за виконання запланованих днів. Життєва сила може підсилювати здобутки. Досягаючи порогів XP, ви підвищуєте рівень, а рівень визначає стадію квітки.</string>
+    <string name="xp_system_explanation">Отримуйте XP за виконання запланованих днів. XP підвищує рівень і стадію квітки. Життєва сила відображає недавню послідовність і може підсилювати майбутній XP, але XP та рівні не втрачаються.</string>
     <string name="xp_current_in_level">%1$d/%2$d XP на цьому рівні</string>
     <string name="xp_remaining_to_next">%1$d XP до наступного рівня</string>
     <string name="growth_system_explanation">Ваша квітка розквітає зі зростанням рівня. Рівень отримується через XP, а не через серію.</string>
     <string name="growth_stages_explained">Пояснення етапів росту</string>
-    <string name="bloom_stage_congrats_extended">Ви досягли фінального етапу! Підтримуйте рівень здоров'я, щоб зберігати цвітіння.</string>
+    <string name="bloom_stage_congrats_extended">Ви досягли фінального етапу! Підтримуйте життєву силу, щоб цвітіння виглядало сильним.</string>
 
     <!-- Growth stage descriptions -->
     <string name="stage_description_seed">Початок шляху. Отримуйте XP, виконуючи завдання.</string>
@@ -463,18 +458,18 @@
     <string name="stage_description_bud">Близько до розквіту. Продовжуйте стабільність.</string>
     <string name="stage_description_bloom">Повне цвітіння. Підтримуйте здоров'я та рівень.</string>
 
-    <!-- Flower Health -->
-    <string name="flower_health">Здоров'я квітки</string>
-    <string name="health_status_healthy">Здорова</string>
-    <string name="health_status_wilting">В'яне</string>
+    <!-- Flower Vitality -->
+    <string name="flower_health">Життєва сила</string>
+    <string name="health_status_healthy">Сильна</string>
+    <string name="health_status_wilting">Слабшає</string>
     <string name="health_status_critical">Критичний стан</string>
-    <string name="health_missed_days">Пропущені дні</string>
-    <string name="health_description">Життєва сила вашої квітки відображає постійність звички. Пропуск днів викликає в'янення, а регулярний догляд зберігає її здоровою.</string>
-    <string name="flower_health_system">Система здоров'я квітки</string>
-    <string name="health_rule_missing_days">• Пропуск 1-2 днів знижує здоров'я квітки, але не впливає на стадію росту</string>
-    <string name="health_rule_consecutive_misses">• Тривалі пропуски при низькій життєвій силі можуть тимчасово тьмянити вигляд, але рівні здобуваються XP і не втрачаються</string>
-    <string name="health_rule_recovery">• Виконання звички поступово відновлює здоров'я</string>
-    <string name="health_rule_vitality_boosts_xp">• Вища життєва сила дає більше XP за кожне виконання</string>
+    <string name="health_missed_days">Недавні пропуски</string>
+    <string name="health_description">Життєва сила відображає недавню послідовність. Вона впливає на вигляд квітки та може підсилювати майбутній XP, а XP і рівні залишаються назавжди.</string>
+    <string name="flower_health_system">Життєва сила та XP</string>
+    <string name="health_rule_missing_days">• Пропущені заплановані дні знижують життєву силу, але не забирають XP або рівні</string>
+    <string name="health_rule_consecutive_misses">• Послідовні недавні пропуски можуть зробити квітку тьмяною або критично слабкою</string>
+    <string name="health_rule_recovery">• Виконання запланованих днів знову підвищує життєву силу</string>
+    <string name="health_rule_vitality_boosts_xp">• Вища життєва сила дає більше XP за майбутні виконання</string>
     <string name="due_now">Нагадування зараз</string>
     <string name="due_in_minutes">Нагадування через %1$d хв</string>
     <string name="due_in_hours">Нагадування через %1$d год</string>

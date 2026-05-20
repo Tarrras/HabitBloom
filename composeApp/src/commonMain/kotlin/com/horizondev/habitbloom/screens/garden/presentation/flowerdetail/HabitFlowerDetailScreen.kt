@@ -47,7 +47,6 @@ import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerHe
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerVisualization
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitDetailSection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitInfoSection
-import com.horizondev.habitbloom.screens.garden.components.flowerdetail.WaterHabitButton
 import com.horizondev.habitbloom.screens.garden.domain.roundToDecimal
 import com.horizondev.habitbloom.utils.getGardenBackgroundRes
 import dev.chrisbanes.haze.HazeState
@@ -234,20 +233,7 @@ fun HabitFlowerDetailScreenContent(
                                 flowerType = habitFlowerDetail.flowerType,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
                                 flowerHealth = habitFlowerDetail.flowerHealth,
-                                level = habitFlowerDetail.level,
-                                showWateringAnimation = uiState.showWateringAnimation
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Water habit button
-                            WaterHabitButton(
-                                isCompleted = habitFlowerDetail.isCompletedToday,
-                                isLoading = uiState.showWateringAnimation,
-                                onClick = {
-                                    handleUiEvent(HabitFlowerDetailUiEvent.WaterTodaysHabit)
-                                },
-                                modifier = Modifier.fillMaxWidth()
+                                level = habitFlowerDetail.level
                             )
 
                             Spacer(modifier = Modifier.height(16.dp))
@@ -258,14 +244,10 @@ fun HabitFlowerDetailScreenContent(
                                 habitName = habitFlowerDetail.name,
                                 timeOfDay = habitFlowerDetail.timeOfDay,
                                 growthStage = habitFlowerDetail.flowerGrowthStage,
-                                streakBasedGrowthStage = habitFlowerDetail.flowerGrowthStage,
-                                currentStreak = 0,
-                                streaksToNextStage = 0,
                                 level = habitFlowerDetail.level,
                                 vitalityPercent = (habitFlowerDetail.flowerHealth.value.roundToDecimal(
                                     1
                                 ) * 100).toInt(),
-                                xpToNextLevel = habitFlowerDetail.xpToNextLevel,
                                 xpInLevel = habitFlowerDetail.xpInLevel,
                                 xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
                                 flowerHealth = habitFlowerDetail.flowerHealth,
@@ -276,7 +258,7 @@ fun HabitFlowerDetailScreenContent(
 
                             Spacer(modifier = Modifier.height(16.dp))
 
-                            // Flower health bar
+                            // Flower vitality bar
                             FlowerHealthBar(
                                 flowerHealth = habitFlowerDetail.flowerHealth,
                                 modifier = Modifier.fillMaxWidth()

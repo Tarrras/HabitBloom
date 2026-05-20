@@ -41,7 +41,6 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.ic_solid_water_drop
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import kotlin.random.Random
 
@@ -50,7 +49,6 @@ import kotlin.random.Random
  *
  * @param flowerType The type of flower to display
  * @param growthStage The current growth stage of the flower
- * @param showWateringAnimation Whether to show water drop animation
  * @param modifier Modifier for styling
  * @param flowerHealth The health status of the flower
  */
@@ -60,7 +58,6 @@ fun FlowerVisualization(
     growthStage: FlowerGrowthStage,
     flowerHealth: FlowerHealth,
     level: Int,
-    showWateringAnimation: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     // Calculate the animated scale for a subtle breathing effect
@@ -151,15 +148,8 @@ fun FlowerVisualization(
                         .size(200.dp)
                 )
 
-                // Water drops animation
-                if (showWateringAnimation) {
-                    WaterDropsAnimation(
-                        Modifier.align(Alignment.TopCenter).padding(top = 48.dp)
-                    )
-                }
-
                 // Critical health indicator
-                if (flowerHealth.isCritical && !showWateringAnimation) {
+                if (flowerHealth.isCritical) {
                     // Animated water drop that pulses
                     val pulseScale by infiniteTransition.animateFloat(
                         initialValue = 1f,
@@ -230,116 +220,6 @@ private fun LevelStarsOverlay(starCount: Int, modifier: Modifier = Modifier) {
         }
     }
 }
-
-/**
- * Component for animated water drops.
- */
-@OptIn(ExperimentalResourceApi::class)
-@Composable
-private fun WaterDropsAnimation(
-    modifier: Modifier
-) {
-    val infiniteTransition = rememberInfiniteTransition()
-
-    // Animation for drop 1
-    val drop1Alpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    val drop1Scale by infiniteTransition.animateFloat(
-        initialValue = 0.5f,
-        targetValue = 1.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    // Animation for drop 2 (offset timing)
-    val drop2Alpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, delayMillis = 250, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    val drop2Scale by infiniteTransition.animateFloat(
-        initialValue = 0.5f,
-        targetValue = 1.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, delayMillis = 250, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    // Animation for drop 3 (offset timing)
-    val drop3Alpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, delayMillis = 500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    val drop3Scale by infiniteTransition.animateFloat(
-        initialValue = 0.5f,
-        targetValue = 1.5f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, delayMillis = 500, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        )
-    )
-
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        // Drop 1
-        Icon(
-            painter = painterResource(Res.drawable.ic_solid_water_drop),
-            contentDescription = null,
-            modifier = Modifier
-                .size(48.dp)
-                .padding(start = 20.dp, top = 40.dp)
-                .alpha(drop1Alpha)
-                .scale(drop1Scale),
-            tint = Color(0xFF1ca3ec)
-        )
-
-        // Drop 2
-        Icon(
-            painter = painterResource(Res.drawable.ic_solid_water_drop),
-            contentDescription = null,
-            modifier = Modifier
-                .size(48.dp)
-                .padding(end = 30.dp, top = 20.dp)
-                .alpha(drop2Alpha)
-                .scale(drop2Scale),
-            tint = Color(0xFF1ca3ec)
-        )
-
-        // Drop 3
-        Icon(
-            painter = painterResource(Res.drawable.ic_solid_water_drop),
-            contentDescription = null,
-            modifier = Modifier
-                .size(48.dp)
-                .padding(start = 30.dp, bottom = 30.dp)
-                .alpha(drop3Alpha)
-                .scale(drop3Scale),
-            tint = Color(0xFF1ca3ec)
-        )
-    }
-}
-
 
 /**
  * Animated background particles for a lively scene, using leaf shapes.

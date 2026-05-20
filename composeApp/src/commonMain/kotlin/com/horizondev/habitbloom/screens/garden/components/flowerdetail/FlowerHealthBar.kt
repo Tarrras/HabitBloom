@@ -50,9 +50,9 @@ import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
- * A component that displays the flower's health as a visual bar with sections.
+ * A component that displays the flower's vitality as a visual bar with sections.
  *
- * @param flowerHealth The current health status of the flower
+ * @param flowerHealth The current vitality status of the flower
  * @param modifier Optional modifier for customizing the component
  */
 @Composable
@@ -60,7 +60,7 @@ fun FlowerHealthBar(
     flowerHealth: FlowerHealth,
     modifier: Modifier = Modifier
 ) {
-    // Round health value to avoid floating point precision issues
+    // Round vitality value to avoid floating point precision issues
     val roundedHealthValue = flowerHealth.value.roundToDecimal(1)
     
     val animatedHealthValue by animateFloatAsState(
@@ -68,7 +68,7 @@ fun FlowerHealthBar(
         animationSpec = tween(durationMillis = 500)
     )
 
-    // Health bar color based on current health
+    // Vitality bar color based on current vitality
     val healthColor by animateColorAsState(
         targetValue = when {
             roundedHealthValue >= FlowerHealth.HEALTHY_THRESHOLD -> BloomTheme.colors.success
@@ -78,7 +78,7 @@ fun FlowerHealthBar(
         animationSpec = tween(durationMillis = 300)
     )
 
-    // Define sections based on health thresholds
+    // Define sections based on vitality thresholds
     val thresholds = remember {
         listOf(
             0.0f,
@@ -88,14 +88,14 @@ fun FlowerHealthBar(
         )
     }
 
-    // Health status labels
+    // Vitality status labels
     val healthStatus = when {
         roundedHealthValue >= FlowerHealth.HEALTHY_THRESHOLD -> stringResource(Res.string.health_status_healthy)
         roundedHealthValue >= FlowerHealth.WILTING_THRESHOLD -> stringResource(Res.string.health_status_wilting)
         else -> stringResource(Res.string.health_status_critical)
     }
 
-    // Display the formatted health value
+    // Display the formatted vitality value
     val healthValueText = "${(roundedHealthValue * 100).toInt()}%"
 
     BloomCard(
@@ -103,7 +103,7 @@ fun FlowerHealthBar(
         onClick = {}
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            // Header with current health status
+            // Header with current vitality status
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.padding(bottom = 8.dp)
@@ -139,16 +139,16 @@ fun FlowerHealthBar(
 
                 Spacer(modifier = Modifier.width(4.dp))
 
-                // Water droplet icon for health indication
+                // Droplet icon for vitality indication
                 Icon(
                     painter = painterResource(Res.drawable.ic_solid_water_drop),
-                    contentDescription = "Health",
+                    contentDescription = "Vitality",
                     tint = healthColor,
                     modifier = Modifier.size(16.dp)
                 )
             }
 
-            // Health bar with threshold markers and current health indicator
+            // Vitality bar with threshold markers and current vitality indicator
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -156,7 +156,7 @@ fun FlowerHealthBar(
                     .clip(RoundedCornerShape(12.dp))
                     .background(BloomTheme.colors.background)
             ) {
-                // Health bar fill
+                // Vitality bar fill
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(animatedHealthValue)
@@ -221,7 +221,7 @@ fun FlowerHealthBar(
                 }
             }
 
-            // Legend for health thresholds
+            // Legend for vitality thresholds
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -247,7 +247,7 @@ fun FlowerHealthBar(
                 )
             }
 
-            // Brief description of the health system
+            // Brief description of the vitality system
             Text(
                 text = stringResource(Res.string.health_description),
                 style = BloomTheme.typography.body,
@@ -255,7 +255,7 @@ fun FlowerHealthBar(
                 modifier = Modifier.padding(top = 8.dp)
             )
 
-            // Health system rules
+            // Vitality system rules
             Column(
                 modifier = Modifier
                     .fillMaxWidth()

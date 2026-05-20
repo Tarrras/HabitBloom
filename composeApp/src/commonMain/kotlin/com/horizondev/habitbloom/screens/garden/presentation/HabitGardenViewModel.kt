@@ -3,22 +3,27 @@ package com.horizondev.habitbloom.screens.garden.presentation
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import com.horizondev.habitbloom.screens.garden.domain.calculateLevelProgress
 import com.horizondev.habitbloom.screens.garden.domain.levelToGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
+import com.horizondev.habitbloom.screens.habits.domain.models.UserHabit
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
+import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
 import com.horizondev.habitbloom.utils.getCurrentDate
 import com.horizondev.habitbloom.utils.getTimeOfDay
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.datetime.LocalDate
 
 /**
  * ViewModel for the Habit Garden screen.
@@ -26,7 +31,6 @@ import kotlinx.coroutines.flow.onEach
  */
 class HabitGardenViewModel(
     private val repository: HabitsRepository,
-    private val flowerHealthRepository: FlowerHealthRepository,
     themeUseCase: ThemeUseCase
 ) : BloomViewModel<HabitGardenUiState, HabitGardenUiIntent>(
     HabitGardenUiState(
@@ -39,6 +43,7 @@ class HabitGardenViewModel(
 
     // MutableStateFlow to hold the selected time of day for easy observation
     private val selectedTimeOfDayFlow = MutableStateFlow(getTimeOfDay())
+    private var observeHabitDataJob: Job? = null
 
     init {
         // Initialize repository data
@@ -71,8 +76,10 @@ class HabitGardenViewModel(
     /**
      * Set up the main flow to observe habits
      */
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeHabitData() {
-        selectedTimeOfDayFlow
+        observeHabitDataJob?.cancel()
+        observeHabitDataJob = selectedTimeOfDayFlow
             .flatMapLatest { timeOfDay ->
                 updateState { it.copy(isLoading = true) }
                 loadGardenData(timeOfDay)
@@ -104,60 +111,19 @@ class HabitGardenViewModel(
      * @param timeOfDay The time of day to filter by
      * @return Flow of habit flowers
      */
-    private fun loadGardenData(timeOfDay: TimeOfDay) = flow {
-        // Get only the habit records for this time of day
-        val habitRecords = repository.getHabitRecordsByTimeOfDay(timeOfDay)
-        // Also fetch basic habit configs to derive days-per-week for EMA alpha
-        val userHabits = repository.getUserHabitsWithoutDetails()
-        val habitIdToDaysPerWeek = userHabits.associate { it.id to it.daysOfWeek.size }
-
-        // Group records by habit ID
-        val habitGroups = habitRecords.groupBy { it.userHabitId }
-
-        // Process each unique habit (we don't need to process every record)
-        val habitFlowers = habitGroups.keys.mapNotNull { habitId ->
-            // Get all records for this habit
-            val records = habitGroups[habitId] ?: return@mapNotNull null
-
-            // Get habit info from the first record
-            val habitInfo = records.firstOrNull() ?: return@mapNotNull null
-
-            // Get health in a single call
-            val health = flowerHealthRepository.getFlowerHealth(habitId)
-
-            // Calculate Level/Vitality via EMA and map to growth stage
-            val domainRecords: List<UserHabitRecord> = records.map { r ->
-                UserHabitRecord(
-                    id = r.id,
-                    userHabitId = r.userHabitId,
-                    date = r.date,
-                    isCompleted = r.isCompleted
+    private fun loadGardenData(timeOfDay: TimeOfDay) =
+        repository.getListOfAllUserHabitRecordsFlow()
+            .map { habitRecords ->
+                val userHabits = repository.getUserHabitsWithoutDetails()
+                buildHabitFlowersForGarden(
+                    habitRecords = habitRecords.filter { it.timeOfDay == timeOfDay },
+                    userHabits = userHabits
                 )
-            }.sortedBy { it.date }.filter { it.date <= getCurrentDate() }
-            val daysPerWeek = habitIdToDaysPerWeek[habitId] ?: 7
-            val levelProgress = calculateLevelProgress(
-                records = domainRecords,
-                daysPerWeek = daysPerWeek
-            )
-            val bloomingStage = levelToGrowthStage(levelProgress.level)
-
-            // Create the flower object
-            HabitFlower(
-                habitId = habitId,
-                name = habitInfo.name,
-                iconUrl = habitInfo.iconUrl,
-                timeOfDay = habitInfo.timeOfDay,
-                bloomingStage = bloomingStage,
-                health = health
-            )
-        }
-
-        // Emit the list of flowers
-        emit(habitFlowers)
-    }.catch { error ->
-        Napier.e("Error processing garden data", error, tag = TAG)
-        emit(emptyList())
-    }
+            }
+            .catch { error ->
+                Napier.e("Error processing garden data", error, tag = TAG)
+                emit(emptyList())
+            }
 
     /**
      * Handles UI events from the Habit Garden screen.
@@ -185,4 +151,42 @@ class HabitGardenViewModel(
             }
         }
     }
-} 
+}
+
+internal fun buildHabitFlowersForGarden(
+    habitRecords: List<UserHabitRecordFullInfo>,
+    userHabits: List<UserHabit>,
+    today: LocalDate = getCurrentDate()
+): List<HabitFlower> {
+    val habitIdToDaysPerWeek = userHabits.associate { it.id to it.daysOfWeek.size }
+    val habitGroups = habitRecords.groupBy { it.userHabitId }
+
+    return habitGroups.keys.mapNotNull { habitId ->
+        val records = habitGroups[habitId] ?: return@mapNotNull null
+        val habitInfo = records.firstOrNull() ?: return@mapNotNull null
+        val domainRecords: List<UserHabitRecord> = records.map { record ->
+            UserHabitRecord(
+                id = record.id,
+                userHabitId = record.userHabitId,
+                date = record.date,
+                isCompleted = record.isCompleted
+            )
+        }.sortedBy { it.date }.filter { it.date <= today }
+        val levelProgress = calculateLevelProgress(
+            records = domainRecords,
+            daysPerWeek = habitIdToDaysPerWeek[habitId] ?: 7
+        )
+
+        HabitFlower(
+            habitId = habitId,
+            name = habitInfo.name,
+            iconUrl = habitInfo.iconUrl,
+            timeOfDay = habitInfo.timeOfDay,
+            bloomingStage = levelToGrowthStage(levelProgress.level),
+            health = FlowerHealth(
+                value = levelProgress.vitality,
+                consecutiveMissedDays = levelProgress.currentMissedDays
+            )
+        )
+    }
+}

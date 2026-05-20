@@ -2,9 +2,8 @@ package com.horizondev.habitbloom.screens.garden.data
 
 import com.horizondev.habitbloom.database.HabitBloomDatabase
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
-import com.horizondev.habitbloom.screens.garden.domain.roundToDecimal
+import com.horizondev.habitbloom.screens.garden.domain.calculateLevelProgress
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
-import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import com.horizondev.habitbloom.utils.getCurrentDate
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.Dispatchers
@@ -13,10 +12,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
-import kotlin.math.max
 
 /**
- * Data structure to hold flower health along with its last updated date.
+ * Data structure to hold flower vitality along with its last updated date.
  */
 data class FlowerHealthRecord(
     val flowerHealth: FlowerHealth,
@@ -24,7 +22,7 @@ data class FlowerHealthRecord(
 )
 
 /**
- * Data source for managing flower health calculations based on habit completion history.
+ * Data source for managing flower vitality calculations based on habit completion history.
  */
 class FlowerHealthDataSource(
     private val database: HabitBloomDatabase,
@@ -33,10 +31,10 @@ class FlowerHealthDataSource(
     private val TAG = "FlowerHealthDataSource"
 
     /**
-     * Gets the flower health for a specific habit by calculating it from completion history.
+     * Gets the flower vitality for a specific habit by calculating it from completion history.
      *
      * @param userHabitId The habit ID
-     * @return The calculated flower health
+     * @return The calculated flower vitality
      */
     suspend fun getFlowerHealth(userHabitId: Long): FlowerHealth = withContext(Dispatchers.IO) {
         try {
@@ -53,50 +51,27 @@ class FlowerHealthDataSource(
                 endDate = currentDate
             ).sortedBy { it.date }
 
-            // EMA vitality based on scheduled records
-            val alpha = selectAlpha(userHabit.daysOfWeek.size)
-            var vitality = 0.6f
-            var consecutiveMissedDays = 0
-            var currentConsecutiveMisses = 0
-
-            for (record in records) {
-                val x = if (record.isCompleted) 1f else 0f
-                vitality = alpha * x + (1 - alpha) * vitality
-
-                if (record.isCompleted) {
-                    consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
-                    currentConsecutiveMisses = 0
-                } else {
-                    currentConsecutiveMisses++
-                }
-            }
-
-            // Don't forget the final streak of misses at the end
-            consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
-
-            // If brand-new (no records), show full vitality; if all completed so far, also full
-            vitality = when {
-                records.isEmpty() -> 1.0f
-                records.all { it.isCompleted } -> 1.0f
-                else -> vitality
-            }.roundToDecimal(2)
+            val progress = calculateLevelProgress(
+                records = records,
+                daysPerWeek = userHabit.daysOfWeek.size
+            )
 
             return@withContext FlowerHealth(
-                value = vitality,
-                consecutiveMissedDays = consecutiveMissedDays
+                value = progress.vitality,
+                consecutiveMissedDays = progress.currentMissedDays
             )
         } catch (e: Exception) {
-            Napier.e("Error calculating flower health", e, tag = TAG)
+            Napier.e("Error calculating flower vitality", e, tag = TAG)
             return@withContext FlowerHealth()
         }
     }
 
     /**
-     * Calculates the flower health for a specific habit with the last update date
+     * Calculates the flower vitality for a specific habit with the last update date
      * This is used for batch processing historical records
      *
      * @param userHabitId The habit ID
-     * @return FlowerHealthRecord containing the health and last update date
+     * @return FlowerHealthRecord containing vitality and last update date
      */
     suspend fun getFlowerHealthWithLastUpdatedDate(userHabitId: Long): FlowerHealthRecord? =
         withContext(Dispatchers.IO) {
@@ -107,13 +82,13 @@ class FlowerHealthDataSource(
                     lastUpdatedDate = getCurrentDate()
                 )
             } catch (e: Exception) {
-                Napier.e("Error getting flower health with date", e, tag = TAG)
+                Napier.e("Error getting flower vitality with date", e, tag = TAG)
                 return@withContext null
             }
         }
 
     /**
-     * Observes the flower health for a specific habit as a Flow.
+     * Observes the flower vitality for a specific habit as a Flow.
      *
      * @param userHabitId The habit ID
      * @return Flow of FlowerHealth for the habit
@@ -121,79 +96,52 @@ class FlowerHealthDataSource(
     fun observeFlowerHealth(userHabitId: Long): Flow<FlowerHealth> {
         // Create a flow of all records for this habit
         return localDataSource.getAllUserHabitRecordsForHabitId(userHabitId)
-            .map { records -> calculateFlowerHealth(userHabitId, records) }
-    }
-
-    /**
-     * Helper method to calculate flower health from a list of records
-     * Used by the observeFlowerHealth flow
-     */
-    private suspend fun calculateFlowerHealth(
-        userHabitId: Long,
-        records: List<UserHabitRecord>
-    ): FlowerHealth {
-        val today = getCurrentDate()
-        val filteredRecords = records
-            .sortedBy { it.date }
-            .filter { it.date <= today }
-
-        val userHabit = localDataSource.getUserHabitInfo(userHabitId)
-        val alpha = selectAlpha(userHabit?.daysOfWeek?.size ?: 7)
-
-        var vitality = 0.6f
-        var consecutiveMissedDays = 0
-        var currentConsecutiveMisses = 0
-
-        for (record in filteredRecords) {
-            val x = if (record.isCompleted) 1f else 0f
-            vitality = alpha * x + (1 - alpha) * vitality
-
-            if (record.isCompleted) {
-                consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
-                currentConsecutiveMisses = 0
-            } else {
-                currentConsecutiveMisses++
+            .map { records ->
+                val today = getCurrentDate()
+                val userHabit = localDataSource.getUserHabitInfo(userHabitId)
+                val progress = calculateLevelProgress(
+                    records = records
+                        .sortedBy { it.date }
+                        .filter { it.date <= today },
+                    daysPerWeek = userHabit?.daysOfWeek?.size ?: 7
+                )
+                FlowerHealth(
+                    value = progress.vitality,
+                    consecutiveMissedDays = progress.currentMissedDays
+                )
             }
-        }
-
-        // Don't forget the final streak of misses at the end
-        consecutiveMissedDays = max(consecutiveMissedDays, currentConsecutiveMisses)
-
-        vitality = vitality.roundToDecimal(2)
-
-        return FlowerHealth(value = vitality, consecutiveMissedDays = consecutiveMissedDays)
     }
 
     /**
-     * Updates the flower health when a habit is completed.
+     * Updates the flower vitality when a habit is completed.
      * With the runtime calculation approach, this method doesn't need to do anything
-     * since health is calculated on demand.
+     * since vitality is calculated on demand.
      *
      * @param userHabitId The habit ID
-     * @return The updated flower health
+     * @return The updated flower vitality
      */
     suspend fun updateHealthForCompletedHabit(userHabitId: Long): FlowerHealth =
         withContext(Dispatchers.IO) {
-            // Health is calculated on demand now, just return the current health
+            // Vitality is calculated on demand now, just return the current vitality
             return@withContext getFlowerHealth(userHabitId)
         }
 
     /**
-     * Updates the flower health when a habit is missed.
+     * Updates the flower vitality when a habit is missed.
      * With the runtime calculation approach, this method doesn't need to do anything
-     * since health is calculated on demand.
+     * since vitality is calculated on demand.
      *
      * @param userHabitId The habit ID
-     * @return The updated flower health
+     * @return The updated flower vitality
      */
     suspend fun updateHealthForMissedHabit(userHabitId: Long): FlowerHealth =
         withContext(Dispatchers.IO) {
-            // Health is calculated on demand now, just return the current health
+            // Vitality is calculated on demand now, just return the current vitality
             return@withContext getFlowerHealth(userHabitId)
         }
 
     /**
-     * Updates the flower health with a pre-computed value.
+     * Updates the flower vitality with a pre-computed value.
      * With the runtime calculation approach, this method doesn't need to do anything.
      */
     suspend fun updateFlowerHealth(
@@ -205,7 +153,7 @@ class FlowerHealthDataSource(
     }
 
     /**
-     * Updates only the last updated date for a flower health record.
+     * Updates only the last updated date for a flower vitality record.
      * With the runtime calculation approach, this method doesn't need to do anything.
      */
     suspend fun updateLastUpdatedDate(
@@ -219,11 +167,4 @@ class FlowerHealthDataSource(
         database.flowerHealthEntityQueries.deleteAllFlowerHealth()
     }
 
-    private fun selectAlpha(daysPerWeek: Int): Float {
-        return when {
-            daysPerWeek >= 5 -> 0.15f
-            daysPerWeek >= 3 -> 0.10f
-            else -> 0.08f
-        }
-    }
 }

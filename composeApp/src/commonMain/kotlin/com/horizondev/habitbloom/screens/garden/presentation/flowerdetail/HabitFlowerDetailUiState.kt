@@ -10,14 +10,12 @@ import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
  * @property isLoading Whether the data is currently loading
  * @property habitFlowerDetail The habit flower detail data to display
  * @property errorMessage Error message to display if loading fails
- * @property showWateringAnimation Whether to show the watering animation
  * @property themeOption App's theme
  */
 data class HabitFlowerDetailUiState(
     val isLoading: Boolean = false,
     val habitFlowerDetail: HabitFlowerDetail? = null,
     val errorMessage: String? = null,
-    val showWateringAnimation: Boolean = false,
     val themeOption: ThemeOption
 )
 
@@ -51,11 +49,6 @@ sealed class HabitFlowerDetailUiIntent {
  * These are events that the UI sends to the ViewModel.
  */
 sealed class HabitFlowerDetailUiEvent {
-    /**
-     * Water (complete) today's habit
-     */
-    data object WaterTodaysHabit : HabitFlowerDetailUiEvent()
-
     /**
      * Navigate to the edit habit screen
      *

@@ -3,7 +3,7 @@ package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
-import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
+import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import com.horizondev.habitbloom.screens.garden.domain.calculateLevelProgress
@@ -11,20 +11,18 @@ import com.horizondev.habitbloom.screens.garden.domain.levelToGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.utils.getCurrentDate
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 
 /**
  * ViewModel for the Habit Flower Detail screen.
- * Handles data loading, habit completion, and UI state updates.
+ * Handles data loading and UI state updates.
  */
 class HabitFlowerDetailViewModel(
     private val habitId: Long,
     private val repository: HabitsRepository,
-    private val flowerHealthRepository: FlowerHealthRepository,
     private val themeUseCase: ThemeUseCase
 ) : BloomViewModel<HabitFlowerDetailUiState, HabitFlowerDetailUiIntent>(
     HabitFlowerDetailUiState(
@@ -42,74 +40,62 @@ class HabitFlowerDetailViewModel(
      * Loads habit details and transforms them into flower detail model.
      */
     private fun loadHabitFlowerDetails() {
-        // Combine habit data with flower health data
-        val habitDataFlow = repository.getUserHabitWithAllRecordsFlow(habitId)
-        val healthDataFlow = flowerHealthRepository.observeFlowerHealth(habitId)
-
-        combine(habitDataFlow, healthDataFlow) { habitInfo, flowerHealth ->
-            if (habitInfo == null) {
-                throw IllegalStateException("Habit not found")
-            }
-
-            // Get current date for calculations
-            val today = getCurrentDate()
-
-            // Reverse to get chronological order (oldest first)
-            val lastSevenScheduledDays = habitInfo.records
-                .filter { it.date <= today }
-                .sortedByDescending { it.date }
-                .take(7)
-                .map { record ->
-                    HabitFlowerDetail.DailyCompletion(
-                        date = record.date,
-                        isCompleted = record.isCompleted
-                    )
+        repository.getUserHabitWithAllRecordsFlow(habitId)
+            .map { habitInfo ->
+                if (habitInfo == null) {
+                    throw IllegalStateException("Habit not found")
                 }
-                .reversed()
 
-            // Compute Level/Vitality/XP using EMA over scheduled records up to today (exclude future)
-            val progressRecords = habitInfo.records.filter { it.date <= today }
-            val levelProgress = calculateLevelProgress(
-                records = progressRecords,
-                daysPerWeek = habitInfo.days.size
-            )
+                // Get current date for calculations
+                val today = getCurrentDate()
 
-            val growthStage = levelToGrowthStage(levelProgress.level)
+                // Reverse to get chronological order (oldest first)
+                val lastSevenScheduledDays = habitInfo.records
+                    .filter { it.date <= today }
+                    .sortedByDescending { it.date }
+                    .take(7)
+                    .map { record ->
+                        HabitFlowerDetail.DailyCompletion(
+                            date = record.date,
+                            isCompleted = record.isCompleted
+                        )
+                    }
+                    .reversed()
 
-            // Determine flower type based on time of day
-            val flowerType = FlowerType.fromTimeOfDay(habitInfo.timeOfDay)
+                val progressRecords = habitInfo.records.filter { it.date <= today }
+                val levelProgress = calculateLevelProgress(
+                    records = progressRecords,
+                    daysPerWeek = habitInfo.days.size
+                )
 
-            // Check if habit is completed today
-            val isCompletedToday = habitInfo.records
-                .any { it.date == today && it.isCompleted }
+                val growthStage = levelToGrowthStage(levelProgress.level)
+                val flowerType = FlowerType.fromTimeOfDay(habitInfo.timeOfDay)
 
-            // Create the flower detail model
-            // Use the vitality from levelProgress as the health value for consistency
-            // This ensures both health display and level progression use the same calculation
-            val consistentHealthValue = levelProgress.vitality
-            val updatedFlowerHealth = flowerHealth.copy(value = consistentHealthValue)
+                val flowerHealth = FlowerHealth(
+                    value = levelProgress.vitality,
+                    consecutiveMissedDays = levelProgress.currentMissedDays
+                )
 
-            HabitFlowerDetail(
-                habitId = habitInfo.userHabitId,
-                name = habitInfo.name,
-                description = habitInfo.description,
-                iconUrl = habitInfo.iconUrl,
-                timeOfDay = habitInfo.timeOfDay,
-                startDate = habitInfo.startDate,
-                endDate = habitInfo.endDate,
-                reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
-                lastSevenDaysCompletions = lastSevenScheduledDays,
-                isCompletedToday = isCompletedToday,
-                flowerGrowthStage = growthStage,
-                flowerType = flowerType,
-                flowerHealth = updatedFlowerHealth,
-                level = levelProgress.level,
-                totalXp = levelProgress.totalXp,
-                xpInLevel = levelProgress.xpInLevel,
-                xpForCurrentLevel = levelProgress.xpForCurrentLevel,
-                xpToNextLevel = levelProgress.xpToNextLevel
-            )
-        }
+                HabitFlowerDetail(
+                    habitId = habitInfo.userHabitId,
+                    name = habitInfo.name,
+                    description = habitInfo.description,
+                    iconUrl = habitInfo.iconUrl,
+                    timeOfDay = habitInfo.timeOfDay,
+                    startDate = habitInfo.startDate,
+                    endDate = habitInfo.endDate,
+                    reminderTime = habitInfo.reminderTime.takeIf { habitInfo.reminderEnabled },
+                    lastSevenDaysCompletions = lastSevenScheduledDays,
+                    flowerGrowthStage = growthStage,
+                    flowerType = flowerType,
+                    flowerHealth = flowerHealth,
+                    level = levelProgress.level,
+                    totalXp = levelProgress.totalXp,
+                    xpInLevel = levelProgress.xpInLevel,
+                    xpForCurrentLevel = levelProgress.xpForCurrentLevel,
+                    xpToNextLevel = levelProgress.xpToNextLevel
+                )
+            }
             .onEach { habitFlowerDetail ->
                 updateState { currentState ->
                     currentState.copy(
@@ -136,60 +122,12 @@ class HabitFlowerDetailViewModel(
      */
     fun handleUiEvent(event: HabitFlowerDetailUiEvent) {
         when (event) {
-            is HabitFlowerDetailUiEvent.WaterTodaysHabit -> {
-                waterHabit()
-            }
-
             is HabitFlowerDetailUiEvent.NavigateToHabitDetails -> {
                 emitUiIntent(HabitFlowerDetailUiIntent.NavigateToHabitDetails(event.habitId))
             }
 
             is HabitFlowerDetailUiEvent.NavigateBack -> {
                 emitUiIntent(HabitFlowerDetailUiIntent.NavigateBack)
-            }
-        }
-    }
-
-    /**
-     * Completes (waters) the habit for today.
-     */
-    private fun waterHabit() {
-        val currentState = state.value
-        val habitFlowerDetail = currentState.habitFlowerDetail ?: return
-
-        // If already completed today, don't do anything
-        if (habitFlowerDetail.isCompletedToday) {
-            //todo show snackbar with bloom visuals
-            //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("You've already watered this habit today"))
-            return
-        }
-
-        // Show watering animation
-        updateState { it.copy(showWateringAnimation = true) }
-
-        launch {
-            try {
-                // Update habit completion status through repository
-                repository.updateHabitCompletionByHabitId(
-                    habitId = habitId,
-                    date = getCurrentDate(),
-                    isCompleted = true
-                )
-                // Note: The repository now takes care of updating flower health
-
-                // Keep animation visible for a moment
-                delay(1500)
-
-                // Show success message
-                //todo show snackbar with bloom visuals
-                //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Habit watered successfully!"))
-            } catch (e: Exception) {
-                Napier.e("Error watering habit", e, tag = TAG)
-                //todo show snackbar with bloom visuals
-                //emitUiIntent(HabitFlowerDetailUiIntent.ShowSnackbar("Failed to water habit"))
-            } finally {
-                // Hide watering animation
-                updateState { it.copy(showWateringAnimation = false) }
             }
         }
     }

@@ -738,29 +738,6 @@ class HabitsRepository(
 
 
     /**
-     * Gets all user habit records for a specific time of day (non-reactive).
-     *
-     * @param timeOfDay The time of day to filter by
-     * @return List of habit records for the specified time of day
-     */
-    suspend fun getHabitRecordsByTimeOfDay(timeOfDay: TimeOfDay): List<UserHabitRecordFullInfo> =
-        withContext(Dispatchers.IO) {
-            val currentDate = getCurrentDate()
-            val records = localDataSource.getAllUserHabitRecords(currentDate).first()
-            val userHabitsById = localDataSource.getAllUserHabits().associateBy { it.id }
-            val filteredRecords = records.filter { record ->
-                userHabitsById[record.userHabitId]?.timeOfDay == timeOfDay
-            }
-
-            buildFullHabitRecords(
-                habitCatalog = getHabitCatalogOrEmpty("time-of-day query"),
-                habitRecords = filteredRecords,
-                userHabitsById = userHabitsById,
-                untilDate = currentDate
-            )
-        }
-
-    /**
      * Checks if an active instance of a habit is already added by the user.
      *
      * @param habitId The ID of the habit to check

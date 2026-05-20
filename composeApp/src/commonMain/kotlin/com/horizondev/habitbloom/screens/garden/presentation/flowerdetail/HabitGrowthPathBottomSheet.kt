@@ -289,7 +289,7 @@ fun HabitGrowthPathBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Health system explanation
+            // Vitality and XP explanation
             Spacer(modifier = Modifier.height(28.dp))
 
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -309,12 +309,12 @@ fun HabitGrowthPathBottomSheet(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Health levels explanation
+                // Vitality levels explanation
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Health legend boxes
+                    // Vitality legend boxes
                     Column(
                         modifier = Modifier.weight(1f),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -369,7 +369,7 @@ fun HabitGrowthPathBottomSheet(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Health system rules
+                // Vitality system rules
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()

@@ -4,7 +4,6 @@ import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GrowthAndHealthTest {
@@ -72,46 +71,63 @@ class GrowthAndHealthTest {
     }
 
     @Test
-    fun flowerHealth_missPenalties_andRecovery_andRegressionRule() {
-        var health = FlowerHealth(value = 1.0f, consecutiveMissedDays = 0)
+    fun calculateLevelProgress_firstMissAfterPerfectHistoryDecaysFromFullVitality() {
+        val records = listOf(
+            UserHabitRecord(1, 10, LocalDate(2025, 1, 1), true),
+            UserHabitRecord(2, 10, LocalDate(2025, 1, 2), true),
+            UserHabitRecord(3, 10, LocalDate(2025, 1, 3), false)
+        )
 
-        // 1st miss: lighter penalty
-        health = health.habitMissed()
-        assertEquals(0.85f, health.value)
-        assertEquals(1, health.consecutiveMissedDays)
-        assertFalse(health.isWilting) // healthy threshold 0.65
-        assertFalse(health.isCritical)
+        val progress = calculateLevelProgress(records = records, daysPerWeek = 7)
 
-        // 2nd miss: lighter penalty
-        health = health.habitMissed()
-        assertEquals(0.75f, health.value)
-        assertEquals(2, health.consecutiveMissedDays)
-        assertTrue(health.isWilting == false) // still above 0.65
-        assertFalse(health.isCritical)
-        assertFalse(health.shouldRegress())
+        assertEquals(0.85f, progress.vitality)
+        assertEquals(1, progress.currentMissedDays)
+    }
 
-        // 3rd miss: -0.08 => 0.67 -> rounds 0.7
-        health = health.habitMissed()
-        assertEquals(0.67f.roundToDecimal(1), health.value)
-        assertEquals(3, health.consecutiveMissedDays)
-        assertFalse(health.isWilting) // just above threshold
-        assertFalse(health.isCritical)
-        assertFalse(health.shouldRegress())
+    @Test
+    fun calculateLevelProgress_missesDoNotRemoveXp() {
+        val d1 = LocalDate(2025, 1, 1)
+        val d2 = LocalDate(2025, 1, 2)
+        val d3 = LocalDate(2025, 1, 3)
+        val completedOnly = listOf(
+            UserHabitRecord(1, 10, d1, true),
+            UserHabitRecord(2, 10, d2, true)
+        )
+        val completedThenMissed = completedOnly + UserHabitRecord(3, 10, d3, false)
 
-        // 4th miss: -0.08 => goes to ~0.59 (wilting)
-        health = health.habitMissed()
-        assertEquals(0.59f.roundToDecimal(1), health.value)
-        assertEquals(4, health.consecutiveMissedDays)
-        assertTrue(health.isWilting)
-        assertFalse(health.isCritical)
-        assertFalse(health.shouldRegress())
+        val beforeMiss = calculateLevelProgress(records = completedOnly, daysPerWeek = 7)
+        val afterMiss = calculateLevelProgress(records = completedThenMissed, daysPerWeek = 7)
 
-        // Recovery: +0.2 => bounce back and reset misses
-        health = health.habitCompleted()
-        assertEquals((0.59f + 0.2f).coerceAtMost(1.0f).roundToDecimal(1), health.value)
-        assertEquals(0, health.consecutiveMissedDays)
-        assertFalse(health.isCritical)
+        assertEquals(beforeMiss.totalXp, afterMiss.totalXp)
+        assertEquals(beforeMiss.level, afterMiss.level)
+        assertTrue(afterMiss.vitality < beforeMiss.vitality)
+    }
+
+    @Test
+    fun calculateLevelProgress_currentMissedDaysTracksOnlyTrailingMisses() {
+        val records = listOf(
+            UserHabitRecord(1, 10, LocalDate(2025, 1, 1), true),
+            UserHabitRecord(2, 10, LocalDate(2025, 1, 2), false),
+            UserHabitRecord(3, 10, LocalDate(2025, 1, 3), false),
+            UserHabitRecord(4, 10, LocalDate(2025, 1, 4), true)
+        )
+
+        val progress = calculateLevelProgress(records = records, daysPerWeek = 7)
+
+        assertEquals(0, progress.currentMissedDays)
+        assertTrue(progress.vitality in 0f..1f)
+    }
+
+    @Test
+    fun calculateLevelProgress_currentMissedDaysCountsRecentMisses() {
+        val records = listOf(
+            UserHabitRecord(1, 10, LocalDate(2025, 1, 1), true),
+            UserHabitRecord(2, 10, LocalDate(2025, 1, 2), false),
+            UserHabitRecord(3, 10, LocalDate(2025, 1, 3), false)
+        )
+
+        val progress = calculateLevelProgress(records = records, daysPerWeek = 7)
+
+        assertEquals(2, progress.currentMissedDays)
     }
 }
-
-

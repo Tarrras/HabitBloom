@@ -4,29 +4,20 @@ import kotlin.math.pow
 import kotlin.math.round
 
 /**
- * Represents the health status of a habit flower.
- * Health is a buffer mechanism that allows flowers to survive missed days.
+ * Represents the current vitality status of a habit flower.
+ * XP and levels are permanent; vitality only influences visual state and future XP gains.
  *
- * @property value Current health value ranging from 0.0 (dead) to 1.0 (fully healthy)
- * @property consecutiveMissedDays Number of consecutive days the habit has been missed
- * @property isWilting Whether the flower is in a wilting state (health below threshold)
+ * @property value Current vitality value ranging from 0.0 to 1.0
+ * @property consecutiveMissedDays Number of currently trailing scheduled missed days
  */
 data class FlowerHealth(
     val value: Float = 1.0f,
     val consecutiveMissedDays: Int = 0,
 ) {
     companion object {
-        // Thresholds for health states (more resilient)
+        // Thresholds for vitality states.
         const val HEALTHY_THRESHOLD = 0.65f
         const val WILTING_THRESHOLD = 0.2f
-
-        // Health penalties for missed days (lighter penalties)
-        const val FIRST_MISS_PENALTY = 0.15f
-        const val SECOND_MISS_PENALTY = 0.10f
-        const val ADDITIONAL_MISS_PENALTY = 0.08f
-
-        // Health recovery for completed days
-        const val COMPLETION_RECOVERY = 0.2f
     }
 
     /**
@@ -40,49 +31,6 @@ data class FlowerHealth(
      */
     val isCritical: Boolean
         get() = value < WILTING_THRESHOLD
-
-    /**
-     * Updates health when a habit is completed.
-     *
-     * @return Updated FlowerHealth instance
-     */
-    fun habitCompleted(): FlowerHealth {
-        // Reset consecutive missed days and increase health
-        val newHealth = (value + COMPLETION_RECOVERY).coerceAtMost(1.0f)
-        // Round to prevent floating point precision issues
-        val roundedHealth = newHealth.roundToDecimal(1)
-        return copy(value = roundedHealth, consecutiveMissedDays = 0)
-    }
-
-    /**
-     * Updates health when a habit is missed.
-     *
-     * @return Updated FlowerHealth instance
-     */
-    fun habitMissed(): FlowerHealth {
-        val newConsecutiveMissedDays = consecutiveMissedDays + 1
-
-        // Calculate penalty based on consecutive misses
-        val penalty = when (newConsecutiveMissedDays) {
-            1 -> FIRST_MISS_PENALTY
-            2 -> SECOND_MISS_PENALTY
-            else -> ADDITIONAL_MISS_PENALTY
-        }
-
-        val newHealth = (value - penalty).coerceAtLeast(0.0f)
-        // Round to prevent floating point precision issues
-        val roundedHealth = newHealth.roundToDecimal(1)
-        return copy(value = roundedHealth, consecutiveMissedDays = newConsecutiveMissedDays)
-    }
-
-    /**
-     * Determines if the flower should regress to a previous growth stage.
-     *
-     * @return True if the flower should regress, false otherwise
-     */
-    fun shouldRegress(): Boolean {
-        return consecutiveMissedDays >= 5 && isCritical
-    }
 }
 
 /**

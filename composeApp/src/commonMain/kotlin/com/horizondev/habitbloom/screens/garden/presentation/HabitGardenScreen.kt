@@ -155,9 +155,7 @@ private fun HabitGardenContent(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Content based on state
             when {
-                // Show loading
                 uiState.isLoading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -169,7 +167,6 @@ private fun HabitGardenContent(
                     }
                 }
 
-                // Show error if present
                 uiState.errorMessage != null -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
@@ -200,7 +197,6 @@ private fun HabitGardenContent(
                     }
                 }
 
-                // Show empty state
                 uiState.habitFlowers.isEmpty() -> {
                     Box(
                         modifier = Modifier.background(
@@ -222,9 +218,7 @@ private fun HabitGardenContent(
                     }
                 }
 
-                // Show garden grid
                 else -> {
-                    // Staggered grid of habit flowers
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(2),
                         contentPadding = PaddingValues(vertical = 8.dp),

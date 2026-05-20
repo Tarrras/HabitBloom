@@ -18,7 +18,6 @@ data class HabitFlowerDetail(
     val endDate: LocalDate? = null,
     val reminderTime: LocalTime?,
     val lastSevenDaysCompletions: List<DailyCompletion>,
-    val isCompletedToday: Boolean,
     val flowerGrowthStage: FlowerGrowthStage,
     val flowerType: FlowerType,
     val flowerHealth: FlowerHealth = FlowerHealth(),

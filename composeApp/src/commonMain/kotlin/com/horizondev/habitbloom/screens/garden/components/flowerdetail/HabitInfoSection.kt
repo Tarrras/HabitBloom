@@ -34,15 +34,11 @@ import habitbloom.composeapp.generated.resources.afternoon_habits_image
 import habitbloom.composeapp.generated.resources.congratulations_full_bloom
 import habitbloom.composeapp.generated.resources.current_stage
 import habitbloom.composeapp.generated.resources.evening_habits_image
-import habitbloom.composeapp.generated.resources.flower_health_critical
-import habitbloom.composeapp.generated.resources.flower_health_impact
-import habitbloom.composeapp.generated.resources.flower_health_wilting
-import habitbloom.composeapp.generated.resources.flower_potential_stage
 import habitbloom.composeapp.generated.resources.how_xp_works_title
 import habitbloom.composeapp.generated.resources.level_label
 import habitbloom.composeapp.generated.resources.level_progress
 import habitbloom.composeapp.generated.resources.morning_habits_image
-import habitbloom.composeapp.generated.resources.needs_urgent_watering
+import habitbloom.composeapp.generated.resources.needs_consistency_boost
 import habitbloom.composeapp.generated.resources.vitality
 import habitbloom.composeapp.generated.resources.xp_to_next_stage
 import org.jetbrains.compose.resources.ExperimentalResourceApi
@@ -54,11 +50,8 @@ import org.jetbrains.compose.resources.stringResource
  *
  * @param habitName The name of the habit
  * @param timeOfDay The time of day associated with the habit
- * @param growthStage The current growth stage of the flower (already accounts for health)
- * @param streakBasedGrowthStage The growth stage based only on streak (without health effects) [Deprecated]
- * @param flowerHealth The health status of the flower
- * @param currentStreak The current streak of the habit [Deprecated]
- * @param streaksToNextStage The number of streaks needed to reach the next stage [Deprecated]
+ * @param growthStage The current growth stage of the flower based on permanent level progress
+ * @param flowerHealth The vitality status of the flower
  * @param modifier Modifier for styling
  */
 @OptIn(ExperimentalResourceApi::class)
@@ -67,28 +60,14 @@ fun HabitInfoSection(
     habitName: String,
     timeOfDay: TimeOfDay,
     growthStage: FlowerGrowthStage,
-    streakBasedGrowthStage: FlowerGrowthStage,
     flowerHealth: FlowerHealth,
-    currentStreak: Int,
-    streaksToNextStage: Int,
     level: Int,
     vitalityPercent: Int,
-    xpToNextLevel: Int,
     xpInLevel: Int,
     xpForCurrentLevel: Int,
     modifier: Modifier = Modifier,
     onShowXpInfo: () -> Unit = {}
 ) {
-    // Determine if health is impacting the growth stage
-    val isHealthImpactingStage = growthStage != streakBasedGrowthStage
-
-    // Determine health status for display
-    val healthStatusColor = when {
-        flowerHealth.isCritical -> BloomTheme.colors.error
-        flowerHealth.isWilting -> BloomTheme.colors.secondary
-        else -> BloomTheme.colors.success
-    }
-
     BloomCard(
         modifier = modifier,
         onClick = {}
@@ -147,45 +126,6 @@ fun HabitInfoSection(
                     style = BloomTheme.typography.subheading,
                     color = BloomTheme.colors.textColor.primary,
                     fontWeight = FontWeight.Medium
-                )
-            }
-
-            // Show the potential stage if health is impacting it
-            if (isHealthImpactingStage) {
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(Res.string.flower_potential_stage),
-                        style = BloomTheme.typography.body,
-                        color = BloomTheme.colors.textColor.secondary
-                    )
-
-                    Spacer(modifier = Modifier.width(4.dp))
-
-                    Text(
-                        text = streakBasedGrowthStage.getTitle(),
-                        style = BloomTheme.typography.body,
-                        color = healthStatusColor,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-
-                // Health impact explanation
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = when {
-                        flowerHealth.isCritical -> stringResource(Res.string.flower_health_critical)
-                        flowerHealth.isWilting -> stringResource(Res.string.flower_health_wilting)
-                        else -> stringResource(Res.string.flower_health_impact)
-                    },
-                    style = BloomTheme.typography.small,
-                    color = healthStatusColor,
-                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
@@ -267,7 +207,7 @@ fun HabitInfoSection(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Health tip for low vitality
+            // Vitality tip for low recent consistency
             if (flowerHealth.isCritical || flowerHealth.isWilting) {
                 BloomCard(onClick = {}) {
                     Row(
@@ -286,7 +226,7 @@ fun HabitInfoSection(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = stringResource(Res.string.needs_urgent_watering),
+                            text = stringResource(Res.string.needs_consistency_boost),
                             style = BloomTheme.typography.small,
                             color = if (flowerHealth.isCritical) BloomTheme.colors.error else BloomTheme.colors.secondary,
                             fontWeight = FontWeight.Medium

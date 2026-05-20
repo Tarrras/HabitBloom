@@ -373,8 +373,6 @@
     <string name="no_habits_for_time_of_day_in_garden">No habits to display for %1$d time.\nAdd some habits to see your garden grow!</string>
     <string name="habit_flower">Habit Flower</string>
     <string name="habit_flower_details">Habit flower details</string>
-    <string name="water_today_habit">💧 Water Today's Habit</string>
-    <string name="watered_today">Watered Today</string>
     <string name="current_stage">Current Stage:</string>
     <string name="progress_to_next_stage">Progress to next stage:</string>
     <string name="vitality">Vitality</string>
@@ -390,7 +388,7 @@
     <string name="level_label">Level %1$d</string>
     <string name="level_progress">Level progress</string>
     <string name="streak_boost">Streak boost</string>
-    <string name="needs_urgent_watering">Needs urgent watering</string>
+    <string name="needs_consistency_boost">Needs a consistency boost</string>
     <string name="background">background</string>
 
     <!-- Flower Growth Stages -->
@@ -448,14 +446,12 @@
     <string name="am_label">AM</string>
     <string name="pm_label">PM</string>
 
-    <string name="habit_watered_successfully">Habit watered successfully!</string>
-    <string name="failed_to_water_habit">Failed to water habit</string>
     <string name="show_bloom_progress">Show Bloom Progress</string>
     <string name="full_growth_path">Full Growth Path</string>
     <string name="stage_progress_info">Stage %1$d of %2$d: %3$s</string>
     <string name="days_to_next_stage">%1$d days to next stage</string>
     <string name="xp_system_title">XP system</string>
-    <string name="xp_system_explanation">Earn XP by completing scheduled days. Your vitality can boost gains. Reaching XP thresholds increases your level, and level maps to the flower stage.</string>
+    <string name="xp_system_explanation">Earn XP by completing scheduled days. XP increases your level and flower stage. Vitality reflects recent consistency and can boost future XP, but XP and levels are never lost.</string>
     <string name="xp_current_in_level">%1$d/%2$d XP this level</string>
     <string name="xp_remaining_to_next">%1$d XP to next level</string>
     <string name="growth_system_explanation">Your habit blooms as your level increases. Levels are earned through XP, not streak length.</string>
@@ -463,7 +459,7 @@
     <string name="current_streak_info">Current streak: %1$d days</string>
     <string name="stage_threshold_started">Started at %1$d days</string>
     <string name="stage_threshold_next">Next at %1$d days</string>
-    <string name="bloom_stage_congrats_extended">You\'ve reached the final stage with a %1$d+ day streak! Keep going to maintain your beautiful bloom.</string>
+    <string name="bloom_stage_congrats_extended">You've reached the final stage! Keep your vitality high to keep the bloom looking strong.</string>
 
     <!-- Growth stage descriptions -->
     <string name="growth_stage_seed_desc">Firmly planted in soil and beginning its journey. Keep going!</string>
@@ -472,18 +468,18 @@
     <string name="growth_stage_bud_desc">A bud forms, promising a beautiful bloom. Almost there!</string>
     <string name="growth_stage_bloom_desc">Full bloom achieved! Your consistent habit has created something beautiful.</string>
 
-    <!-- Flower Health -->
-    <string name="flower_health">Flower Health</string>
-    <string name="health_status_healthy">Healthy</string>
-    <string name="health_status_wilting">Wilting</string>
+    <!-- Flower Vitality -->
+    <string name="flower_health">Vitality</string>
+    <string name="health_status_healthy">Strong</string>
+    <string name="health_status_wilting">Fading</string>
     <string name="health_status_critical">Critical</string>
-    <string name="health_missed_days">Missed Days</string>
-    <string name="health_description">Your flower's vitality reflects your habit consistency. Missing days causes wilting, while regular maintenance keeps it healthy.</string>
-    <string name="flower_health_system">Flower Health System</string>
-    <string name="health_rule_missing_days">• Missing 1-2 days reduces flower health but doesn't affect growth stage</string>
-    <string name="health_rule_consecutive_misses">• Missing many consecutive days at low vitality may dim visuals, but levels are earned by XP and are never lost</string>
-    <string name="health_rule_recovery">• Completing your habit restores health gradually</string>
-    <string name="health_rule_vitality_boosts_xp">• Higher vitality yields more XP for each completion</string>
+    <string name="health_missed_days">Recent misses</string>
+    <string name="health_description">Vitality reflects recent consistency. It changes the flower's appearance and can boost future XP, while XP and levels are permanent.</string>
+    <string name="flower_health_system">Vitality and XP</string>
+    <string name="health_rule_missing_days">• Missed scheduled days reduce vitality, but do not remove XP or levels</string>
+    <string name="health_rule_consecutive_misses">• Consecutive recent misses can make the flower look faded or critical</string>
+    <string name="health_rule_recovery">• Completing scheduled days raises vitality again</string>
+    <string name="health_rule_vitality_boosts_xp">• Higher vitality gives more XP for future completions</string>
     <string name="due_now">Due now</string>
     <string name="due_in_minutes">in %1$dm</string>
     <string name="due_in_hours">in %1$dh</string>
@@ -513,11 +509,6 @@
     </plurals>
 
     <string name="tap_to_edit_dates">Tap to edit dates</string>
-
-    <string name="flower_potential_stage">Potential stage:</string>
-    <string name="flower_health_critical">Health critical: Visuals may dim temporarily. Water daily to recover!</string>
-    <string name="flower_health_wilting">Health wilting: Your flower is at risk. Regular watering will help it recover.</string>
-    <string name="flower_health_impact">Health affects your flower's appearance. Maintain regular completion to keep it healthy.</string>
 
     <!-- Habit Related Errors -->
     <string name="habit_already_added">This habit is already active. You can edit it in Habit Details and add it again after it finishes.</string>
