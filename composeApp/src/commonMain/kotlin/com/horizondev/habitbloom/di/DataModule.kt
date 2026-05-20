@@ -1,7 +1,6 @@
 package com.horizondev.habitbloom.di
 
 import com.horizondev.habitbloom.auth.domain.AuthRepository
-import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.onboarding.data.OnboardingRepositoryImpl
 import com.horizondev.habitbloom.screens.onboarding.domain.OnboardingRepository
@@ -14,16 +13,10 @@ import org.koin.dsl.module
 
 @OptIn(ExperimentalSettingsApi::class)
 val dataModule = module {
-    // Onboarding repository
     single<OnboardingRepository> {
         OnboardingRepositoryImpl(preferencesDataSource = get())
     }
 
-    single {
-        FlowerHealthRepository(
-            flowerHealthDataSource = get()
-        )
-    }
 
     single {
         HabitsRepository(
@@ -33,21 +26,17 @@ val dataModule = module {
             storageService = get(),
             notificationManager = get(),
             permissionsManager = get(),
-            flowerHealthRepository = get()
         )
     }
 
     single { Settings().makeObservable() }
     singleOf(::AuthRepository)
     
-    // Update ProfileRepository with notificationScheduler parameter
     single {
         ProfileRepository(
-            remoteDataSource = get(),
             settings = get(),
             permissionsManager = get(),
             habitsRepository = get(),
-            flowerHealthRepository = get(),
             onboardingRepository = get(),
             notificationScheduler = get()
         )

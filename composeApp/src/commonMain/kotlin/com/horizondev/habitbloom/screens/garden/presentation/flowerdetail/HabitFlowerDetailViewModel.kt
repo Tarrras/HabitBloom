@@ -46,10 +46,7 @@ class HabitFlowerDetailViewModel(
                     throw IllegalStateException("Habit not found")
                 }
 
-                // Get current date for calculations
                 val today = getCurrentDate()
-
-                // Reverse to get chronological order (oldest first)
                 val lastSevenScheduledDays = habitInfo.records
                     .filter { it.date <= today }
                     .sortedByDescending { it.date }

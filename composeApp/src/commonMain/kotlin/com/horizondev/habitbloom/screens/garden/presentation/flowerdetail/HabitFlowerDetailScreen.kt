@@ -6,6 +6,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,6 +48,7 @@ import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerHe
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.FlowerVisualization
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitDetailSection
 import com.horizondev.habitbloom.screens.garden.components.flowerdetail.HabitInfoSection
+import com.horizondev.habitbloom.screens.garden.domain.HabitFlowerDetail
 import com.horizondev.habitbloom.screens.garden.domain.roundToDecimal
 import com.horizondev.habitbloom.utils.getGardenBackgroundRes
 import dev.chrisbanes.haze.HazeState
@@ -57,6 +59,7 @@ import habitbloom.composeapp.generated.resources.Res
 import habitbloom.composeapp.generated.resources.back
 import habitbloom.composeapp.generated.resources.habit_flower_details
 import habitbloom.composeapp.generated.resources.show_bloom_progress
+import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -115,12 +118,16 @@ fun HabitFlowerDetailScreenContent(
 ) {
     val hazeState = remember { HazeState() }
     val isSystemInDarkTheme = isSystemInDarkTheme()
-    val backgroundImage = remember(uiState.themeOption) {
+    val backgroundImage = remember(uiState.themeOption, isSystemInDarkTheme) {
         uiState.themeOption.getGardenBackgroundRes(isSystemInDarkTheme)
     }
-
-    // Show Bloom Progress button
     var showGrowthPathBottomSheet by remember { mutableStateOf(false) }
+    val onShowGrowthPath = remember {
+        { showGrowthPathBottomSheet = true }
+    }
+    val onDismissGrowthPath = remember {
+        { showGrowthPathBottomSheet = false }
+    }
 
     Scaffold(
         snackbarHost = {
@@ -133,188 +140,273 @@ fun HabitFlowerDetailScreenContent(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            Image(
-                modifier = Modifier
-                    .hazeSource(state = hazeState)
-                    .fillMaxSize(),
-                painter = painterResource(backgroundImage),
-                contentScale = ContentScale.Crop,
-                contentDescription = null
+            GardenBackground(
+                hazeState = hazeState,
+                backgroundImage = backgroundImage
             )
 
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                Spacer(modifier = Modifier.statusBarsPadding())
+                DetailTopBar(handleUiEvent = handleUiEvent)
 
-                Spacer(modifier = Modifier.height(18.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Default.ArrowBack,
-                        contentDescription = stringResource(Res.string.back),
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = ripple(bounded = false)
-                            ) {
-                                handleUiEvent(HabitFlowerDetailUiEvent.NavigateBack)
-                            },
-                        tint = BloomTheme.colors.textColor.primary
-                    )
-
-                    Spacer(modifier = Modifier.width(18.dp))
-
-                    Text(
-                        text = stringResource(Res.string.habit_flower_details),
-                        style = BloomTheme.typography.title,
-                        color = BloomTheme.colors.textColor.primary
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                when {
-                    uiState.isLoading -> {
-                        // Loading state
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            BloomLoadingAnimation(
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-
-                    uiState.errorMessage != null -> {
-                        // Error state
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = uiState.errorMessage,
-                                style = BloomTheme.typography.body,
-                                color = BloomTheme.colors.error,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        }
-                    }
-
-                    uiState.habitFlowerDetail != null -> {
-                        // Habit flower detail content
-                        val habitFlowerDetail = uiState.habitFlowerDetail
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
-                                .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
-                        ) {
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Flower visualization
-                            FlowerVisualization(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .hazeEffect(
-                                        state = hazeState, style = HazeMaterials.regular(
-                                            containerColor = BloomTheme.colors.surface
-                                        )
-                                    )
-                                    .fillMaxWidth(),
-                                flowerType = habitFlowerDetail.flowerType,
-                                growthStage = habitFlowerDetail.flowerGrowthStage,
-                                flowerHealth = habitFlowerDetail.flowerHealth,
-                                level = habitFlowerDetail.level
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Habit info section
-                            HabitInfoSection(
-                                modifier = Modifier.fillMaxWidth(),
-                                habitName = habitFlowerDetail.name,
-                                timeOfDay = habitFlowerDetail.timeOfDay,
-                                growthStage = habitFlowerDetail.flowerGrowthStage,
-                                level = habitFlowerDetail.level,
-                                vitalityPercent = (habitFlowerDetail.flowerHealth.value.roundToDecimal(
-                                    1
-                                ) * 100).toInt(),
-                                xpInLevel = habitFlowerDetail.xpInLevel,
-                                xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
-                                flowerHealth = habitFlowerDetail.flowerHealth,
-                                onShowXpInfo = {
-                                    showGrowthPathBottomSheet = true
-                                }
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Flower vitality bar
-                            FlowerHealthBar(
-                                flowerHealth = habitFlowerDetail.flowerHealth,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            BloomPrimaryFilledButton(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = stringResource(Res.string.show_bloom_progress),
-                                onClick = {
-                                    showGrowthPathBottomSheet = true
-                                }
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // 7-day completion history
-                            CompletionHistorySection(
-                                completions = habitFlowerDetail.lastSevenDaysCompletions,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-
-                            Spacer(modifier = Modifier.height(16.dp))
-
-                            // Habit details section
-                            HabitDetailSection(
-                                modifier = Modifier.fillMaxWidth(),
-                                description = habitFlowerDetail.description,
-                                startDate = habitFlowerDetail.startDate,
-                                endDate = habitFlowerDetail.endDate,
-                                reminderTime = habitFlowerDetail.reminderTime,
-                                onCheckFullHabitInfoClick = {
-                                    handleUiEvent(
-                                        HabitFlowerDetailUiEvent.NavigateToHabitDetails(
-                                            habitFlowerDetail.habitId
-                                        )
-                                    )
-                                }
-                            )
-                        }
-
-
-                        if (showGrowthPathBottomSheet) {
-                            HabitGrowthPathBottomSheet(
-                                currentStage = habitFlowerDetail.flowerGrowthStage,
-                                flowerType = habitFlowerDetail.flowerType,
-                                level = habitFlowerDetail.level,
-                                xpInLevel = habitFlowerDetail.xpInLevel,
-                                xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
-                                onDismissRequest = { showGrowthPathBottomSheet = false }
-                            )
-                        }
-                    }
-                }
+                DetailContentState(
+                    uiState = uiState,
+                    hazeState = hazeState,
+                    handleUiEvent = handleUiEvent,
+                    showGrowthPathBottomSheet = showGrowthPathBottomSheet,
+                    onShowGrowthPath = onShowGrowthPath,
+                    onDismissGrowthPath = onDismissGrowthPath
+                )
             }
         }
     }
+}
+
+@Composable
+private fun GardenBackground(
+    hazeState: HazeState,
+    backgroundImage: DrawableResource
+) {
+    Image(
+        modifier = Modifier
+            .hazeSource(state = hazeState)
+            .fillMaxSize(),
+        painter = painterResource(backgroundImage),
+        contentScale = ContentScale.Crop,
+        contentDescription = null
+    )
+}
+
+@Composable
+private fun DetailTopBar(
+    handleUiEvent: (HabitFlowerDetailUiEvent) -> Unit
+) {
+    Spacer(modifier = Modifier.statusBarsPadding())
+
+    Spacer(modifier = Modifier.height(18.dp))
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Default.ArrowBack,
+            contentDescription = stringResource(Res.string.back),
+            modifier = Modifier
+                .size(24.dp)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = ripple(bounded = false)
+                ) {
+                    handleUiEvent(HabitFlowerDetailUiEvent.NavigateBack)
+                },
+            tint = BloomTheme.colors.textColor.primary
+        )
+
+        Spacer(modifier = Modifier.width(18.dp))
+
+        Text(
+            text = stringResource(Res.string.habit_flower_details),
+            style = BloomTheme.typography.title,
+            color = BloomTheme.colors.textColor.primary
+        )
+    }
+
+    Spacer(modifier = Modifier.height(12.dp))
+}
+
+@Composable
+private fun ColumnScope.DetailContentState(
+    uiState: HabitFlowerDetailUiState,
+    hazeState: HazeState,
+    handleUiEvent: (HabitFlowerDetailUiEvent) -> Unit,
+    showGrowthPathBottomSheet: Boolean,
+    onShowGrowthPath: () -> Unit,
+    onDismissGrowthPath: () -> Unit
+) {
+    when {
+        uiState.isLoading -> LoadingState()
+        uiState.errorMessage != null -> ErrorState(errorMessage = uiState.errorMessage)
+        uiState.habitFlowerDetail != null -> LoadedHabitFlowerContent(
+            habitFlowerDetail = uiState.habitFlowerDetail,
+            hazeState = hazeState,
+            handleUiEvent = handleUiEvent,
+            showGrowthPathBottomSheet = showGrowthPathBottomSheet,
+            onShowGrowthPath = onShowGrowthPath,
+            onDismissGrowthPath = onDismissGrowthPath
+        )
+    }
+}
+
+@Composable
+private fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        BloomLoadingAnimation(
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun ErrorState(errorMessage: String) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = errorMessage,
+            style = BloomTheme.typography.body,
+            color = BloomTheme.colors.error,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun LoadedHabitFlowerContent(
+    habitFlowerDetail: HabitFlowerDetail,
+    hazeState: HazeState,
+    handleUiEvent: (HabitFlowerDetailUiEvent) -> Unit,
+    showGrowthPathBottomSheet: Boolean,
+    onShowGrowthPath: () -> Unit,
+    onDismissGrowthPath: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(bottom = 16.dp, start = 16.dp, end = 16.dp)
+    ) {
+        HabitFlowerHeroSection(
+            habitFlowerDetail = habitFlowerDetail,
+            hazeState = hazeState
+        )
+
+        HabitFlowerProgressSection(
+            habitFlowerDetail = habitFlowerDetail,
+            onShowGrowthPath = onShowGrowthPath
+        )
+
+        HabitFlowerHistoryAndDetailsSection(
+            habitFlowerDetail = habitFlowerDetail,
+            handleUiEvent = handleUiEvent
+        )
+    }
+
+    if (showGrowthPathBottomSheet) {
+        HabitFlowerGrowthPathSheet(
+            habitFlowerDetail = habitFlowerDetail,
+            onDismissGrowthPath = onDismissGrowthPath
+        )
+    }
+}
+
+@Composable
+private fun ColumnScope.HabitFlowerHeroSection(
+    habitFlowerDetail: HabitFlowerDetail,
+    hazeState: HazeState
+) {
+    Spacer(modifier = Modifier.height(16.dp))
+
+    FlowerVisualization(
+        modifier = Modifier
+            .clip(RoundedCornerShape(16.dp))
+            .hazeEffect(
+                state = hazeState, style = HazeMaterials.regular(
+                    containerColor = BloomTheme.colors.surface
+                )
+            )
+            .fillMaxWidth(),
+        flowerType = habitFlowerDetail.flowerType,
+        growthStage = habitFlowerDetail.flowerGrowthStage,
+        flowerHealth = habitFlowerDetail.flowerHealth,
+        level = habitFlowerDetail.level
+    )
+}
+
+@Composable
+private fun ColumnScope.HabitFlowerProgressSection(
+    habitFlowerDetail: HabitFlowerDetail,
+    onShowGrowthPath: () -> Unit
+) {
+    Spacer(modifier = Modifier.height(16.dp))
+
+    HabitInfoSection(
+        modifier = Modifier.fillMaxWidth(),
+        habitName = habitFlowerDetail.name,
+        timeOfDay = habitFlowerDetail.timeOfDay,
+        growthStage = habitFlowerDetail.flowerGrowthStage,
+        level = habitFlowerDetail.level,
+        vitalityPercent = (habitFlowerDetail.flowerHealth.value.roundToDecimal(1) * 100).toInt(),
+        xpInLevel = habitFlowerDetail.xpInLevel,
+        xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
+        flowerHealth = habitFlowerDetail.flowerHealth,
+        onShowXpInfo = onShowGrowthPath
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    FlowerHealthBar(
+        flowerHealth = habitFlowerDetail.flowerHealth,
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    BloomPrimaryFilledButton(
+        modifier = Modifier.fillMaxWidth(),
+        text = stringResource(Res.string.show_bloom_progress),
+        onClick = onShowGrowthPath
+    )
+}
+
+@Composable
+private fun ColumnScope.HabitFlowerHistoryAndDetailsSection(
+    habitFlowerDetail: HabitFlowerDetail,
+    handleUiEvent: (HabitFlowerDetailUiEvent) -> Unit
+) {
+    Spacer(modifier = Modifier.height(16.dp))
+
+    CompletionHistorySection(
+        completions = habitFlowerDetail.lastSevenDaysCompletions,
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    HabitDetailSection(
+        modifier = Modifier.fillMaxWidth(),
+        description = habitFlowerDetail.description,
+        startDate = habitFlowerDetail.startDate,
+        endDate = habitFlowerDetail.endDate,
+        reminderTime = habitFlowerDetail.reminderTime,
+        onCheckFullHabitInfoClick = {
+            handleUiEvent(
+                HabitFlowerDetailUiEvent.NavigateToHabitDetails(
+                    habitFlowerDetail.habitId
+                )
+            )
+        }
+    )
+}
+
+@Composable
+private fun HabitFlowerGrowthPathSheet(
+    habitFlowerDetail: HabitFlowerDetail,
+    onDismissGrowthPath: () -> Unit
+) {
+    HabitGrowthPathBottomSheet(
+        currentStage = habitFlowerDetail.flowerGrowthStage,
+        flowerType = habitFlowerDetail.flowerType,
+        level = habitFlowerDetail.level,
+        xpInLevel = habitFlowerDetail.xpInLevel,
+        xpForCurrentLevel = habitFlowerDetail.xpForCurrentLevel,
+        onDismissRequest = onDismissGrowthPath
+    )
 }

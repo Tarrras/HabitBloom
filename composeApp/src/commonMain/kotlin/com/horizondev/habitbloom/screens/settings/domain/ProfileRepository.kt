@@ -7,13 +7,9 @@ import com.horizondev.habitbloom.common.settings.SETTINGS_THEME_KEY
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
-import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.onboarding.domain.OnboardingRepository
-import com.horizondev.habitbloom.screens.settings.data.ProfileRemoteDataSource
-import com.horizondev.habitbloom.screens.settings.data.model.toDomainModel
 import com.russhwolf.settings.ObservableSettings
-import com.russhwolf.settings.coroutines.getBooleanFlow
 import com.russhwolf.settings.coroutines.getStringFlow
 import com.russhwolf.settings.set
 import io.github.aakira.napier.Napier
@@ -21,24 +17,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class ProfileRepository(
-    private val remoteDataSource: ProfileRemoteDataSource,
     private val settings: ObservableSettings,
     private val permissionsManager: PermissionsManager,
     private val habitsRepository: HabitsRepository,
-    private val flowerHealthRepository: FlowerHealthRepository,
     private val onboardingRepository: OnboardingRepository,
     private val notificationScheduler: NotificationScheduler
 ) {
-    suspend fun getUserInfo() = remoteDataSource.getUser().mapCatching { it.toDomainModel() }
 
-    /**
-     * Legacy method - use getNotificationStateFlow() instead
-     */
-    fun getNotificationState() = settings.getBooleanFlow(SETTINGS_NOTIFICATIONS_KEY, false)
-
-    /**
-     * Get the current notification state
-     */
     fun getNotificationStateEnum(): NotificationState {
         val savedState = settings.getStringOrNull(SETTINGS_NOTIFICATION_STATE_KEY)
         return if (savedState != null) {
@@ -77,23 +62,10 @@ class ProfileRepository(
             }
     }
 
-    /**
-     * Update the notification state
-     */
-    suspend fun updateNotificationState(
-        isEnabled: Boolean
-    ): Result<Unit> {
-        val newState = NotificationState.fromBoolean(isEnabled)
-        return updateNotificationState(newState)
-    }
 
-    /**
-     * Update the notification state with enum value
-     */
     suspend fun updateNotificationState(
         state: NotificationState
     ): Result<Unit> {
-        // For ENABLED state, check and request permission if needed
         if (state == NotificationState.ENABLED) {
             if (!permissionsManager.hasNotificationPermission()) {
                 val permissionGranted = permissionsManager.requestNotificationPermission()
@@ -102,21 +74,15 @@ class ProfileRepository(
                 }
             }
         } else if (state == NotificationState.DISABLED) {
-            // If notifications are being disabled, cancel all habit reminders
             cancelAllHabitReminders()
         }
 
         return runCatching {
-            // Update both the new enum state and legacy boolean for backward compatibility
             settings[SETTINGS_NOTIFICATION_STATE_KEY] = state.toString()
             settings[SETTINGS_NOTIFICATIONS_KEY] = state.isEnabled()
         }
     }
 
-    /**
-     * Cancels all habit reminders for all user habits
-     * This is called when notifications are globally disabled
-     */
     private suspend fun cancelAllHabitReminders() {
         runCatching {
             val userHabits = habitsRepository.getUserHabitsWithoutDetails()
@@ -133,14 +99,9 @@ class ProfileRepository(
         }
     }
 
-    /**
-     * Enable notifications if they have not been explicitly disabled by the user
-     * Returns true if notifications were enabled, false otherwise
-     */
     suspend fun enableNotificationsIfNotDetermined(): Boolean {
         val currentState = getNotificationStateEnum()
 
-        // Only enable if state is NOT_DETERMINED
         if (currentState.isNotDetermined()) {
             updateNotificationState(NotificationState.ENABLED)
             return true
@@ -176,19 +137,9 @@ class ProfileRepository(
      */
     suspend fun resetAllAppData(): Result<Unit> {
         return runCatching {
-            // Cancel all notifications
             cancelAllHabitReminders()
-
-            // Delete all local user-owned habit data.
             habitsRepository.deleteAllLocalUserHabitData().getOrThrow()
-
-            // Clear legacy stored flower health rows, if present.
-            flowerHealthRepository.deleteAllFlowerHealth()
-
-            // Clear all settings
             settings.clear()
-
-            // Reset onboarding completed status after clearing settings.
             onboardingRepository.setOnboardingCompleted(false)
         }
     }

@@ -2,9 +2,6 @@ package com.horizondev.habitbloom.screens.garden.domain
 
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
 
-/**
- * Encapsulates XP/Level progress together with a computed vitality snapshot.
- */
 data class LevelProgress(
     val level: Int,
     val totalXp: Int,
@@ -15,14 +12,9 @@ data class LevelProgress(
     val currentMissedDays: Int,
 )
 
-/**
- * Thresholds for reaching levels 2-5. Level 1 threshold is 0 by definition.
- */
 private val LEVEL_THRESHOLDS = intArrayOf(0, 50, 150, 350, 700)
 
-/**
- * Map level (1..5) to a UI growth stage.
- */
+
 fun levelToGrowthStage(level: Int): FlowerGrowthStage = when (level.coerceIn(1, 5)) {
     1 -> FlowerGrowthStage.SEED
     2 -> FlowerGrowthStage.SPROUT
@@ -31,13 +23,6 @@ fun levelToGrowthStage(level: Int): FlowerGrowthStage = when (level.coerceIn(1, 
     else -> FlowerGrowthStage.BLOOM
 }
 
-/**
- * Compute exponential moving average vitality and XP-based level progress from records.
- *
- * @param records Habit records for scheduled days only. Any date gaps are non-scheduled days.
- * @param daysPerWeek Number of scheduled days per week (1..7) used to select EMA alpha.
- * @return LevelProgress snapshot at the end of the provided history.
- */
 fun calculateLevelProgress(
     records: List<UserHabitRecord>,
     daysPerWeek: Int,
@@ -45,7 +30,6 @@ fun calculateLevelProgress(
 ): LevelProgress {
     val sorted = records.sortedBy { it.date }
 
-    // Brand-new habits: show full vitality at the start
     if (sorted.isEmpty()) {
         return LevelProgress(
             level = 1,

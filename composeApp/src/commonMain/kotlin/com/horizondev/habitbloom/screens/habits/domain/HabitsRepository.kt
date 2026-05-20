@@ -3,7 +3,6 @@ package com.horizondev.habitbloom.screens.habits.domain
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.screens.calendar.HabitStreakInfo
-import com.horizondev.habitbloom.screens.garden.domain.FlowerHealthRepository
 import com.horizondev.habitbloom.screens.habits.data.database.HabitCatalogLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
@@ -45,7 +44,6 @@ class HabitsRepository(
     private val storageService: SupabaseStorageService,
     private val notificationManager: NotificationScheduler,
     private val permissionsManager: PermissionsManager,
-    private val flowerHealthRepository: FlowerHealthRepository
 ) {
     private val TAG = "HabitsRepository"
     private val habitCatalogSyncMutex = Mutex()
@@ -197,32 +195,8 @@ class HabitsRepository(
             date = date,
             isCompleted = isCompleted
         )
-        updateFlowerHealth(record.userHabitId, isCompleted)
     }
 
-    suspend fun updateHabitCompletionByHabitId(
-        habitId: Long,
-        date: LocalDate,
-        isCompleted: Boolean
-    ) {
-        localDataSource.updateHabitCompletionByHabitId(
-            habitId = habitId,
-            date = date,
-            isCompleted = isCompleted
-        )
-        updateFlowerHealth(habitId, isCompleted)
-    }
-
-    private suspend fun updateFlowerHealth(
-        userHabitId: Long,
-        isCompleted: Boolean
-    ) {
-        if (isCompleted) {
-            flowerHealthRepository.updateHealthForCompletedHabit(userHabitId)
-        } else {
-            flowerHealthRepository.updateHealthForMissedHabit(userHabitId)
-        }
-    }
 
     suspend fun createPersonalHabit(
         title: String,
