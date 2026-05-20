@@ -30,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -40,6 +41,7 @@ import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutli
 import com.horizondev.habitbloom.core.designComponents.switcher.TimeOfDaySwitcher
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.screens.garden.components.HabitFlowerCell
+import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.utils.collectAsEffect
 import com.horizondev.habitbloom.utils.getGardenBackgroundRes
 import com.horizondev.habitbloom.utils.getTitle
@@ -63,22 +65,25 @@ fun HabitGardenScreen(
     onNavigateBack: () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
+    val handleUiEvent = remember(viewModel) { viewModel::handleUiEvent }
+    val currentOnNavigateBack by rememberUpdatedState(onNavigateBack)
+    val currentOnNavigateToHabitFlower by rememberUpdatedState(onNavigateToHabitFlower)
 
     viewModel.uiIntents.collectAsEffect { uiIntent ->
         when (uiIntent) {
             HabitGardenUiIntent.NavigateBack -> {
-                onNavigateBack()
+                currentOnNavigateBack()
             }
 
             is HabitGardenUiIntent.OpenFlowerDetails -> {
-                onNavigateToHabitFlower(uiIntent.habitId)
+                currentOnNavigateToHabitFlower(uiIntent.habitId)
             }
         }
     }
 
     HabitGardenContent(
         uiState = uiState,
-        handleUiEvent = viewModel::handleUiEvent
+        handleUiEvent = handleUiEvent
     )
 }
 
@@ -93,8 +98,24 @@ private fun HabitGardenContent(
     val hazeState = remember { HazeState() }
 
     val isSystemInDarkTheme = isSystemInDarkTheme()
-    val backgroundImage = remember(uiState.themeOption) {
+    val backgroundImage = remember(uiState.themeOption, isSystemInDarkTheme) {
         uiState.themeOption.getGardenBackgroundRes(isSystemInDarkTheme)
+    }
+    val onBackClick = remember(handleUiEvent) {
+        { handleUiEvent(HabitGardenUiEvent.BackPressed) }
+    }
+    val onRetryClick = remember(handleUiEvent) {
+        { handleUiEvent(HabitGardenUiEvent.RefreshGarden) }
+    }
+    val onTimeOfDaySelected = remember(handleUiEvent) {
+        { timeOfDay: TimeOfDay ->
+            handleUiEvent(HabitGardenUiEvent.SelectTimeOfDay(timeOfDay))
+        }
+    }
+    val onOpenFlower = remember(handleUiEvent) {
+        { habitId: Long ->
+            handleUiEvent(HabitGardenUiEvent.OpenFlowerDetails(habitId))
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -127,9 +148,7 @@ private fun HabitGardenContent(
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = ripple(bounded = false)
-                        ) {
-                            handleUiEvent(HabitGardenUiEvent.BackPressed)
-                        },
+                        ) { onBackClick() },
                     tint = BloomTheme.colors.textColor.primary
                 )
 
@@ -147,9 +166,7 @@ private fun HabitGardenContent(
             // Time of day switcher
             TimeOfDaySwitcher(
                 selectedTimeOfDay = uiState.selectedTimeOfDay,
-                onTimeOfDaySelected = { timeOfDay ->
-                    handleUiEvent(HabitGardenUiEvent.SelectTimeOfDay(timeOfDay))
-                },
+                onTimeOfDaySelected = onTimeOfDaySelected,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -190,7 +207,7 @@ private fun HabitGardenContent(
                             Spacer(modifier = Modifier.height(24.dp))
 
                             BloomPrimaryOutlinedButton(
-                                onClick = { handleUiEvent(HabitGardenUiEvent.RefreshGarden) },
+                                onClick = onRetryClick,
                                 text = stringResource(Res.string.retry)
                             )
                         }
@@ -228,15 +245,12 @@ private fun HabitGardenContent(
                             items = uiState.habitFlowers,
                             key = { it.habitId }
                         ) { habitFlower ->
+                            val onFlowerClick = remember(habitFlower.habitId, onOpenFlower) {
+                                { onOpenFlower(habitFlower.habitId) }
+                            }
                             HabitFlowerCell(
                                 habitFlower = habitFlower,
-                                onClick = {
-                                    handleUiEvent(
-                                        HabitGardenUiEvent.OpenFlowerDetails(
-                                            habitId = habitFlower.habitId
-                                        )
-                                    )
-                                },
+                                onClick = onFlowerClick,
                                 modifier = Modifier.padding(8.dp),
                                 hazeState = hazeState
                             )

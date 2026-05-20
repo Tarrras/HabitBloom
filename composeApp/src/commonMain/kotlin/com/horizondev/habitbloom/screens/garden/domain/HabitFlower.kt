@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.garden.domain
 
+import androidx.compose.runtime.Immutable
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 
 /**
@@ -12,6 +13,7 @@ import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
  * @property bloomingStage The current blooming stage derived from level
  * @property health The health status of the flower
  */
+@Immutable
 data class HabitFlower(
     val habitId: Long,
     val name: String,

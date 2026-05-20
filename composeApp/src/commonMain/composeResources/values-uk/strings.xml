@@ -363,7 +363,7 @@
     <string name="yearly_habit_tracking">Річне відстеження звичок</string>
 
     <string name="your_habit_garden">Твій сад звичок</string>
-    <string name="no_habits_for_time_of_day_in_garden">Немає звичок для показу в %1$d час.\nДодайте звички, щоб побачити, як росте ваш сад!</string>
+    <string name="no_habits_for_time_of_day_in_garden">Немає звичок для показу в %1$s час.\nДодайте звички, щоб побачити, як росте ваш сад!</string>
     <string name="habit_flower">Квітка звички</string>
     <string name="habit_flower_details">Деталі квітки звички</string>
     <string name="current_stage">Поточна стадія:</string>

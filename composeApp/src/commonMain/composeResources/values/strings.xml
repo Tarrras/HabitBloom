@@ -370,7 +370,7 @@
     <string name="yearly_habit_tracking">Yearly Habit Tracking</string>
 
     <string name="your_habit_garden">Your Habit Garden</string>
-    <string name="no_habits_for_time_of_day_in_garden">No habits to display for %1$d time.\nAdd some habits to see your garden grow!</string>
+    <string name="no_habits_for_time_of_day_in_garden">No habits to display for %1$s time.\nAdd some habits to see your garden grow!</string>
     <string name="habit_flower">Habit Flower</string>
     <string name="habit_flower_details">Habit flower details</string>
     <string name="current_stage">Current Stage:</string>

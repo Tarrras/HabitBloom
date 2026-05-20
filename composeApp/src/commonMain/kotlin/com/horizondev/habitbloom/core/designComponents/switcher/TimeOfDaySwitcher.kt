@@ -1,6 +1,5 @@
 package com.horizondev.habitbloom.core.designComponents.switcher
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,10 +17,13 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,20 +39,19 @@ fun TimeOfDaySwitcher(
     selectedTimeOfDay: TimeOfDay,
     onTimeOfDaySelected: (TimeOfDay) -> Unit
 ) {
-    val periods = TimeOfDay.entries
-
-    val selectedTabIndex = TimeOfDay.entries.indexOf(selectedTimeOfDay)
-    val bgBrush = Brush.linearGradient(
-        colors = listOf(
-            BloomTheme.colors.primary,
-            BloomTheme.colors.primaryVariant
-        )
-    )
+    val periods = remember { TimeOfDay.entries }
+    val currentOnTimeOfDaySelected by rememberUpdatedState(onTimeOfDaySelected)
+    val selectedTabIndex = selectedTimeOfDay.ordinal
+    val outerShape = remember { RoundedCornerShape(24.dp) }
+    val tabShape = remember { RoundedCornerShape(16.dp) }
+    val primary = BloomTheme.colors.primary
+    val primaryVariant = BloomTheme.colors.primaryVariant
+    val bgBrush = remember(primary, primaryVariant) {
+        Brush.linearGradient(colors = listOf(primary, primaryVariant))
+    }
 
     TabRow(
-        modifier = modifier.clip(
-            shape = RoundedCornerShape(24.dp)
-        ),
+        modifier = modifier.clip(shape = outerShape),
         divider = {},
         selectedTabIndex = selectedTabIndex,
         indicator = @Composable { tabPositions ->
@@ -62,7 +63,7 @@ fun TimeOfDaySwitcher(
                         .padding(all = 4.dp)
                         .background(
                             brush = bgBrush,
-                            shape = RoundedCornerShape(16.dp)
+                            shape = tabShape
                         )
                 )
             }
@@ -70,41 +71,60 @@ fun TimeOfDaySwitcher(
         containerColor = BloomTheme.colors.glassBackgroundStrong
     ) {
         periods.forEach { period ->
-            val isSelected = period == selectedTimeOfDay
-
-            val textColor by animateColorAsState(
-                if (isSelected) BloomTheme.colors.primaryForeground
-                else BloomTheme.colors.mutedForeground
+            TimeOfDayTab(
+                period = period,
+                isSelected = period == selectedTimeOfDay,
+                selectedColor = BloomTheme.colors.primaryForeground,
+                unselectedColor = BloomTheme.colors.mutedForeground,
+                shape = tabShape,
+                onSelected = currentOnTimeOfDaySelected
             )
-
-            Box(
-                modifier = Modifier
-                    .zIndex(2f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable { onTimeOfDaySelected(period) }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        painter = period.getIcon(),
-                        contentDescription = null,
-                        tint = textColor,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(6.dp))
-                    Text(
-                        text = period.getTitle(),
-                        fontSize = 14.sp,
-                        color = textColor,
-                        fontWeight = FontWeight.Medium
-                    )
-                }
-            }
         }
     }
 }
 
+@Composable
+private fun TimeOfDayTab(
+    period: TimeOfDay,
+    isSelected: Boolean,
+    selectedColor: Color,
+    unselectedColor: Color,
+    shape: RoundedCornerShape,
+    onSelected: (TimeOfDay) -> Unit
+) {
+    val onClick = remember(period, onSelected) {
+        { onSelected(period) }
+    }
+    val textColor = if (isSelected) selectedColor else unselectedColor
+
+    Box(
+        modifier = Modifier
+            .zIndex(2f)
+            .clip(shape)
+            .clickable(
+                enabled = !isSelected,
+                onClick = onClick
+            )
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                painter = period.getIcon(),
+                contentDescription = null,
+                tint = textColor,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                text = period.getTitle(),
+                fontSize = 14.sp,
+                color = textColor,
+                fontWeight = FontWeight.Medium
+            )
+        }
+    }
+}
