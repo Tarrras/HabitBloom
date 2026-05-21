@@ -2,7 +2,6 @@ package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
 import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -30,19 +29,15 @@ import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.getTitle
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import habitbloom.composeapp.generated.resources.Res
-import habitbloom.composeapp.generated.resources.afternoon_habits_image
 import habitbloom.composeapp.generated.resources.congratulations_full_bloom
 import habitbloom.composeapp.generated.resources.current_stage
-import habitbloom.composeapp.generated.resources.evening_habits_image
 import habitbloom.composeapp.generated.resources.how_xp_works_title
 import habitbloom.composeapp.generated.resources.level_label
 import habitbloom.composeapp.generated.resources.level_progress
-import habitbloom.composeapp.generated.resources.morning_habits_image
 import habitbloom.composeapp.generated.resources.needs_consistency_boost
 import habitbloom.composeapp.generated.resources.vitality
 import habitbloom.composeapp.generated.resources.xp_to_next_stage
 import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -77,27 +72,10 @@ fun HabitInfoSection(
                 .fillMaxWidth()
                 .padding(16.dp)
         ) {
-            // Habit name and time of day
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Time of day icon
-                val timeOfDayIcon = when (timeOfDay) {
-                    TimeOfDay.Morning -> Res.drawable.morning_habits_image
-                    TimeOfDay.Afternoon -> Res.drawable.afternoon_habits_image
-                    TimeOfDay.Evening -> Res.drawable.evening_habits_image
-                }
-
-                Image(
-                    painter = painterResource(timeOfDayIcon),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .padding(end = 12.dp)
-                        .size(36.dp)
-                )
-
-                // Habit name
                 Text(
                     text = habitName,
                     style = BloomTheme.typography.heading,

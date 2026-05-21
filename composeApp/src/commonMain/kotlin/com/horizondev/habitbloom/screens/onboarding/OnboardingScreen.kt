@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -67,6 +68,7 @@ fun OnboardingScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .statusBarsPadding()
             .background(BloomTheme.colors.background)
             .padding(16.dp)
     ) {
@@ -86,7 +88,6 @@ fun OnboardingScreen(
             )
         }
 
-        // Pager content
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.fillMaxSize()
@@ -99,14 +100,12 @@ fun OnboardingScreen(
             )
         }
 
-        // Bottom section with indicators and buttons
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Page indicators
             Row(
                 modifier = Modifier.padding(16.dp),
                 horizontalArrangement = Arrangement.Center
