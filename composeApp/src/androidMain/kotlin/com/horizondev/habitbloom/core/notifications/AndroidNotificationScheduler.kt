@@ -10,6 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
+import kotlinx.datetime.number
 import java.util.Calendar
 
 class AndroidNotificationScheduler(
@@ -50,7 +51,7 @@ class AndroidNotificationScheduler(
             // Set up the alarm time
             val calendar = Calendar.getInstance().apply {
                 set(Calendar.YEAR, date.year)
-                set(Calendar.MONTH, date.monthNumber - 1) // Java Calendar months are 0-based
+                set(Calendar.MONTH, date.month.number - 1) // Java Calendar months are 0-based
                 set(Calendar.DAY_OF_MONTH, date.day)
                 set(Calendar.HOUR_OF_DAY, time.hour)
                 set(Calendar.MINUTE, time.minute)

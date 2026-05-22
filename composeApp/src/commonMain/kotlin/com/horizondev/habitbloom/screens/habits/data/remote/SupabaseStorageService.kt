@@ -15,18 +15,12 @@ import kotlinx.coroutines.withContext
 class SupabaseStorageService(
     private val supabaseClient: SupabaseClient
 ) {
-    // Access the storage bucket
     private val storage = supabaseClient.storage
     private val bucketName = "habit_images"
 
-    /**
-     * Ensures that the required bucket exists in Supabase Storage.
-     * This should be called during app initialization.
-     */
     suspend fun initializeBucket() {
         try {
-            // Check if bucket exists, create if not
-            val buckets = storage.retrieveBuckets()
+            val buckets = storage.listBuckets()
             if (buckets.none { it.name == bucketName }) {
                 storage.createBucket(bucketName) {
                     public = true
@@ -38,13 +32,6 @@ class SupabaseStorageService(
         }
     }
 
-    /**
-     * Uploads an image to Supabase Storage and returns the download URL.
-     *
-     * @param filePath The local file path of the image to upload
-     * @param fileName The name to use for the file in storage (default: generates a random name)
-     * @return Result containing the download URL on success, or an exception on failure
-     */
     suspend fun uploadHabitImage(
         filePath: String,
         fileName: String? = null

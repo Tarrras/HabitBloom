@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.YearMonth
+import kotlinx.datetime.number
 import kotlinx.datetime.plus
 
 /**
@@ -31,13 +32,11 @@ class CalendarViewModel(
         isLoading = true
     )
 ) {
-    // Track the current time of day filter to reapply it when data is refreshed
     private val selectedTimeOfDayFilter = MutableStateFlow<TimeOfDay?>(null)
 
     init {
-        // Initialize with current date
         val now = getCurrentDate()
-        val currentMonth = YearMonth(now.year, now.monthNumber)
+        val currentMonth = YearMonth(now.year, now.month.number)
 
         updateState {
             it.copy(
@@ -46,11 +45,9 @@ class CalendarViewModel(
             )
         }
 
-        // Observe filter changes to update the view
         viewModelScope.launch {
             selectedTimeOfDayFilter.collectLatest { timeOfDay ->
                 updateState { it.copy(selectedTimeOfDayFilter = timeOfDay) }
-                // Update filtered habits for selected date
                 updateFilteredHabitsForSelectedDate()
             }
         }
@@ -58,15 +55,9 @@ class CalendarViewModel(
         loadCalendarData()
     }
 
-    /**
-     * Loads calendar data including habits and their completion status.
-     * Uses a reactive approach to automatically update when data changes.
-     */
     private fun loadCalendarData() {
-        // Set loading state
         updateState { it.copy(isLoading = true) }
 
-        // Use flow-based repository method to get continuous updates
         repository.getListOfAllUserHabitRecordsFlow(
             untilDate = getCurrentDate().plus(DatePeriod(years = 1))
         )
@@ -75,7 +66,6 @@ class CalendarViewModel(
                 processHabitRecords(habitRecords)
             }
             .catch { error ->
-                // Log error or show error state
                 updateState { it.copy(isLoading = false) }
             }
             .launchIn(viewModelScope)
@@ -87,21 +77,17 @@ class CalendarViewModel(
         val selectedDate = state.value.selectedDate
         val selectedTimeOfDayFilter = state.value.selectedTimeOfDayFilter
 
-        // Filter habits for selected date
         val habitsForSelectedDate = habitsByDate[selectedDate] ?: emptyList()
 
-        // Apply time of day filter if selected
         val filteredHabits = if (selectedTimeOfDayFilter != null) {
             habitsForSelectedDate.filter { it.timeOfDay == selectedTimeOfDayFilter }
         } else {
             habitsForSelectedDate
         }
 
-        // Calculate monthly statistics
         val monthlyStats =
             calculateMonthlyStatistics(habitsByDate, currentMonth, selectedTimeOfDayFilter)
 
-        // Calculate habit streaks
         val habitsWithStreaks = calculateHabitStreaks(habitRecords)
 
         updateState {
@@ -115,22 +101,17 @@ class CalendarViewModel(
         }
     }
 
-    /**
-     * Updates the habits for the selected date based on the current filter
-     */
     private fun updateFilteredHabitsForSelectedDate() {
         val selectedDate = state.value.selectedDate
         val habitsForDate = state.value.habitsByDate[selectedDate] ?: emptyList()
         val timeOfDayFilter = state.value.selectedTimeOfDayFilter
 
-        // Apply time of day filter
         val filteredHabits = if (timeOfDayFilter != null) {
             habitsForDate.filter { it.timeOfDay == timeOfDayFilter }
         } else {
             habitsForDate
         }
 
-        // Update monthly statistics with filter
         val monthlyStats = calculateMonthlyStatistics(
             state.value.habitsByDate,
             state.value.currentMonth,
@@ -150,12 +131,10 @@ class CalendarViewModel(
         currentMonth: YearMonth,
         timeOfDayFilter: TimeOfDay?
     ): MonthlyStatistics {
-        // Filter habits that are within the current month
         val habitsInMonth = habitsByDate.filter { (date, _) ->
             date.year == currentMonth.year && date.month == currentMonth.month
         }
 
-        // Count total and completed habits in the month, applying time of day filter if needed
         var totalHabits = 0
         var completedHabits = 0
 
@@ -170,14 +149,12 @@ class CalendarViewModel(
             completedHabits += filteredHabits.count { it.isCompleted }
         }
 
-        // Calculate completion rate
         val completionRate = if (totalHabits > 0) {
             completedHabits.toFloat() / totalHabits
         } else {
             0f
         }
 
-        // Calculate longest streak in the month
         val streaks = calculateHabitStreaks(habitsInMonth.values.flatten())
         val longestStreak = streaks.values.maxOfOrNull { it.currentStreak } ?: 0
 
@@ -193,7 +170,6 @@ class CalendarViewModel(
         return runCatching {
             val result = mutableMapOf<Long, HabitStreakInfo>()
 
-            // Group records by habit ID
             val habitGroups = habitRecords.groupBy { it.userHabitId }
 
             habitGroups.forEach { (userHabitId, records) ->
@@ -209,16 +185,12 @@ class CalendarViewModel(
         }.getOrNull()?.toMap() ?: emptyMap()
     }
 
-    /**
-     * Handles UI events from the Calendar screen.
-     */
+
     fun handleUiEvent(event: CalendarUiEvent) {
         when (event) {
             is CalendarUiEvent.SelectDate -> {
-                // Check if the date has habits before showing bottom sheet
                 val habitsForDate = state.value.habitsByDate[event.date] ?: emptyList()
 
-                // Apply the time of day filter
                 val filteredHabits = if (state.value.selectedTimeOfDayFilter != null) {
                     habitsForDate.filter { it.timeOfDay == state.value.selectedTimeOfDayFilter }
                 } else {
@@ -241,7 +213,6 @@ class CalendarViewModel(
                     )
                 }
 
-                // Recalculate monthly statistics when month changes
                 val habitsByDate = state.value.habitsByDate
                 val currentMonth = YearMonth(event.yearMonth.year, event.yearMonth.month)
                 val selectedTimeOfDayFilter = state.value.selectedTimeOfDayFilter
@@ -259,27 +230,21 @@ class CalendarViewModel(
 
             is CalendarUiEvent.FilterByTimeOfDay -> {
                 viewModelScope.launch {
-                    // Update filter flow to trigger update
                     selectedTimeOfDayFilter.emit(event.timeOfDay)
                 }
             }
 
             is CalendarUiEvent.ToggleHabitCompletion -> {
                 viewModelScope.launch {
-                    // Get current date
                     val today = getCurrentDate()
 
-                    // Only allow toggling completion for the current day
                     if (event.date == today) {
                         repository.updateHabitCompletionByRecordId(
                             habitRecordId = event.habitRecordId,
                             date = event.date,
                             isCompleted = event.completed
                         )
-                        // No need to manually reload data as the Flow will update automatically
                     } else {
-                        // Optionally, you could emit a UI event to show an error message
-                        // or simply log that an invalid operation was attempted
                     }
                 }
             }
@@ -292,7 +257,6 @@ class CalendarViewModel(
                 val today = getCurrentDate()
                 val currentMonth = YearMonth(today.year, today.monthNumber)
 
-                // Update state to show today's date and current month
                 updateState {
                     it.copy(
                         selectedDate = today,
@@ -300,7 +264,6 @@ class CalendarViewModel(
                     )
                 }
 
-                // Check if today has habits and show bottom sheet if it does
                 val habitsForToday = state.value.habitsByDate[today] ?: emptyList()
                 val filteredHabits = if (state.value.selectedTimeOfDayFilter != null) {
                     habitsForToday.filter { it.timeOfDay == state.value.selectedTimeOfDayFilter }
@@ -317,7 +280,6 @@ class CalendarViewModel(
                     }
                 }
 
-                // Update monthly statistics for the new month
                 val monthlyStats = calculateMonthlyStatistics(
                     state.value.habitsByDate,
                     currentMonth,
@@ -331,10 +293,8 @@ class CalendarViewModel(
 
             is CalendarUiEvent.ShowStreakCelebration -> {
                 viewModelScope.launch {
-                    // Set the celebrating habit ID
                     updateState { it.copy(celebratingHabitId = event.habitId) }
 
-                    // Clear the celebration after a delay
                     delay(2000)
                     updateState { it.copy(celebratingHabitId = null) }
                 }
