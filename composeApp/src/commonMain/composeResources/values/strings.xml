@@ -228,8 +228,7 @@
     <string name="longest_streak">Longest streak</string>
     <string name="average_completion">Average completion</string>
     <string name="best_habit">Best habit</string>
-    <string name="completion_percent">%1$d%% completion</string>
-    <string name="days_count">%1$d days</string>
+    <string name="completion_percent">%1$d% completion</string>
     <string name="great_work">Great work!</string>
     <string name="keep_it_up">Keep going like this!</string>
 
@@ -456,17 +455,14 @@
     <string name="xp_remaining_to_next">%1$d XP to next level</string>
     <string name="growth_system_explanation">Your habit blooms as your level increases. Levels are earned through XP, not streak length.</string>
     <string name="growth_stages_explained">Growth Stages Explained</string>
-    <string name="current_streak_info">Current streak: %1$d days</string>
-    <string name="stage_threshold_started">Started at %1$d days</string>
-    <string name="stage_threshold_next">Next at %1$d days</string>
     <string name="bloom_stage_congrats_extended">You've reached the final stage! Keep your vitality high to keep the bloom looking strong.</string>
 
     <!-- Growth stage descriptions -->
-    <string name="growth_stage_seed_desc">Firmly planted in soil and beginning its journey. Keep going!</string>
-    <string name="growth_stage_sprout_desc">Small green shoots emerging from the soil. Progress is visible!</string>
-    <string name="growth_stage_bush_desc">Developing leaves and gaining strength. Keep up the good work!</string>
-    <string name="growth_stage_bud_desc">A bud forms, promising a beautiful bloom. Almost there!</string>
-    <string name="growth_stage_bloom_desc">Full bloom achieved! Your consistent habit has created something beautiful.</string>
+    <string name="stage_description_seed">Firmly planted in soil and beginning its journey. Keep going!</string>
+    <string name="stage_description_sprout">Small green shoots emerging from the soil. Progress is visible!</string>
+    <string name="stage_description_bush">Developing leaves and gaining strength. Keep up the good work!</string>
+    <string name="stage_description_bud">A bud forms, promising a beautiful bloom. Almost there!</string>
+    <string name="stage_description_bloom">Full bloom achieved! Your consistent habit has created something beautiful.</string>
 
     <!-- Flower Vitality -->
     <string name="flower_health">Vitality</string>

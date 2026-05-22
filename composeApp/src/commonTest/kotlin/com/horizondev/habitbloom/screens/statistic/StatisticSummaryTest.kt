@@ -54,6 +54,35 @@ class StatisticSummaryTest {
     }
 
     @Test
+    fun buildStatisticSummary_ignoresFutureRecordsForBestHabitCompletionRate() {
+        val records = listOf(
+            record(
+                name = "Drink water",
+                date = LocalDate(2026, 5, 22),
+                completed = true,
+                streak = 1
+            ),
+            record(
+                name = "Drink water",
+                date = LocalDate(2026, 5, 23),
+                completed = false,
+                streak = 1
+            ),
+        )
+
+        val summary = buildStatisticSummary(
+            periodHabitRecords = records,
+            completedByTimeOfDay = mapOf(TimeOfDay.Morning to 1),
+            completedByPeriod = mapOf("May" to 1),
+            scheduledByPeriod = mapOf("May" to 2),
+            today = LocalDate(2026, 5, 22)
+        )
+
+        assertEquals("Drink water", summary.bestHabitName)
+        assertEquals(100, summary.bestHabitCompletionRate)
+    }
+
+    @Test
     fun buildMonthlyChartData_createsOneBucketForEveryDayOfMonth() {
         val records = listOf(
             record(

@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.statistic
 import com.horizondev.habitbloom.core.designComponents.pickers.TimeUnit
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.utils.getCurrentDate
 import kotlinx.datetime.LocalDate
 import kotlin.math.roundToInt
 
@@ -39,9 +40,11 @@ internal fun buildStatisticSummary(
     periodHabitRecords: List<UserHabitRecordFullInfo>,
     completedByTimeOfDay: Map<TimeOfDay, Int>,
     completedByPeriod: Map<String, Int>,
-    scheduledByPeriod: Map<String, Int>
+    scheduledByPeriod: Map<String, Int>,
+    today: LocalDate = getCurrentDate()
 ): StatisticSummary {
     val completedRecords = periodHabitRecords.filter { it.isCompleted }
+    val currentAndPastRecords = periodHabitRecords.filter { it.date <= today }
     val totalCompleted = completedRecords.size
     val totalScheduled = scheduledByPeriod.values.sum()
     val averageCompletionRate = if (totalScheduled == 0) {
@@ -56,7 +59,7 @@ internal fun buildStatisticSummary(
 
     val bestHabitCompletionRate = bestHabit
         ?.let { (_, records) ->
-            val scheduledForHabit = periodHabitRecords.count { it.name == records.first().name }
+            val scheduledForHabit = currentAndPastRecords.count { it.name == records.first().name }
             if (scheduledForHabit == 0) 0 else (records.size.toFloat() / scheduledForHabit * 100).roundToInt()
         }
         ?: 0

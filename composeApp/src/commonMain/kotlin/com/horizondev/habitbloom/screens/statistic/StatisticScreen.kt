@@ -91,6 +91,7 @@ import io.github.koalaplot.core.xygraph.Point
 import io.github.koalaplot.core.xygraph.XYGraph
 import io.github.koalaplot.core.xygraph.rememberFloatLinearAxisModel
 import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.pluralStringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.math.floor
 
@@ -403,7 +404,11 @@ private fun GeneralStatisticsCard(
             icon = painterResource(Res.drawable.best_completion_streak),
             iconTint = BloomTheme.colors.warning,
             label = stringResource(Res.string.longest_streak),
-            value = stringResource(Res.string.days_count, summary.longestStreak)
+            value = pluralStringResource(
+                Res.plurals.days_count,
+                summary.longestStreak,
+                summary.longestStreak
+            )
         )
         Spacer(modifier = Modifier.height(14.dp))
         StatisticMetricRow(

@@ -236,8 +236,7 @@
     <string name="longest_streak">Найдовший streak</string>
     <string name="average_completion">Середнє виконання</string>
     <string name="best_habit">Найкраща звичка</string>
-    <string name="completion_percent">%1$d%% виконання</string>
-    <string name="days_count">%1$d днів</string>
+    <string name="completion_percent">%1$d% виконання</string>
     <string name="great_work">Чудова робота!</string>
     <string name="keep_it_up">Продовжуйте в тому ж дусі!</string>
 
