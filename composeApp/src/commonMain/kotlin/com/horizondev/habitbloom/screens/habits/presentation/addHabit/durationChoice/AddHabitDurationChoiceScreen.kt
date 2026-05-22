@@ -179,6 +179,7 @@ private fun AddHabitDurationChoiceScreenContent(
                 modifier = Modifier.fillMaxWidth(),
                 reminderEnabled = uiState.reminderEnabled,
                 reminderTime = uiState.reminderTime,
+                use24HourFormat = uiState.use24HourFormat,
                 onReminderEnabledChanged = { enabled ->
                     handleUiEvent(AddHabitDurationUiEvent.ReminderEnabledChanged(enabled))
                 },
@@ -347,6 +348,7 @@ private fun ReminderSettingsCard(
     modifier: Modifier = Modifier,
     reminderEnabled: Boolean,
     reminderTime: LocalTime,
+    use24HourFormat: Boolean,
     onReminderEnabledChanged: (Boolean) -> Unit,
     onReminderTimeChanged: (LocalTime) -> Unit
 ) {
@@ -416,8 +418,8 @@ private fun ReminderSettingsCard(
 
                         TimePicker(
                             time = reminderTime,
-                            onTimeSelected = onReminderTimeChanged,
-                            use24HourFormat = true
+                            use24HourFormat = use24HourFormat,
+                            onTimeSelected = onReminderTimeChanged
                         )
                     }
                 }

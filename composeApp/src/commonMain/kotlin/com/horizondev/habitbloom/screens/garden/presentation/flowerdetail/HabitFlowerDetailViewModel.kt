@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.screens.garden.presentation.flowerdetail
 
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
+import com.horizondev.habitbloom.core.time.TimeFormatUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.FlowerType
@@ -23,22 +24,26 @@ import kotlinx.coroutines.flow.onEach
 class HabitFlowerDetailViewModel(
     private val habitId: Long,
     private val repository: HabitsRepository,
-    private val themeUseCase: ThemeUseCase
+    private val themeUseCase: ThemeUseCase,
+    private val timeFormatUseCase: TimeFormatUseCase
 ) : BloomViewModel<HabitFlowerDetailUiState, HabitFlowerDetailUiIntent>(
     HabitFlowerDetailUiState(
         isLoading = true,
-        themeOption = themeUseCase.getThemeMode()
+        themeOption = themeUseCase.getThemeMode(),
+        use24HourFormat = timeFormatUseCase.uses24HourTimeFormat()
     )
 ) {
     private val TAG = "HabitFlowerDetailVM"
 
     init {
+        timeFormatUseCase.timeFormatFlow.map { option ->
+            timeFormatUseCase.uses24HourTimeFormat(option)
+        }.onEach { use24HourFormat ->
+            updateState { it.copy(use24HourFormat = use24HourFormat) }
+        }.launchIn(viewModelScope)
         loadHabitFlowerDetails()
     }
 
-    /**
-     * Loads habit details and transforms them into flower detail model.
-     */
     private fun loadHabitFlowerDetails() {
         repository.getUserHabitWithAllRecordsFlow(habitId)
             .map { habitInfo ->
@@ -114,9 +119,6 @@ class HabitFlowerDetailViewModel(
             .launchIn(viewModelScope)
     }
 
-    /**
-     * Handles UI events from the Habit Flower Detail screen.
-     */
     fun handleUiEvent(event: HabitFlowerDetailUiEvent) {
         when (event) {
             is HabitFlowerDetailUiEvent.NavigateToHabitDetails -> {

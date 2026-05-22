@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
+import com.horizondev.habitbloom.core.time.TimeFormatUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.usecases.AddHabitStateUseCase
@@ -19,6 +20,7 @@ import habitbloom.composeapp.generated.resources.the_habit_cannot_start_on_past_
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -34,18 +36,26 @@ import org.jetbrains.compose.resources.getString
  */
 class AddHabitDurationViewModel(
     private val permissionsManager: PermissionsManager,
-    private val addHabitStateUseCase: AddHabitStateUseCase
+    private val addHabitStateUseCase: AddHabitStateUseCase,
+    private val timeFormatUseCase: TimeFormatUseCase
 ) : BloomViewModel<AddHabitDurationUiState, AddHabitDurationUiIntent>(
     initialState = AddHabitDurationUiState(
         activeDays = DayOfWeek.entries,
         startDate = getCurrentDate(),
         endDate = getCurrentDate().calculateEndOfWeek(),
         durationInDays = getCurrentDate().daysUntil(getCurrentDate().calculateEndOfWeek()),
+        use24HourFormat = timeFormatUseCase.uses24HourTimeFormat(),
         timeOfDay = addHabitStateUseCase.getCurrentDraft().timeOfDay ?: TimeOfDay.Morning
     )
 ) {
 
     init {
+        timeFormatUseCase.timeFormatFlow.map { option ->
+            timeFormatUseCase.uses24HourTimeFormat(option)
+        }.onEach { use24HourFormat ->
+            updateState { it.copy(use24HourFormat = use24HourFormat) }
+        }.launchIn(viewModelScope)
+
         // Setup derived state for start date
         combine(
             state.map { it.activeDays },

@@ -17,6 +17,7 @@ data class AddHabitDurationUiState(
     val durationInDays: Int = 1, // Display how many days the habit will take
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0), // Default reminder time set to 8:00 AM
+    val use24HourFormat: Boolean = false,
     val maxHabitDurationDays: Int = 90, // Maximum allowed habit duration in days
     val isDatePickerVisible: Boolean = false, // Control dialog visibility from ViewModel
     val timeOfDay: TimeOfDay = TimeOfDay.Morning,

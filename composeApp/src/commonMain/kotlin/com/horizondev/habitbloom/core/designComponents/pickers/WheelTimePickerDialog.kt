@@ -52,7 +52,7 @@ fun WheelTimePickerDialog(
     onDismiss: () -> Unit,
     time: LocalTime,
     onTimeSelected: (LocalTime) -> Unit,
-    use24HourFormat: Boolean = false
+    use24HourFormat: Boolean
 ) {
     var internalTime by remember(time) { mutableStateOf(time) }
     if (!isVisible) return
@@ -102,7 +102,7 @@ fun WheelTimePickerDialog(
 
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = formatTime(internalTime, use24HourFormat = true),
+                text = formatTime(internalTime, use24HourFormat),
                 style = BloomTheme.typography.bodyMedium,
                 color = BloomTheme.colors.textColor.secondary,
                 textAlign = TextAlign.Start,
@@ -142,7 +142,7 @@ fun WheelTimePickerDialog(
                             }
                         ) {
                             Text(
-                                text = formatTime(qt, use24HourFormat = true),
+                                text = formatTime(qt, use24HourFormat),
                                 style = BloomTheme.typography.labelMedium,
                                 color = BloomTheme.colors.textColor.secondary,
                                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
@@ -183,5 +183,3 @@ fun WheelTimePickerDialog(
         }
     }
 }
-
-

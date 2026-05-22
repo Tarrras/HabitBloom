@@ -45,12 +45,12 @@ internal fun buildStatisticSummary(
 ): StatisticSummary {
     val completedRecords = periodHabitRecords.filter { it.isCompleted }
     val currentAndPastRecords = periodHabitRecords.filter { it.date <= today }
-    val totalCompleted = completedRecords.size
-    val totalScheduled = scheduledByPeriod.values.sum()
+    val totalCompleted = currentAndPastRecords.count { it.isCompleted }
+    val totalScheduled = currentAndPastRecords.size
     val averageCompletionRate = if (totalScheduled == 0) {
         0
     } else {
-        (completedByPeriod.values.sum().toFloat() / totalScheduled * 100).roundToInt()
+        (totalCompleted.toFloat() / totalScheduled * 100).roundToInt()
     }
 
     val bestHabit = completedRecords

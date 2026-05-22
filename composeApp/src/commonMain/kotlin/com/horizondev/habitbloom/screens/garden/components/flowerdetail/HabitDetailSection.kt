@@ -29,22 +29,14 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * Component to display the habit's detailed information and edit option.
- *
- * @param description The habit description
- * @param startDate The date when the habit starts
- * @param endDate The date when the habit ends
- * @param reminderTime The time of day when the reminder is set (if any)
- * @param onCheckFullHabitInfoClick Callback when the edit button is clicked
- * @param modifier Modifier for styling
- */
+
 @Composable
 fun HabitDetailSection(
     description: String,
     startDate: LocalDate,
     endDate: LocalDate? = null,
     reminderTime: LocalTime?,
+    use24HourFormat: Boolean,
     onCheckFullHabitInfoClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -72,7 +64,6 @@ fun HabitDetailSection(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Description section
             if (description.isNotEmpty()) {
                 Text(
                     text = stringResource(Res.string.description_label),
@@ -92,7 +83,6 @@ fun HabitDetailSection(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Reminder time section
             if (reminderTime != null) {
 
                 Text(
@@ -105,7 +95,7 @@ fun HabitDetailSection(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = formatTime(reminderTime, use24HourFormat = true),
+                    text = formatTime(reminderTime, use24HourFormat = use24HourFormat),
                     style = BloomTheme.typography.body,
                     color = BloomTheme.colors.textColor.primary
                 )
@@ -113,7 +103,6 @@ fun HabitDetailSection(
                 Spacer(modifier = Modifier.height(12.dp))
             }
 
-            // Date range section
             if (endDate != null && startDate != endDate) {
                 Text(
                     text = stringResource(Res.string.date_range_label),
@@ -130,7 +119,6 @@ fun HabitDetailSection(
                     color = BloomTheme.colors.textColor.primary
                 )
             } else {
-                // Start date section
                 Text(
                     text = stringResource(Res.string.start_date_label),
                     style = BloomTheme.typography.body,

@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.habits.presentation.addHabit.summary
 import androidx.compose.material3.SnackbarDuration
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
+import com.horizondev.habitbloom.core.time.TimeFormatUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.ActiveHabitAlreadyExistsException
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
@@ -20,12 +21,23 @@ import org.jetbrains.compose.resources.getString
 class AddHabitSummaryViewModel(
     private val repository: HabitsRepository,
     private val addHabitStateUseCase: AddHabitStateUseCase,
-    private val enableNotificationsUseCase: EnableNotificationsForReminderUseCase
+    private val enableNotificationsUseCase: EnableNotificationsForReminderUseCase,
+    private val timeFormatUseCase: TimeFormatUseCase
 ) : BloomViewModel<AddHabitSummaryUiState, AddHabitSummaryUiIntent>(
-    initialState = AddHabitSummaryUiState()
+    initialState = AddHabitSummaryUiState(
+        use24HourFormat = timeFormatUseCase.uses24HourTimeFormat()
+    )
 ) {
 
     init {
+        launch {
+            timeFormatUseCase.timeFormatFlow.collect { option ->
+                updateState {
+                    it.copy(use24HourFormat = timeFormatUseCase.uses24HourTimeFormat(option))
+                }
+            }
+        }
+
         launch {
             addHabitStateUseCase.draft.collect { draft ->
                 updateState {

@@ -4,7 +4,9 @@ import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.common.settings.SETTINGS_NOTIFICATIONS_KEY
 import com.horizondev.habitbloom.common.settings.SETTINGS_NOTIFICATION_STATE_KEY
 import com.horizondev.habitbloom.common.settings.SETTINGS_THEME_KEY
+import com.horizondev.habitbloom.common.settings.SETTINGS_TIME_FORMAT_KEY
 import com.horizondev.habitbloom.common.settings.ThemeOption
+import com.horizondev.habitbloom.common.settings.TimeFormatOption
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
@@ -122,6 +124,24 @@ class ProfileRepository(
         option: ThemeOption
     ): Result<Unit> {
         return runCatching { settings[SETTINGS_THEME_KEY] = option.toString() }
+    }
+
+    fun getTimeFormatStateFlow() = settings
+        .getStringFlow(SETTINGS_TIME_FORMAT_KEY, TimeFormatOption.System.toString())
+        .map { value ->
+            runCatching { TimeFormatOption.valueOf(value) }.getOrDefault(TimeFormatOption.System)
+        }
+
+    fun getTimeFormatState() = settings
+        .getString(SETTINGS_TIME_FORMAT_KEY, TimeFormatOption.System.toString())
+        .let { value ->
+            runCatching { TimeFormatOption.valueOf(value) }.getOrDefault(TimeFormatOption.System)
+        }
+
+    fun updateTimeFormatState(
+        option: TimeFormatOption
+    ): Result<Unit> {
+        return runCatching { settings[SETTINGS_TIME_FORMAT_KEY] = option.toString() }
     }
 
     /**

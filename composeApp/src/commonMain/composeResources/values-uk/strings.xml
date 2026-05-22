@@ -233,7 +233,7 @@
     <string name="best_time_of_day">Найкращий час дня</string>
     <string name="general_statistics">Загальна статистика</string>
     <string name="completed_habits_count">Виконано звичок</string>
-    <string name="longest_streak">Найдовший streak</string>
+    <string name="longest_streak">Найдовша серія</string>
     <string name="average_completion">Середнє виконання</string>
     <string name="best_habit">Найкраща звичка</string>
     <string name="completion_percent">%1$d% виконання</string>
@@ -340,6 +340,10 @@
     <string name="theme_device">Системна</string>
     <string name="appearance">Зовнішній вигляд</string>
     <string name="settings_appearance_theme">Тема оформлення</string>
+    <string name="settings_time_format">Формат часу</string>
+    <string name="time_format_system">Системний</string>
+    <string name="time_format_12_hour">12-год</string>
+    <string name="time_format_24_hour">24-год</string>
     <string name="notifications">Сповіщення</string>
     <string name="enable_notifications">Увімкнути сповіщення</string>
     <string name="settings_personalize_experience">Персоналізуйте свій досвід</string>

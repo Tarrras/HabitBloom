@@ -65,13 +65,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 
-/**
- * Main screen to display a habit as a growing flower.
- *
- * @param habitId The ID of the habit to display
- * @param onNavigateBack Callback when the back button is pressed
- * @param onNavigateToHabitDetails Callback when the edit habit button is pressed
- */
+
 @Composable
 fun HabitFlowerDetailScreen(
     habitId: Long,
@@ -231,6 +225,7 @@ private fun ColumnScope.DetailContentState(
         uiState.errorMessage != null -> ErrorState(errorMessage = uiState.errorMessage)
         uiState.habitFlowerDetail != null -> LoadedHabitFlowerContent(
             habitFlowerDetail = uiState.habitFlowerDetail,
+            use24HourFormat = uiState.use24HourFormat,
             hazeState = hazeState,
             handleUiEvent = handleUiEvent,
             showGrowthPathBottomSheet = showGrowthPathBottomSheet,
@@ -271,6 +266,7 @@ private fun ErrorState(errorMessage: String) {
 @Composable
 private fun LoadedHabitFlowerContent(
     habitFlowerDetail: HabitFlowerDetail,
+    use24HourFormat: Boolean,
     hazeState: HazeState,
     handleUiEvent: (HabitFlowerDetailUiEvent) -> Unit,
     showGrowthPathBottomSheet: Boolean,
@@ -295,6 +291,7 @@ private fun LoadedHabitFlowerContent(
 
         HabitFlowerHistoryAndDetailsSection(
             habitFlowerDetail = habitFlowerDetail,
+            use24HourFormat = use24HourFormat,
             handleUiEvent = handleUiEvent
         )
     }
@@ -367,8 +364,9 @@ private fun ColumnScope.HabitFlowerProgressSection(
 }
 
 @Composable
-private fun ColumnScope.HabitFlowerHistoryAndDetailsSection(
+private fun HabitFlowerHistoryAndDetailsSection(
     habitFlowerDetail: HabitFlowerDetail,
+    use24HourFormat: Boolean,
     handleUiEvent: (HabitFlowerDetailUiEvent) -> Unit
 ) {
     Spacer(modifier = Modifier.height(16.dp))
@@ -386,6 +384,7 @@ private fun ColumnScope.HabitFlowerHistoryAndDetailsSection(
         startDate = habitFlowerDetail.startDate,
         endDate = habitFlowerDetail.endDate,
         reminderTime = habitFlowerDetail.reminderTime,
+        use24HourFormat = use24HourFormat,
         onCheckFullHabitInfoClick = {
             handleUiEvent(
                 HabitFlowerDetailUiEvent.NavigateToHabitDetails(

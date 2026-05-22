@@ -1,6 +1,12 @@
 package com.horizondev.habitbloom.utils
 
+import com.horizondev.habitbloom.common.locale.AppLocale
+import com.horizondev.habitbloom.common.settings.uses24HourTimeFormat
 import kotlinx.datetime.LocalTime
+
+fun formatTimeForLocale(time: LocalTime, locale: AppLocale): String {
+    return formatTime(time, use24HourFormat = locale.uses24HourTimeFormat())
+}
 
 /**
  * Formats a LocalTime into a readable string based on the specified format.

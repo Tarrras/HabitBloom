@@ -166,7 +166,10 @@ private fun SummaryHabitCard(
         uiState.reminderEnabled && uiState.reminderTime != null -> {
             stringResource(
                 Res.string.reminder_set_for,
-                formatTime(uiState.reminderTime, use24HourFormat = true)
+                formatTime(
+                    uiState.reminderTime,
+                    use24HourFormat = uiState.use24HourFormat
+                )
             )
         }
 
@@ -345,4 +348,3 @@ private fun SummaryActions(handleUiEvent: (AddHabitSummaryUiEvent) -> Unit) {
         )
     }
 }
-

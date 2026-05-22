@@ -30,6 +30,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.ButtonDefaults
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.horizondev.habitbloom.common.settings.ThemeOption
+import com.horizondev.habitbloom.common.settings.TimeFormatOption
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
@@ -83,10 +85,14 @@ import habitbloom.composeapp.generated.resources.settings_profile
 import habitbloom.composeapp.generated.resources.settings_profile_subtitle
 import habitbloom.composeapp.generated.resources.settings_rate_app
 import habitbloom.composeapp.generated.resources.settings_reminders_subtitle
+import habitbloom.composeapp.generated.resources.settings_time_format
 import habitbloom.composeapp.generated.resources.settings_version
 import habitbloom.composeapp.generated.resources.theme_dark
 import habitbloom.composeapp.generated.resources.theme_device
 import habitbloom.composeapp.generated.resources.theme_light
+import habitbloom.composeapp.generated.resources.time_format_12_hour
+import habitbloom.composeapp.generated.resources.time_format_24_hour
+import habitbloom.composeapp.generated.resources.time_format_system
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -140,7 +146,11 @@ private fun SettingsScreenContent(
                 ProfileCard()
                 AppearanceSection(
                     selectedTheme = uiState.themeMode,
-                    onThemeSelected = { handleUiEvent(SettingsUiEvent.SetThemeMode(it)) }
+                    selectedTimeFormat = uiState.timeFormat,
+                    onThemeSelected = { handleUiEvent(SettingsUiEvent.SetThemeMode(it)) },
+                    onTimeFormatSelected = {
+                        handleUiEvent(SettingsUiEvent.SetTimeFormat(it))
+                    }
                 )
                 NotificationsSection(
                     notificationsEnabled = uiState.notificationsEnabled,
@@ -270,7 +280,9 @@ private fun ProfileCard() {
 @Composable
 private fun AppearanceSection(
     selectedTheme: ThemeOption,
-    onThemeSelected: (ThemeOption) -> Unit
+    selectedTimeFormat: TimeFormatOption,
+    onThemeSelected: (ThemeOption) -> Unit,
+    onTimeFormatSelected: (TimeFormatOption) -> Unit
 ) {
     SettingsSection(title = stringResource(Res.string.appearance)) {
         SettingsCard(
@@ -317,6 +329,50 @@ private fun AppearanceSection(
                     icon = Icons.Outlined.Computer,
                     selected = selectedTheme == ThemeOption.Device,
                     onClick = { onThemeSelected(ThemeOption.Device) }
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                SettingsIconBox(
+                    icon = Icons.Outlined.Schedule,
+                    backgroundColor = BloomTheme.colors.primary.copy(alpha = 0.1f),
+                    tint = BloomTheme.colors.primary
+                )
+                Text(
+                    text = stringResource(Res.string.settings_time_format),
+                    style = BloomTheme.typography.titleSmall,
+                    color = BloomTheme.colors.textColor.primary
+                )
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                ThemeChoiceButton(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(Res.string.time_format_system),
+                    icon = Icons.Outlined.Computer,
+                    selected = selectedTimeFormat == TimeFormatOption.System,
+                    onClick = { onTimeFormatSelected(TimeFormatOption.System) }
+                )
+                ThemeChoiceButton(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(Res.string.time_format_12_hour),
+                    icon = Icons.Outlined.Schedule,
+                    selected = selectedTimeFormat == TimeFormatOption.TwelveHour,
+                    onClick = { onTimeFormatSelected(TimeFormatOption.TwelveHour) }
+                )
+                ThemeChoiceButton(
+                    modifier = Modifier.weight(1f),
+                    label = stringResource(Res.string.time_format_24_hour),
+                    icon = Icons.Outlined.Schedule,
+                    selected = selectedTimeFormat == TimeFormatOption.TwentyFourHour,
+                    onClick = { onTimeFormatSelected(TimeFormatOption.TwentyFourHour) }
                 )
             }
         }

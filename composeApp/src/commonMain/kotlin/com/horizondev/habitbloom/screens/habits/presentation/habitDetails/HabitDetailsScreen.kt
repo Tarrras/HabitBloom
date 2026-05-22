@@ -237,6 +237,7 @@ fun HabitDetailsScreenContent(
                             .padding(horizontal = 16.dp),
                         reminderEnabled = uiState.reminderEnabled,
                         reminderTime = uiState.reminderTime,
+                        use24HourFormat = uiState.use24HourFormat,
                         onShowReminderDialog = {
                             handleUiEvent(HabitScreenDetailsUiEvent.ShowReminderDialog)
                         },
@@ -288,6 +289,7 @@ fun HabitDetailsScreenContent(
                     showDialog = uiState.showReminderDialog,
                     reminderEnabled = uiState.reminderDraftEnabled,
                     reminderTime = uiState.reminderDraftTime,
+                    use24HourFormat = uiState.use24HourFormat,
                     onDismiss = {
                         handleUiEvent(HabitScreenDetailsUiEvent.DismissReminderDialog)
                     },
@@ -304,6 +306,7 @@ fun HabitDetailsScreenContent(
 
                 WheelTimePickerDialog(
                     isVisible = uiState.showReminderTimePicker,
+                    use24HourFormat = uiState.use24HourFormat,
                     onDismiss = {
                         handleUiEvent(HabitScreenDetailsUiEvent.DismissReminderTimePicker)
                     },
@@ -809,6 +812,7 @@ private fun ReminderSettingsCard(
     modifier: Modifier = Modifier,
     reminderEnabled: Boolean,
     reminderTime: LocalTime,
+    use24HourFormat: Boolean,
     onShowReminderDialog: () -> Unit,
     onShowReminderTimePicker: () -> Unit
 ) {
@@ -848,7 +852,7 @@ private fun ReminderSettingsCard(
                         text = stringResource(
                             Res.string.reminder_set_for, formatTime(
                                 reminderTime,
-                                use24HourFormat = true
+                                use24HourFormat = use24HourFormat
                             )
                         ),
                         style = BloomTheme.typography.body,
@@ -888,6 +892,7 @@ private fun ReminderDialog(
     showDialog: Boolean,
     reminderEnabled: Boolean,
     reminderTime: LocalTime,
+    use24HourFormat: Boolean,
     onDismiss: () -> Unit,
     onReminderEnabledChanged: (Boolean) -> Unit,
     onShowReminderTimePicker: () -> Unit,
@@ -945,7 +950,7 @@ private fun ReminderDialog(
 
                 BloomPrimaryOutlinedButton(
                     modifier = Modifier.fillMaxWidth(),
-                    text = formatTime(reminderTime, use24HourFormat = true),
+                    text = formatTime(reminderTime, use24HourFormat = use24HourFormat),
                     onClick = onShowReminderTimePicker
                 )
 

@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.settings.presentation
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
+import com.horizondev.habitbloom.core.time.TimeFormatUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
 import io.github.aakira.napier.Napier
@@ -16,7 +17,8 @@ import org.koin.core.component.KoinComponent
  */
 class SettingsViewModel(
     private val repository: ProfileRepository,
-    private val themeUseCase: ThemeUseCase
+    private val themeUseCase: ThemeUseCase,
+    private val timeFormatUseCase: TimeFormatUseCase
 ) : BloomViewModel<SettingsUiState, SettingsUiIntent>(
     SettingsUiState()
 ), KoinComponent {
@@ -38,6 +40,10 @@ class SettingsViewModel(
         themeUseCase.themeModeFlow.onEach { mode ->
             updateState { it.copy(themeMode = mode) }
         }.launchIn(viewModelScope)
+
+        timeFormatUseCase.timeFormatFlow.onEach { option ->
+            updateState { it.copy(timeFormat = option) }
+        }.launchIn(viewModelScope)
     }
 
     /**
@@ -57,6 +63,12 @@ class SettingsViewModel(
                 viewModelScope.launch {
                     themeUseCase.updateThemeMode(event.mode)
                     updateState { it.copy(isThemeDialogVisible = false) }
+                }
+            }
+
+            is SettingsUiEvent.SetTimeFormat -> {
+                viewModelScope.launch {
+                    timeFormatUseCase.updateTimeFormat(event.option)
                 }
             }
 
@@ -102,4 +114,4 @@ class SettingsViewModel(
             }
         }
     }
-} 
+}

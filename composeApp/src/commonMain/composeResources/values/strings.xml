@@ -348,6 +348,10 @@
     <string name="theme_device">System</string>
     <string name="appearance">Appearance</string>
     <string name="settings_appearance_theme">Theme appearance</string>
+    <string name="settings_time_format">Time format</string>
+    <string name="time_format_system">System</string>
+    <string name="time_format_12_hour">12-hour</string>
+    <string name="time_format_24_hour">24-hour</string>
     <string name="notifications">Notifications</string>
     <string name="enable_notifications">Enable notifications</string>
     <string name="settings_personalize_experience">Personalize your experience</string>

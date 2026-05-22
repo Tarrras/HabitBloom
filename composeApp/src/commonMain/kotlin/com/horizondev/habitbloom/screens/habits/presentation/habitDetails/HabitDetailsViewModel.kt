@@ -4,6 +4,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.lifecycle.viewModelScope
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarState
 import com.horizondev.habitbloom.core.designComponents.snackbar.BloomSnackbarVisuals
+import com.horizondev.habitbloom.core.time.TimeFormatUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitFullInfo
@@ -37,6 +38,14 @@ class HabitDetailsViewModel(
 ), KoinComponent {
 
     private val enableNotificationsUseCase: EnableNotificationsForReminderUseCase by inject()
+    private val timeFormatUseCase: TimeFormatUseCase by inject()
+
+    init {
+        updateState { it.copy(use24HourFormat = timeFormatUseCase.uses24HourTimeFormat()) }
+        timeFormatUseCase.timeFormatFlow.onEach { option ->
+            updateState { it.copy(use24HourFormat = timeFormatUseCase.uses24HourTimeFormat(option)) }
+        }.launchIn(viewModelScope)
+    }
 
     private val habitDetailsFlow = repository.getUserHabitWithAllRecordsFlow(
         userHabitId = userHabitId
@@ -280,7 +289,10 @@ class HabitDetailsViewModel(
                                     visuals = BloomSnackbarVisuals(
                                         message = if (enabled) getString(
                                             Res.string.reminder_set_for,
-                                            formatTime(time!!, use24HourFormat = true)
+                                            formatTime(
+                                                time!!,
+                                                use24HourFormat = currentState.use24HourFormat
+                                            )
                                         ) else getString(
                                             Res.string.reminder_disabled
                                         ),

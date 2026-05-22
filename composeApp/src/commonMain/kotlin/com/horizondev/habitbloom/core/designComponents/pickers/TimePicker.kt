@@ -38,20 +38,12 @@ import kotlinx.datetime.LocalTime
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
-/**
- * A time picker component that shows a time field and opens a dialog for selection
- *
- * @param modifier The modifier to be applied to the component
- * @param time The currently selected time
- * @param onTimeSelected Callback when time is changed
- * @param use24HourFormat Whether to use 24-hour format (true) or 12-hour format with AM/PM (false)
- */
 @Composable
 fun TimePicker(
     modifier: Modifier = Modifier,
     time: LocalTime,
     onTimeSelected: (LocalTime) -> Unit,
-    use24HourFormat: Boolean = true
+    use24HourFormat: Boolean
 ) {
     var showTimePicker by remember { mutableStateOf(false) }
 
@@ -92,7 +84,6 @@ fun TimePicker(
             )
         }
 
-        // Time picker dialog
         WheelTimePickerDialog(
             isVisible = showTimePicker,
             onDismiss = { showTimePicker = false },
@@ -166,4 +157,4 @@ fun NumberPickerColumn(
                 .padding(4.dp)
         )
     }
-} 
+}

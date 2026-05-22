@@ -23,6 +23,7 @@ data class HabitScreenDetailsUiState(
     val showEndDatePickerDialog: Boolean = false,
     val reminderEnabled: Boolean = false,
     val reminderTime: LocalTime = LocalTime(8, 0), // Default to 8:00 AM
+    val use24HourFormat: Boolean = false,
     val reminderDraftEnabled: Boolean = false,
     val reminderDraftTime: LocalTime = LocalTime(8, 0),
     val progressUiState: UserHabitProgressUiState? = null
