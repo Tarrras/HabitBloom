@@ -2,7 +2,6 @@ package com.horizondev.habitbloom.screens.habits.domain
 
 import com.horizondev.habitbloom.core.notifications.NotificationScheduler
 import com.horizondev.habitbloom.core.permissions.PermissionsManager
-import com.horizondev.habitbloom.screens.calendar.HabitStreakInfo
 import com.horizondev.habitbloom.screens.habits.data.database.HabitCatalogLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.database.HabitsLocalDataSource
 import com.horizondev.habitbloom.screens.habits.data.remote.HabitsRemoteDataSource
@@ -29,12 +28,9 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalTime
-import kotlinx.datetime.minus
-import kotlinx.datetime.plus
 import kotlin.random.Random
 
 class HabitsRepository(
@@ -161,14 +157,6 @@ class HabitsRepository(
         )
     }
 
-    /**
-     * Updates an existing habit with new duration and days.
-     *
-     * @param userHabitId The ID of the user habit to update
-     * @param endDate The new end date for the habit
-     * @param days The days of the week the habit should occur on
-     * @return Result containing success (true) or failure with error
-     */
     suspend fun updateExistingHabit(
         userHabitId: Long,
         endDate: LocalDate,
@@ -188,8 +176,6 @@ class HabitsRepository(
         date: LocalDate,
         isCompleted: Boolean
     ) {
-        val record = localDataSource.getHabitRecordByRecordId(habitRecordId) ?: return
-
         localDataSource.updateHabitCompletionByRecordId(
             habitRecordId = habitRecordId,
             date = date,
@@ -352,13 +338,6 @@ class HabitsRepository(
         }
     }
 
-    /**
-     * Clears all past records for a specific habit up to the current date.
-     * Current and future records are preserved.
-     *
-     * @param userHabitId The ID of the user habit
-     * @return Result containing the number of records deleted on success, or the error on failure
-     */
     suspend fun clearPastRecords(userHabitId: Long): Result<Int> {
         return withContext(Dispatchers.IO) {
             runCatching {
@@ -374,12 +353,6 @@ class HabitsRepository(
         }
     }
 
-    /**
-     * Deletes a custom habit by its ID.
-     *
-     * @param habitId The ID of the custom habit to delete
-     * @return Result containing success (true) or failure with error
-     */
     suspend fun deleteCustomHabit(habitId: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             runCatching {
@@ -402,17 +375,6 @@ class HabitsRepository(
         }
     }
 
-    /**
-     * Adds a new habit with the specified details.
-     *
-     * @param habitInfo The habit information
-     * @param startDate The start date for the habit
-     * @param endDate The end date for the habit
-     * @param selectedDays The days of the week the habit should occur on
-     * @param reminderEnabled Whether reminder notifications are enabled
-     * @param reminderTime The time to send reminder notifications
-     * @return Result containing the ID of the newly created habit or an error
-     */
     suspend fun addUserHabit(
         habitInfo: HabitInfo,
         timeOfDay: TimeOfDay,
@@ -471,9 +433,6 @@ class HabitsRepository(
         )
     }
 
-    /**
-     * Schedules a reminder for a specific habit
-     */
     suspend fun scheduleReminderForHabit(
         habitId: Long,
         reminderTime: LocalTime
@@ -537,14 +496,6 @@ class HabitsRepository(
         }
     }
 
-    /**
-     * Updates the reminder settings for an existing habit
-     *
-     * @param habitId The ID of the habit
-     * @param enabled Whether the reminder is enabled
-     * @param reminderTime The time for the reminder (null to keep existing)
-     * @return Result containing success (true) or failure with error
-     */
     suspend fun updateHabitReminder(
         habitId: Long,
         enabled: Boolean,
@@ -612,89 +563,6 @@ class HabitsRepository(
             activeDays = userHabit.daysOfWeek,
             reminderEnabled = userHabit.reminderEnabled,
             reminderTime = userHabit.reminderTime
-        )
-    }
-
-    fun calculateHabitStreak(
-        userHabitId: Long,
-        habitRecords: List<UserHabitRecordFullInfo>
-    ): HabitStreakInfo {
-        val today = getCurrentDate()
-        val records = habitRecords.filter { it.userHabitId == userHabitId }
-
-        val habitName = records.firstOrNull()?.name ?: "Unknown Habit"
-
-        // Sort records by date (newest first)
-        val sortedRecords = records
-            .sortedByDescending { it.date }
-            .filter { it.date <= today }
-
-        // Calculate current streak
-        var currentStreak = 0
-        var previousDate: LocalDate? = null
-
-        for (record in sortedRecords) {
-            if (!record.isCompleted) continue
-
-            // If this is the first completed habit we're examining
-            if (previousDate == null) {
-                previousDate = record.date
-                currentStreak = 1
-                continue
-            }
-
-            // Check if this record is part of a consecutive streak
-            val expectedDate = previousDate.minus(1, DateTimeUnit.DAY)
-            if (record.date == expectedDate) {
-                currentStreak++
-                previousDate = record.date
-            } else {
-                // The streak is broken
-                break
-            }
-        }
-
-        // Calculate longest streak (historical)
-        var longestStreak = 0
-        var currentLongestStreak = 0
-        var lastDate: LocalDate? = null
-
-        for (record in records.sortedBy { it.date }) {
-            if (!record.isCompleted) {
-                // Reset current streak if we find an uncompleted habit
-                currentLongestStreak = 0
-                lastDate = null
-                continue
-            }
-
-            if (lastDate == null) {
-                // First completed habit in a potential streak
-                currentLongestStreak = 1
-                lastDate = record.date
-            } else {
-                val expectedDate = lastDate.plus(1, DateTimeUnit.DAY)
-                if (record.date == expectedDate) {
-                    // Streak continues
-                    currentLongestStreak++
-                } else {
-                    // Streak breaks, start a new one
-                    currentLongestStreak = 1
-                }
-
-                lastDate = record.date
-            }
-
-            // Update longest streak if current is higher
-            if (currentLongestStreak > longestStreak) {
-                longestStreak = currentLongestStreak
-            }
-        }
-
-        return HabitStreakInfo(
-            userHabitId = userHabitId,
-            habitName = habitName,
-            currentStreak = currentStreak,
-            longestStreak = longestStreak
         )
     }
 

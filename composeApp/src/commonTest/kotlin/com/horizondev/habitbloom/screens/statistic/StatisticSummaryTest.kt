@@ -2,6 +2,7 @@ package com.horizondev.habitbloom.screens.statistic
 
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecordFullInfo
+import com.horizondev.habitbloom.screens.statistic.domain.usecases.BuildStatisticSummaryUseCase
 import kotlinx.datetime.LocalDate
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -27,15 +28,13 @@ class StatisticSummaryTest {
             record(name = "Read", date = LocalDate(2026, 5, 3), completed = true, streak = 4),
         )
 
-        val summary = buildStatisticSummary(
+        val summary = BuildStatisticSummaryUseCase().invoke(
             periodHabitRecords = records,
             completedByTimeOfDay = mapOf(
                 TimeOfDay.Morning to 2,
                 TimeOfDay.Afternoon to 1,
                 TimeOfDay.Evening to 0
-            ),
-            completedByPeriod = mapOf("Week 1" to 3),
-            scheduledByPeriod = mapOf("Week 1" to 4)
+            )
         )
 
         assertEquals(3, summary.completedHabits)
@@ -70,11 +69,9 @@ class StatisticSummaryTest {
             ),
         )
 
-        val summary = buildStatisticSummary(
+        val summary = BuildStatisticSummaryUseCase().invoke(
             periodHabitRecords = records,
             completedByTimeOfDay = mapOf(TimeOfDay.Morning to 1),
-            completedByPeriod = mapOf("May" to 1),
-            scheduledByPeriod = mapOf("May" to 2),
             today = LocalDate(2026, 5, 22)
         )
 
@@ -99,11 +96,9 @@ class StatisticSummaryTest {
             ),
         )
 
-        val summary = buildStatisticSummary(
+        val summary = BuildStatisticSummaryUseCase().invoke(
             periodHabitRecords = records,
             completedByTimeOfDay = mapOf(TimeOfDay.Morning to 1),
-            completedByPeriod = mapOf("May" to 1),
-            scheduledByPeriod = mapOf("May" to 2),
             today = LocalDate(2026, 5, 22)
         )
 

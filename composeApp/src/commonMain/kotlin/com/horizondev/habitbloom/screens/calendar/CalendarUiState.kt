@@ -108,4 +108,4 @@ sealed class CalendarUiIntent {
      * Intent to navigate to habit details.
      */
     data class OpenHabitDetails(val habitId: Long) : CalendarUiIntent()
-} 
+}
