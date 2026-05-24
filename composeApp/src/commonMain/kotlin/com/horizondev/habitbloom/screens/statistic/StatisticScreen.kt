@@ -82,7 +82,10 @@ import habitbloom.composeapp.generated.resources.no_data_available
 import habitbloom.composeapp.generated.resources.period_dynamics
 import habitbloom.composeapp.generated.resources.statistics_subtitle
 import io.github.koalaplot.core.line.AreaBaseline
-import io.github.koalaplot.core.line.AreaPlot2
+import io.github.koalaplot.core.line.StackArea
+import io.github.koalaplot.core.line.StackedAreaPlot
+import io.github.koalaplot.core.line.StackedAreaStyle
+import io.github.koalaplot.core.line.horizontalBezierControlPoints
 import io.github.koalaplot.core.style.AreaStyle
 import io.github.koalaplot.core.style.KoalaPlotTheme
 import io.github.koalaplot.core.style.LineStyle
@@ -275,11 +278,11 @@ private fun HabitDynamicsCard(uiState: StatisticUiState) {
                 XYGraph(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(146.dp),
+                        .height(170.dp),
                     xAxisModel = rememberFloatLinearAxisModel(
                         range = 0f..points.last().x.coerceAtLeast(1f)
                     ),
-                    yAxisModel = rememberFloatLinearAxisModel(range = 0f..100f),
+                    yAxisModel = rememberFloatLinearAxisModel(range = -14f..114f),
                     xAxisTitle = {},
                     yAxisTitle = {},
                     xAxisLabels = { _: Float -> },
@@ -289,21 +292,28 @@ private fun HabitDynamicsCard(uiState: StatisticUiState) {
                     verticalMajorGridLineStyle = null,
                     verticalMinorGridLineStyle = null
                 ) {
-                    AreaPlot2(
-                        data = visiblePoints,
-                        areaBaseline = AreaBaseline.HorizontalLine(0f),
-                        areaStyle = AreaStyle(
-                            brush = Brush.verticalGradient(
-                                colors = listOf(
-                                    BloomTheme.colors.primary.copy(alpha = 0.28f),
-                                    BloomTheme.colors.primary.copy(alpha = 0.03f)
+                    StackedAreaPlot(
+                        stacks = listOf(
+                            StackArea.CubicBezierStackArea(
+                                values = visiblePoints,
+                                control = horizontalBezierControlPoints(),
+                                stackedAreaStyle = StackedAreaStyle(
+                                    lineStyle = LineStyle(
+                                        brush = SolidColor(BloomTheme.colors.primary),
+                                        strokeWidth = 3.dp
+                                    ),
+                                    areaStyle = AreaStyle(
+                                        brush = Brush.verticalGradient(
+                                            colors = listOf(
+                                                BloomTheme.colors.primary.copy(alpha = 0.28f),
+                                                BloomTheme.colors.primary.copy(alpha = 0.03f)
+                                            )
+                                        )
+                                    )
                                 )
                             )
                         ),
-                        lineStyle = LineStyle(
-                            brush = SolidColor(BloomTheme.colors.primary),
-                            strokeWidth = 3.dp
-                        )
+                        baseline = AreaBaseline.HorizontalLine(0f)
                     )
                 }
             }
