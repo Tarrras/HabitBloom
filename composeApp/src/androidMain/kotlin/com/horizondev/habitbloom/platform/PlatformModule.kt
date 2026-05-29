@@ -1,5 +1,7 @@
 package com.horizondev.habitbloom.platform
 
+import com.horizondev.habitbloom.auth.platform.AndroidGoogleAuthProvider
+import com.horizondev.habitbloom.auth.platform.GoogleAuthProvider
 import com.horizondev.habitbloom.common.locale.AppLocaleManager
 import com.horizondev.habitbloom.core.notifications.AndroidNotificationManager
 import com.horizondev.habitbloom.core.notifications.AndroidNotificationScheduler
@@ -14,6 +16,7 @@ import org.koin.dsl.module
 actual val platformModule: Module = module {
     single { DatabaseDriverFactory(context = get()) }
     single { AndroidImagePicker(context = get()) } bind ImagePicker::class
+    single { AndroidGoogleAuthProvider() } bind GoogleAuthProvider::class
     single { AndroidAppLocaleManager(context = androidApplication()) } bind AppLocaleManager::class
 
     single { AndroidNotificationManager(context = androidContext()) }
