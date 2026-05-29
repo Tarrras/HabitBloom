@@ -47,6 +47,14 @@ sealed interface SettingsUiEvent {
     data class SetThemeMode(val mode: ThemeOption) : SettingsUiEvent
     data class SetTimeFormat(val option: TimeFormatOption) : SettingsUiEvent
     data object Logout : SettingsUiEvent
+    data object OpenSignIn : SettingsUiEvent
+    data object OpenSignUp : SettingsUiEvent
+    data object CloseAuthSheet : SettingsUiEvent
+    data class UpdateAuthEmail(val email: String) : SettingsUiEvent
+    data class UpdateAuthPassword(val password: String) : SettingsUiEvent
+    data object SubmitEmailAuth : SettingsUiEvent
+    data object ResetPassword : SettingsUiEvent
+    data object SignInWithGoogle : SettingsUiEvent
     data object OpenThemeDialog : SettingsUiEvent
     data object CloseThemeDialog : SettingsUiEvent
     data object ShowDeleteDataDialog : SettingsUiEvent

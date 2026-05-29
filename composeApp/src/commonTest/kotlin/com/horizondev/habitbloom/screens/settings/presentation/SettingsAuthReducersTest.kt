@@ -31,4 +31,23 @@ class SettingsAuthReducersTest {
         assertEquals("user@example.com", state.authProfile.title)
         assertEquals(AuthProvider.Email, state.authProfile.provider)
     }
+
+    @Test
+    fun openSignInShowsAuthSheetInSignInMode() {
+        val state = reduceAuthSheetOpened(SettingsUiState(), SettingsAuthMode.SignIn)
+
+        assertTrue(state.showAuthSheet)
+        assertEquals(SettingsAuthMode.SignIn, state.authMode)
+        assertEquals(null, state.authError)
+    }
+
+    @Test
+    fun invalidAuthFormSetsReadableError() {
+        val state = SettingsUiState(authEmail = "bad", authPassword = "12345")
+
+        val result = validateAuthForm(state)
+
+        assertTrue(result is SettingsAuthFormValidation.Invalid)
+        assertEquals("Enter a valid email and password.", result.message)
+    }
 }
