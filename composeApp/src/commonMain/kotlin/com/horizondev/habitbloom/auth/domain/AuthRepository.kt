@@ -1,28 +1,34 @@
 package com.horizondev.habitbloom.auth.domain
 
-import com.horizondev.habitbloom.auth.data.AuthRemoteDataSource
-import io.github.aakira.napier.Napier
-
 class AuthRepository(
-    private val remoteDataSource: AuthRemoteDataSource
+    private val gateway: AuthGateway
 ) {
-    suspend fun initUser(): Result<Boolean> {
-        return remoteDataSource.isUserLoggedIn().mapCatching { isUserLoggedIn ->
-            when (isUserLoggedIn) {
-                true -> {
-                    Napier.d("User logged in")
-                    true
-                }
+    fun observeSession() = gateway.observeSession()
 
-                false -> {
-                    Napier.d("User not logged in")
-                    remoteDataSource.signInAnonymously().map { uid ->
-                        Napier.d("User logged in anonymously with $uid")
-                        uid != null
-                    }.getOrThrow()
-                }
-            }
+    suspend fun currentSession(): AuthSession = gateway.currentSession()
+
+    suspend fun initUser(): Result<Boolean> {
+        return runCatching {
+            gateway.currentSession()
+            true
         }
     }
 
+    suspend fun signInWithEmail(email: String, password: String): Result<AuthSession> {
+        return gateway.signInWithEmail(email.trim(), password)
+    }
+
+    suspend fun signUpWithEmail(email: String, password: String): Result<AuthSession> {
+        return gateway.signUpWithEmail(email.trim(), password)
+    }
+
+    suspend fun resetPassword(email: String): Result<Unit> {
+        return gateway.resetPassword(email.trim())
+    }
+
+    suspend fun signInWithGoogle(tokens: ExternalAuthTokens): Result<AuthSession> {
+        return gateway.signInWithExternalTokens(tokens.copy(provider = AuthProvider.Google))
+    }
+
+    suspend fun signOut(): Result<Unit> = gateway.signOut()
 }
