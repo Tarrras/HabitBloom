@@ -35,11 +35,11 @@ class AppViewModel(
      * Initializes the app and performs necessary startup operations.
      */
     fun initApp() = viewModelScope.launch {
-        // Initialize user authentication
+        // Load current auth session without forcing account creation.
         runCatching {
-            authRepository.initUser()
+            authRepository.currentSession()
         }.onFailure {
-            Napier.e("Failed to initialize user", it, tag = TAG)
+            Napier.e("Failed to load auth session", it, tag = TAG)
         }
 
         // Check if onboarding is needed

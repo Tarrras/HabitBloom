@@ -47,6 +47,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -57,6 +59,7 @@ import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAni
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
+import com.horizondev.habitbloom.core.designComponents.inputText.BloomTextField
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.platform.appStoreName
@@ -77,7 +80,15 @@ import habitbloom.composeapp.generated.resources.notifications
 import habitbloom.composeapp.generated.resources.settings
 import habitbloom.composeapp.generated.resources.settings_about_app
 import habitbloom.composeapp.generated.resources.settings_appearance_theme
+import habitbloom.composeapp.generated.resources.settings_auth_sign_in_title
+import habitbloom.composeapp.generated.resources.settings_auth_sign_up_title
+import habitbloom.composeapp.generated.resources.settings_continue_with_google
+import habitbloom.composeapp.generated.resources.settings_create_account
 import habitbloom.composeapp.generated.resources.settings_delete_data_description_short
+import habitbloom.composeapp.generated.resources.settings_email
+import habitbloom.composeapp.generated.resources.settings_guest_profile
+import habitbloom.composeapp.generated.resources.settings_guest_profile_subtitle
+import habitbloom.composeapp.generated.resources.settings_password
 import habitbloom.composeapp.generated.resources.settings_personalize_experience
 import habitbloom.composeapp.generated.resources.settings_privacy
 import habitbloom.composeapp.generated.resources.settings_privacy_subtitle
@@ -85,6 +96,9 @@ import habitbloom.composeapp.generated.resources.settings_profile
 import habitbloom.composeapp.generated.resources.settings_profile_subtitle
 import habitbloom.composeapp.generated.resources.settings_rate_app
 import habitbloom.composeapp.generated.resources.settings_reminders_subtitle
+import habitbloom.composeapp.generated.resources.settings_reset_password
+import habitbloom.composeapp.generated.resources.settings_sign_in_email
+import habitbloom.composeapp.generated.resources.settings_sign_out
 import habitbloom.composeapp.generated.resources.settings_time_format
 import habitbloom.composeapp.generated.resources.settings_version
 import habitbloom.composeapp.generated.resources.theme_dark
@@ -93,6 +107,7 @@ import habitbloom.composeapp.generated.resources.theme_light
 import habitbloom.composeapp.generated.resources.time_format_12_hour
 import habitbloom.composeapp.generated.resources.time_format_24_hour
 import habitbloom.composeapp.generated.resources.time_format_system
+import androidx.compose.foundation.text.KeyboardOptions
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -143,7 +158,13 @@ private fun SettingsScreenContent(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 SettingsHeader()
-                ProfileCard()
+                ProfileCard(
+                    profile = uiState.authProfile,
+                    onGoogleClick = { handleUiEvent(SettingsUiEvent.SignInWithGoogle) },
+                    onSignInClick = { handleUiEvent(SettingsUiEvent.OpenSignIn) },
+                    onSignUpClick = { handleUiEvent(SettingsUiEvent.OpenSignUp) },
+                    onSignOutClick = { handleUiEvent(SettingsUiEvent.Logout) }
+                )
                 AppearanceSection(
                     selectedTheme = uiState.themeMode,
                     selectedTimeFormat = uiState.timeFormat,
@@ -171,6 +192,15 @@ private fun SettingsScreenContent(
                     onConfirm = { handleUiEvent(SettingsUiEvent.ConfirmDeleteData) }
                 )
             }
+
+            AuthDialog(
+                uiState = uiState,
+                onDismiss = { handleUiEvent(SettingsUiEvent.CloseAuthSheet) },
+                onEmailChanged = { handleUiEvent(SettingsUiEvent.UpdateAuthEmail(it)) },
+                onPasswordChanged = { handleUiEvent(SettingsUiEvent.UpdateAuthPassword(it)) },
+                onSubmit = { handleUiEvent(SettingsUiEvent.SubmitEmailAuth) },
+                onResetPassword = { handleUiEvent(SettingsUiEvent.ResetPassword) }
+            )
 
             if (uiState.isLoading) {
                 BloomLoadingAnimation(
@@ -206,73 +236,201 @@ private fun SettingsHeader() {
 }
 
 @Composable
-private fun ProfileCard() {
+private fun ProfileCard(
+    profile: SettingsAuthProfileUiState,
+    onGoogleClick: () -> Unit,
+    onSignInClick: () -> Unit,
+    onSignUpClick: () -> Unit,
+    onSignOutClick: () -> Unit
+) {
     SettingsCard {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clippedShadow(
-                        elevation = 8.dp,
-                        shape = RoundedCornerShape(16.dp),
-                        clip = false
-                    )
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.linearGradient(
-                            listOf(BloomTheme.colors.primary, BloomTheme.colors.primaryVariant)
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clippedShadow(
+                            elevation = 8.dp,
+                            shape = RoundedCornerShape(16.dp),
+                            clip = false
                         )
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(BloomTheme.colors.primary, BloomTheme.colors.primaryVariant)
+                            )
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "HB",
+                        fontSize = 16.sp,
+                        lineHeight = 22.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = BloomTheme.colors.textColor.white
+                    )
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    Text(
+                        text = profile.title.ifBlank {
+                            if (profile.isAuthenticated) {
+                                stringResource(Res.string.settings_profile)
+                            } else {
+                                stringResource(Res.string.settings_guest_profile)
+                            }
+                        },
+                        style = BloomTheme.typography.titleMedium.copy(
+                            fontSize = 18.sp,
+                            lineHeight = 24.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = BloomTheme.colors.textColor.primary
+                    )
+                    Text(
+                        text = profile.subtitle.ifBlank {
+                            if (profile.isAuthenticated) {
+                                stringResource(Res.string.settings_profile_subtitle)
+                            } else {
+                                stringResource(Res.string.settings_guest_profile_subtitle)
+                            }
+                        },
+                        style = BloomTheme.typography.bodySmall.copy(
+                            fontSize = 12.sp,
+                            lineHeight = 20.sp
+                        ),
+                        color = SettingsMutedText
+                    )
+                }
+            }
+
+            if (profile.isAuthenticated) {
+                BloomPrimaryOutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.settings_sign_out),
+                    onClick = onSignOutClick
+                )
+            } else {
+                BloomPrimaryFilledButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.settings_continue_with_google),
+                    onClick = onGoogleClick
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    BloomPrimaryOutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(Res.string.settings_sign_in_email),
+                        onClick = onSignInClick
+                    )
+                    BloomPrimaryOutlinedButton(
+                        modifier = Modifier.weight(1f),
+                        text = stringResource(Res.string.settings_create_account),
+                        onClick = onSignUpClick
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AuthDialog(
+    uiState: SettingsUiState,
+    onDismiss: () -> Unit,
+    onEmailChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    onSubmit: () -> Unit,
+    onResetPassword: () -> Unit
+) {
+    BloomAlertDialog(
+        isShown = uiState.showAuthSheet,
+        onDismiss = onDismiss
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Text(
+                text = when (uiState.authMode) {
+                    SettingsAuthMode.SignIn -> {
+                        stringResource(Res.string.settings_auth_sign_in_title)
+                    }
+
+                    SettingsAuthMode.SignUp -> {
+                        stringResource(Res.string.settings_auth_sign_up_title)
+                    }
+                },
+                style = BloomTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                color = BloomTheme.colors.textColor.primary
+            )
+
+            BloomTextField(
+                value = uiState.authEmail,
+                onValueChange = onEmailChanged,
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(Res.string.settings_email),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = uiState.authError != null
+            )
+
+            BloomTextField(
+                value = uiState.authPassword,
+                onValueChange = onPasswordChanged,
+                modifier = Modifier.fillMaxWidth(),
+                title = stringResource(Res.string.settings_password),
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                isError = uiState.authError != null
+            )
+
+            uiState.authError?.let { error ->
                 Text(
-                    text = "🌱",
-                    fontSize = 21.sp,
-                    lineHeight = 28.sp
+                    text = error,
+                    style = BloomTheme.typography.bodySmall,
+                    color = SettingsDanger
                 )
             }
 
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = stringResource(Res.string.settings_profile),
-                    style = BloomTheme.typography.titleMedium.copy(
-                        fontSize = 18.sp,
-                        lineHeight = 24.sp,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    color = BloomTheme.colors.textColor.primary
-                )
-                Text(
-                    text = stringResource(Res.string.settings_profile_subtitle),
-                    style = BloomTheme.typography.bodySmall.copy(
-                        fontSize = 12.sp,
-                        lineHeight = 20.sp
-                    ),
-                    color = SettingsMutedText
+            BloomPrimaryFilledButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = when (uiState.authMode) {
+                    SettingsAuthMode.SignIn -> {
+                        stringResource(Res.string.settings_auth_sign_in_title)
+                    }
+
+                    SettingsAuthMode.SignUp -> {
+                        stringResource(Res.string.settings_create_account)
+                    }
+                },
+                onClick = onSubmit,
+                enabled = !uiState.isAuthLoading
+            )
+
+            if (uiState.authMode == SettingsAuthMode.SignIn) {
+                BloomPrimaryOutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = stringResource(Res.string.settings_reset_password),
+                    onClick = onResetPassword
                 )
             }
 
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(BloomTheme.colors.surfaceVariant.copy(alpha = 0.6f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp),
-                    tint = SettingsMutedText
-                )
-            }
+            BloomPrimaryOutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.cancel),
+                onClick = onDismiss
+            )
         }
     }
 }

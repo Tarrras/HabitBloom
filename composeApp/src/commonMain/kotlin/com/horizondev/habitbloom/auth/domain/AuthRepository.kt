@@ -7,13 +7,6 @@ class AuthRepository(
 
     suspend fun currentSession(): AuthSession = gateway.currentSession()
 
-    suspend fun initUser(): Result<Boolean> {
-        return runCatching {
-            gateway.currentSession()
-            true
-        }
-    }
-
     suspend fun signInWithEmail(email: String, password: String): Result<AuthSession> {
         return gateway.signInWithEmail(email.trim(), password)
     }

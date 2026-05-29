@@ -97,7 +97,6 @@ kotlin {
             api(libs.gitlive.firebase.kotlin.crashlytics)
             implementation(libs.gitlive.firebase.firestore)
             implementation(libs.gitlive.firebase.common)
-            implementation(libs.gitlive.firebase.auth)
 
             implementation(libs.supabase.auth.ktx)
             implementation(libs.supabase.storage.ktx)

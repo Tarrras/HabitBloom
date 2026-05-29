@@ -349,6 +349,17 @@
     <string name="settings_personalize_experience">Персоналізуйте свій досвід</string>
     <string name="settings_profile">Мій профіль</string>
     <string name="settings_profile_subtitle">Налаштуйте обліковий запис</string>
+    <string name="settings_guest_profile">Гостьовий профіль</string>
+    <string name="settings_guest_profile_subtitle">Увійдіть, щоб захистити прогрес</string>
+    <string name="settings_continue_with_google">Продовжити з Google</string>
+    <string name="settings_sign_in_email">Увійти з email</string>
+    <string name="settings_create_account">Створити обліковий запис</string>
+    <string name="settings_sign_out">Вийти</string>
+    <string name="settings_email">Email</string>
+    <string name="settings_password">Пароль</string>
+    <string name="settings_reset_password">Скинути пароль</string>
+    <string name="settings_auth_sign_in_title">Увійти</string>
+    <string name="settings_auth_sign_up_title">Створити обліковий запис</string>
     <string name="settings_reminders_subtitle">Нагадування про звички</string>
     <string name="settings_delete_data_description_short">Скинути додаток до початкового стану</string>
     <string name="settings_about_app">Про додаток</string>
