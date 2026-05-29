@@ -95,6 +95,7 @@ gitlive-firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "f
 gitlive-firebase-storage = { module = "dev.gitlive:firebase-storage", version.ref = "firebase-gitlive-sdk" }
 
 supabase-bom = { module = "o.github.jan-tennert.supabase:bom", version.ref = "supabaseBom" }
+supabase-auth-ktx = { module = "io.github.jan-tennert.supabase:auth-kt", version.ref = "supabaseBom" }
 supabase-storage-ktx = { module = "io.github.jan-tennert.supabase:storage-kt", version.ref = "supabaseBom" }
 
 compose-activity = { module = "androidx.activity:activity-compose", version.ref = "compose-activity" }

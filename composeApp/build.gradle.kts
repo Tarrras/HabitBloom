@@ -99,7 +99,7 @@ kotlin {
             implementation(libs.gitlive.firebase.common)
             implementation(libs.gitlive.firebase.auth)
 
-            //implementation(libs.supabase.bom)
+            implementation(libs.supabase.auth.ktx)
             implementation(libs.supabase.storage.ktx)
 
             implementation(libs.stately.common)
