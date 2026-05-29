@@ -1,5 +1,6 @@
 package com.horizondev.habitbloom.screens.settings.presentation
 
+import com.horizondev.habitbloom.auth.domain.AuthProvider
 import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.common.settings.TimeFormatOption
@@ -13,10 +14,29 @@ data class SettingsUiState(
     val themeMode: ThemeOption = ThemeOption.Device,
     val timeFormat: TimeFormatOption = TimeFormatOption.System,
     val isThemeDialogVisible: Boolean = false,
-    val showDeleteDataDialog: Boolean = false
+    val showDeleteDataDialog: Boolean = false,
+    val authProfile: SettingsAuthProfileUiState = SettingsAuthProfileUiState(),
+    val authMode: SettingsAuthMode = SettingsAuthMode.SignIn,
+    val showAuthSheet: Boolean = false,
+    val authEmail: String = "",
+    val authPassword: String = "",
+    val authError: String? = null,
+    val isAuthLoading: Boolean = false
 ) {
     val notificationsEnabled: Boolean
         get() = notificationState.isEnabled()
+}
+
+data class SettingsAuthProfileUiState(
+    val isAuthenticated: Boolean = false,
+    val title: String = "",
+    val subtitle: String = "",
+    val provider: AuthProvider = AuthProvider.Guest
+)
+
+enum class SettingsAuthMode {
+    SignIn,
+    SignUp
 }
 
 /**
