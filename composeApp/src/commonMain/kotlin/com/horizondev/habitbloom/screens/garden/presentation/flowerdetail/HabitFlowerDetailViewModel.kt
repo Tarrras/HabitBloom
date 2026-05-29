@@ -67,7 +67,8 @@ class HabitFlowerDetailViewModel(
                 val progressRecords = habitInfo.records.filter { it.date <= today }
                 val levelProgress = calculateLevelProgress(
                     records = progressRecords,
-                    daysPerWeek = habitInfo.days.size
+                    daysPerWeek = habitInfo.days.size,
+                    expectedScheduledDays = habitInfo.records.size
                 )
 
                 val growthStage = levelToGrowthStage(levelProgress.level)

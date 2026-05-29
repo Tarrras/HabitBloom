@@ -187,6 +187,7 @@ fun HabitInfoSection(
 
             // Vitality tip for low recent consistency
             if (flowerHealth.isCritical || flowerHealth.isWilting) {
+                val statusColor = flowerHealthStatusColor(flowerHealth.value)
                 BloomCard(onClick = {}) {
                     Row(
                         modifier = Modifier
@@ -198,7 +199,7 @@ fun HabitInfoSection(
                             modifier = Modifier
                                 .size(8.dp)
                                 .background(
-                                    if (flowerHealth.isCritical) BloomTheme.colors.error else BloomTheme.colors.secondary,
+                                    statusColor,
                                     CircleShape
                                 )
                         )
@@ -206,7 +207,7 @@ fun HabitInfoSection(
                         Text(
                             text = stringResource(Res.string.needs_consistency_boost),
                             style = BloomTheme.typography.small,
-                            color = if (flowerHealth.isCritical) BloomTheme.colors.error else BloomTheme.colors.secondary,
+                            color = statusColor,
                             fontWeight = FontWeight.Medium
                         )
                     }

@@ -1,6 +1,5 @@
 package com.horizondev.habitbloom.screens.garden.components.flowerdetail
 
-import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -16,11 +15,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,14 +40,7 @@ import habitbloom.composeapp.generated.resources.ic_solid_water_drop
 import org.jetbrains.compose.resources.painterResource
 import kotlin.random.Random
 
-/**
- * Component to display a flower visualization at a specific growth stage.
- *
- * @param flowerType The type of flower to display
- * @param growthStage The current growth stage of the flower
- * @param modifier Modifier for styling
- * @param flowerHealth The health status of the flower
- */
+
 @Composable
 fun FlowerVisualization(
     flowerType: FlowerType,
@@ -60,9 +49,7 @@ fun FlowerVisualization(
     level: Int,
     modifier: Modifier = Modifier
 ) {
-    // Calculate the animated scale for a subtle breathing effect
     val infiniteTransition = rememberInfiniteTransition()
-    // Vitality-driven subtle breathing effect: higher vitality -> slightly larger amplitude
     val breathingTargetScale = 1f + (0.01f + 0.02f * flowerHealth.value.coerceIn(0f, 1f))
     val breathingScale by infiniteTransition.animateFloat(
         initialValue = 1f,
@@ -73,29 +60,10 @@ fun FlowerVisualization(
         )
     )
 
-    // Apply wilting animation if health is critical
-    val rotationAngle = remember { Animatable(0f) }
-
-    LaunchedEffect(flowerHealth.isCritical) {
-        if (flowerHealth.isCritical) {
-            rotationAngle.animateTo(
-                targetValue = 2f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2000),
-                    repeatMode = RepeatMode.Reverse
-                )
-            )
-        } else {
-            // Reset rotation if not critical
-            rotationAngle.snapTo(0f)
-        }
-    }
-
     Box(
         modifier = modifier.height(280.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Background particle effects scale with vitality (density from 50%..100%)
         if (!flowerHealth.isCritical) {
             val density = 0.5f + (flowerHealth.value.coerceIn(0f, 1f) * 0.5f)
             ParticleEffects(modifier = Modifier.fillMaxSize(), density = density)
@@ -105,15 +73,12 @@ fun FlowerVisualization(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.padding(16.dp)
         ) {
-            // The flower based on growth stage and health status
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Box for the flower visualization
             Box(
                 modifier = Modifier.height(220.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Vitality-driven glow halo behind the flower
                 GlowHalo(
                     intensity = flowerHealth.value.coerceIn(0f, 1f),
                     modifier = Modifier
@@ -128,29 +93,13 @@ fun FlowerVisualization(
                         .align(Alignment.Center)
                         .scale(1.2f)
                         .scale(breathingScale)
-                        .graphicsLayer {
-                            if (flowerHealth.isCritical) {
-                                rotationZ = rotationAngle.value
-                            }
-                        }
                         .alpha(if (flowerHealth.isWilting) 0.9f else 1f),
-                    // Display current level-based stage; visual regression handled internally
                     flowerMaxStage = growthStage,
                     flowerHealth = flowerHealth,
                     flowerType = flowerType
                 )
 
-                // Tiny level stars around the flower (L2..L5 show 1..4 stars)
-                LevelStarsOverlay(
-                    starCount = (level - 1).coerceIn(0, 4),
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(200.dp)
-                )
-
-                // Critical health indicator
                 if (flowerHealth.isCritical) {
-                    // Animated water drop that pulses
                     val pulseScale by infiniteTransition.animateFloat(
                         initialValue = 1f,
                         targetValue = 1.3f,
@@ -179,7 +128,6 @@ fun FlowerVisualization(
 
 @Composable
 private fun GlowHalo(intensity: Float, modifier: Modifier = Modifier) {
-    // Color shifts from secondary to primary as vitality grows
     val inner = BloomTheme.colors.primary.copy(alpha = 0.45f * intensity)
     val middle = BloomTheme.colors.primary.copy(alpha = 0.25f * intensity)
     val outer = Color.Transparent
@@ -197,38 +145,11 @@ private fun GlowHalo(intensity: Float, modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-private fun LevelStarsOverlay(starCount: Int, modifier: Modifier = Modifier) {
-    Box(modifier = modifier) {
-        val positions = listOf(
-            Alignment.TopCenter,
-            Alignment.CenterStart,
-            Alignment.CenterEnd,
-            Alignment.BottomCenter
-        )
-        repeat(starCount) { index ->
-            val align = positions.getOrNull(index) ?: Alignment.TopCenter
-            Icon(
-                imageVector = Icons.Filled.Star,
-                contentDescription = null,
-                tint = Color(0xFFFFD54F).copy(alpha = 0.9f),
-                modifier = Modifier
-                    .align(align)
-                    .size(16.dp)
-                    .alpha(0.9f)
-            )
-        }
-    }
-}
 
-/**
- * Animated background particles for a lively scene, using leaf shapes.
- */
 @Composable
 private fun ParticleEffects(modifier: Modifier = Modifier, density: Float = 1f) {
     val infiniteTransition = rememberInfiniteTransition()
 
-    // Create more varied particles with different sizes, colors and animation patterns
     val particles = remember(density) {
         val count = (12 * density.coerceIn(0.2f, 1.0f)).toInt().coerceAtLeast(3)
         List(count) {
@@ -243,7 +164,6 @@ private fun ParticleEffects(modifier: Modifier = Modifier, density: Float = 1f) 
         }
     }
 
-    // Different animation parameters for particles
     val animations = particles.mapIndexed { index, _ ->
         val delay = (index * 300) % 2500
         val duration = 3000 + (index % 5) * 500 // Varied durations
@@ -258,7 +178,6 @@ private fun ParticleEffects(modifier: Modifier = Modifier, density: Float = 1f) 
         )
     }
 
-    // Rotation animations for particles
     val rotations = particles.mapIndexed { index, _ ->
         val delay = (index * 200) % 2000
         val duration = 4000 + (index % 3) * 1000 // Varied durations
@@ -273,7 +192,6 @@ private fun ParticleEffects(modifier: Modifier = Modifier, density: Float = 1f) 
         )
     }
 
-    // Define leaf colors
     val leafColors = listOf(
         Color(0xFF8BC34A), // Light green
         Color(0xFF689F38), // Medium green

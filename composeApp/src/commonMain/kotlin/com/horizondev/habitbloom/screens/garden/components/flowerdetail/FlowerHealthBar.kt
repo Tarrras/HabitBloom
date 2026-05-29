@@ -70,11 +70,7 @@ fun FlowerHealthBar(
 
     // Vitality bar color based on current vitality
     val healthColor by animateColorAsState(
-        targetValue = when {
-            roundedHealthValue >= FlowerHealth.HEALTHY_THRESHOLD -> BloomTheme.colors.success
-            roundedHealthValue >= FlowerHealth.WILTING_THRESHOLD -> BloomTheme.colors.secondary
-            else -> BloomTheme.colors.error
-        },
+        targetValue = flowerHealthStatusColor(roundedHealthValue),
         animationSpec = tween(durationMillis = 300)
     )
 
@@ -235,7 +231,7 @@ fun FlowerHealthBar(
                 )
 
                 HealthLegendItem(
-                    color = BloomTheme.colors.secondary,
+                    color = BloomTheme.colors.warning,
                     label = stringResource(Res.string.health_status_wilting),
                     modifier = Modifier.weight(1f)
                 )

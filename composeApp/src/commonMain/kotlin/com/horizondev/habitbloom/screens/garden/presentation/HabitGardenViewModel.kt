@@ -6,6 +6,7 @@ import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.garden.domain.FlowerHealth
 import com.horizondev.habitbloom.screens.garden.domain.HabitFlower
 import com.horizondev.habitbloom.screens.garden.domain.calculateLevelProgress
+import com.horizondev.habitbloom.screens.garden.domain.countScheduledHabitDays
 import com.horizondev.habitbloom.screens.garden.domain.levelToGrowthStage
 import com.horizondev.habitbloom.screens.habits.domain.HabitsRepository
 import com.horizondev.habitbloom.screens.habits.domain.models.TimeOfDay
@@ -158,6 +159,7 @@ internal fun buildHabitFlowersForGarden(
     userHabits: List<UserHabit>,
     today: LocalDate = getCurrentDate()
 ): List<HabitFlower> {
+    val habitById = userHabits.associateBy { it.id }
     val habitIdToDaysPerWeek = userHabits.associate { it.id to it.daysOfWeek.size }
     val habitGroups = habitRecords.groupBy { it.userHabitId }
 
@@ -174,7 +176,14 @@ internal fun buildHabitFlowersForGarden(
         }.sortedBy { it.date }.filter { it.date <= today }
         val levelProgress = calculateLevelProgress(
             records = domainRecords,
-            daysPerWeek = habitIdToDaysPerWeek[habitId] ?: 7
+            daysPerWeek = habitIdToDaysPerWeek[habitId] ?: 7,
+            expectedScheduledDays = habitById[habitId]?.let { habit ->
+                countScheduledHabitDays(
+                    startDate = habit.startDate,
+                    endDate = habit.endDate,
+                    daysOfWeek = habit.daysOfWeek
+                )
+            } ?: domainRecords.size
         )
 
         HabitFlower(

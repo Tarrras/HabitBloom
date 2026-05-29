@@ -130,4 +130,51 @@ class GrowthAndHealthTest {
 
         assertEquals(2, progress.currentMissedDays)
     }
+
+    @Test
+    fun calculateLevelProgress_shortCompletedHabitCanReachBloom() {
+        val records = (1..5).map { day ->
+            UserHabitRecord(
+                id = day.toLong(),
+                userHabitId = 10,
+                date = LocalDate(2025, 1, day),
+                isCompleted = true
+            )
+        }
+
+        val progress = calculateLevelProgress(
+            records = records,
+            daysPerWeek = 7,
+            expectedScheduledDays = records.size
+        )
+
+        assertEquals(5, progress.level)
+        assertEquals(FlowerGrowthStage.BLOOM, levelToGrowthStage(progress.level))
+    }
+
+    @Test
+    fun calculateLevelProgress_longHabitAccruesXpMoreSlowlyPerCompletion() {
+        val completedDays = (1..5).map { day ->
+            UserHabitRecord(
+                id = day.toLong(),
+                userHabitId = 10,
+                date = LocalDate(2025, 1, day),
+                isCompleted = true
+            )
+        }
+
+        val shortHabit = calculateLevelProgress(
+            records = completedDays,
+            daysPerWeek = 7,
+            expectedScheduledDays = 5
+        )
+        val longHabit = calculateLevelProgress(
+            records = completedDays,
+            daysPerWeek = 7,
+            expectedScheduledDays = 30
+        )
+
+        assertTrue(shortHabit.totalXp > longHabit.totalXp)
+        assertTrue(shortHabit.level > longHabit.level)
+    }
 }

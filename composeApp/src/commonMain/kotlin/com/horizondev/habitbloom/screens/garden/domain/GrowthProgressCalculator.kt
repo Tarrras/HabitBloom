@@ -1,6 +1,10 @@
 package com.horizondev.habitbloom.screens.garden.domain
 
 import com.horizondev.habitbloom.screens.habits.domain.models.UserHabitRecord
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.plus
 
 data class LevelProgress(
     val level: Int,
@@ -23,12 +27,30 @@ fun levelToGrowthStage(level: Int): FlowerGrowthStage = when (level.coerceIn(1, 
     else -> FlowerGrowthStage.BLOOM
 }
 
+fun countScheduledHabitDays(
+    startDate: LocalDate,
+    endDate: LocalDate,
+    daysOfWeek: List<DayOfWeek>
+): Int {
+    if (endDate < startDate || daysOfWeek.isEmpty()) return 0
+
+    var count = 0
+    var date = startDate
+    while (date <= endDate) {
+        if (date.dayOfWeek in daysOfWeek) count++
+        date = date.plus(1, DateTimeUnit.DAY)
+    }
+    return count
+}
+
 fun calculateLevelProgress(
     records: List<UserHabitRecord>,
     daysPerWeek: Int,
     baseXp: Int = 10,
+    expectedScheduledDays: Int? = null,
 ): LevelProgress {
     val sorted = records.sortedBy { it.date }
+    val xpPerCompletion = scaledBaseXp(expectedScheduledDays, baseXp)
 
     if (sorted.isEmpty()) {
         return LevelProgress(
@@ -58,7 +80,7 @@ fun calculateLevelProgress(
         if (record.isCompleted) {
             val streakMultiplier = 1.0 + (currentStreak - 1).coerceAtLeast(0) * 0.05
             val vitalityBonus = 0.75 + (vitality.toDouble() * 0.5) // 0.75..1.25 multiplier
-            totalXp += baseXp * streakMultiplier * vitalityBonus
+            totalXp += xpPerCompletion * streakMultiplier * vitalityBonus
         }
     }
 
@@ -86,6 +108,13 @@ fun calculateLevelProgress(
         vitality = (kotlin.math.round(vitality * 100) / 100f).coerceIn(0f, 1f),
         currentMissedDays = currentMissedDays
     )
+}
+
+private fun scaledBaseXp(expectedScheduledDays: Int?, fallbackBaseXp: Int): Double {
+    if (expectedScheduledDays == null || expectedScheduledDays <= 0) {
+        return fallbackBaseXp.toDouble()
+    }
+    return LEVEL_THRESHOLDS.last().toDouble() / expectedScheduledDays.toDouble()
 }
 
 private fun selectAlpha(daysPerWeek: Int): Float {
