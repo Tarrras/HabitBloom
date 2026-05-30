@@ -18,6 +18,14 @@
 	<string>1.0</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+    <key>SUPABASE_URL</key>
+    <string>$(SUPABASE_URL)</string>
+    <key>SUPABASE_PUBLISHABLE_KEY</key>
+    <string>$(SUPABASE_PUBLISHABLE_KEY)</string>
+    <key>SUPABASE_AUTH_SCHEME</key>
+    <string>$(SUPABASE_AUTH_SCHEME)</string>
+    <key>SUPABASE_AUTH_HOST</key>
+    <string>$(SUPABASE_AUTH_HOST)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -25,7 +33,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.horizondev.habitbloom</string>
+                <string>$(SUPABASE_AUTH_SCHEME)</string>
 			</array>
 		</dict>
 	</array>

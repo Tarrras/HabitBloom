@@ -1,5 +1,24 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
+
+val localProperties = Properties().apply {
+    val file = rootProject.file("local.properties")
+    if (file.exists()) {
+        file.inputStream().use(::load)
+    }
+}
+
+fun secureConfig(name: String): String {
+    return providers.gradleProperty(name).orNull
+        ?: providers.environmentVariable(name).orNull
+        ?: localProperties.getProperty(name)
+        ?: ""
+}
+
+fun buildConfigString(value: String): String {
+    return "\"${value.replace("\\", "\\\\").replace("\"", "\\\"")}\""
+}
 
 plugins {
     //alias(libs.plugins.nativeCocoapod)
@@ -176,6 +195,35 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        val supabaseAuthScheme = secureConfig("SUPABASE_AUTH_SCHEME")
+            .ifBlank { "com.horizondev.habitbloom" }
+        val supabaseAuthHost = secureConfig("SUPABASE_AUTH_HOST")
+            .ifBlank { "auth-callback" }
+
+        buildConfigField(
+            "String",
+            "SUPABASE_URL",
+            buildConfigString(secureConfig("SUPABASE_URL"))
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_PUBLISHABLE_KEY",
+            buildConfigString(secureConfig("SUPABASE_PUBLISHABLE_KEY"))
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_AUTH_SCHEME",
+            buildConfigString(supabaseAuthScheme)
+        )
+        buildConfigField(
+            "String",
+            "SUPABASE_AUTH_HOST",
+            buildConfigString(supabaseAuthHost)
+        )
+
+        manifestPlaceholders["supabaseAuthScheme"] = supabaseAuthScheme
+        manifestPlaceholders["supabaseAuthHost"] = supabaseAuthHost
     }
 
     packaging {
@@ -194,6 +242,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     dependencies {
         debugImplementation(compose.uiTooling)

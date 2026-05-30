@@ -1,3 +1,8 @@
 TEAM_ID=
 BUNDLE_ID=com.horizondev.habitbloom.HabitBloom
 APP_NAME=Habit Bloom
+SUPABASE_AUTH_SCHEME=com.horizondev.habitbloom
+SUPABASE_AUTH_HOST=auth-callback
+SUPABASE_URL=
+SUPABASE_PUBLISHABLE_KEY=
+#include? "Secrets.xcconfig"
