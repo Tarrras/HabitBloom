@@ -9,8 +9,11 @@ import dev.gitlive.firebase.crashlytics.crashlytics
 import dev.gitlive.firebase.initialize
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
+import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.handleDeeplinks
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import platform.Foundation.NSURL
 import platform.UIKit.UIViewController
 
 fun MainViewController(): UIViewController {
@@ -34,4 +37,18 @@ fun initialize() {
     Firebase.initialize()
     Firebase.crashlytics.setCrashlyticsCollectionEnabled(true)
     KoinInit().init()
+}
+
+fun handleSupabaseAuthCallback(url: String) {
+    val callbackUrl = NSURL(string = url)
+    object : KoinComponent {
+        private val supabaseClient: SupabaseClient by inject()
+
+        init {
+            supabaseClient.handleDeeplinks(
+                url = callbackUrl,
+                onError = { Napier.e("Failed to handle Supabase auth callback", it) }
+            )
+        }
+    }
 }

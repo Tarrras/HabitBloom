@@ -1,9 +1,9 @@
 package com.horizondev.habitbloom.screens.settings.presentation
 
 import androidx.lifecycle.viewModelScope
+import com.horizondev.habitbloom.auth.domain.AuthProvider
 import com.horizondev.habitbloom.auth.domain.AuthRepository
 import com.horizondev.habitbloom.auth.domain.AuthSession
-import com.horizondev.habitbloom.auth.platform.GoogleAuthProvider
 import com.horizondev.habitbloom.common.settings.NotificationState
 import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.time.TimeFormatUseCase
@@ -22,8 +22,7 @@ class SettingsViewModel(
     private val repository: ProfileRepository,
     private val themeUseCase: ThemeUseCase,
     private val timeFormatUseCase: TimeFormatUseCase,
-    private val authRepository: AuthRepository,
-    private val googleAuthProvider: GoogleAuthProvider
+    private val authRepository: AuthRepository
 ) : BloomViewModel<SettingsUiState, SettingsUiIntent>(
     SettingsUiState()
 ), KoinComponent {
@@ -236,31 +235,18 @@ class SettingsViewModel(
     private fun signInWithGoogle() {
         launch {
             updateState { it.copy(isAuthLoading = true, authError = null) }
-            googleAuthProvider.requestTokens()
-                .fold(
-                    onSuccess = { tokens ->
-                        authRepository.signInWithGoogle(tokens)
-                            .onSuccess { session ->
-                                updateState { reduceAuthSession(it, session) }
-                            }
-                            .onFailure { error ->
-                                updateState {
-                                    it.copy(
-                                        isAuthLoading = false,
-                                        authError = error.message ?: "Google sign in failed."
-                                    )
-                                }
-                            }
-                    },
-                    onFailure = { error ->
-                        updateState {
-                            it.copy(
-                                isAuthLoading = false,
-                                authError = error.message ?: "Google sign in is not configured."
-                            )
-                        }
+            authRepository.signInWithProvider(AuthProvider.Google)
+                .onSuccess {
+                    updateState { it.copy(isAuthLoading = false) }
+                }
+                .onFailure { error ->
+                    updateState {
+                        it.copy(
+                            isAuthLoading = false,
+                            authError = error.message ?: "Google sign in failed."
+                        )
                     }
-                )
+                }
         }
     }
 }

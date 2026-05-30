@@ -19,6 +19,10 @@ class AuthRepository(
         return gateway.resetPassword(email.trim())
     }
 
+    suspend fun signInWithProvider(provider: AuthProvider): Result<Unit> {
+        return gateway.signInWithProvider(provider)
+    }
+
     suspend fun signInWithGoogle(tokens: ExternalAuthTokens): Result<AuthSession> {
         return gateway.signInWithExternalTokens(tokens.copy(provider = AuthProvider.Google))
     }

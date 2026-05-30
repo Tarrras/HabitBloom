@@ -8,6 +8,7 @@ interface AuthGateway {
     suspend fun signInWithEmail(email: String, password: String): Result<AuthSession>
     suspend fun signUpWithEmail(email: String, password: String): Result<AuthSession>
     suspend fun resetPassword(email: String): Result<Unit>
+    suspend fun signInWithProvider(provider: AuthProvider): Result<Unit>
     suspend fun signInWithExternalTokens(tokens: ExternalAuthTokens): Result<AuthSession>
     suspend fun signOut(): Result<Unit>
 }

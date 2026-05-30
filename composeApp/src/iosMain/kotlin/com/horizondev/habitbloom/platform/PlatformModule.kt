@@ -1,7 +1,5 @@
 package com.horizondev.habitbloom.platform
 
-import com.horizondev.habitbloom.auth.platform.GoogleAuthProvider
-import com.horizondev.habitbloom.auth.platform.IosGoogleAuthProvider
 import com.horizondev.habitbloom.common.locale.AppLocaleManager
 import com.horizondev.habitbloom.core.notifications.IOSNotificationCenterService
 import com.horizondev.habitbloom.core.notifications.IOSNotificationEventHandler
@@ -17,7 +15,6 @@ import org.koin.dsl.module
 actual val platformModule: Module = module {
     single<DatabaseDriverFactory> { DatabaseDriverFactory() }
     single<IOSImagePicker> { IOSImagePicker() } bind ImagePicker::class
-    single<IosGoogleAuthProvider> { IosGoogleAuthProvider() } bind GoogleAuthProvider::class
 
     single<IOSNotificationCenterService> { IOSNotificationCenterService() }
 

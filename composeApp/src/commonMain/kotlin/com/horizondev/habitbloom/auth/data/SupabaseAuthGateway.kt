@@ -64,6 +64,18 @@ class SupabaseAuthGateway(
         }
     }
 
+    override suspend fun signInWithProvider(provider: AuthProvider): Result<Unit> {
+        return runCatching {
+            when (provider) {
+                AuthProvider.Google -> auth.signInWith(Google)
+                AuthProvider.Email,
+                AuthProvider.Apple,
+                AuthProvider.Guest,
+                AuthProvider.Unknown -> error("Auth provider is not supported yet.")
+            }
+        }
+    }
+
     override suspend fun signInWithExternalTokens(tokens: ExternalAuthTokens): Result<AuthSession> {
         return runCatching {
             auth.signInWith(IDToken) {

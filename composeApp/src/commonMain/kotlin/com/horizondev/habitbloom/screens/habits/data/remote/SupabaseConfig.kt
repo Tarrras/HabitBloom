@@ -3,6 +3,7 @@ package com.horizondev.habitbloom.screens.habits.data.remote
 import io.github.aakira.napier.Napier
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.FlowType
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.storage.Storage
 
@@ -24,8 +25,12 @@ object SupabaseConfig {
             supabaseUrl = SUPABASE_URL,
             supabaseKey = SUPABASE_ANON_KEY
         ) {
-            install(Auth)
+            install(Auth) {
+                flowType = FlowType.PKCE
+                scheme = "com.horizondev.habitbloom"
+                host = "auth-callback"
+            }
             install(Storage)
         }
     }
-} 
+}

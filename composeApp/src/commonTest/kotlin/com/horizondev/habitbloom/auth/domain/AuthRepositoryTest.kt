@@ -47,6 +47,8 @@ class AuthRepositoryTest {
 
         override suspend fun resetPassword(email: String) = Result.success(Unit)
 
+        override suspend fun signInWithProvider(provider: AuthProvider) = Result.success(Unit)
+
         override suspend fun signInWithExternalTokens(tokens: ExternalAuthTokens) =
             Result.success(session.value)
 
