@@ -1,6 +1,8 @@
 package com.horizondev.habitbloom.di
 
 import CreatePersonalHabitViewModel
+import com.horizondev.habitbloom.auth.presentation.resetpassword.SettingsResetPasswordViewModel
+import com.horizondev.habitbloom.auth.presentation.signin.SettingsAuthViewModel
 import com.horizondev.habitbloom.common.AppViewModel
 import com.horizondev.habitbloom.screens.calendar.CalendarViewModel
 import com.horizondev.habitbloom.screens.garden.presentation.HabitGardenViewModel
@@ -31,6 +33,8 @@ val viewModelModule: Module = module {
     viewModelOf(::StatisticViewModel)
     viewModelOf(::CalendarViewModel)
     viewModelOf(::SettingsViewModel)
+    viewModelOf(::SettingsAuthViewModel)
+    viewModelOf(::SettingsResetPasswordViewModel)
 
     // Habit details
     viewModelOf(::HabitDetailsViewModel)

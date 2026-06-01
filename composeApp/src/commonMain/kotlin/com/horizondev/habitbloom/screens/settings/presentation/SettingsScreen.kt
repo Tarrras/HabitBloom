@@ -1,6 +1,7 @@
 package com.horizondev.habitbloom.screens.settings.presentation
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.Logout
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Computer
 import androidx.compose.material.icons.outlined.DarkMode
@@ -30,6 +32,8 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.icons.outlined.NotificationsNone
 import androidx.compose.material.icons.outlined.Palette
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material.icons.outlined.StarBorder
@@ -45,21 +49,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.horizondev.habitbloom.auth.presentation.signin.SettingsAuthMode
 import com.horizondev.habitbloom.common.settings.ThemeOption
 import com.horizondev.habitbloom.common.settings.TimeFormatOption
 import com.horizondev.habitbloom.core.designComponents.animation.BloomLoadingAnimation
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryFilledButton
 import com.horizondev.habitbloom.core.designComponents.buttons.BloomPrimaryOutlinedButton
 import com.horizondev.habitbloom.core.designComponents.dialog.BloomAlertDialog
-import com.horizondev.habitbloom.core.designComponents.inputText.BloomTextField
 import com.horizondev.habitbloom.core.designComponents.switcher.BloomSwitch
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
 import com.horizondev.habitbloom.platform.appStoreName
@@ -76,19 +80,18 @@ import habitbloom.composeapp.generated.resources.delete_all_data
 import habitbloom.composeapp.generated.resources.delete_data_description
 import habitbloom.composeapp.generated.resources.delete_data_question
 import habitbloom.composeapp.generated.resources.enable_notifications
+import habitbloom.composeapp.generated.resources.ic_google
 import habitbloom.composeapp.generated.resources.notifications
 import habitbloom.composeapp.generated.resources.settings
 import habitbloom.composeapp.generated.resources.settings_about_app
 import habitbloom.composeapp.generated.resources.settings_appearance_theme
-import habitbloom.composeapp.generated.resources.settings_auth_sign_in_title
-import habitbloom.composeapp.generated.resources.settings_auth_sign_up_title
+import habitbloom.composeapp.generated.resources.settings_auth_status_offline
+import habitbloom.composeapp.generated.resources.settings_auth_status_synced
+import habitbloom.composeapp.generated.resources.settings_auth_unsynced
 import habitbloom.composeapp.generated.resources.settings_continue_with_google
-import habitbloom.composeapp.generated.resources.settings_create_account
+import habitbloom.composeapp.generated.resources.settings_create_account_short
 import habitbloom.composeapp.generated.resources.settings_delete_data_description_short
-import habitbloom.composeapp.generated.resources.settings_email
 import habitbloom.composeapp.generated.resources.settings_guest_profile
-import habitbloom.composeapp.generated.resources.settings_guest_profile_subtitle
-import habitbloom.composeapp.generated.resources.settings_password
 import habitbloom.composeapp.generated.resources.settings_personalize_experience
 import habitbloom.composeapp.generated.resources.settings_privacy
 import habitbloom.composeapp.generated.resources.settings_privacy_subtitle
@@ -96,9 +99,8 @@ import habitbloom.composeapp.generated.resources.settings_profile
 import habitbloom.composeapp.generated.resources.settings_profile_subtitle
 import habitbloom.composeapp.generated.resources.settings_rate_app
 import habitbloom.composeapp.generated.resources.settings_reminders_subtitle
-import habitbloom.composeapp.generated.resources.settings_reset_password
-import habitbloom.composeapp.generated.resources.settings_sign_in_email
-import habitbloom.composeapp.generated.resources.settings_sign_out
+import habitbloom.composeapp.generated.resources.settings_sign_in_short
+import habitbloom.composeapp.generated.resources.settings_sign_out_account
 import habitbloom.composeapp.generated.resources.settings_time_format
 import habitbloom.composeapp.generated.resources.settings_version
 import habitbloom.composeapp.generated.resources.theme_dark
@@ -107,7 +109,7 @@ import habitbloom.composeapp.generated.resources.theme_light
 import habitbloom.composeapp.generated.resources.time_format_12_hour
 import habitbloom.composeapp.generated.resources.time_format_24_hour
 import habitbloom.composeapp.generated.resources.time_format_system
-import androidx.compose.foundation.text.KeyboardOptions
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 /**
@@ -116,16 +118,14 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
-    onNavigateToOnboarding: () -> Unit
+    onNavigateToOnboarding: () -> Unit,
+    onNavigateToAuth: (SettingsAuthMode) -> Unit
 ) {
     val uiState by viewModel.state.collectAsState()
 
     // Handle navigation
     viewModel.uiIntents.collectAsEffect { intent ->
         when (intent) {
-            is SettingsUiIntent.NavigateToLogin -> {
-                // Navigation will be handled by parent NavHost
-            }
             is SettingsUiIntent.NavigateToOnboarding -> {
                 onNavigateToOnboarding()
             }
@@ -134,14 +134,16 @@ fun SettingsScreen(
 
     SettingsScreenContent(
         uiState = uiState,
-        handleUiEvent = viewModel::handleUiEvent
+        handleUiEvent = viewModel::handleUiEvent,
+        onNavigateToAuth = onNavigateToAuth
     )
 }
 
 @Composable
 private fun SettingsScreenContent(
     uiState: SettingsUiState,
-    handleUiEvent: (SettingsUiEvent) -> Unit
+    handleUiEvent: (SettingsUiEvent) -> Unit,
+    onNavigateToAuth: (SettingsAuthMode) -> Unit
 ) {
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -161,8 +163,8 @@ private fun SettingsScreenContent(
                 ProfileCard(
                     profile = uiState.authProfile,
                     onGoogleClick = { handleUiEvent(SettingsUiEvent.SignInWithGoogle) },
-                    onSignInClick = { handleUiEvent(SettingsUiEvent.OpenSignIn) },
-                    onSignUpClick = { handleUiEvent(SettingsUiEvent.OpenSignUp) },
+                    onSignInClick = { onNavigateToAuth(SettingsAuthMode.SignIn) },
+                    onSignUpClick = { onNavigateToAuth(SettingsAuthMode.SignUp) },
                     onSignOutClick = { handleUiEvent(SettingsUiEvent.Logout) }
                 )
                 AppearanceSection(
@@ -192,15 +194,6 @@ private fun SettingsScreenContent(
                     onConfirm = { handleUiEvent(SettingsUiEvent.ConfirmDeleteData) }
                 )
             }
-
-            AuthDialog(
-                uiState = uiState,
-                onDismiss = { handleUiEvent(SettingsUiEvent.CloseAuthSheet) },
-                onEmailChanged = { handleUiEvent(SettingsUiEvent.UpdateAuthEmail(it)) },
-                onPasswordChanged = { handleUiEvent(SettingsUiEvent.UpdateAuthPassword(it)) },
-                onSubmit = { handleUiEvent(SettingsUiEvent.SubmitEmailAuth) },
-                onResetPassword = { handleUiEvent(SettingsUiEvent.ResetPassword) }
-            )
 
             if (uiState.isLoading) {
                 BloomLoadingAnimation(
@@ -243,195 +236,285 @@ private fun ProfileCard(
     onSignUpClick: () -> Unit,
     onSignOutClick: () -> Unit
 ) {
-    SettingsCard {
-        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clippedShadow(
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(16.dp),
-                            clip = false
-                        )
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.linearGradient(
-                                listOf(BloomTheme.colors.primary, BloomTheme.colors.primaryVariant)
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = "HB",
-                        fontSize = 16.sp,
-                        lineHeight = 22.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = BloomTheme.colors.textColor.white
-                    )
-                }
+    SettingsCard(
+        contentPadding = 18.dp,
+        verticalArrangement = Arrangement.spacedBy(18.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            ProfileAvatar(profile = profile)
 
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(2.dp)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
                     Text(
-                        text = profile.title.ifBlank {
-                            if (profile.isAuthenticated) {
-                                stringResource(Res.string.settings_profile)
-                            } else {
-                                stringResource(Res.string.settings_guest_profile)
-                            }
-                        },
+                        text = profileTitle(profile),
+                        modifier = Modifier.weight(1f, fill = false),
                         style = BloomTheme.typography.titleMedium.copy(
                             fontSize = 18.sp,
                             lineHeight = 24.sp,
                             fontWeight = FontWeight.Medium
                         ),
-                        color = BloomTheme.colors.textColor.primary
+                        color = BloomTheme.colors.textColor.primary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = profile.subtitle.ifBlank {
-                            if (profile.isAuthenticated) {
-                                stringResource(Res.string.settings_profile_subtitle)
-                            } else {
-                                stringResource(Res.string.settings_guest_profile_subtitle)
-                            }
-                        },
-                        style = BloomTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            lineHeight = 20.sp
-                        ),
-                        color = SettingsMutedText
-                    )
+                    ProfileStatusBadge(isAuthenticated = profile.isAuthenticated)
                 }
+                Text(
+                    text = profileSubtitle(profile),
+                    style = BloomTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 20.sp
+                    ),
+                    color = if (profile.isAuthenticated) SettingsMutedText else SettingsWarning,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
+        }
 
-            if (profile.isAuthenticated) {
-                BloomPrimaryOutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(Res.string.settings_sign_out),
-                    onClick = onSignOutClick
+        if (profile.isAuthenticated) {
+            ProfileActionButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.settings_sign_out_account),
+                icon = Icons.AutoMirrored.Outlined.Logout,
+                contentColor = SettingsDanger,
+                backgroundColor = SettingsDanger.copy(alpha = 0.1f),
+                borderColor = SettingsDanger.copy(alpha = 0.2f),
+                onClick = onSignOutClick,
+                horizontalArrangement = Arrangement.Start
+            )
+        } else {
+            val isLightSurface = BloomTheme.colors.surface.luminance() > 0.5f
+            ProfileActionButton(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(Res.string.settings_continue_with_google),
+                contentColor = BloomTheme.colors.textColor.primary,
+                backgroundColor = if (isLightSurface) {
+                    BloomTheme.colors.cardMuted
+                } else {
+                    BloomTheme.colors.surface
+                },
+                borderColor = if (isLightSurface) {
+                    BloomTheme.colors.border
+                } else {
+                    BloomTheme.colors.border.copy(alpha = 0.5f)
+                },
+                onClick = onGoogleClick,
+                leadingContent = { GoogleGlyph() }
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                ProfileActionButton(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(Res.string.settings_sign_in_short),
+                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentColor = BloomTheme.colors.primary,
+                    backgroundColor = BloomTheme.colors.primary.copy(alpha = 0.1f),
+                    borderColor = BloomTheme.colors.primary.copy(alpha = 0.2f),
+                    onClick = onSignInClick
                 )
-            } else {
-                BloomPrimaryFilledButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(Res.string.settings_continue_with_google),
-                    onClick = onGoogleClick
+                ProfileActionButton(
+                    modifier = Modifier.weight(1f),
+                    text = stringResource(Res.string.settings_create_account_short),
+                    icon = Icons.Outlined.PersonAdd,
+                    contentColor = BloomTheme.colors.primaryForeground,
+                    backgroundColor = BloomTheme.colors.primary,
+                    borderColor = Color.Transparent,
+                    onClick = onSignUpClick
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    BloomPrimaryOutlinedButton(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(Res.string.settings_sign_in_email),
-                        onClick = onSignInClick
-                    )
-                    BloomPrimaryOutlinedButton(
-                        modifier = Modifier.weight(1f),
-                        text = stringResource(Res.string.settings_create_account),
-                        onClick = onSignUpClick
-                    )
-                }
             }
         }
     }
 }
 
 @Composable
-private fun AuthDialog(
-    uiState: SettingsUiState,
-    onDismiss: () -> Unit,
-    onEmailChanged: (String) -> Unit,
-    onPasswordChanged: (String) -> Unit,
-    onSubmit: () -> Unit,
-    onResetPassword: () -> Unit
-) {
-    BloomAlertDialog(
-        isShown = uiState.showAuthSheet,
-        onDismiss = onDismiss
+private fun ProfileAvatar(profile: SettingsAuthProfileUiState) {
+    val shape = RoundedCornerShape(14.dp)
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .then(
+                if (profile.isAuthenticated) {
+                    Modifier.clippedShadow(elevation = 10.dp, shape = shape, clip = false)
+                } else {
+                    Modifier
+                }
+            )
+            .clip(shape)
+            .background(
+                if (profile.isAuthenticated) {
+                    Brush.linearGradient(
+                        listOf(BloomTheme.colors.primary, BloomTheme.colors.primaryVariant)
+                    )
+                } else {
+                    Brush.linearGradient(
+                        listOf(BloomTheme.colors.surfaceVariant, BloomTheme.colors.surfaceVariant)
+                    )
+                }
+            )
+            .border(
+                width = 1.dp,
+                color = if (profile.isAuthenticated) {
+                    Color.Transparent
+                } else {
+                    BloomTheme.colors.border.copy(alpha = 0.4f)
+                },
+                shape = shape
+            ),
+        contentAlignment = Alignment.Center
     ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
-        ) {
+        if (profile.isAuthenticated) {
             Text(
-                text = when (uiState.authMode) {
-                    SettingsAuthMode.SignIn -> {
-                        stringResource(Res.string.settings_auth_sign_in_title)
-                    }
-
-                    SettingsAuthMode.SignUp -> {
-                        stringResource(Res.string.settings_auth_sign_up_title)
-                    }
-                },
-                style = BloomTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-                color = BloomTheme.colors.textColor.primary
+                text = profileInitials(profile.title),
+                fontSize = 21.sp,
+                lineHeight = 28.sp,
+                fontWeight = FontWeight.Bold,
+                color = BloomTheme.colors.primaryForeground
             )
-
-            BloomTextField(
-                value = uiState.authEmail,
-                onValueChange = onEmailChanged,
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(Res.string.settings_email),
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                isError = uiState.authError != null
-            )
-
-            BloomTextField(
-                value = uiState.authPassword,
-                onValueChange = onPasswordChanged,
-                modifier = Modifier.fillMaxWidth(),
-                title = stringResource(Res.string.settings_password),
-                singleLine = true,
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                isError = uiState.authError != null
-            )
-
-            uiState.authError?.let { error ->
-                Text(
-                    text = error,
-                    style = BloomTheme.typography.bodySmall,
-                    color = SettingsDanger
-                )
-            }
-
-            BloomPrimaryFilledButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = when (uiState.authMode) {
-                    SettingsAuthMode.SignIn -> {
-                        stringResource(Res.string.settings_auth_sign_in_title)
-                    }
-
-                    SettingsAuthMode.SignUp -> {
-                        stringResource(Res.string.settings_create_account)
-                    }
-                },
-                onClick = onSubmit,
-                enabled = !uiState.isAuthLoading
-            )
-
-            if (uiState.authMode == SettingsAuthMode.SignIn) {
-                BloomPrimaryOutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    text = stringResource(Res.string.settings_reset_password),
-                    onClick = onResetPassword
-                )
-            }
-
-            BloomPrimaryOutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(Res.string.cancel),
-                onClick = onDismiss
+        } else {
+            Icon(
+                imageVector = Icons.Outlined.Person,
+                contentDescription = null,
+                modifier = Modifier.size(28.dp),
+                tint = SettingsMutedText
             )
         }
+    }
+}
+
+@Composable
+private fun ProfileStatusBadge(isAuthenticated: Boolean) {
+    val backgroundColor = if (isAuthenticated) {
+        BloomTheme.colors.primary.copy(alpha = 0.15f)
+    } else {
+        BloomTheme.colors.surfaceVariant
+    }
+    val textColor = if (isAuthenticated) BloomTheme.colors.primary else SettingsMutedText
+    val text = if (isAuthenticated) {
+        stringResource(Res.string.settings_auth_status_synced)
+    } else {
+        stringResource(Res.string.settings_auth_status_offline)
+    }
+
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(7.dp))
+            .background(backgroundColor)
+            .padding(horizontal = 7.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = text,
+            style = BloomTheme.typography.labelSmall.copy(
+                fontSize = 9.sp,
+                lineHeight = 11.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            color = textColor,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
+private fun ProfileActionButton(
+    modifier: Modifier = Modifier,
+    text: String,
+    contentColor: Color,
+    backgroundColor: Color,
+    borderColor: Color,
+    onClick: () -> Unit,
+    icon: ImageVector? = null,
+    leadingContent: (@Composable () -> Unit)? = null,
+    horizontalArrangement: Arrangement.Horizontal = Arrangement.Center
+) {
+    Row(
+        modifier = modifier
+            .height(44.dp)
+            .clip(RoundedCornerShape(13.dp))
+            .background(backgroundColor)
+            .border(1.dp, borderColor, RoundedCornerShape(13.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = horizontalArrangement
+    ) {
+        if (leadingContent != null) {
+            leadingContent()
+            Spacer(modifier = Modifier.width(10.dp))
+        } else if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                modifier = Modifier.size(17.dp),
+                tint = contentColor
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
+        Text(
+            text = text,
+            style = BloomTheme.typography.button.copy(
+                fontSize = 12.sp,
+                lineHeight = 18.sp,
+                fontWeight = FontWeight.Medium
+            ),
+            color = contentColor,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+private fun GoogleGlyph() {
+    Image(
+        painter = painterResource(Res.drawable.ic_google),
+        contentDescription = null,
+        modifier = Modifier.size(24.dp)
+    )
+}
+
+@Composable
+private fun profileTitle(profile: SettingsAuthProfileUiState): String {
+    return if (profile.isAuthenticated) {
+        profile.title.ifBlank { stringResource(Res.string.settings_profile) }
+    } else {
+        stringResource(Res.string.settings_guest_profile)
+    }
+}
+
+@Composable
+private fun profileSubtitle(profile: SettingsAuthProfileUiState): String {
+    return if (profile.isAuthenticated) {
+        profile.subtitle.ifBlank { stringResource(Res.string.settings_profile_subtitle) }
+    } else {
+        stringResource(Res.string.settings_auth_unsynced)
+    }
+}
+
+private fun profileInitials(title: String): String {
+    val source = title.substringBefore('@').trim()
+    val initials = source
+        .split(' ', '.', '-', '_')
+        .filter { it.isNotBlank() }
+        .take(2)
+        .joinToString(separator = "") { it.first().uppercaseChar().toString() }
+
+    return initials.ifBlank {
+        source.take(2).uppercase().ifBlank { "HB" }
     }
 }
 
@@ -878,7 +961,7 @@ private fun DeleteDataConfirmationDialog(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Text(
                 text = stringResource(Res.string.delete_data_description),
                 color = BloomTheme.colors.textColor.primary,
@@ -911,4 +994,5 @@ private fun DeleteDataConfirmationDialog(
 }
 
 private val SettingsMutedText = Color(0xFF94A3B8)
+private val SettingsWarning = Color(0xFFEAB308)
 private val SettingsDanger = Color(0xFFF87171)

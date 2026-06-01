@@ -20,6 +20,7 @@ import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +32,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.horizondev.habitbloom.auth.domain.AuthDeepLinkEvent
+import com.horizondev.habitbloom.auth.domain.AuthDeepLinkRepository
+import com.horizondev.habitbloom.auth.presentation.navigation.authFlowGraph
+import com.horizondev.habitbloom.auth.presentation.resetpassword.SettingsResetPasswordDestination
+import com.horizondev.habitbloom.auth.presentation.signin.SettingsAuthDestination
 import com.horizondev.habitbloom.common.navigation.BottomNavItem
 import com.horizondev.habitbloom.common.navigation.getBottomNavItems
 import com.horizondev.habitbloom.core.designSystem.BloomTheme
@@ -68,6 +74,7 @@ fun MainScreen(
 ) {
     val navController = rememberNavController()
     val commonNavigator: CommonNavigator = koinInject()
+    val authDeepLinkRepository: AuthDeepLinkRepository = koinInject()
 
     val navItems = getBottomNavItems()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -76,6 +83,21 @@ fun MainScreen(
         currentDestination?.route?.contains(
             it.route::class.qualifiedName.toString()
         ) == true
+    }
+
+    LaunchedEffect(Unit) {
+        authDeepLinkRepository.event.collect { event ->
+            when (event) {
+                is AuthDeepLinkEvent.PasswordRecovery -> {
+                    navController.navigate(SettingsResetPasswordDestination) {
+                        launchSingleTop = true
+                    }
+                    authDeepLinkRepository.markHandled(event)
+                }
+
+                null -> Unit
+            }
+        }
     }
 
     Scaffold(
@@ -128,7 +150,10 @@ fun MainScreen(
                     val viewModel = koinViewModel<SettingsViewModel>()
                     SettingsScreen(
                         viewModel = viewModel,
-                        onNavigateToOnboarding = onNavigateToOnboarding
+                        onNavigateToOnboarding = onNavigateToOnboarding,
+                        onNavigateToAuth = { mode ->
+                            navController.navigate(SettingsAuthDestination.from(mode))
+                        }
                     )
                 }
 
@@ -152,6 +177,10 @@ fun MainScreen(
                 )
 
                 gardenNestedFlowGraph(
+                    navController = navController
+                )
+
+                authFlowGraph(
                     navController = navController
                 )
 

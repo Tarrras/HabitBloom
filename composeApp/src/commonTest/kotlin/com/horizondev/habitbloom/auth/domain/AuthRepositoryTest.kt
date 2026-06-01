@@ -29,9 +29,23 @@ class AuthRepositoryTest {
         assertEquals("user@example.com", gateway.lastEmail)
     }
 
+    @Test
+    fun signUpWithEmailTrimsAndPassesDisplayName() = runBlocking {
+        val user = AuthUser("user-1", "user@example.com", "User", AuthProvider.Email)
+        val gateway = FakeAuthGateway(AuthSession(user, isAuthenticated = true))
+        val repository = AuthRepository(gateway)
+
+        val result = repository.signUpWithEmail(" user@example.com ", "strong-password", " User ")
+
+        assertTrue(result.isSuccess)
+        assertEquals("user@example.com", gateway.lastEmail)
+        assertEquals("User", gateway.lastDisplayName)
+    }
+
     private class FakeAuthGateway(initialSession: AuthSession) : AuthGateway {
         private val session = MutableStateFlow(initialSession)
         var lastEmail: String? = null
+        var lastDisplayName: String? = null
 
         override fun observeSession() = session
 
@@ -42,10 +56,19 @@ class AuthRepositoryTest {
             return Result.success(session.value)
         }
 
-        override suspend fun signUpWithEmail(email: String, password: String) =
-            Result.success(session.value)
+        override suspend fun signUpWithEmail(
+            email: String,
+            password: String,
+            displayName: String?
+        ): Result<AuthSession> {
+            lastEmail = email
+            lastDisplayName = displayName
+            return Result.success(session.value)
+        }
 
         override suspend fun resetPassword(email: String) = Result.success(Unit)
+
+        override suspend fun updatePassword(password: String) = Result.success(session.value)
 
         override suspend fun signInWithProvider(provider: AuthProvider) = Result.success(Unit)
 

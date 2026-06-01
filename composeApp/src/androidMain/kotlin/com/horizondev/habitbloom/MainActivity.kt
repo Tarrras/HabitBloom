@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.horizondev.habitbloom.app.App
+import com.horizondev.habitbloom.auth.domain.AuthDeepLinkRepository
+import com.horizondev.habitbloom.auth.domain.isPasswordRecoveryDeepLink
 import com.horizondev.habitbloom.platform.AndroidImagePicker
 import dev.icerock.moko.permissions.PermissionsController
 import io.github.aakira.napier.DebugAntilog
@@ -20,6 +22,7 @@ class MainActivity : ComponentActivity() {
     private val imagePicker: AndroidImagePicker by inject()
     private val permissionsController: PermissionsController by inject()
     private val supabaseClient: SupabaseClient by inject()
+    private val authDeepLinkRepository: AuthDeepLinkRepository by inject()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -46,6 +49,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun handleAuthCallback(intent: Intent) {
+        intent.dataString
+            ?.takeIf(::isPasswordRecoveryDeepLink)
+            ?.let { authDeepLinkRepository.notifyPasswordRecoveryLinkOpened() }
+
         supabaseClient.handleDeeplinks(
             intent = intent,
             onError = { Napier.e("Failed to handle Supabase auth callback", it) }

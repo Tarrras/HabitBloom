@@ -9,11 +9,19 @@ import com.horizondev.habitbloom.core.theme.ThemeUseCase
 import com.horizondev.habitbloom.core.time.TimeFormatUseCase
 import com.horizondev.habitbloom.core.viewmodel.BloomViewModel
 import com.horizondev.habitbloom.screens.settings.domain.ProfileRepository
+import habitbloom.composeapp.generated.resources.Res
+import habitbloom.composeapp.generated.resources.settings_auth_account_title
+import habitbloom.composeapp.generated.resources.settings_auth_provider_apple
+import habitbloom.composeapp.generated.resources.settings_auth_provider_email
+import habitbloom.composeapp.generated.resources.settings_auth_provider_google
+import habitbloom.composeapp.generated.resources.settings_auth_provider_unknown
+import habitbloom.composeapp.generated.resources.settings_guest_profile
+import habitbloom.composeapp.generated.resources.settings_guest_profile_subtitle
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
+import org.jetbrains.compose.resources.getString
 
 /**
  * ViewModel for the Settings screen.
@@ -25,22 +33,20 @@ class SettingsViewModel(
     private val authRepository: AuthRepository
 ) : BloomViewModel<SettingsUiState, SettingsUiIntent>(
     SettingsUiState()
-), KoinComponent {
+) {
     private val TAG = "SettingsViewModel"
+    private var authProfileLabels: SettingsAuthProfileLabels? = null
 
     init {
-        // Listen for notification state changes
         repository.getNotificationStateFlow().onEach { state ->
             updateState { it.copy(notificationState = state) }
         }.launchIn(viewModelScope)
 
-        // If notification state flow is not available, get the current state
         viewModelScope.launch {
             val currentState = repository.getNotificationStateEnum()
             updateState { it.copy(notificationState = currentState) }
         }
 
-        // Listen for theme changes
         themeUseCase.themeModeFlow.onEach { mode ->
             updateState { it.copy(themeMode = mode) }
         }.launchIn(viewModelScope)
@@ -49,19 +55,20 @@ class SettingsViewModel(
             updateState { it.copy(timeFormat = option) }
         }.launchIn(viewModelScope)
 
-        authRepository.observeSession().onEach { session ->
-            updateState { reduceAuthSession(it, session) }
-        }.launchIn(viewModelScope)
-
         viewModelScope.launch {
+            val labels = getAuthProfileLabels()
             val session = authRepository.currentSession()
-            updateState { reduceAuthSession(it, session) }
+            updateState { reduceAuthSession(it, session, labels) }
         }
+
+        authRepository.observeSession().onEach { session ->
+            val labels = authProfileLabels ?: loadAuthProfileLabels().also {
+                authProfileLabels = it
+            }
+            updateState { reduceAuthSession(it, session, labels) }
+        }.launchIn(viewModelScope)
     }
 
-    /**
-     * Handles UI events from the Settings screen.
-     */
     fun handleUiEvent(event: SettingsUiEvent) {
         when (event) {
             is SettingsUiEvent.ToggleNotifications -> {
@@ -88,36 +95,15 @@ class SettingsViewModel(
             is SettingsUiEvent.Logout -> {
                 launch {
                     authRepository.signOut()
-                    updateState { reduceAuthSession(it, AuthSession.Guest) }
+                    val labels = getAuthProfileLabels()
+                    updateState {
+                        reduceAuthSession(
+                            state = it,
+                            session = AuthSession.Guest,
+                            labels = labels
+                        )
+                    }
                 }
-            }
-
-            SettingsUiEvent.OpenSignIn -> {
-                updateState { reduceAuthSheetOpened(it, SettingsAuthMode.SignIn) }
-            }
-
-            SettingsUiEvent.OpenSignUp -> {
-                updateState { reduceAuthSheetOpened(it, SettingsAuthMode.SignUp) }
-            }
-
-            SettingsUiEvent.CloseAuthSheet -> {
-                updateState(::reduceAuthSheetClosed)
-            }
-
-            is SettingsUiEvent.UpdateAuthEmail -> {
-                updateState { it.copy(authEmail = event.email, authError = null) }
-            }
-
-            is SettingsUiEvent.UpdateAuthPassword -> {
-                updateState { it.copy(authPassword = event.password, authError = null) }
-            }
-
-            SettingsUiEvent.SubmitEmailAuth -> {
-                submitEmailAuth()
-            }
-
-            SettingsUiEvent.ResetPassword -> {
-                resetPassword()
             }
 
             SettingsUiEvent.SignInWithGoogle -> {
@@ -152,7 +138,6 @@ class SettingsViewModel(
                         }
                         .onFailure { error ->
                             Napier.e("Failed to reset app data", error, tag = TAG)
-                            // Stay on the current screen but update loading state
                             updateState { it.copy(isLoading = false) }
                         }
                 }
@@ -160,93 +145,41 @@ class SettingsViewModel(
         }
     }
 
-    private fun submitEmailAuth() {
-        launch {
-            val current = state.value
-            when (val validation = validateAuthForm(current)) {
-                SettingsAuthFormValidation.Valid -> Unit
-                is SettingsAuthFormValidation.Invalid -> {
-                    updateState { it.copy(authError = validation.message) }
-                    return@launch
-                }
-            }
-
-            updateState { it.copy(isAuthLoading = true, authError = null) }
-
-            val result = when (current.authMode) {
-                SettingsAuthMode.SignIn -> {
-                    authRepository.signInWithEmail(current.authEmail, current.authPassword)
-                }
-
-                SettingsAuthMode.SignUp -> {
-                    authRepository.signUpWithEmail(current.authEmail, current.authPassword)
-                }
-            }
-
-            result
-                .onSuccess { session ->
-                    updateState {
-                        reduceAuthSession(it, session).copy(
-                            showAuthSheet = false,
-                            authPassword = ""
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    updateState {
-                        it.copy(
-                            isAuthLoading = false,
-                            authError = error.message ?: "Authentication failed."
-                        )
-                    }
-                }
-        }
-    }
-
-    private fun resetPassword() {
-        launch {
-            val email = state.value.authEmail.trim()
-            if ("@" !in email) {
-                updateState { it.copy(authError = "Enter your email first.") }
-                return@launch
-            }
-
-            updateState { it.copy(isAuthLoading = true, authError = null) }
-            authRepository.resetPassword(email)
-                .onSuccess {
-                    updateState {
-                        it.copy(
-                            isAuthLoading = false,
-                            authError = "Password reset email sent."
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    updateState {
-                        it.copy(
-                            isAuthLoading = false,
-                            authError = error.message ?: "Password reset failed."
-                        )
-                    }
-                }
-        }
-    }
-
     private fun signInWithGoogle() {
         launch {
-            updateState { it.copy(isAuthLoading = true, authError = null) }
             authRepository.signInWithProvider(AuthProvider.Google)
                 .onSuccess {
-                    updateState { it.copy(isAuthLoading = false) }
-                }
-                .onFailure { error ->
+                    val session = authRepository.currentSession()
+                    val labels = getAuthProfileLabels()
                     updateState {
-                        it.copy(
-                            isAuthLoading = false,
-                            authError = error.message ?: "Google sign in failed."
+                        reduceAuthSession(
+                            state = it,
+                            session = session,
+                            labels = labels
                         )
                     }
                 }
+                .onFailure { error ->
+                    Napier.e("Google sign in failed.", error, tag = TAG)
+                }
         }
+    }
+
+    private suspend fun getAuthProfileLabels(): SettingsAuthProfileLabels {
+        return authProfileLabels ?: loadAuthProfileLabels().also {
+            authProfileLabels = it
+        }
+    }
+
+    private suspend fun loadAuthProfileLabels(): SettingsAuthProfileLabels {
+        return SettingsAuthProfileLabels(
+            accountTitle = getString(Res.string.settings_auth_account_title),
+            guestTitle = getString(Res.string.settings_guest_profile),
+            guestSubtitle = getString(Res.string.settings_guest_profile_subtitle),
+            googleSubtitle = getString(Res.string.settings_auth_provider_google),
+            emailSubtitle = getString(Res.string.settings_auth_provider_email),
+            appleSubtitle = getString(Res.string.settings_auth_provider_apple),
+            unknownSubtitle = getString(Res.string.settings_auth_provider_unknown)
+        )
     }
 }

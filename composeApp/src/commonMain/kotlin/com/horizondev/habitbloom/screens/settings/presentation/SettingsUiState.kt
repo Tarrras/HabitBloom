@@ -15,13 +15,7 @@ data class SettingsUiState(
     val timeFormat: TimeFormatOption = TimeFormatOption.System,
     val isThemeDialogVisible: Boolean = false,
     val showDeleteDataDialog: Boolean = false,
-    val authProfile: SettingsAuthProfileUiState = SettingsAuthProfileUiState(),
-    val authMode: SettingsAuthMode = SettingsAuthMode.SignIn,
-    val showAuthSheet: Boolean = false,
-    val authEmail: String = "",
-    val authPassword: String = "",
-    val authError: String? = null,
-    val isAuthLoading: Boolean = false
+    val authProfile: SettingsAuthProfileUiState = SettingsAuthProfileUiState()
 ) {
     val notificationsEnabled: Boolean
         get() = notificationState.isEnabled()
@@ -34,11 +28,6 @@ data class SettingsAuthProfileUiState(
     val provider: AuthProvider = AuthProvider.Guest
 )
 
-enum class SettingsAuthMode {
-    SignIn,
-    SignUp
-}
-
 /**
  * Events that can be triggered from the Settings screen.
  */
@@ -47,13 +36,6 @@ sealed interface SettingsUiEvent {
     data class SetThemeMode(val mode: ThemeOption) : SettingsUiEvent
     data class SetTimeFormat(val option: TimeFormatOption) : SettingsUiEvent
     data object Logout : SettingsUiEvent
-    data object OpenSignIn : SettingsUiEvent
-    data object OpenSignUp : SettingsUiEvent
-    data object CloseAuthSheet : SettingsUiEvent
-    data class UpdateAuthEmail(val email: String) : SettingsUiEvent
-    data class UpdateAuthPassword(val password: String) : SettingsUiEvent
-    data object SubmitEmailAuth : SettingsUiEvent
-    data object ResetPassword : SettingsUiEvent
     data object SignInWithGoogle : SettingsUiEvent
     data object OpenThemeDialog : SettingsUiEvent
     data object CloseThemeDialog : SettingsUiEvent
@@ -66,6 +48,5 @@ sealed interface SettingsUiEvent {
  * Intents that can be emitted from the Settings screen.
  */
 sealed interface SettingsUiIntent {
-    data object NavigateToLogin : SettingsUiIntent
     data object NavigateToOnboarding : SettingsUiIntent
 }

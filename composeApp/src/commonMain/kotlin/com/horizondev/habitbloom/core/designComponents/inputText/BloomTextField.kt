@@ -84,7 +84,7 @@ fun BloomTextField(
             title?.let {
                 Text(
                     text = title,
-                    style = BloomTheme.typography.titleMedium,
+                    style = BloomTheme.typography.labelMedium,
                     color = BloomTheme.colors.textColor.primary
                 )
             }

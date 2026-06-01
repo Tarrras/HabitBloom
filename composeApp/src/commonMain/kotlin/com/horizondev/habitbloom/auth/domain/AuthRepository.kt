@@ -11,12 +11,20 @@ class AuthRepository(
         return gateway.signInWithEmail(email.trim(), password)
     }
 
-    suspend fun signUpWithEmail(email: String, password: String): Result<AuthSession> {
-        return gateway.signUpWithEmail(email.trim(), password)
+    suspend fun signUpWithEmail(
+        email: String,
+        password: String,
+        displayName: String? = null
+    ): Result<AuthSession> {
+        return gateway.signUpWithEmail(email.trim(), password, displayName?.trim())
     }
 
     suspend fun resetPassword(email: String): Result<Unit> {
         return gateway.resetPassword(email.trim())
+    }
+
+    suspend fun updatePassword(password: String): Result<AuthSession> {
+        return gateway.updatePassword(password)
     }
 
     suspend fun signInWithProvider(provider: AuthProvider): Result<Unit> {
