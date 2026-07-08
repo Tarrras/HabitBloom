@@ -43,9 +43,9 @@ HabitBloom makes progress tangible. Plan a habit for the morning, afternoon, or 
       <sub>A visual home for every habit you nurture.</sub>
     </td>
     <td align="center" width="33%">
-      <img src="screenshots/create_habit.png" alt="HabitBloom habit creation flow" width="250" /><br />
-      <strong>Shape your routine</strong><br />
-      <sub>A guided flow from category to schedule.</sub>
+      <img src="screenshots/habit_details.png" alt="HabitBloom habit details screen" width="250" /><br />
+      <strong>Follow every habit</strong><br />
+      <sub>Streaks, completion rate, and schedule at a glance.</sub>
     </td>
   </tr>
 </table>
