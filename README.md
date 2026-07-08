@@ -33,17 +33,17 @@ HabitBloom makes progress tangible. Plan a habit for the morning, afternoon, or 
 <table>
   <tr>
     <td align="center" width="33%">
-      <img src="screenshots/home.png" alt="HabitBloom home screen" width="250" /><br />
+      <img src="screenshots/home-2026-07-08.png" alt="HabitBloom home screen" width="250" /><br />
       <strong>Plan the day</strong><br />
       <sub>Habits organized around your natural rhythm.</sub>
     </td>
     <td align="center" width="33%">
-      <img src="screenshots/garden.png" alt="HabitBloom flower garden" width="250" /><br />
+      <img src="screenshots/garden-2026-07-08.png" alt="HabitBloom flower garden" width="250" /><br />
       <strong>Grow a garden</strong><br />
       <sub>A visual home for every habit you nurture.</sub>
     </td>
     <td align="center" width="33%">
-      <img src="screenshots/habit_details.png" alt="HabitBloom habit details screen" width="250" /><br />
+      <img src="screenshots/habit-details-2026-07-08.png" alt="HabitBloom habit details screen" width="250" /><br />
       <strong>Follow every habit</strong><br />
       <sub>Streaks, completion rate, and schedule at a glance.</sub>
     </td>
@@ -53,17 +53,17 @@ HabitBloom makes progress tangible. Plan a habit for the morning, afternoon, or 
 <table>
   <tr>
     <td align="center" width="33%">
-      <img src="screenshots/calendar.png" alt="HabitBloom calendar screen" width="250" /><br />
+      <img src="screenshots/calendar-2026-07-08.png" alt="HabitBloom calendar screen" width="250" /><br />
       <strong>Review the calendar</strong><br />
       <sub>Daily history and weekly progress in one place.</sub>
     </td>
     <td align="center" width="33%">
-      <img src="screenshots/statistics.png" alt="HabitBloom statistics screen" width="250" /><br />
+      <img src="screenshots/statistics-2026-07-08.png" alt="HabitBloom statistics screen" width="250" /><br />
       <strong>Understand progress</strong><br />
       <sub>Weekly, monthly, and yearly completion insights.</sub>
     </td>
     <td align="center" width="33%">
-      <img src="screenshots/settings.png" alt="HabitBloom settings screen" width="250" /><br />
+      <img src="screenshots/settings-2026-07-08.png" alt="HabitBloom settings screen" width="250" /><br />
       <strong>Make it yours</strong><br />
       <sub>Theme, time format, reminders, and profile controls.</sub>
     </td>
